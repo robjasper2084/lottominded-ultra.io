@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=ultra-motion-7" />
-    <link rel="stylesheet" href="./merch-store.css?v=merch-motion-2" />
+    <link rel="stylesheet" href="./merch-store.css?v=merch-cart-3" />
   </head>
   <body class="merch-store-page">
     <header class="site-header merch-site-header" data-site-header>
@@ -30,7 +30,7 @@
         <a href="#gallery">Art Gallery</a>
       </nav>
       <div class="direct-launch merch-direct" aria-label="Merch store direct links">
-        <button class="direct-action" type="button" data-bag-toggle>Drop List <span data-bag-count>0</span></button>
+        <button class="direct-action cart-toggle" type="button" data-bag-toggle>Cart <span data-bag-count>0</span></button>
       </div>
     </header>
 
@@ -78,7 +78,7 @@
             <div>
               <h3>Frequency Vault Hoodie</h3>
               <p>Heavyweight fleece, embroidered city-code artwork, charcoal body, studio-night energy.</p>
-              <div class="product-row"><strong>$78</strong><button type="button" data-add-item="Frequency Vault Hoodie">Add to Drop List</button></div>
+              <div class="product-row"><strong>$78</strong><button type="button" data-add-item="Frequency Vault Hoodie" data-item-price="78">Add to Cart</button></div>
             </div>
           </article>
           <article class="product-card">
@@ -86,7 +86,7 @@
             <div>
               <h3>1701 Signal Cap</h3>
               <p>Navy structured cap with embroidered skyline signal mark and everyday launch-team fit.</p>
-              <div class="product-row"><strong>$38</strong><button type="button" data-add-item="1701 Signal Cap">Add to Drop List</button></div>
+              <div class="product-row"><strong>$38</strong><button type="button" data-add-item="1701 Signal Cap" data-item-price="38">Add to Cart</button></div>
             </div>
           </article>
           <article class="product-card">
@@ -94,7 +94,7 @@
             <div>
               <h3>Metro Signal Polo</h3>
               <p>Clean collared piece for demos, pop-ups, listening sessions, and product meetings.</p>
-              <div class="product-row"><strong>$54</strong><button type="button" data-add-item="Metro Signal Polo">Add to Drop List</button></div>
+              <div class="product-row"><strong>$54</strong><button type="button" data-add-item="Metro Signal Polo" data-item-price="54">Add to Cart</button></div>
             </div>
           </article>
         </div>
@@ -132,11 +132,21 @@
         </div>
       </section>
 
-      <aside class="bag-drawer" data-bag-drawer aria-label="Drop list drawer">
-        <button type="button" data-bag-close aria-label="Close drop list">X</button>
-        <h2>Drop List</h2>
-        <p>Local preview bag. Connect checkout later when products are ready to sell.</p>
+      <aside class="bag-drawer cart-drawer" data-bag-drawer aria-label="Shopping cart drawer">
+        <button class="cart-close" type="button" data-bag-close aria-label="Close shopping cart">X</button>
+        <p class="cart-eyebrow">Lottomind Merch</p>
+        <h2>Shopping Cart</h2>
+        <p>Local cart preview. Connect Shopify, Stripe Checkout, or another storefront when products are ready to sell.</p>
         <ul data-bag-items></ul>
+        <div class="cart-total-row" aria-label="Cart subtotal">
+          <span>Subtotal</span>
+          <strong data-bag-total>$0</strong>
+        </div>
+        <div class="cart-actions">
+          <button type="button" data-cart-clear>Clear Cart</button>
+          <button type="button" data-cart-checkout>Checkout Preview</button>
+        </div>
+        <p class="cart-note" data-cart-note>Shipping and taxes are not calculated in this local preview.</p>
       </aside>
     </main>
 
@@ -147,6 +157,6 @@
     </footer>
 
     <script src="./site.js?v=ultra-motion-7" defer></script>
-    <script src="./merch-store.js?v=merch-drop-1" defer></script>
+    <script src="./merch-store.js?v=merch-cart-3" defer></script>
   </body>
 </html>
