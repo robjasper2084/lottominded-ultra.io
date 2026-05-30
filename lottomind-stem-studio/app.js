@@ -1546,9 +1546,9 @@ function renderHeader() {
           </div>
         </div>
       </div>
-      <div class="ultra-project-zone">
+      <div class="ultra-project-zone" aria-label="Project details">
         <label class="project-field ultra-project-input">
-          <span class="micro">Project name</span>
+          <span class="micro">Project</span>
           <input type="text" data-input="projectName" value="${escapeAttr(state.projectName)}" aria-label="Project name" />
         </label>
         <div class="ultra-status-pills" aria-label="Project status">
