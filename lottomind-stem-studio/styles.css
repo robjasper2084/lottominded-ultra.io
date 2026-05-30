@@ -1261,6 +1261,71 @@ canvas {
   gap: 14px;
 }
 
+.pad-editor.panel {
+  justify-self: start;
+  width: min(100%, 760px);
+}
+
+.pad-editor .panel-body {
+  display: grid;
+  gap: 8px;
+  max-height: 430px;
+  overflow: auto;
+  padding: 11px;
+  font-size: 0.76rem;
+}
+
+.pad-editor .pad-top {
+  gap: 7px;
+}
+
+.pad-editor .pad-top h3 {
+  font-size: 0.92rem;
+}
+
+.pad-editor .button-row {
+  gap: 5px;
+}
+
+.pad-editor button,
+.pad-editor .file-button {
+  min-height: 31px;
+  padding: 0.38rem 0.52rem;
+  font-size: 0.68rem;
+}
+
+.pad-editor canvas[data-waveform="pad"] {
+  height: 58px;
+}
+
+.pad-editor .control-grid {
+  gap: 6px;
+}
+
+.pad-editor .field {
+  gap: 3px;
+}
+
+.pad-editor .field span,
+.pad-editor .micro {
+  font-size: 0.66rem;
+}
+
+.pad-editor input,
+.pad-editor select {
+  min-height: 30px;
+  font-size: 0.72rem;
+}
+
+.pad-editor input[type="range"] {
+  min-height: 21px;
+}
+
+.pad-editor .empty {
+  padding: 8px;
+  font-size: 0.68rem;
+}
+
 .pad-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(68px, 1fr));
