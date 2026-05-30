@@ -17,6 +17,7 @@ const STORAGE = {
   customLotteryGames: "lottomind.stemStudio.customLotteryGames.v1",
   beatCreativeBundles: "lottomind.stemStudio.beatCreativeBundles.v1",
   keyboardMappings: "lottominded.ultra.keyboardMappings.v1",
+  floatingTransportPosition: "lottominded.ultra.floatingTransportPosition.v1",
   topShellLayout: "lottominded.ultra.topShellLayout.v1"
 };
 const PAD_KEYS = ["1", "2", "3", "4", "q", "w", "e", "r", "a", "s", "d", "f", "z", "x", "c", "v"];
@@ -1472,6 +1473,7 @@ function render() {
   `;
   drawAllCanvases();
   initUltraCockpit();
+  initFloatingTransport();
 }
 
 function renderTopShellControls() {
@@ -1570,7 +1572,11 @@ function renderHeader() {
 function renderTransport() {
   const playingLabel = state.transport.paused ? "Resume All" : state.playing ? "Playing" : "Play All";
   return `
-    <section class="transport ultra-command-deck" aria-label="ULTRA Studio Cockpit controls">
+    <section class="transport ultra-command-deck is-floating-transport" data-floating-transport aria-label="ULTRA Studio Cockpit controls">
+      <div class="floating-transport-grip" data-floating-transport-handle role="button" tabindex="0" aria-label="Drag transport controls" title="Drag transport controls">
+        <span>Transport</span>
+        <small>Drag</small>
+      </div>
       <div class="ultra-transport-rail" aria-label="Transport rail">
         <button type="button" class="ultra-help-button" data-action="open-help-topic" data-help-topic="transport" aria-label="Transport help">?</button>
         <button type="button" class="ultra-transport-button play" data-action="play-all" aria-pressed="${state.playing && !state.transport.paused}"><span aria-hidden="true">▶</span><span>${playingLabel}</span></button>
@@ -11410,6 +11416,95 @@ function initUltraCockpit() {
   syncTransportButtonStates();
   updateUltraMeters();
   animateUltraWaveform();
+}
+
+function initFloatingTransport() {
+  const deck = document.querySelector("[data-floating-transport]");
+  const handle = deck?.querySelector("[data-floating-transport-handle]");
+  if (!deck || !handle) return;
+
+  let position = { x: 0, y: 0 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE.floatingTransportPosition) || "{}");
+    if (Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
+      position = { x: saved.x, y: saved.y };
+    }
+  } catch (error) {
+    position = { x: 0, y: 0 };
+  }
+
+  const applyPosition = () => {
+    position.x = clamp(position.x, -360, Math.max(360, window.innerWidth - 240));
+    position.y = clamp(position.y, -180, Math.max(240, window.innerHeight - 140));
+    deck.style.setProperty("--transport-x", `${Math.round(position.x)}px`);
+    deck.style.setProperty("--transport-y", `${Math.round(position.y)}px`);
+  };
+
+  applyPosition();
+
+  let dragState = null;
+  const finishDrag = () => {
+    if (!dragState) return;
+    dragState = null;
+    deck.classList.remove("is-dragging");
+    localStorage.setItem(STORAGE.floatingTransportPosition, JSON.stringify(position));
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", finishDrag);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+
+  const startDrag = (clientX, clientY) => {
+    dragState = {
+      startX: clientX,
+      startY: clientY,
+      originX: position.x,
+      originY: position.y
+    };
+    deck.classList.add("is-dragging");
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!dragState) return;
+    position.x = dragState.originX + clientX - dragState.startX;
+    position.y = dragState.originY + clientY - dragState.startY;
+    applyPosition();
+  };
+
+  function onPointerMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onPointerUp() {
+    finishDrag();
+  }
+
+  function onMouseMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onMouseUp() {
+    finishDrag();
+  }
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button && event.button !== 0) return;
+    startDrag(event.clientX, event.clientY);
+    handle.setPointerCapture?.(event.pointerId);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", finishDrag);
+    event.preventDefault();
+  });
+
+  handle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0) return;
+    startDrag(event.clientX, event.clientY);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    event.preventDefault();
+  });
 }
 
 function setActiveCreativeMode(mode) {

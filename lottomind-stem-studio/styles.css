@@ -1308,9 +1308,11 @@ canvas {
 .key-map-panel {
   grid-column: 1 / -1;
   display: grid;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
-  padding: 14px;
+  max-height: 50vh;
+  overflow: hidden;
+  padding: 10px;
   border: 1px solid rgba(94, 255, 157, 0.2);
   border-radius: var(--radius);
   background:
@@ -1318,38 +1320,71 @@ canvas {
     rgba(4, 8, 16, 0.84);
 }
 
+.key-map-panel .section-head {
+  gap: 8px;
+}
+
+.key-map-panel .section-head h3 {
+  font-size: 1rem;
+}
+
+.key-map-panel .section-head .micro {
+  font-size: 0.68rem;
+}
+
+.key-map-panel .button-row button {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 0.66rem;
+}
+
 .key-map-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .key-map-card {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   min-width: 0;
-  padding: 12px;
+  max-height: 34vh;
+  overflow: hidden;
+  padding: 8px;
   border: 1px solid rgba(130, 200, 255, 0.16);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.045);
 }
 
+.key-map-card h4 {
+  font-size: 0.78rem;
+}
+
 .key-map-list {
   display: grid;
-  gap: 8px;
+  gap: 5px;
+  max-height: calc(34vh - 48px);
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .key-map-row {
   display: grid;
-  grid-template-columns: minmax(95px, 1fr) minmax(64px, auto) auto;
-  gap: 8px;
+  grid-template-columns: minmax(84px, 1fr) minmax(46px, auto) auto;
+  gap: 5px;
   align-items: center;
   min-width: 0;
-  padding: 8px;
+  min-height: 34px;
+  padding: 5px 6px;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 10px;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.2);
+}
+
+.key-map-row strong {
+  font-size: 0.72rem;
 }
 
 .key-map-row strong,
@@ -1363,18 +1398,18 @@ canvas {
 
 .key-map-row span {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
 }
 
 .key-map-row kbd {
-  min-width: 58px;
-  padding: 7px 9px;
+  min-width: 44px;
+  padding: 5px 7px;
   border: 1px solid rgba(41, 247, 255, 0.28);
   border-radius: 8px;
   color: #eaffff;
   background: linear-gradient(180deg, rgba(41, 247, 255, 0.18), rgba(0, 0, 0, 0.34));
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.28);
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   text-align: center;
 }
 
@@ -1386,21 +1421,23 @@ canvas {
 .key-map-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   justify-content: end;
 }
 
 .key-map-actions button {
-  min-height: 36px;
-  padding: 7px 9px;
+  min-height: 26px;
+  padding: 4px 6px;
+  font-size: 0.62rem;
 }
 
 .key-map-capture {
-  padding: 10px 12px;
+  padding: 7px 9px;
   border: 1px solid rgba(255, 224, 113, 0.32);
   border-radius: 10px;
   color: #fff2bf;
   background: rgba(255, 224, 113, 0.08);
+  font-size: 0.72rem;
 }
 
 .sequencer-grid {
@@ -2863,6 +2900,100 @@ canvas {
     rgba(5, 9, 18, 0.72);
 }
 
+.ultra-command-deck.is-floating-transport {
+  position: sticky;
+  top: 8px;
+  z-index: 30;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  justify-self: start;
+  width: min(920px, 100%);
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 12px;
+  transform: translate3d(var(--transport-x, 0px), var(--transport-y, 0px), 0);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(41, 247, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.floating-transport-grip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  padding: 5px 8px;
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 9px;
+  color: #e9fbff;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.14), rgba(94, 255, 157, 0.08)),
+    rgba(0, 0, 0, 0.28);
+  cursor: grab;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  touch-action: none;
+  user-select: none;
+}
+
+.floating-transport-grip small {
+  color: var(--muted);
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+}
+
+.ultra-command-deck.is-dragging .floating-transport-grip {
+  cursor: grabbing;
+  border-color: rgba(94, 255, 157, 0.64);
+  box-shadow: 0 0 20px rgba(94, 255, 157, 0.18);
+}
+
+.ultra-command-deck.is-floating-transport .ultra-transport-rail,
+.ultra-command-deck.is-floating-transport .ultra-creative-rail,
+.ultra-command-deck.is-floating-transport .ultra-timing-strip {
+  gap: 6px;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-transport-button,
+.ultra-command-deck.is-floating-transport .ultra-mode-tab {
+  min-height: 30px;
+  padding: 6px 9px;
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-help-button {
+  width: 32px;
+  height: 32px;
+  font-size: 0.72rem;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-timing-strip {
+  grid-template-columns: minmax(82px, 0.7fr) minmax(104px, 0.85fr) minmax(100px, 0.8fr) minmax(118px, 1fr) minmax(128px, 1fr) minmax(128px, 1fr);
+}
+
+.ultra-command-deck.is-floating-transport .ultra-timing-card input,
+.ultra-command-deck.is-floating-transport .ultra-timing-card select {
+  min-height: 30px;
+  font-size: 0.72rem;
+}
+
+.ultra-command-deck.is-floating-transport .transport-status {
+  padding: 5px;
+  gap: 4px;
+}
+
+.ultra-command-deck.is-floating-transport .transport-status span {
+  min-height: 22px;
+  padding: 0 6px;
+  font-size: 0.62rem;
+}
+
 .ultra-transport-rail,
 .ultra-creative-rail,
 .ultra-timing-strip {
@@ -3128,6 +3259,10 @@ body.ultra-header-compact .ultra-cockpit-header {
     grid-template-columns: 1fr;
   }
 
+  .ultra-command-deck.is-floating-transport .ultra-timing-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .ultra-workspace-dock {
     grid-template-columns: repeat(5, minmax(92px, 1fr));
     overflow-x: auto;
@@ -3157,6 +3292,23 @@ body.ultra-header-compact .ultra-cockpit-header {
     flex: 0 0 auto;
     min-width: 112px;
     scroll-snap-align: start;
+  }
+
+  .ultra-command-deck.is-floating-transport {
+    width: min(100%, calc(100vw - 20px));
+    transform: translate3d(0, var(--transport-y, 0px), 0);
+  }
+
+  .ultra-command-deck.is-floating-transport .ultra-timing-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .key-map-panel {
+    max-height: 54vh;
+  }
+
+  .key-map-grid {
+    grid-template-columns: 1fr;
   }
 
   .ultra-quick-card-grid {
