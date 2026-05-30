@@ -318,6 +318,48 @@
   margin-bottom: 2rem;
 }
 
+.merch-drop-section .merch-section-copy {
+  align-items: start;
+}
+
+.merch-drop-section .merch-section-copy h2 {
+  grid-row: 1 / span 2;
+}
+
+.merch-drop-video {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(41, 247, 255, 0.38);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(41, 247, 255, 0.12), transparent 16rem),
+    rgba(7, 22, 38, 0.86);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.36),
+    0 0 34px rgba(41, 247, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.merch-drop-video::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent, rgba(3, 5, 10, 0.16)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 5rem);
+}
+
+.merch-drop-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.12) contrast(1.04);
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -727,6 +769,10 @@
   .product-grid,
   .gallery-grid {
     grid-template-columns: 1fr;
+  }
+
+  .merch-drop-section .merch-section-copy h2 {
+    grid-row: auto;
   }
 
   .merch-hero {
