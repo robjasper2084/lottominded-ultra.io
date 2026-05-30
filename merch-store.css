@@ -65,6 +65,16 @@
     0 0 28px rgba(0, 245, 255, 0.32);
 }
 
+.merch-hero h1 {
+  background: linear-gradient(92deg, #effbff 0%, #bdefff 22%, #fff0a5 42%, #effbff 58%, #29f7ff 78%, #effbff 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: merch-title-shimmer 7s ease-in-out infinite, merch-title-float 5.5s ease-in-out infinite;
+  will-change: background-position, transform, filter;
+}
+
 .merch-hero p,
 .merch-section-copy p,
 .motion-gallery-copy p {
@@ -108,22 +118,54 @@
 }
 
 .merch-strip {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 1rem clamp(2rem, 7vw, 8rem);
-  overflow: visible;
+  overflow: hidden;
   border-block: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 245, 255, 0.06);
   padding: 1rem clamp(1rem, 5vw, 5rem);
 }
 
+.merch-strip::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, rgba(41, 247, 255, 0.18), rgba(255, 209, 102, 0.14), transparent);
+  transform: translateX(-120%);
+  animation: merch-strip-scan 7.5s ease-in-out infinite;
+}
+
 .merch-strip span {
+  position: relative;
+  z-index: 1;
   min-width: max-content;
   color: #ffd166;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0;
+  animation: merch-strip-word 4.8s ease-in-out infinite;
+  text-shadow: 0 0 12px rgba(255, 209, 102, 0.18);
+}
+
+.merch-strip span:nth-child(2) {
+  animation-delay: 0.35s;
+}
+
+.merch-strip span:nth-child(3) {
+  animation-delay: 0.7s;
+}
+
+.merch-strip span:nth-child(4) {
+  animation-delay: 1.05s;
+}
+
+.merch-strip span:nth-child(5) {
+  animation-delay: 1.4s;
 }
 
 .merch-section,
@@ -318,6 +360,57 @@
   }
 }
 
+@keyframes merch-title-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 0 rgba(41, 247, 255, 0));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 14px rgba(41, 247, 255, 0.32));
+  }
+}
+
+@keyframes merch-title-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -0.18rem, 0);
+  }
+}
+
+@keyframes merch-strip-scan {
+  0%,
+  12% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  36%,
+  58% {
+    opacity: 1;
+  }
+  88%,
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+@keyframes merch-strip-word {
+  0%,
+  100% {
+    transform: translateY(0);
+    color: #ffd166;
+  }
+  50% {
+    transform: translateY(-0.12rem);
+    color: #f4fff3;
+  }
+}
+
 @media (max-width: 900px) {
   .merch-site-header {
     overflow: hidden;
@@ -362,6 +455,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .merch-store-page [data-reveal],
+  .merch-hero h1,
+  .merch-strip::before,
+  .merch-strip span,
   .gallery-grid img {
     animation: none;
     transition: none;
