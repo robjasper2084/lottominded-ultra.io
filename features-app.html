@@ -31,34 +31,39 @@
     </header>
 
     <main class="feature-console-shell">
+      <section class="feature-launch-grid" id="feature-grid" aria-label="All LOTTOMINDED ULTRA features">
+        <div class="section-kicker">All Tools</div>
+        <h2>Choose a module and jump straight in.</h2>
+        <div class="feature-tool-grid" id="featureToolGrid"></div>
+      </section>
+
       <section class="feature-console-hero">
         <div class="feature-console-copy">
-          <h1>Interactive Feature Console</h1>
+          <h1>Feature Command Deck</h1>
           <p>
-            Step into the LOTTOMINDED ULTRA control room. Spin the 3D studio core, select a module,
-            and launch straight into the production, prompt, mastering, deck, pad, stem, or creative
-            signal workflow.
+            Step into the LOTTOMINDED ULTRA control room. Pick a module, review the signal path,
+            and launch straight into the production, prompt, mastering, deck, pad, stem, or
+            creative workflow.
           </p>
           <div class="feature-console-actions">
             <a class="primary-action" href="../lottomind-stem-studio/index.html">Open Full Studio</a>
             <a class="secondary-action" href="#feature-grid">Browse Tools</a>
           </div>
         </div>
-        <div class="studio-3d-stage" aria-label="Interactive 3D studio feature selector">
-          <img class="studio-stage-asset" src="./assets/brand/lm-frequency-vault-hero.webp" alt="" />
-          <div class="studio-stage-orb" aria-hidden="true"></div>
-          <canvas id="studio3d" width="960" height="620"></canvas>
-          <div class="studio-3d-hud">
-            <strong id="selectedFeatureName">Beat DNA Engine</strong>
-            <span id="selectedFeatureCopy">Analyzes rhythm, stems, pads, decks, mixer movement, and arrangement into a reusable creative fingerprint.</span>
+        <div class="feature-command-panel" aria-label="Studio feature command panel">
+          <img class="command-panel-asset" src="./assets/brand/studio-mode-console.png" alt="" />
+          <div class="command-panel-interface">
+            <div class="command-orb" aria-hidden="true">
+              <span>LM</span>
+            </div>
+            <div class="command-readout">
+              <span class="section-kicker">Signal Path</span>
+              <strong>Local-first creative routing</strong>
+              <p>Audio, prompts, stems, pads, decks, mastering, video ideas, and beat signals stay organized in one launch deck.</p>
+            </div>
+            <div class="command-module-list" id="featuredModuleList" aria-label="Featured feature modules"></div>
           </div>
         </div>
-      </section>
-
-      <section class="feature-launch-grid" id="feature-grid" aria-label="All LOTTOMINDED ULTRA features">
-        <div class="section-kicker">All Tools</div>
-        <h2>Choose a module and jump straight in.</h2>
-        <div class="feature-tool-grid" id="featureToolGrid"></div>
       </section>
     </main>
 
