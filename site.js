@@ -13,7 +13,10 @@ const soundtrackButtons = document.querySelectorAll("[data-soundtrack-toggle]");
 const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoClose = document.querySelector("[data-startup-video-close]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
-const compactHeaderLabels = document.body.classList.contains("prompt-lab-page") || document.body.classList.contains("home-page");
+const compactHeaderLabels =
+  document.body.classList.contains("prompt-lab-page") ||
+  document.body.classList.contains("home-page") ||
+  document.body.classList.contains("merch-store-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const miniGameConfigs = {

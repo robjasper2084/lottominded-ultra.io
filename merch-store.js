@@ -142,6 +142,18 @@ document.addEventListener("pointermove", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  const stripLink = event.target.closest(".merch-strip a[href^='#']");
+  if (stripLink) {
+    const target = document.getElementById(stripLink.getAttribute("href").slice(1));
+    if (target) {
+      event.preventDefault();
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      target.scrollIntoView({ behavior, block: "start" });
+      history.pushState(null, "", stripLink.getAttribute("href"));
+    }
+    return;
+  }
+
   const addButton = event.target.closest("[data-add-item]");
   if (addButton) {
     addToCart(addButton);

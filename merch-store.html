@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=ultra-motion-7" />
-    <link rel="stylesheet" href="./merch-store.css?v=merch-cart-3" />
+    <link rel="stylesheet" href="./merch-store.css?v=merch-header-5" />
   </head>
   <body class="merch-store-page">
     <header class="site-header merch-site-header" data-site-header>
@@ -20,14 +20,14 @@
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
           <span>LOTTOMINDED ULTRA</span>
         </a>
-        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Shrink Menu</button>
+        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Merch store navigation">
         <a href="./">Home</a>
-        <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
+        <a href="./lottomind-stem-studio/index.html">Studio</a>
         <a href="./features-app.html">Features</a>
-        <a href="#drop">Merch Drop</a>
-        <a href="#gallery">Art Gallery</a>
+        <a href="#drop">Drop</a>
+        <a href="#gallery">Gallery</a>
       </nav>
       <div class="direct-launch merch-direct" aria-label="Merch store direct links">
         <button class="direct-action cart-toggle" type="button" data-bag-toggle>Cart <span data-bag-count>0</span></button>
@@ -57,11 +57,11 @@
       </section>
 
       <section class="merch-strip" aria-label="Store highlights">
-        <span>Hoodies</span>
-        <span>Caps</span>
-        <span>Polos</span>
-        <span>Gallery Prints</span>
-        <span>Motion Drops</span>
+        <a href="#hoodies">Hoodies</a>
+        <a href="#caps">Caps</a>
+        <a href="#polos">Polos</a>
+        <a href="#gallery">Gallery Prints</a>
+        <a href="#motion-drops">Motion Drops</a>
       </section>
 
       <section class="merch-section merch-drop-section" id="drop" data-reveal>
@@ -73,7 +73,7 @@
           </p>
         </div>
         <div class="product-grid" aria-label="Merch products">
-          <article class="product-card featured">
+          <article class="product-card featured" id="hoodies">
             <img src="./assets/merch/gallery-orb-01.png" alt="Detroit-inspired embroidered hoodie product photo" />
             <div>
               <h3>Frequency Vault Hoodie</h3>
@@ -81,7 +81,7 @@
               <div class="product-row"><strong>$78</strong><button type="button" data-add-item="Frequency Vault Hoodie" data-item-price="78">Add to Cart</button></div>
             </div>
           </article>
-          <article class="product-card">
+          <article class="product-card" id="caps">
             <img src="./assets/merch/gallery-orb-06.png" alt="Navy embroidered LottoMind baseball cap product photo" />
             <div>
               <h3>1701 Signal Cap</h3>
@@ -89,7 +89,7 @@
               <div class="product-row"><strong>$38</strong><button type="button" data-add-item="1701 Signal Cap" data-item-price="38">Add to Cart</button></div>
             </div>
           </article>
-          <article class="product-card">
+          <article class="product-card" id="polos">
             <img src="./assets/merch/gallery-orb-02.png" alt="Metro Signal Polo product photo" />
             <div>
               <h3>Metro Signal Polo</h3>
@@ -100,7 +100,7 @@
         </div>
       </section>
 
-      <section class="motion-gallery" aria-label="Animated motion graphic merch gallery" data-reveal>
+      <section class="motion-gallery" id="motion-drops" aria-label="Animated motion graphic merch gallery" data-reveal>
         <div class="motion-frame">
           <video autoplay muted loop playsinline preload="metadata">
             <source src="./assets/merch/merch-motion-02.mp4" type="video/mp4" />
@@ -156,7 +156,7 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=ultra-motion-7" defer></script>
-    <script src="./merch-store.js?v=merch-cart-3" defer></script>
+    <script src="./site.js?v=merch-header-5" defer></script>
+    <script src="./merch-store.js?v=merch-header-5" defer></script>
   </body>
 </html>

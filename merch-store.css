@@ -4,8 +4,118 @@
     linear-gradient(180deg, #03050a 0%, #061522 42%, #04070d 100%);
 }
 
-.merch-site-header nav a {
-  min-width: 8.5rem;
+.merch-store-page .merch-site-header {
+  grid-template-columns: minmax(260px, auto) minmax(0, 1fr);
+  grid-template-areas:
+    "brand nav"
+    "brand actions";
+  align-items: center;
+  gap: 8px clamp(18px, 3vw, 32px);
+  min-height: 94px;
+  padding-block: 10px;
+  background:
+    linear-gradient(180deg, rgba(2, 7, 16, 0.98), rgba(4, 11, 22, 0.9)),
+    radial-gradient(circle at 74% 30%, rgba(41, 247, 255, 0.12), transparent 18rem),
+    rgba(3, 5, 10, 0.95);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.36);
+}
+
+.merch-store-page .merch-site-header .site-header-main {
+  grid-area: brand;
+  flex-wrap: nowrap;
+}
+
+.merch-store-page .merch-site-header .brand {
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.merch-store-page .merch-site-header .brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.merch-store-page .merch-site-header .site-header-toggle {
+  min-height: 36px;
+  padding-inline: 14px;
+  border-color: rgba(130, 200, 255, 0.28);
+  color: #e7f3ff;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.merch-store-page .merch-site-header nav {
+  grid-area: nav;
+  justify-content: flex-end;
+  justify-self: end;
+  gap: 6px;
+  width: auto;
+  max-width: 100%;
+  padding: 6px;
+  border: 1px solid rgba(41, 247, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.085), rgba(138, 92, 255, 0.055)),
+    rgba(3, 7, 16, 0.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+    0 0 24px rgba(41, 247, 255, 0.08);
+}
+
+.merch-store-page .merch-site-header nav a {
+  position: relative;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0.56rem 0.78rem;
+  border-color: rgba(130, 200, 255, 0.2);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(41, 247, 255, 0.04)),
+    rgba(255, 255, 255, 0.02);
+  box-shadow: none;
+  font-size: 0.7rem;
+}
+
+.merch-store-page .merch-site-header nav a::before {
+  position: absolute;
+  inset: auto 12px 6px 12px;
+  height: 2px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(90deg, #29f7ff, #5eff9d);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.merch-store-page .merch-site-header nav a:hover::before,
+.merch-store-page .merch-site-header nav a:focus-visible::before {
+  opacity: 0.86;
+}
+
+.merch-store-page .merch-direct {
+  grid-area: actions;
+  justify-self: end;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+}
+
+.merch-store-page .merch-direct .direct-action {
+  min-height: 34px;
+  padding-inline: 13px;
+  border-color: rgba(94, 255, 157, 0.3);
+  border-radius: 999px;
+  color: #eafff6;
+  background:
+    linear-gradient(180deg, rgba(94, 255, 157, 0.12), rgba(41, 247, 255, 0.06)),
+    rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 -1px 0 rgba(94, 255, 157, 0.18);
+  font-size: 0.7rem;
+}
+
+.merch-store-page .merch-direct .cart-toggle {
+  border-color: rgba(41, 247, 255, 0.42);
+  color: #f4feff;
 }
 
 .cart-toggle span {
@@ -152,7 +262,7 @@
   animation: merch-strip-scan 7.5s ease-in-out infinite;
 }
 
-.merch-strip span {
+.merch-strip a {
   position: relative;
   z-index: 1;
   min-width: max-content;
@@ -160,23 +270,30 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0;
+  text-decoration: none;
   animation: merch-strip-word 4.8s ease-in-out infinite;
   text-shadow: 0 0 12px rgba(255, 209, 102, 0.18);
 }
 
-.merch-strip span:nth-child(2) {
+.merch-strip a:hover,
+.merch-strip a:focus-visible {
+  color: #f4fff3;
+  text-shadow: 0 0 18px rgba(41, 247, 255, 0.32);
+}
+
+.merch-strip a:nth-child(2) {
   animation-delay: 0.35s;
 }
 
-.merch-strip span:nth-child(3) {
+.merch-strip a:nth-child(3) {
   animation-delay: 0.7s;
 }
 
-.merch-strip span:nth-child(4) {
+.merch-strip a:nth-child(4) {
   animation-delay: 1.05s;
 }
 
-.merch-strip span:nth-child(5) {
+.merch-strip a:nth-child(5) {
   animation-delay: 1.4s;
 }
 
@@ -212,6 +329,7 @@
   display: grid;
   grid-template-rows: auto 1fr;
   min-height: 100%;
+  scroll-margin-top: 7.5rem;
 }
 
 .product-card.featured {
@@ -272,6 +390,11 @@
   background:
     linear-gradient(180deg, rgba(139, 92, 246, 0.12), rgba(0, 245, 255, 0.05)),
     #03050a;
+  scroll-margin-top: 7.5rem;
+}
+
+.gallery-section {
+  scroll-margin-top: 7.5rem;
 }
 
 .motion-frame {
@@ -554,21 +677,31 @@
 }
 
 @media (max-width: 900px) {
-  .merch-site-header {
+  .merch-store-page .merch-site-header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "nav"
+      "actions";
     overflow: hidden;
   }
 
-  .merch-site-header nav,
-  .merch-direct {
+  .merch-store-page .merch-site-header nav,
+  .merch-store-page .merch-direct {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-self: stretch;
     width: 100%;
     min-width: 0;
     justify-content: stretch;
   }
 
-  .merch-site-header nav a,
-  .merch-direct .direct-action {
+  .merch-store-page .merch-site-header nav {
+    border-radius: 16px;
+  }
+
+  .merch-store-page .merch-site-header nav a,
+  .merch-store-page .merch-direct .direct-action {
     width: 100%;
     min-width: 0;
   }
@@ -599,7 +732,7 @@
   .merch-store-page [data-reveal],
   .merch-hero h1,
   .merch-strip::before,
-  .merch-strip span,
+  .merch-strip a,
   .gallery-grid img {
     animation: none;
     transition: none;
