@@ -1131,18 +1131,15 @@ p {
 }
 
 .prompt-lab-hero h1 {
-  max-width: 12ch;
+  max-width: 16ch;
   margin: 0;
   font-family: var(--body-font);
-  font-size: clamp(3.1rem, 8vw, 8rem);
-  font-weight: 800;
-  line-height: 0.9;
+  font-size: clamp(2.65rem, 5.8vw, 5.8rem);
+  font-weight: 900;
+  line-height: 0.98;
   text-transform: none;
-  color: transparent;
-  background: linear-gradient(96deg, #f8fbff, #29f7ff 30%, #ffe071 60%, #f8fbff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  text-shadow: 0 8px 0 rgba(0, 0, 0, 0.32), 0 0 30px rgba(41, 247, 255, 0.35);
+  color: #ecfbff;
+  text-shadow: 0 0 28px rgba(41, 247, 255, 0.28);
 }
 
 .prompt-lab-hero p {
