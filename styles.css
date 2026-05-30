@@ -1331,13 +1331,13 @@ p {
 .prompt-lab-hero h1 {
   max-width: 16ch;
   margin: 0;
-  font-family: var(--body-font);
-  font-size: clamp(2.65rem, 5.8vw, 5.8rem);
-  font-weight: 900;
-  line-height: 0.98;
+  font-family: "Aptos Display", "Segoe UI Variable Display", Inter, var(--body-font);
+  font-size: clamp(2.7rem, 5.6vw, 5.65rem);
+  font-weight: 850;
+  line-height: 1;
   text-transform: none;
-  color: #ecfbff;
-  text-shadow: 0 0 28px rgba(41, 247, 255, 0.28);
+  color: #f4fbff;
+  text-shadow: 0 0 18px rgba(41, 247, 255, 0.22);
 }
 
 .prompt-lab-hero p {

@@ -1456,6 +1456,7 @@ function render() {
         ${renderTabs()}
         <div class="top-shell-main">
           ${renderHeader()}
+          ${renderWorkflowShortcuts()}
           ${renderTransport()}
         </div>
       </div>
@@ -1631,11 +1632,34 @@ function renderTransport() {
   `;
 }
 
+function renderWorkflowShortcuts() {
+  const shortcuts = [
+    { view: "pads", step: "1", label: "Pads", note: "Play drums" },
+    { view: "patterns", step: "2", label: "Patterns", note: "Program steps" },
+    { view: "sequencer", step: "3", label: "Sequencer", note: "16/64 grid" },
+    { view: "mixer", step: "4", label: "Mixer", note: "Balance levels" },
+    { view: "song", step: "5", label: "Song", note: "Arrange clips" },
+    { view: "beat dna", step: "6", label: "Beat DNA", note: "Export ideas" },
+  ];
+  return `
+    <nav class="workflow-shortcuts" aria-label="Beat workflow shortcuts">
+      ${shortcuts.map((shortcut) => `
+        <button type="button" class="workflow-shortcut ${state.view === shortcut.view ? "is-active" : ""}" data-action="set-view" data-view="${shortcut.view}" aria-pressed="${state.view === shortcut.view}">
+          <span class="workflow-step">${shortcut.step}</span>
+          <span><strong>${escapeHtml(shortcut.label)}</strong><small>${escapeHtml(shortcut.note)}</small></span>
+        </button>
+      `).join("")}
+    </nav>
+  `;
+}
+
 function renderTabs() {
   const tabs = ["studio", "song", "open tools", "patterns", "piano roll", "stems", "dj decks", "pads", "sampler", "sequencer", "mixer", "ai master", "automation", "plugins", "midi", "recorder", "files", "suno prompt", "video prompt", "beat lottery", "beat dna", "settings", "help"];
+  const workflowTabs = new Set(["pads", "patterns", "sequencer", "mixer", "song", "beat dna"]);
   return `
     <nav class="tabs ultra-left-dock" aria-label="Modes">
-      ${tabs.map((tab) => `<button type="button" class="tab ${state.view === tab ? "is-active" : ""}" data-action="set-view" data-view="${tab}">${titleCase(tab)}</button>`).join("")}
+      <span class="tabs-label">Modes</span>
+      ${tabs.map((tab) => `<button type="button" class="tab ${state.view === tab ? "is-active" : ""} ${workflowTabs.has(tab) ? "is-workflow-tab" : ""}" data-action="set-view" data-view="${tab}" aria-current="${state.view === tab ? "page" : "false"}">${titleCase(tab)}</button>`).join("")}
     </nav>
   `;
 }
@@ -4199,6 +4223,10 @@ function renderSequencer() {
         </div>
         <div class="sequencer-grid">
           <div class="step-table" style="--steps:${state.sequencer.steps}">
+            <div class="step-ruler" aria-hidden="true">
+              <span>Pad</span>
+              ${Array.from({ length: state.sequencer.steps }, (_, index) => `<span class="${index % 4 === 0 ? "bar" : ""}">${index + 1}</span>`).join("")}
+            </div>
             ${state.pads.map((pad, row) => renderStepRow(pad, row)).join("")}
           </div>
         </div>

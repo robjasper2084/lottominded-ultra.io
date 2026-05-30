@@ -583,12 +583,41 @@ canvas {
   box-shadow: inset 0 0 28px rgba(41, 247, 255, 0.04);
 }
 
+.tabs-label {
+  color: var(--gold);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .tab {
+  position: relative;
   width: 100%;
   justify-content: flex-start;
   padding: 0.56rem 0.78rem;
   text-align: left;
   white-space: normal;
+}
+
+.tab.is-workflow-tab {
+  border-color: rgba(94, 255, 157, 0.32);
+}
+
+.tab.is-workflow-tab::before {
+  position: absolute;
+  inset: 8px auto 8px 6px;
+  width: 3px;
+  content: "";
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--green), var(--cyan));
+  opacity: 0.72;
+}
+
+.tab.is-active {
+  border-color: rgba(255, 224, 113, 0.72);
+  color: #061016;
+  background: linear-gradient(135deg, var(--gold), var(--green), var(--cyan));
 }
 
 .hero {
@@ -1392,6 +1421,30 @@ canvas {
   align-items: center;
 }
 
+.step-ruler {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 92px repeat(var(--steps, 16), minmax(28px, 1fr));
+  gap: 5px;
+  align-items: center;
+  padding-bottom: 3px;
+  color: var(--muted);
+  background: rgba(4, 9, 20, 0.9);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.step-ruler span:first-child {
+  text-align: left;
+}
+
+.step-ruler .bar {
+  color: var(--gold);
+}
+
 .step-label {
   overflow: hidden;
   color: var(--muted);
@@ -2058,6 +2111,7 @@ canvas {
 
   .header,
   .transport,
+  .workflow-shortcuts,
   .hero,
   .deck-grid,
   .pad-layout,
@@ -2123,6 +2177,10 @@ canvas {
   .header,
   .transport {
     gap: 10px;
+  }
+
+  .workflow-shortcuts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .brand img {
@@ -2710,7 +2768,8 @@ canvas {
 .ultra-transport-button,
 .ultra-mode-tab,
 .ultra-dock-button,
-.ultra-quick-card {
+.ultra-quick-card,
+.workflow-shortcut {
   position: relative;
   min-height: 42px;
   border-radius: 10px;
@@ -2727,10 +2786,69 @@ canvas {
 .ultra-transport-button:hover,
 .ultra-mode-tab:hover,
 .ultra-dock-button:hover,
-.ultra-quick-card:hover {
+.ultra-quick-card:hover,
+.workflow-shortcut:hover {
   transform: translateY(-1px);
   border-color: rgba(41, 247, 255, 0.7);
   box-shadow: 0 0 24px rgba(41, 247, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.workflow-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px solid rgba(94, 255, 157, 0.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, rgba(94, 255, 157, 0.08), rgba(41, 247, 255, 0.06)),
+    rgba(0, 0, 0, 0.22);
+}
+
+.workflow-shortcut {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  text-align: left;
+}
+
+.workflow-shortcut.is-active {
+  border-color: rgba(255, 224, 113, 0.74);
+  background: linear-gradient(135deg, rgba(255, 224, 113, 0.18), rgba(94, 255, 157, 0.12)), rgba(5, 12, 24, 0.8);
+}
+
+.workflow-step {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  color: #061016;
+  background: linear-gradient(135deg, var(--gold), var(--cyan));
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.workflow-shortcut strong,
+.workflow-shortcut small {
+  display: block;
+}
+
+.workflow-shortcut strong {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.workflow-shortcut small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.2;
 }
 
 .ultra-command-deck {
