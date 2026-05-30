@@ -1665,7 +1665,7 @@ function renderTabs() {
 }
 
 function renderCurrentView() {
-  if (state.view === "studio") return `${renderStemMixer()}${renderPads()}${renderDecks()}`;
+  if (state.view === "studio") return `${renderStemMixer()}${renderPads()}`;
   if (state.view === "song") return renderSongEditor();
   if (state.view === "open tools") return renderOpenMusicToolLab();
   if (state.view === "patterns") return renderPatternEditor();
