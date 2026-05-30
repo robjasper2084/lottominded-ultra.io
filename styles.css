@@ -990,6 +990,11 @@ p {
   grid-row: 2;
 }
 
+.home-page .prompt-band-top .prompt-video-card {
+  grid-column: 2 / -1;
+  grid-row: 2;
+}
+
 .home-page .prompt-brief-card,
 .home-page .prompt-launch-card,
 .home-page .feature-grid article {
@@ -1308,6 +1313,51 @@ p {
 
 .prompt-signals-card {
   grid-column: auto;
+}
+
+.prompt-video-card {
+  position: relative;
+  display: grid;
+  min-height: 26rem;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.26);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 72% 16%, rgba(41, 247, 255, 0.16), transparent 14rem),
+    rgba(4, 9, 18, 0.82);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.prompt-video-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(3, 5, 10, 0.08), rgba(3, 5, 10, 0.46)),
+    radial-gradient(circle at 50% 50%, transparent 42%, rgba(3, 5, 10, 0.42) 100%);
+}
+
+.prompt-video-card video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.14) contrast(1.08) brightness(0.88);
+}
+
+.prompt-video-card span {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  left: 16px;
+  z-index: 1;
+  color: #fff1a8;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(0, 0, 0, 0.62);
 }
 
 .prompt-visual-column {
@@ -1690,7 +1740,8 @@ footer {
   }
 
   .home-page .prompt-band-top .prompt-signals-card,
-  .home-page .prompt-band-top .prompt-brief-card {
+  .home-page .prompt-band-top .prompt-brief-card,
+  .home-page .prompt-band-top .prompt-video-card {
     grid-column: auto;
     grid-row: auto;
   }
