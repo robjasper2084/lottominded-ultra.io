@@ -232,11 +232,16 @@
   transform: translate3d(var(--hero-product-x, 0), var(--hero-product-y, 0), 0) rotate(-2deg);
 }
 
-.merch-hero-product img {
+.merch-hero-product img,
+.merch-hero-product video {
   display: block;
   width: 100%;
   aspect-ratio: 1.2;
   object-fit: cover;
+}
+
+.merch-hero-product video {
+  background: rgba(0, 0, 0, 0.44);
 }
 
 .merch-hero-product span {
