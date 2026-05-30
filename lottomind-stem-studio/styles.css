@@ -1590,19 +1590,53 @@ canvas {
 
 .sequencer-grid {
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 3px;
+}
+
+.sequencer .panel-body {
+  padding: 11px;
+}
+
+.sequencer .panel-body > .button-row {
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.sequencer .panel-body > .button-row button,
+.sequencer .panel-body > .button-row .field {
+  min-height: 32px;
+}
+
+.sequencer .panel-body > .button-row button {
+  padding: 0.38rem 0.56rem;
+  font-size: 0.7rem;
+}
+
+.sequencer .field.compact {
+  gap: 2px;
+}
+
+.sequencer .field.compact span,
+.sequencer .range-control span {
+  font-size: 0.64rem;
+}
+
+.sequencer select {
+  min-height: 32px;
+  padding: 0 0.5rem;
+  font-size: 0.78rem;
 }
 
 .step-table {
   display: grid;
-  min-width: 860px;
-  gap: 5px;
+  min-width: 650px;
+  gap: 3px;
 }
 
 .step-row {
   display: grid;
-  grid-template-columns: 92px repeat(var(--steps, 16), minmax(28px, 1fr));
-  gap: 5px;
+  grid-template-columns: 68px repeat(var(--steps, 16), minmax(20px, 44px));
+  gap: 3px;
   align-items: center;
 }
 
@@ -1611,13 +1645,13 @@ canvas {
   top: 0;
   z-index: 2;
   display: grid;
-  grid-template-columns: 92px repeat(var(--steps, 16), minmax(28px, 1fr));
-  gap: 5px;
+  grid-template-columns: 68px repeat(var(--steps, 16), minmax(20px, 44px));
+  gap: 3px;
   align-items: center;
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   color: var(--muted);
   background: rgba(4, 9, 20, 0.9);
-  font-size: 0.62rem;
+  font-size: 0.55rem;
   font-weight: 800;
   text-align: center;
 }
@@ -1633,14 +1667,14 @@ canvas {
 .step-label {
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .step {
-  min-height: 28px;
-  border-radius: 5px;
+  min-height: 20px;
+  border-radius: 4px;
   padding: 0;
 }
 
