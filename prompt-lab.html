@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="LOTTOMINDED ULTRA Prompt Lab combines Beat to Suno, Beat to Video, and Beat2Lotto+ creative signal generators in one standalone page."
+    />
+    <title>LOTTOMINDED ULTRA | Prompt Lab</title>
+    <meta name="theme-color" content="#03050a" />
+    <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css?v=ultra-motion-7" />
+  </head>
+  <body class="prompt-lab-page">
+    <header class="site-header" data-site-header>
+      <div class="site-header-main">
+        <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
+          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+          <span>LOTTOMINDED ULTRA</span>
+        </a>
+        <button type="button" class="site-back-button" data-site-back aria-label="Go back to the previous page">Back</button>
+        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Shrink Menu</button>
+      </div>
+      <nav aria-label="Prompt Lab navigation">
+        <a href="./">Website</a>
+        <a href="../lottomind-stem-studio/index.html">Launch Studio</a>
+        <a href="#beat-suno">Suno</a>
+        <a href="#beat-video">Video</a>
+        <a href="#beat2lotto">Beat2Lotto+</a>
+        <a href="./merch-store.html">Merch + Gallery</a>
+        <a href="./beat2lotto-plus.html">Audio Import</a>
+      </nav>
+      <div class="direct-launch" aria-label="Prompt Lab direct controls">
+        <a class="direct-action direct-primary" href="../lottomind-stem-studio/index.html">Open Studio</a>
+        <a class="direct-action" href="../lottomind-stem-studio/index.html#video-prompt">Studio Video</a>
+        <a class="direct-action" href="../lottomind-stem-studio/index.html#suno-prompt">Studio Suno</a>
+        <button class="direct-action soundtrack-toggle" type="button" data-soundtrack-toggle>Play Demo Music</button>
+      </div>
+    </header>
+    <audio id="siteSoundtrack" src="./assets/audio/default-stems/2%20Drums.mp3" preload="auto" loop></audio>
+
+    <main>
+      <section class="prompt-lab-hero marketing-section reveal-section" data-reveal>
+        <div>
+          <p class="eyebrow">Prompt Lab Branch Page</p>
+          <h1>Beat DNA becomes the brief.</h1>
+          <p>
+            One focused page for the creative generators: Beat -> Suno Prompt, Beat -> Video Prompt,
+            and Beat2Lotto+ Signals. Start with the built-in Verse 1 demo rhythm or type your own beat
+            seed, then copy a clean prompt or entertainment-only signal set.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#beat-suno">Generate Music</a>
+            <a class="secondary-action" href="#beat-video">Generate Video</a>
+            <a class="secondary-action" href="#beat2lotto">Generate Signals</a>
+          </div>
+        </div>
+        <div class="soundtrack-panel">
+          <strong>Demo soundtrack</strong>
+          <span>Verse 1 Drums stem loaded locally. Browsers may require one click before audio starts.</span>
+          <button class="primary-action" type="button" data-soundtrack-toggle>Play Demo Music</button>
+        </div>
+      </section>
+
+      <section class="prompt-app-suite prompt-lab-suite marketing-section reveal-section" aria-label="Standalone prompt generator apps" data-reveal>
+        <article class="prompt-mini-app" id="beat-suno" data-mini-app="suno">
+          <h2>Beat -> Suno Prompt</h2>
+          <p>Write a polished song prompt from a beat idea, BPM, mood, and arrangement.</p>
+          <label><span>Beat idea</span><input id="miniSunoBeat" type="text" value="Verse 1 drums, bass pocket, neon synth hook, vocal lift" /></label>
+          <label><span>Mood / genre</span><input id="miniSunoMood" type="text" value="cinematic cyber R&B with trap drums and polished pop tension" /></label>
+          <label><span>BPM</span><input id="miniSunoBpm" type="number" value="120" min="40" max="220" /></label>
+          <button class="primary-action" type="button" data-mini-action="suno">Generate Suno Prompt</button>
+          <textarea id="miniSunoOutput" rows="7" readonly></textarea>
+          <button class="secondary-action" type="button" data-copy-target="miniSunoOutput">Copy Music Prompt</button>
+        </article>
+
+        <article class="prompt-mini-app" id="beat-video" data-mini-app="video">
+          <h2>Beat -> Video Prompt</h2>
+          <p>Create a cinematic video prompt for Higgsfield, Kling, Runway-style, or any text-to-video tool.</p>
+          <label><span>Scene subject</span><input id="miniVideoSubject" type="text" value="futuristic producer activating a glowing Beat DNA orb from a stem console" /></label>
+          <label><span>Location</span><input id="miniVideoLocation" type="text" value="neon glass music studio with floating waveform meters" /></label>
+          <label><span>Motion style</span><input id="miniVideoMotion" type="text" value="slow push-in, smooth orbit, bass-drop zoom, beat-synced light pulses" /></label>
+          <button class="primary-action" type="button" data-mini-action="video">Generate Video Prompt</button>
+          <textarea id="miniVideoOutput" rows="7" readonly></textarea>
+          <button class="secondary-action" type="button" data-copy-target="miniVideoOutput">Copy Video Prompt</button>
+        </article>
+
+        <article class="prompt-mini-app" id="beat2lotto" data-mini-app="numbers">
+          <h2>Beat2Lotto+ Signals</h2>
+          <p>Generate entertainment-only number signals from a typed seed, then open the full audio-import app.</p>
+          <label><span>Creative seed</span><input id="miniLottoSeed" type="text" value="Verse 1 stems, 120 BPM, syncopated drums, violet synth lift" /></label>
+          <label>
+            <span>Game</span>
+            <select id="miniLottoGame">
+              <option value="pick3">Pick 3</option>
+              <option value="pick4">Pick 4</option>
+              <option value="cash5">Cash 5</option>
+              <option value="powerball">Powerball Style</option>
+            </select>
+          </label>
+          <button class="primary-action" type="button" data-mini-action="numbers">Generate Number Signals</button>
+          <textarea id="miniLottoOutput" rows="7" readonly></textarea>
+          <div class="button-row">
+            <button class="secondary-action" type="button" data-copy-target="miniLottoOutput">Copy Signals</button>
+            <a class="secondary-action" href="./beat2lotto-plus.html">Open Full Beat2Lotto+</a>
+          </div>
+          <p class="mini-disclaimer">
+            Beat-seeded entertainment picks. Creative number generation. Not a prediction. Lottery outcomes are random.
+            Verify official rules before playing.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>LOTTOMINDED ULTRA Prompt Lab</span>
+      <span>Local prompt generation. No uploads, no auto-submit, no prediction claims.</span>
+    </footer>
+
+    <script src="./site.js?v=ultra-motion-5" defer></script>
+  </body>
+</html>

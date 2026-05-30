@@ -1,0 +1,343 @@
+.beat2lotto-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(94, 255, 157, 0.14), transparent 25rem),
+    radial-gradient(circle at 82% 18%, rgba(255, 224, 113, 0.12), transparent 28rem),
+    linear-gradient(145deg, #020409, #07101f 52%, #06030b);
+}
+
+.beat2lotto-header {
+  grid-template-columns: minmax(220px, auto) 1fr;
+}
+
+.beat2lotto-shell {
+  width: min(calc(100% - 32px), 1180px);
+  margin: 0 auto;
+}
+
+.beat2lotto-hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(260px, 0.46fr);
+  gap: clamp(24px, 6vw, 72px);
+  align-items: center;
+  min-height: 58vh;
+  padding: 84px 0 48px;
+}
+
+.beat2lotto-hero h1 {
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: clamp(3.4rem, 11vw, 9rem);
+  line-height: 0.82;
+  text-transform: uppercase;
+  color: #f8fbff;
+  text-shadow: 0 0 30px rgba(41, 247, 255, 0.24), 0 22px 60px rgba(0, 0, 0, 0.62);
+}
+
+.lotto-safety {
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 224, 113, 0.34);
+  border-radius: 10px;
+  color: #ffe9b2;
+  background: rgba(255, 224, 113, 0.07);
+}
+
+.beat2lotto-orb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid rgba(41, 247, 255, 0.36);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 224, 113, 0.24), transparent 28%),
+    repeating-conic-gradient(from 12deg, rgba(41, 247, 255, 0.58) 0 8deg, transparent 8deg 18deg),
+    rgba(5, 12, 22, 0.92);
+  box-shadow: 0 0 70px rgba(41, 247, 255, 0.18), inset 0 0 40px rgba(94, 255, 157, 0.18);
+}
+
+.beat2lotto-orb span {
+  font-family: var(--display-font);
+  font-size: clamp(5rem, 16vw, 10rem);
+  color: var(--gold);
+  text-shadow: 0 0 28px rgba(255, 224, 113, 0.42);
+}
+
+.beat2lotto-console {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.42fr) minmax(320px, 1fr);
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(41, 247, 255, 0.08), rgba(138, 92, 255, 0.06)),
+    rgba(3, 7, 16, 0.76);
+}
+
+.lotto-controls,
+.lotto-output-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.file-drop {
+  position: relative;
+  padding: 14px;
+  border: 1px dashed rgba(41, 247, 255, 0.38);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(94, 255, 157, 0.12), transparent 14rem),
+    rgba(255, 255, 255, 0.04);
+}
+
+.file-drop input[type="file"] {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+}
+
+.file-drop small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.beat-analysis-card {
+  display: grid;
+  gap: 5px;
+  min-height: 88px;
+  padding: 13px;
+  border: 1px solid rgba(255, 224, 113, 0.24);
+  border-radius: 12px;
+  background: rgba(255, 224, 113, 0.055);
+}
+
+.beat-analysis-card strong {
+  color: var(--gold);
+  font-family: var(--display-font);
+  text-transform: uppercase;
+}
+
+.beat-analysis-card span {
+  font-size: 0.82rem;
+}
+
+.lotto-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.lotto-controls span,
+.lotto-output-head span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.lotto-output-head h2 {
+  font-size: clamp(2rem, 4vw, 4rem);
+}
+
+.lotto-output-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.lotto-set-card {
+  padding: 16px;
+  border: 1px solid rgba(120, 210, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.lotto-set-card strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--gold);
+  font-family: var(--display-font);
+  text-transform: uppercase;
+}
+
+.lotto-number-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lotto-ball {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid rgba(41, 247, 255, 0.42);
+  border-radius: 999px;
+  color: #f8fbff;
+  font-weight: 900;
+  background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.22), transparent 32%), rgba(8, 17, 32, 0.88);
+  box-shadow: 0 0 18px rgba(41, 247, 255, 0.18);
+}
+
+.lotto-ball.special {
+  border-color: rgba(255, 224, 113, 0.72);
+  color: #1a1200;
+  background: linear-gradient(135deg, var(--gold), var(--green));
+}
+
+.lotto-note {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.sheet-prompt-lab {
+  display: grid;
+  gap: 22px;
+  margin: 30px 0 70px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid rgba(138, 92, 255, 0.26);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(138, 92, 255, 0.11), rgba(41, 247, 255, 0.06)),
+    rgba(3, 7, 16, 0.78);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.26);
+}
+
+.sheet-lab-copy {
+  max-width: 920px;
+}
+
+.sheet-lab-copy h2 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 5.4rem);
+  line-height: 0.86;
+}
+
+.sheet-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.75fr) minmax(320px, 1fr) minmax(320px, 1fr);
+  gap: 14px;
+}
+
+.sheet-card {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(120, 210, 255, 0.22);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(41, 247, 255, 0.13), transparent 14rem),
+    rgba(255, 255, 255, 0.045);
+}
+
+.sheet-card h3 {
+  color: #f8fbff;
+  font-family: var(--display-font);
+  text-transform: uppercase;
+}
+
+.sheet-preview {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.24);
+  text-align: center;
+}
+
+.sheet-preview img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.note-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 34px;
+}
+
+.note-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(41, 247, 255, 0.3);
+  border-radius: 999px;
+  color: #f8fbff;
+  background: rgba(41, 247, 255, 0.08);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.note-chip.muted {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+}
+
+.piano-keyboard {
+  display: grid;
+  grid-template-columns: repeat(13, minmax(28px, 1fr));
+  gap: 4px;
+  align-items: end;
+  min-height: 118px;
+  padding: 10px;
+  border: 1px solid rgba(41, 247, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.piano-key {
+  min-height: 88px;
+  padding: 4px;
+  border-radius: 8px;
+  font-size: 0.66rem;
+}
+
+.piano-key.is-white {
+  color: #071018;
+  background: linear-gradient(180deg, #f8fbff, #bed7ee);
+}
+
+.piano-key.is-black {
+  min-height: 62px;
+  color: #f8fbff;
+  background: linear-gradient(180deg, #101522, #020409);
+  box-shadow: 0 0 14px rgba(138, 92, 255, 0.2);
+}
+
+.prompt-output-card textarea {
+  min-height: 122px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 800px) {
+  .beat2lotto-hero,
+  .beat2lotto-console {
+    grid-template-columns: 1fr;
+  }
+
+  .lotto-output-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-lab-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .piano-keyboard {
+    grid-template-columns: repeat(7, minmax(34px, 1fr));
+  }
+}

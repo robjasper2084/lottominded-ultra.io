@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Beat2Lotto+ is a standalone entertainment-only creative number signal generator for LOTTOMINDED ULTRA."
+    />
+    <title>Beat2Lotto+ | Creative Number Signals</title>
+    <meta name="theme-color" content="#03050a" />
+    <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css?v=ultra-motion-7" />
+    <link rel="stylesheet" href="./beat2lotto-plus.css?v=beat-audio-1" />
+  </head>
+  <body class="beat2lotto-page">
+    <header class="site-header beat2lotto-header">
+      <div class="site-header-main">
+        <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
+          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+          <span>LOTTOMINDED ULTRA</span>
+        </a>
+      </div>
+      <nav aria-label="Beat2Lotto+ navigation">
+        <a href="./">Website</a>
+        <a href="./prompt-lab.html">Prompt Lab</a>
+        <a href="./merch-store.html">Merch + Gallery</a>
+        <a href="../lottomind-stem-studio/index.html#beat-lottery">Studio Signals</a>
+        <a href="../lottomind-stem-studio/index.html">Open Studio</a>
+      </nav>
+    </header>
+
+    <main class="beat2lotto-shell">
+      <section class="beat2lotto-hero">
+        <div>
+          <h1>Beat2Lotto+</h1>
+          <p>
+            A standalone creative number signal console powered by beat-style inputs. Import a beat or
+            music file, enter a BPM, groove, mood, or session phrase, then generate beat-seeded
+            entertainment picks for journaling, creative play, and studio rituals.
+          </p>
+          <p class="lotto-safety">
+            Beat2Lotto+ is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
+            draw times, prizes, and eligibility with official lottery sources before playing.
+          </p>
+        </div>
+        <div class="beat2lotto-orb" aria-hidden="true">
+          <span>+</span>
+        </div>
+      </section>
+
+      <section class="beat2lotto-console" aria-label="Beat2Lotto+ generator">
+        <div class="lotto-controls">
+          <label class="file-drop">
+            <span>Import beat or music</span>
+            <input id="lottoAudioFile" type="file" accept="audio/*" />
+            <small>Local analysis only. Audio never uploads.</small>
+          </label>
+          <div id="beatAnalysis" class="beat-analysis-card" aria-live="polite">
+            <strong>No beat imported yet</strong>
+            <span>Generate from typed Beat DNA, or load audio to seed the digits.</span>
+          </div>
+          <label>
+            <span>Session seed</span>
+            <input id="lottoSeed" type="text" value="neon drums, 120 BPM, late-night bounce" />
+          </label>
+          <label>
+            <span>BPM</span>
+            <input id="lottoBpm" type="number" min="40" max="220" value="120" />
+          </label>
+          <label>
+            <span>Game format</span>
+            <select id="lottoGame">
+              <option value="pick3">Pick 3</option>
+              <option value="pick4">Pick 4</option>
+              <option value="cash5">Cash 5 / Fantasy 5</option>
+              <option value="lotto6">Lotto 6</option>
+              <option value="powerball">Powerball Style</option>
+              <option value="mega">Mega Millions Style</option>
+            </select>
+          </label>
+          <label>
+            <span>Sets</span>
+            <input id="lottoCount" type="number" min="1" max="12" value="5" />
+          </label>
+          <label>
+            <span>Method</span>
+            <select id="lottoMethod">
+              <option>Beat DNA</option>
+              <option>Rhythm Signature</option>
+              <option>Drum Pattern</option>
+              <option>Stem Mix</option>
+              <option>Random + Beat DNA</option>
+            </select>
+          </label>
+          <button class="primary-action" type="button" id="generateLotto">Generate Number Signals</button>
+          <button class="secondary-action" type="button" id="copyLotto">Copy All</button>
+        </div>
+
+        <div class="lotto-output-panel">
+          <div class="lotto-output-head">
+            <h2>Beat-seeded entertainment picks</h2>
+            <span>Creative number generation • Not a prediction</span>
+          </div>
+          <div id="lottoOutput" class="lotto-output-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="sheet-prompt-lab" aria-label="Sheet music keyboard and prompt lab">
+        <div class="sheet-lab-copy">
+          <h2>Sheet-to-notes prompt keyboard</h2>
+          <p>
+            Upload a sheet music image or PDF, preview it locally, then confirm notes with the keyboard
+            or editable note lane. This is a browser-friendly scan assistant for turning written ideas
+            into music and video prompts.
+          </p>
+          <p class="lotto-safety">
+            Scan assistant note: this static app does not upload files or call OCR services. Use the
+            preview, keyboard, and note lane to confirm the melody before generating prompts.
+          </p>
+        </div>
+        <div class="sheet-lab-grid">
+          <article class="sheet-card">
+            <h3>1. Import sheet music</h3>
+            <label class="file-drop">
+              <span>Sheet image or PDF</span>
+              <input id="sheetMusicFile" type="file" accept="image/*,.pdf,application/pdf" />
+              <small>Image preview appears below when supported by the browser.</small>
+            </label>
+            <div id="sheetPreview" class="sheet-preview">No sheet loaded.</div>
+          </article>
+          <article class="sheet-card">
+            <h3>2. Build note lane</h3>
+            <textarea id="noteSequence" rows="4" placeholder="Example: C4 D4 Eb4 G4 Bb4 C5"></textarea>
+            <div id="noteChips" class="note-chip-row" aria-live="polite"></div>
+            <div id="pianoKeyboard" class="piano-keyboard" aria-label="Playable note keyboard"></div>
+            <div class="button-row">
+              <button class="secondary-action" type="button" id="scanSheet">Scan to editable notes</button>
+              <button class="secondary-action" type="button" id="clearNotes">Clear Notes</button>
+            </div>
+          </article>
+          <article class="sheet-card prompt-output-card">
+            <h3>3. Generate prompts</h3>
+            <div class="button-row">
+              <button class="primary-action" type="button" id="generateSheetSuno">Generate Music Prompt</button>
+              <button class="secondary-action" type="button" id="generateSheetVideo">Generate Video Prompt</button>
+              <button class="secondary-action" type="button" id="copySheetPrompts">Copy Prompts</button>
+            </div>
+            <label>
+              <span>Music prompt</span>
+              <textarea id="sheetSunoPrompt" rows="6" readonly></textarea>
+            </label>
+            <label>
+              <span>Video prompt</span>
+              <textarea id="sheetVideoPrompt" rows="6" readonly></textarea>
+            </label>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Beat2Lotto+</span>
+      <span>Entertainment-only creative number signals. No wagers, no ticket sales, no outcome claims.</span>
+    </footer>
+
+    <script src="./beat2lotto-plus.js" defer></script>
+  </body>
+</html>
