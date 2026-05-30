@@ -539,6 +539,14 @@ nav {
   font-size: 1rem;
 }
 
+.startup-video-credit {
+  margin: 8px 0 0;
+  color: #fff2b2;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
 .direct-primary {
   border-color: rgba(255, 224, 113, 0.52);
   color: #071018;
@@ -972,6 +980,16 @@ p {
   padding-top: clamp(32px, 4vw, 52px);
 }
 
+.home-page .prompt-band-top .prompt-signals-card {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.home-page .prompt-band-top .prompt-brief-card {
+  grid-column: 1;
+  grid-row: 2;
+}
+
 .home-page .prompt-brief-card,
 .home-page .prompt-launch-card,
 .home-page .feature-grid article {
@@ -1289,7 +1307,7 @@ p {
 }
 
 .prompt-signals-card {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .prompt-visual-column {
@@ -1669,6 +1687,12 @@ footer {
 
   .home-page .prompt-band-top {
     grid-template-columns: 1fr;
+  }
+
+  .home-page .prompt-band-top .prompt-signals-card,
+  .home-page .prompt-band-top .prompt-brief-card {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .home-page .feature-grid .feature-spotlight {
