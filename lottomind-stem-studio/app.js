@@ -18,6 +18,7 @@ const STORAGE = {
   beatCreativeBundles: "lottomind.stemStudio.beatCreativeBundles.v1",
   keyboardMappings: "lottominded.ultra.keyboardMappings.v1",
   floatingTransportPosition: "lottominded.ultra.floatingTransportPosition.v1",
+  floatingStemMixerPosition: "lottominded.ultra.floatingStemMixerPosition.v1",
   topShellLayout: "lottominded.ultra.topShellLayout.v1"
 };
 const PAD_KEYS = ["1", "2", "3", "4", "q", "w", "e", "r", "a", "s", "d", "f", "z", "x", "c", "v"];
@@ -463,6 +464,7 @@ let ultraCockpitRunning = false;
 let dbPromise = null;
 let renderQueued = false;
 let deferredInstallPrompt = null;
+let waveformPreviewSource = null;
 const activePadPointers = new Map();
 const activeKeyboardPointers = new Map();
 const activeKeyboardShortcuts = new Set();
@@ -1474,6 +1476,7 @@ function render() {
   drawAllCanvases();
   initUltraCockpit();
   initFloatingTransport();
+  initFloatingStemMixer();
 }
 
 function renderTopShellControls() {
@@ -1645,7 +1648,8 @@ function renderWorkflowShortcuts() {
     { view: "sequencer", step: "3", label: "Sequencer", note: "16/64 grid" },
     { view: "mixer", step: "4", label: "Mixer", note: "Balance levels" },
     { view: "song", step: "5", label: "Song", note: "Arrange clips" },
-    { view: "beat dna", step: "6", label: "Beat DNA", note: "Export ideas" },
+    { view: "waveform studio", step: "6", label: "Waveform", note: "Edit audio" },
+    { view: "beat dna", step: "7", label: "Beat DNA", note: "Export ideas" },
   ];
   return `
     <nav class="workflow-shortcuts" aria-label="Beat workflow shortcuts">
@@ -1660,8 +1664,8 @@ function renderWorkflowShortcuts() {
 }
 
 function renderTabs() {
-  const tabs = ["studio", "song", "open tools", "patterns", "piano roll", "stems", "dj decks", "pads", "sampler", "sequencer", "mixer", "ai master", "automation", "plugins", "midi", "recorder", "files", "suno prompt", "video prompt", "beat lottery", "beat dna", "settings", "help"];
-  const workflowTabs = new Set(["pads", "patterns", "sequencer", "mixer", "song", "beat dna"]);
+  const tabs = ["studio", "song", "waveform studio", "open tools", "patterns", "piano roll", "stems", "dj decks", "pads", "sampler", "sequencer", "mixer", "ai master", "automation", "plugins", "midi", "recorder", "files", "suno prompt", "video prompt", "beat lottery", "beat dna", "settings", "help"];
+  const workflowTabs = new Set(["pads", "patterns", "sequencer", "mixer", "song", "waveform studio", "beat dna"]);
   return `
     <nav class="tabs ultra-left-dock" aria-label="Modes">
       <span class="tabs-label">Modes</span>
@@ -1673,6 +1677,7 @@ function renderTabs() {
 function renderCurrentView() {
   if (state.view === "studio") return `${renderStemMixer()}<div class="studio-song-editor">${renderSongEditor()}</div>${renderPads()}`;
   if (state.view === "song") return renderSongEditor();
+  if (state.view === "waveform studio") return `${renderWaveformStudio()}${renderSongEditorContextMenu()}`;
   if (state.view === "open tools") return renderOpenMusicToolLab();
   if (state.view === "patterns") return renderPatternEditor();
   if (state.view === "piano roll") return renderPianoRoll();
@@ -1699,7 +1704,8 @@ function renderCurrentView() {
 
 function renderSongEditor() {
   const bars = Array.from({ length: state.song.bars }, (_, index) => index + 1);
-  const subMode = state.song.subMode || "arrangement";
+  const rawSubMode = state.song.subMode || "arrangement";
+  const subMode = rawSubMode === "waveform" ? "arrangement" : rawSubMode;
   return `
     <section class="panel song-editor-screen" aria-label="Song editor">
       <div class="panel-header">
@@ -1710,7 +1716,6 @@ function renderSongEditor() {
         <div class="button-row">
           ${helpButton("song")}
           <button type="button" data-action="set-song-submode" data-mode="arrangement" aria-pressed="${subMode === "arrangement"}">Arrangement</button>
-          <button type="button" data-action="set-song-submode" data-mode="waveform" aria-pressed="${subMode === "waveform"}">Waveform Studio</button>
           <button type="button" data-action="set-song-submode" data-mode="multitrack" aria-pressed="${subMode === "multitrack"}">Multitrack</button>
           <button type="button" data-action="set-song-submode" data-mode="adaptive" aria-pressed="${subMode === "adaptive"}">Adaptive</button>
           <button type="button" data-action="add-song-track">Add Track</button>
@@ -1751,6 +1756,7 @@ function renderWaveformStudio() {
         </div>
         ${helpButton("waveform-studio")}
       </div>
+      ${renderWaveformPlaybackControls()}
       ${renderWaveformEditorToolbar()}
       ${renderWaveformWorkspace()}
       <div class="waveform-lab-grid">
@@ -1762,6 +1768,25 @@ function renderWaveformStudio() {
       </div>
       ${renderWaveformStatusBar()}
     </section>
+  `;
+}
+
+function renderWaveformPlaybackControls() {
+  const buffer = getWaveformStudioBuffer();
+  const selection = normalizeWaveformSelection();
+  const isPlaying = Boolean(state.waveformStudio.previewPlaying);
+  const loop = Boolean(state.waveformStudio.previewLoop);
+  return `
+    <div class="waveform-playback-controls" aria-label="Waveform playback controls">
+      <button type="button" class="waveform-play-button" data-action="play-waveform-selection" aria-pressed="${isPlaying && !loop}">Play Selection</button>
+      <button type="button" data-action="play-waveform-from-cursor">Play From Cursor</button>
+      <button type="button" data-action="loop-waveform-preview" aria-pressed="${loop}">${loop ? "Looping" : "Loop Selection"}</button>
+      <button type="button" class="danger" data-action="stop-waveform-preview">Stop</button>
+      <span class="waveform-playback-readout">
+        ${formatTime(selection.startTime)} - ${formatTime(selection.endTime)}
+        <small>${buffer ? `${formatTime(buffer.duration)} source` : "No source loaded"}</small>
+      </span>
+    </div>
   `;
 }
 
@@ -2169,6 +2194,66 @@ function normalizeWaveformSelection() {
   if (endTime <= startTime) endTime = Math.min(duration, startTime + 0.05);
   state.waveformStudio.selection = { startTime, endTime };
   return state.waveformStudio.selection;
+}
+
+function stopWaveformPreview(silent = false) {
+  if (waveformPreviewSource) {
+    try {
+      waveformPreviewSource.onended = null;
+      waveformPreviewSource.stop();
+    } catch (error) {}
+  }
+  waveformPreviewSource = null;
+  state.waveformStudio.previewPlaying = false;
+  state.waveformStudio.previewLoop = false;
+  if (!silent) {
+    state.waveformStudio.status = "Waveform preview stopped.";
+    queueRender();
+  }
+}
+
+async function playWaveformSelection(loop = false) {
+  const buffer = getWaveformStudioBuffer();
+  if (!buffer) return toast("Load or select audio before previewing Waveform Studio.");
+  const ctx = await ensureAudio();
+  if (!ctx) return;
+  const selection = normalizeWaveformSelection();
+  const startTime = clamp(selection.startTime, 0, Math.max(0, buffer.duration - 0.05));
+  const endTime = clamp(selection.endTime, startTime + 0.05, buffer.duration);
+  const duration = Math.max(0.05, endTime - startTime);
+  stopWaveformPreview(true);
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = loop;
+  if (loop) {
+    source.loopStart = startTime;
+    source.loopEnd = endTime;
+  }
+  source.connect(masterGain);
+  waveformPreviewSource = source;
+  state.waveformStudio.previewPlaying = true;
+  state.waveformStudio.previewLoop = loop;
+  state.waveformStudio.cursorTime = startTime;
+  state.waveformStudio.status = `${loop ? "Looping" : "Playing"} selection ${formatTime(startTime)} to ${formatTime(endTime)}.`;
+  source.onended = () => {
+    if (waveformPreviewSource !== source) return;
+    waveformPreviewSource = null;
+    state.waveformStudio.previewPlaying = false;
+    state.waveformStudio.previewLoop = false;
+    state.waveformStudio.cursorTime = endTime;
+    queueRender();
+  };
+  if (loop) source.start(0, startTime);
+  else source.start(0, startTime, duration);
+  queueRender();
+}
+
+async function playWaveformFromCursor() {
+  const buffer = getWaveformStudioBuffer();
+  if (!buffer) return toast("Load or select audio before previewing Waveform Studio.");
+  const cursorTime = clamp(Number(state.waveformStudio.cursorTime) || state.waveformStudio.selection?.startTime || 0, 0, Math.max(0, buffer.duration - 0.05));
+  state.waveformStudio.selection = { startTime: cursorTime, endTime: buffer.duration };
+  await playWaveformSelection(false);
 }
 
 function drawMainWaveform(canvas, buffer, options = {}) {
@@ -2675,7 +2760,7 @@ function runSongContextAction(action = "") {
 }
 
 function handleSongEditorShortcut(event) {
-  if (!state.settings.waveformStudio.keyboardShortcuts || state.view !== "song") return false;
+  if (!state.settings.waveformStudio.keyboardShortcuts || !["song", "waveform studio"].includes(state.view)) return false;
   const key = event.key.toLowerCase();
   const mod = event.ctrlKey || event.metaKey;
   if (key === "s" && !mod) { splitWaveformAtPlayhead(); return true; }
@@ -3028,11 +3113,12 @@ function renderStemMixer() {
           <button type="button" data-action="export-stem-map">Export Stem Map</button>
         </div>
       </div>
-      <div class="panel-body">
-        <div class="stem-transport-strip" aria-label="Stem mixer synced transport">
+      <div class="panel-body stem-mixer-body" data-floating-stem-mixer>
+        <div class="stem-transport-strip" data-floating-stem-mixer-handle aria-label="Stem mixer synced transport">
           <div class="stem-transport-status">
             <strong>Synced Stem Transport</strong>
             <span>${loadedStems}/8 loaded - ${runningStems} playing - ${timelineStatus} - Session ${formatTime(longestStem)}</span>
+            <small class="stem-drag-chip">Drag mixer</small>
           </div>
           <div class="stem-transport-actions">
             <button type="button" data-action="play-all" aria-pressed="${state.playing && !state.transport.paused}">Start All Same Time</button>
@@ -5887,6 +5973,18 @@ async function handleAction(action, target) {
       state.song.subMode = target.dataset.mode || "arrangement";
       render();
       break;
+    case "play-waveform-selection":
+      await playWaveformSelection(false);
+      break;
+    case "play-waveform-from-cursor":
+      await playWaveformFromCursor();
+      break;
+    case "loop-waveform-preview":
+      await playWaveformSelection(true);
+      break;
+    case "stop-waveform-preview":
+      stopWaveformPreview();
+      break;
     case "set-waveform-source":
       state.waveformStudio.source = target.value || "selected-stem";
       state.waveformStudio.fileInfo = analyzeAudioFileMetadata(null, getWaveformStudioBuffer());
@@ -6713,6 +6811,7 @@ function stopAll(silent = false) {
   Object.values(state.decks).forEach((deck) => stopDeck(deck.id, true));
   state.pads.forEach((_, index) => releasePad(index));
   if (state.pad16Level?.generatedPads?.length) state.pad16Level.generatedPads.forEach((_, index) => releasePad(index));
+  stopWaveformPreview(true);
   stopSequencer(true);
   state.playing = false;
   state.transport.paused = false;
@@ -11507,6 +11606,101 @@ function initFloatingTransport() {
 
   handle.addEventListener("mousedown", (event) => {
     if (event.button !== 0) return;
+    startDrag(event.clientX, event.clientY);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    event.preventDefault();
+  });
+}
+
+function initFloatingStemMixer() {
+  const mixer = document.querySelector("[data-floating-stem-mixer]");
+  const handle = mixer?.querySelector("[data-floating-stem-mixer-handle]");
+  if (!mixer || !handle) return;
+
+  let position = { x: 0, y: 0 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE.floatingStemMixerPosition) || "{}");
+    if (Number.isFinite(saved.x) && Number.isFinite(saved.y)) position = { x: saved.x, y: saved.y };
+  } catch (error) {
+    position = { x: 0, y: 0 };
+  }
+
+  const applyPosition = () => {
+    const rect = mixer.getBoundingClientRect();
+    const baseLeft = rect.left - position.x;
+    const baseTop = rect.top - position.y;
+    const minX = Math.min(0, 12 - baseLeft);
+    const maxX = Math.max(minX, window.innerWidth - baseLeft - Math.min(mixer.offsetWidth, window.innerWidth - 24) - 12);
+    const minY = Math.min(0, 12 - baseTop);
+    const maxY = Math.max(minY, window.innerHeight - baseTop - Math.min(mixer.offsetHeight, window.innerHeight * 0.72) - 12);
+    position.x = clamp(position.x, minX, maxX);
+    position.y = clamp(position.y, minY, maxY);
+    mixer.style.setProperty("--stem-mixer-x", `${Math.round(position.x)}px`);
+    mixer.style.setProperty("--stem-mixer-y", `${Math.round(position.y)}px`);
+  };
+
+  applyPosition();
+  requestAnimationFrame(applyPosition);
+
+  let dragState = null;
+  const finishDrag = () => {
+    if (!dragState) return;
+    dragState = null;
+    mixer.classList.remove("is-dragging");
+    localStorage.setItem(STORAGE.floatingStemMixerPosition, JSON.stringify(position));
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", finishDrag);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+
+  const startDrag = (clientX, clientY) => {
+    dragState = {
+      startX: clientX,
+      startY: clientY,
+      originX: position.x,
+      originY: position.y
+    };
+    mixer.classList.add("is-dragging");
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!dragState) return;
+    position.x = dragState.originX + clientX - dragState.startX;
+    position.y = dragState.originY + clientY - dragState.startY;
+    applyPosition();
+  };
+
+  function onPointerMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onPointerUp() {
+    finishDrag();
+  }
+
+  function onMouseMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onMouseUp() {
+    finishDrag();
+  }
+
+  handle.addEventListener("pointerdown", (event) => {
+    if ((event.button && event.button !== 0) || event.target.closest("button, input, select, label, a")) return;
+    startDrag(event.clientX, event.clientY);
+    handle.setPointerCapture?.(event.pointerId);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", finishDrag);
+    event.preventDefault();
+  });
+
+  handle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0 || event.target.closest("button, input, select, label, a")) return;
     startDrag(event.clientX, event.clientY);
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);

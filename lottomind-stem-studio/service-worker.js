@@ -1,4 +1,4 @@
-const CACHE_NAME = "lottomind-stem-studio-v24";
+const CACHE_NAME = "lottomind-stem-studio-v25";
 const CORE_ASSETS = [
   "./",
   "./index.html",
