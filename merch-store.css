@@ -401,6 +401,13 @@
   scroll-margin-top: 7.5rem;
 }
 
+.gallery-section .merch-section-copy h2 {
+  font-family: var(--body-font);
+  font-size: clamp(2.7rem, 7vw, 5.2rem);
+  line-height: 0.96;
+  font-weight: 900;
+}
+
 .motion-frame {
   border: 1px solid rgba(255, 43, 214, 0.28);
   min-height: 26rem;
