@@ -223,6 +223,7 @@ nav {
 }
 
 .home-page .site-header-toggle {
+  display: none;
   min-height: 36px;
   padding-inline: 14px;
   border-color: rgba(130, 200, 255, 0.28);
@@ -310,6 +311,33 @@ nav {
   background:
     linear-gradient(180deg, rgba(255, 224, 113, 0.12), rgba(41, 247, 255, 0.055)),
     rgba(255, 255, 255, 0.025);
+}
+
+.home-page {
+  font-size: 16px;
+}
+
+.home-page .site-header {
+  grid-template-columns: minmax(220px, auto) minmax(0, 1fr) auto;
+  grid-template-areas: "brand nav actions";
+  min-height: 78px;
+  padding-block: 8px;
+}
+
+.home-page .site-header nav {
+  align-self: center;
+}
+
+.home-page .direct-launch {
+  align-self: center;
+  justify-self: end;
+}
+
+.home-page .site-header nav a,
+.home-page .direct-action {
+  min-height: 32px;
+  padding: 0.42rem 0.62rem;
+  font-size: 0.64rem;
 }
 
 .prompt-lab-page .site-header {
@@ -881,6 +909,91 @@ p {
   font-family: var(--display-font);
   font-size: clamp(2.35rem, 6vw, 5.85rem);
   line-height: 0.86;
+}
+
+.home-page .hero {
+  min-height: clamp(520px, 66vh, 720px);
+  padding: 104px clamp(18px, 4vw, 58px) 32px;
+}
+
+.home-page .domain-strip {
+  margin-top: 32px;
+}
+
+.home-page .studio-band,
+.home-page .feature-band,
+.home-page .prompt-band,
+.home-page .how-to-band,
+.home-page .how-to-cta-band,
+.home-page .manual-hero,
+.home-page .manual-section,
+.home-page .access-band,
+.home-page .motion-band {
+  width: min(calc(100% - 32px), 1120px);
+  padding: clamp(42px, 6vw, 64px) 0;
+}
+
+.home-page h2 {
+  max-width: 760px;
+  font-family: var(--body-font);
+  font-size: clamp(1.9rem, 4.5vw, 3.75rem);
+  line-height: 1.02;
+  text-shadow:
+    0 0 18px rgba(41, 247, 255, 0.18),
+    0 12px 34px rgba(0, 0, 0, 0.48);
+}
+
+.home-page .studio-band-clean {
+  max-width: min(calc(100% - 32px), 860px);
+}
+
+.home-page .studio-band-clean h2 {
+  font-family: var(--body-font);
+  font-size: clamp(1.85rem, 4vw, 3.25rem);
+  line-height: 1.04;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.home-page .studio-band-clean p,
+.home-page .feature-lede {
+  max-width: 740px;
+  font-size: clamp(0.98rem, 1.25vw, 1.1rem);
+}
+
+.home-page .feature-band h2,
+.home-page .prompt-band h2 {
+  font-size: clamp(1.95rem, 4.6vw, 4rem);
+  line-height: 1;
+}
+
+.home-page .prompt-band-top {
+  grid-template-columns: minmax(280px, 1.08fr) repeat(2, minmax(210px, 0.92fr));
+  padding-top: clamp(32px, 4vw, 52px);
+}
+
+.home-page .prompt-brief-card,
+.home-page .prompt-launch-card,
+.home-page .feature-grid article {
+  padding: clamp(16px, 2.2vw, 22px);
+}
+
+.home-page .feature-grid article {
+  min-height: 170px;
+}
+
+.home-page .feature-grid .feature-spotlight {
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.home-page .feature-spotlight h3 {
+  max-width: 760px;
+  font-size: clamp(1.45rem, 3vw, 2.5rem);
+  line-height: 1.06;
+}
+
+.home-page .access-band h2 {
+  font-size: clamp(1.8rem, 3.6vw, 3.1rem);
 }
 
 .feature-actions {
@@ -1458,6 +1571,10 @@ footer {
       "actions";
   }
 
+  .home-page .site-header-toggle {
+    display: inline-flex;
+  }
+
   .home-page .site-header nav,
   .home-page .direct-launch {
     justify-self: start;
@@ -1514,6 +1631,15 @@ footer {
   .hero {
     min-height: 82vh;
     padding-top: 102px;
+  }
+
+  .home-page .hero {
+    min-height: clamp(460px, 62vh, 620px);
+    padding-top: 92px;
+  }
+
+  .home-page .prompt-band-top {
+    grid-template-columns: 1fr;
   }
 
 }
@@ -1588,6 +1714,19 @@ footer {
   .prompt-band h2 {
     font-size: clamp(2.05rem, 11vw, 3.65rem);
     line-height: 0.9;
+  }
+
+  .home-page h2,
+  .home-page .feature-band h2,
+  .home-page .prompt-band h2,
+  .home-page .studio-band-clean h2 {
+    font-size: clamp(1.75rem, 8vw, 2.75rem);
+    line-height: 1.04;
+  }
+
+  .home-page .hero {
+    min-height: 520px;
+    padding-inline: 18px;
   }
 
   .domain-strip {
