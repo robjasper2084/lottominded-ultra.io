@@ -2938,6 +2938,10 @@ canvas {
   letter-spacing: 0.04em;
 }
 
+.ultra-creative-rail .ultra-mode-tab.suno {
+  display: none;
+}
+
 .ultra-mode-tab.suno { border-color: rgba(94, 255, 157, 0.34); }
 .ultra-mode-tab.video { border-color: rgba(138, 92, 255, 0.42); }
 .ultra-mode-tab.signals { border-color: rgba(255, 224, 113, 0.42); }
