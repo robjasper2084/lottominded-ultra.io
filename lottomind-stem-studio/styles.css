@@ -2486,6 +2486,25 @@ canvas {
   box-shadow: inset 0 0 32px rgba(41, 247, 255, 0.04);
 }
 
+.pad-16-panel {
+  gap: 8px;
+  padding: 8px;
+  font-size: 0.76rem;
+}
+
+.pad-16-panel .section-head {
+  gap: 8px;
+}
+
+.pad-16-panel .section-head h3 {
+  margin-bottom: 3px;
+  font-size: 0.96rem;
+}
+
+.pad-16-panel .section-head p {
+  display: none;
+}
+
 .pad-16-header,
 .pad-16-control-strip,
 .waveform-editor-toolbar,
@@ -2510,6 +2529,25 @@ canvas {
   background: rgba(0, 0, 0, 0.22);
 }
 
+.pad-16-control-strip {
+  gap: 6px;
+  padding: 6px;
+}
+
+.pad-16-panel button,
+.pad-16-panel select,
+.pad-16-panel input {
+  min-height: 28px;
+  padding: 0.34rem 0.48rem;
+  border-radius: 8px;
+  font-size: 0.68rem;
+}
+
+.pad-16-panel .toggle-line {
+  gap: 5px;
+  font-size: 0.72rem;
+}
+
 .pad-16-mode-tabs,
 .pad-16-function-controls,
 .hardware-control-grid,
@@ -2521,6 +2559,24 @@ canvas {
   gap: 10px;
 }
 
+.pad-16-panel .pad-16-mode-tabs {
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 6px;
+}
+
+.pad-16-panel .pad-16-function-controls {
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 6px;
+}
+
+.pad-16-panel .field {
+  gap: 3px;
+}
+
+.pad-16-panel .field span {
+  font-size: 0.62rem;
+}
+
 .pad-16-function-controls .field,
 .waveform-editor-toolbar .field {
   min-width: min(100%, 180px);
@@ -2528,12 +2584,13 @@ canvas {
 
 .pad-16-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(64px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(8, minmax(46px, 1fr));
+  gap: 6px;
 }
 
 .pad-16-level {
-  min-height: clamp(82px, 11vw, 132px);
+  min-height: clamp(42px, 5vw, 58px);
+  padding: 0.28rem;
   border-color: color-mix(in srgb, var(--pad-color, var(--cyan)) 52%, rgba(255,255,255,.12));
   background:
     radial-gradient(circle at 50% calc(100% - 10px), color-mix(in srgb, var(--pad-color, var(--cyan)) 32%, transparent), transparent 56%),
@@ -2544,6 +2601,14 @@ canvas {
 .pad-16-level-source {
   outline: 2px solid var(--gold);
   outline-offset: -4px;
+}
+
+.pad-16-level strong {
+  font-size: 0.72rem;
+}
+
+.pad-16-level span {
+  font-size: 0.58rem;
 }
 
 .pad-16-level-reference {
@@ -2581,12 +2646,12 @@ canvas {
   z-index: 1;
   align-self: end;
   width: fit-content;
-  padding: 3px 7px;
+  padding: 2px 6px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   color: #f8fbff;
   background: rgba(0, 0, 0, 0.32);
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   letter-spacing: 0.02em;
 }
 
@@ -2595,11 +2660,15 @@ canvas {
 .video-warning-note,
 .vocal-artifact-warning {
   margin: 0;
-  padding: 11px 13px;
+  padding: 7px 9px;
   border: 1px solid rgba(255, 224, 113, 0.22);
   border-radius: 10px;
   color: #ffe9ab;
   background: rgba(255, 224, 113, 0.06);
+}
+
+.pad-16-panel .pad-16-commit-warning {
+  display: none;
 }
 
 .pad-16-wave-slices,
@@ -3121,12 +3190,12 @@ canvas {
   top: 8px;
   z-index: 30;
   grid-template-columns: minmax(0, 1fr);
-  gap: 7px;
+  gap: 4px;
   justify-self: start;
-  width: min(920px, 100%);
-  padding: 8px;
-  margin-top: 4px;
-  border-radius: 12px;
+  width: min(620px, 100%);
+  padding: 5px;
+  margin-top: 2px;
+  border-radius: 10px;
   transform: translate3d(var(--transport-x, 0px), var(--transport-y, 0px), 0);
   box-shadow:
     0 18px 50px rgba(0, 0, 0, 0.34),
@@ -3138,8 +3207,8 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 28px;
-  padding: 5px 8px;
+  min-height: 20px;
+  padding: 3px 6px;
   border: 1px solid rgba(41, 247, 255, 0.24);
   border-radius: 9px;
   color: #e9fbff;
@@ -3147,7 +3216,7 @@ canvas {
     linear-gradient(90deg, rgba(41, 247, 255, 0.14), rgba(94, 255, 157, 0.08)),
     rgba(0, 0, 0, 0.28);
   cursor: grab;
-  font-size: 0.68rem;
+  font-size: 0.56rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3157,7 +3226,7 @@ canvas {
 
 .floating-transport-grip small {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: 0.5rem;
   letter-spacing: 0.06em;
 }
 
@@ -3170,38 +3239,49 @@ canvas {
 .ultra-command-deck.is-floating-transport .ultra-transport-rail,
 .ultra-command-deck.is-floating-transport .ultra-creative-rail,
 .ultra-command-deck.is-floating-transport .ultra-timing-strip {
-  gap: 6px;
-  padding: 5px;
-  border-radius: 10px;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-transport-rail,
+.ultra-command-deck.is-floating-transport .ultra-creative-rail {
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .ultra-command-deck.is-floating-transport .ultra-transport-button,
 .ultra-command-deck.is-floating-transport .ultra-mode-tab {
-  min-height: 30px;
-  padding: 6px 9px;
-  font-size: 0.66rem;
-  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 4px 6px;
+  font-size: 0.56rem;
+  letter-spacing: 0.01em;
 }
 
 .ultra-command-deck.is-floating-transport .ultra-help-button {
-  width: 32px;
-  height: 32px;
-  font-size: 0.72rem;
+  width: 24px;
+  height: 24px;
+  font-size: 0.62rem;
 }
 
 .ultra-command-deck.is-floating-transport .ultra-timing-strip {
-  grid-template-columns: minmax(82px, 0.7fr) minmax(104px, 0.85fr) minmax(100px, 0.8fr) minmax(118px, 1fr) minmax(128px, 1fr) minmax(128px, 1fr);
+  grid-template-columns: minmax(64px, 0.65fr) minmax(84px, 0.78fr) minmax(84px, 0.78fr) minmax(96px, 1fr) minmax(96px, 1fr) minmax(96px, 1fr);
 }
 
 .ultra-command-deck.is-floating-transport .ultra-timing-card input,
 .ultra-command-deck.is-floating-transport .ultra-timing-card select {
-  min-height: 30px;
-  font-size: 0.72rem;
+  min-height: 24px;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.62rem;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-timing-card span {
+  font-size: 0.58rem;
 }
 
 .ultra-command-deck.is-floating-transport .transport-status {
-  padding: 5px;
-  gap: 4px;
+  display: none;
 }
 
 .ultra-command-deck.is-floating-transport .transport-status span {
@@ -3544,6 +3624,10 @@ body.ultra-header-compact .ultra-cockpit-header {
 
   .ultra-command-deck.is-floating-transport .ultra-timing-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pad-16-grid {
+    grid-template-columns: repeat(4, minmax(54px, 1fr));
   }
 
   .key-map-panel {

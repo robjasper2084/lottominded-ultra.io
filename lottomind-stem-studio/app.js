@@ -11433,13 +11433,21 @@ function initFloatingTransport() {
   }
 
   const applyPosition = () => {
-    position.x = clamp(position.x, -360, Math.max(360, window.innerWidth - 240));
-    position.y = clamp(position.y, -180, Math.max(240, window.innerHeight - 140));
+    const rect = deck.getBoundingClientRect();
+    const baseLeft = rect.left - position.x;
+    const baseTop = rect.top - position.y;
+    const minX = Math.min(0, 12 - baseLeft);
+    const maxX = Math.max(minX, window.innerWidth - baseLeft - deck.offsetWidth - 12);
+    const minY = Math.min(0, 12 - baseTop);
+    const maxY = Math.max(minY, window.innerHeight - baseTop - Math.min(deck.offsetHeight, 180) - 12);
+    position.x = clamp(position.x, minX, maxX);
+    position.y = clamp(position.y, minY, maxY);
     deck.style.setProperty("--transport-x", `${Math.round(position.x)}px`);
     deck.style.setProperty("--transport-y", `${Math.round(position.y)}px`);
   };
 
   applyPosition();
+  requestAnimationFrame(applyPosition);
 
   let dragState = null;
   const finishDrag = () => {
