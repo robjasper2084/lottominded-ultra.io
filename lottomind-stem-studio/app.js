@@ -3298,7 +3298,6 @@ function renderPads() {
           ${getActivePadMap().map(renderPadButton).join("")}
         </div>
         ${renderComputerKeyMappingPanel()}
-        ${renderPadEditor()}
       </div>
     </section>
     ${renderSequencer()}
