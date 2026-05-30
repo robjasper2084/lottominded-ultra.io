@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 160" role="img" aria-label="ULTRA mobile dock">
+  <rect width="760" height="160" rx="36" fill="#07101e" stroke="#29f7ff" stroke-opacity=".36"/>
+  <g fill="#0f1e38" stroke="#29f7ff" stroke-opacity=".35">
+    <circle cx="90" cy="80" r="38"/>
+    <circle cx="210" cy="80" r="38"/>
+    <circle cx="330" cy="80" r="46" stroke="#5eff9d"/>
+    <circle cx="450" cy="80" r="38"/>
+    <circle cx="570" cy="80" r="38"/>
+    <circle cx="690" cy="80" r="38"/>
+  </g>
+  <path d="M72 82h36M192 62h36v36h-36zM314 80h32M330 64v32M432 58c28 18 28 26 0 44M556 56v48M676 62h28v36h-28z" fill="none" stroke="#ffe071" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

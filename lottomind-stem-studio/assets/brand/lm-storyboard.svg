@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Beat-synced storyboard artwork</title>
+  <desc id="desc">Neon cinematic frames aligned to kick, snare, hi-hat, bass drop, and visual cuts.</desc>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <g fill="#0c1324" stroke="#29f7ff">
+    <rect x="56" y="72" width="132" height="96" rx="14"/>
+    <rect x="214" y="72" width="132" height="96" rx="14"/>
+    <rect x="372" y="72" width="132" height="96" rx="14"/>
+    <rect x="530" y="72" width="132" height="96" rx="14"/>
+  </g>
+  <path d="M62 270h596" stroke="#ffffff" stroke-opacity=".22" stroke-width="4"/>
+  <g fill="#ffe071">
+    <circle cx="118" cy="270" r="12"/><circle cx="276" cy="270" r="8"/><circle cx="434" cy="270" r="12"/><circle cx="592" cy="270" r="16"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-width="6">
+    <path d="M86 120h72M244 120h72M402 120h72M560 120h72" stroke="#ff4fd8"/>
+    <path d="M88 316c38-38 62-38 100 0s62 38 100 0 62-38 100 0 62 38 100 0 62-38 100 0" stroke="#29f7ff"/>
+  </g>
+</svg>

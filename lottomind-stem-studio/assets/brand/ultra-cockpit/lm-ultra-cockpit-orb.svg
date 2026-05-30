@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Lottominded ULTRA cockpit orb">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#29f7ff"/>
+      <stop offset=".45" stop-color="#8a5cff"/>
+      <stop offset="1" stop-color="#05070d"/>
+    </radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="256" cy="256" r="214" fill="url(#g)" opacity=".92"/>
+  <circle cx="256" cy="256" r="232" fill="none" stroke="#ffe071" stroke-width="8" opacity=".75"/>
+  <circle cx="256" cy="256" r="178" fill="none" stroke="#29f7ff" stroke-width="4" opacity=".55"/>
+  <path d="M112 286c38-46 60-46 98 0s60 46 98 0 60-46 92 0" fill="none" stroke="#29f7ff" stroke-width="14" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M176 320V184l82 82 82-82v136" fill="none" stroke="#fff7c5" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

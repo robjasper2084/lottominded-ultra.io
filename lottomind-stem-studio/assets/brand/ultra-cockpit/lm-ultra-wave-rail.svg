@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 180" role="img" aria-label="ULTRA waveform rail">
+  <rect width="900" height="180" rx="24" fill="#05070d"/>
+  <path d="M20 92h98l28-42 34 92 42-118 50 136 42-86 48 18h142l34-42 46 86 52-118 48 134 42-72 34 12h118" fill="none" stroke="#29f7ff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M20 112h98l28-18 34 38 42-54 50 72 42-42 48 8h142l34-18 46 42 52-62 48 68 42-32 34 4h118" fill="none" stroke="#ff4fd8" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+</svg>

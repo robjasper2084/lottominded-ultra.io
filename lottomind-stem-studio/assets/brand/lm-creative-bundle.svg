@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">LottoMind Stem Studio creative bundle artwork</title>
+  <desc id="desc">A split music and prompt console connected by a glowing Beat DNA core.</desc>
+  <defs>
+    <linearGradient id="line" x1="0" x2="1">
+      <stop stop-color="#29f7ff"/>
+      <stop offset=".5" stop-color="#5eff9d"/>
+      <stop offset="1" stop-color="#ffe071"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <rect x="56" y="82" width="240" height="256" rx="22" fill="#0a1220" stroke="#29f7ff" opacity=".86"/>
+  <rect x="424" y="82" width="240" height="256" rx="22" fill="#120c20" stroke="#ffe071" opacity=".86"/>
+  <g filter="url(#glow)">
+    <circle cx="360" cy="210" r="66" fill="#0d1726" stroke="url(#line)" stroke-width="8"/>
+    <path d="M124 160c28-34 46-34 74 0s46 34 74 0" fill="none" stroke="#29f7ff" stroke-width="7" stroke-linecap="round"/>
+    <path d="M124 240h136M124 270h96" stroke="#5eff9d" stroke-width="8" stroke-linecap="round"/>
+    <path d="M476 146h112M476 184h148M476 222h126M476 260h96" stroke="#ffe071" stroke-width="8" stroke-linecap="round"/>
+    <path d="M296 210h128" stroke="url(#line)" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g fill="#ff4fd8">
+    <circle cx="344" cy="192" r="7"/><circle cx="376" cy="228" r="7"/>
+  </g>
+</svg>

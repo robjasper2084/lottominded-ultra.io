@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 560" role="img" aria-label="ULTRA inspector panel">
+  <rect width="360" height="560" rx="28" fill="#07101e" stroke="#29f7ff" stroke-opacity=".38"/>
+  <g fill="#0d1a31" stroke="#ffffff" stroke-opacity=".12">
+    <rect x="28" y="38" width="304" height="86" rx="16"/>
+    <rect x="28" y="146" width="304" height="86" rx="16"/>
+    <rect x="28" y="254" width="304" height="120" rx="16"/>
+    <rect x="28" y="398" width="304" height="116" rx="16"/>
+  </g>
+  <path d="M54 96h220" stroke="#29f7ff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M54 202h148" stroke="#ffe071" stroke-width="8" stroke-linecap="round"/>
+  <path d="M54 320c44-34 70-34 114 0s70 34 114 0" fill="none" stroke="#ff4fd8" stroke-width="8"/>
+  <path d="M54 452h80M54 478h180" stroke="#5eff9d" stroke-width="8" stroke-linecap="round"/>
+</svg>

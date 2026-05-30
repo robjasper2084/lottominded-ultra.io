@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">LottoMind Stem Studio video prompt artwork</title>
+  <desc id="desc">A beat waveform transforming into cinematic storyboard cards and camera paths.</desc>
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#29f7ff"/><stop offset=".5" stop-color="#ff4fd8"/><stop offset="1" stop-color="#ffe071"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <g fill="#0b1222" stroke="#29f7ff" opacity=".9">
+    <rect x="70" y="86" width="138" height="82" rx="14"/>
+    <rect x="250" y="62" width="168" height="110" rx="16"/>
+    <rect x="462" y="86" width="188" height="82" rx="14"/>
+    <rect x="114" y="238" width="188" height="94" rx="16"/>
+    <rect x="348" y="230" width="232" height="102" rx="16"/>
+  </g>
+  <path d="M70 204c46-48 74-48 120 0s74 48 120 0 74-48 120 0 74 48 120 0 74-48 120 0" fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round" filter="url(#glow)"/>
+  <g stroke="#ffe071" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#glow)">
+    <path d="M136 128h48M314 114h44M512 128h72M172 286h80M406 276h112"/>
+    <path d="M320 208c54-42 106-42 156 0"/>
+    <path d="M466 198l14 10-17 5"/>
+  </g>
+</svg>

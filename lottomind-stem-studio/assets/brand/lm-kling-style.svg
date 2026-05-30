@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Storyboard continuity artwork</title>
+  <desc id="desc">Original storyboard panels with subject consistency markers and a negative prompt shield.</desc>
+  <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#29f7ff"/><stop offset="1" stop-color="#ffe071"/></linearGradient></defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <g fill="#0a1220" stroke="url(#g)" stroke-width="2">
+    <rect x="66" y="78" width="144" height="108" rx="16"/>
+    <rect x="236" y="78" width="144" height="108" rx="16"/>
+    <rect x="406" y="78" width="144" height="108" rx="16"/>
+    <rect x="66" y="234" width="144" height="108" rx="16"/>
+    <rect x="236" y="234" width="144" height="108" rx="16"/>
+    <path d="M550 252l58-28 58 28v42c0 42-28 66-58 78-30-12-58-36-58-78z" fill="#140d22" stroke="#ff4fd8"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-width="6">
+    <path d="M106 132h64M276 132h64M446 132h64M106 288h64M276 288h64" stroke="#29f7ff"/>
+    <path d="M190 132h64M360 132h64M190 288h64" stroke="#ffe071"/>
+    <path d="M588 290l16 16 34-42" stroke="#5eff9d"/>
+  </g>
+</svg>

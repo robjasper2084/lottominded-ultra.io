@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">LottoMind Stem Studio creative number signal artwork</title>
+  <desc id="desc">Audio waveforms and glowing number orbs in a music-first cyber studio console.</desc>
+  <defs>
+    <radialGradient id="orb" cx=".32" cy=".24" r=".72">
+      <stop stop-color="#ffffff" stop-opacity=".52"/>
+      <stop offset=".28" stop-color="#ffe071" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#8a5cff" stop-opacity=".82"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <g opacity=".24" stroke="#29f7ff">
+    <path d="M60 104h600M60 178h600M60 252h600M60 326h600"/>
+    <path d="M96 70v288M180 70v288M264 70v288M348 70v288M432 70v288M516 70v288M600 70v288"/>
+  </g>
+  <path d="M78 220c44-86 74-86 118 0s74 86 118 0 74-86 118 0 74 86 118 0 74-86 118 0" fill="none" stroke="#29f7ff" stroke-width="7" stroke-linecap="round" filter="url(#glow)"/>
+  <g filter="url(#glow)">
+    <circle cx="178" cy="154" r="44" fill="url(#orb)"/>
+    <circle cx="286" cy="286" r="38" fill="url(#orb)"/>
+    <circle cx="396" cy="132" r="50" fill="url(#orb)"/>
+    <circle cx="518" cy="278" r="42" fill="url(#orb)"/>
+  </g>
+  <g fill="none" stroke="#5eff9d" stroke-width="5" stroke-linecap="round" opacity=".88">
+    <path d="M152 154h52M260 286h52M368 132h56M492 278h52"/>
+    <path d="M178 128v52M286 260v52M396 104v56M518 252v52"/>
+  </g>
+</svg>

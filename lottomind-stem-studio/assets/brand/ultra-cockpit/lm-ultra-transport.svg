@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 160" role="img" aria-label="ULTRA transport rail">
+  <rect width="920" height="160" rx="24" fill="#07101e" stroke="#29f7ff" stroke-opacity=".35"/>
+  <g fill="#0e1b31" stroke="#29f7ff" stroke-opacity=".5" stroke-width="3">
+    <rect x="28" y="34" width="112" height="92" rx="18"/>
+    <rect x="156" y="34" width="112" height="92" rx="18"/>
+    <rect x="284" y="34" width="112" height="92" rx="18"/>
+    <rect x="412" y="34" width="112" height="92" rx="18"/>
+    <rect x="540" y="34" width="112" height="92" rx="18"/>
+    <rect x="668" y="34" width="112" height="92" rx="18"/>
+    <rect x="796" y="34" width="96" height="92" rx="18"/>
+  </g>
+  <path d="M72 58v44l38-22z" fill="#5eff9d"/>
+  <path d="M198 56v48M226 56v48" stroke="#29f7ff" stroke-width="14" stroke-linecap="round"/>
+  <rect x="326" y="60" width="28" height="40" rx="3" fill="#ff6a74"/>
+  <circle cx="468" cy="80" r="20" fill="#ff4fd8"/>
+  <path d="M584 58a30 30 0 1 1-18 54" fill="none" stroke="#ffe071" stroke-width="10"/>
+  <path d="M708 52v56M736 52v56" stroke="#8a5cff" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="844" cy="80" r="24" fill="none" stroke="#ffe071" stroke-width="8"/>
+</svg>

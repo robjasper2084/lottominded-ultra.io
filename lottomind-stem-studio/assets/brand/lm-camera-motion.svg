@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Camera motion artwork</title>
+  <desc id="desc">Dolly, orbit, whip pan, zoom, and crane paths around a glowing audio orb.</desc>
+  <defs><filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <circle cx="360" cy="210" r="76" fill="#0d1726" stroke="#29f7ff" stroke-width="8" filter="url(#glow)"/>
+  <g fill="none" stroke-linecap="round" stroke-width="7" filter="url(#glow)">
+    <path d="M122 210h160" stroke="#ffe071"/>
+    <path d="M256 192l28 18-28 18" stroke="#ffe071"/>
+    <path d="M438 210h160" stroke="#ff4fd8"/>
+    <path d="M572 192l28 18-28 18" stroke="#ff4fd8"/>
+    <path d="M360 88c118 0 214 54 214 122s-96 122-214 122-214-54-214-122 96-122 214-122z" stroke="#5eff9d"/>
+    <path d="M492 112l30 4-16 26" stroke="#5eff9d"/>
+    <path d="M360 338c-28-42-28-86 0-128s28-86 0-128" stroke="#29f7ff"/>
+  </g>
+</svg>

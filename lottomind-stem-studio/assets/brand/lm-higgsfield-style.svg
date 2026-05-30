@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">Short-form cinematic workflow artwork</title>
+  <desc id="desc">Original neon short-form video workflow with hook card, camera line, and beat transition arrows.</desc>
+  <defs><filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <rect width="720" height="420" rx="34" fill="#05070d"/>
+  <rect x="76" y="74" width="210" height="272" rx="28" fill="#0b1222" stroke="#ff4fd8"/>
+  <rect x="434" y="74" width="210" height="272" rx="28" fill="#0b1222" stroke="#29f7ff"/>
+  <g filter="url(#glow)" fill="none" stroke-linecap="round">
+    <path d="M180 302c84-170 218-170 358 0" stroke="#ffe071" stroke-width="8"/>
+    <path d="M318 210h84" stroke="#29f7ff" stroke-width="9"/>
+    <path d="M392 194l28 16-28 16" stroke="#29f7ff" stroke-width="7"/>
+    <circle cx="180" cy="166" r="54" stroke="#ff4fd8" stroke-width="9"/>
+    <circle cx="540" cy="166" r="54" stroke="#5eff9d" stroke-width="9"/>
+    <path d="M118 166h124M478 166h124" stroke="#ffffff" stroke-opacity=".72" stroke-width="5"/>
+  </g>
+</svg>

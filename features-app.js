@@ -1,7 +1,7 @@
 const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
 
-const studioUrl = "../lottomind-stem-studio/index.html";
+const studioUrl = "./lottomind-stem-studio/index.html";
 const features = [
   { name: "Beat DNA Engine", route: "#beat-dna", color: "rgba(41,247,255,0.28)", copy: "Analyze rhythm, stems, pads, decks, mixer movement, and arrangement into a reusable creative fingerprint." },
   { name: "Stem Studio", route: "#stems", color: "rgba(94,255,157,0.25)", copy: "Load owned stems, trim channels, balance levels, pan, EQ, filter, send, mute, solo, and export maps." },

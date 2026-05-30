@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" role="img" aria-labelledby="title desc">
+  <title id="title">Waveform orb fallback art</title>
+  <desc id="desc">A glowing audio waveform orb with spectrum bars.</desc>
+  <defs>
+    <radialGradient id="r" cx="50%" cy="50%" r="50%">
+      <stop stop-color="#f7fffb"/>
+      <stop offset=".28" stop-color="#31ffe3"/>
+      <stop offset=".62" stop-color="#744dff"/>
+      <stop offset="1" stop-color="#080c18" stop-opacity=".15"/>
+    </radialGradient>
+    <linearGradient id="s" x1="0" x2="1">
+      <stop stop-color="#2bfff2"/><stop offset=".5" stop-color="#ff4fd8"/><stop offset="1" stop-color="#ffe071"/>
+    </linearGradient>
+  </defs>
+  <circle cx="180" cy="180" r="128" fill="url(#r)" opacity=".85"/>
+  <circle cx="180" cy="180" r="154" fill="none" stroke="url(#s)" stroke-width="4" stroke-dasharray="3 12"/>
+  <path d="M46 178c23-47 40 47 62 0s42 51 66 0 45 52 69 0 39 43 71 2" fill="none" stroke="url(#s)" stroke-width="7" stroke-linecap="round"/>
+  <g stroke="#ecfff8" stroke-width="5" stroke-linecap="round" opacity=".9">
+    <path d="M134 139v82"/><path d="M158 110v140"/><path d="M182 86v184"/><path d="M206 118v124"/><path d="M230 145v70"/>
+  </g>
+</svg>
