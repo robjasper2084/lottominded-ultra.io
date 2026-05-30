@@ -1487,15 +1487,6 @@ function renderTopShellControls() {
         <span class="switch-track"><span class="switch-dot"></span></span>
         <span>${expanded ? "Header Open" : "Header Closed"}</span>
       </button>
-      <button type="button" class="top-shell-max" data-action="set-top-shell-mode" data-mode="full">
-        Full Studio Header
-      </button>
-      <label class="top-shell-mode-control">
-        <span>Header size</span>
-        <select data-action="set-top-shell-mode" aria-label="Header size">
-          ${["full", "compact", "collapsed"].map((item) => `<option value="${item}" ${mode === item ? "selected" : ""}>${titleCase(item)}</option>`).join("")}
-        </select>
-      </label>
       <label class="top-shell-height-control">
         <span>Height</span>
         <input type="range" min="118" max="620" step="8" value="${state.ui.topShell.height}" data-action="set-top-shell-height" aria-label="Header panel height" />
@@ -1538,7 +1529,7 @@ function renderHeader() {
   return `
     <header class="header ultra-cockpit-header">
       <div class="ultra-brand-zone">
-        <a class="app-top-link app-back-link ultra-back-pill" href="../lottominded-ultra.io/" aria-label="Back to Studio">
+        <a class="app-top-link app-back-link ultra-back-pill" href="../" aria-label="Back to Studio">
           <span aria-hidden="true">←</span>
           <span>Back to Studio</span>
         </a>
@@ -1594,7 +1585,7 @@ function renderTransport() {
         <button type="button" class="ultra-mode-tab suno ${state.view === "suno prompt" ? "active" : ""}" data-action="generate-suno-prompt"><span aria-hidden="true">♪</span><span>Suno</span></button>
         <button type="button" class="ultra-mode-tab video ${state.view === "video prompt" ? "active" : ""}" data-action="generate-video-prompt"><span aria-hidden="true">▣</span><span>Video</span></button>
         <button type="button" class="ultra-mode-tab signals ${state.view === "beat lottery" ? "active" : ""}" data-action="generate-beat-lottery"><span aria-hidden="true">#</span><span>Signals</span></button>
-        <a class="app-top-link ultra-mode-tab beat2lotto" href="../lottominded-ultra.io/beat2lotto-plus.html"><span aria-hidden="true">◎</span><span>Beat2Lotto+</span></a>
+        <a class="app-top-link ultra-mode-tab beat2lotto" href="../beat2lotto-plus.html"><span aria-hidden="true">◎</span><span>Beat2Lotto+</span></a>
         <button type="button" class="ultra-mode-tab master ${state.view === "ai master" ? "active" : ""}" data-action="set-view" data-view="ai master"><span aria-hidden="true">▥</span><span>AI Master</span></button>
         <button type="button" class="ultra-mode-tab bundle" data-action="generate-creative-bundle"><span aria-hidden="true">✦</span><span>Both</span></button>
       </div>
@@ -1648,7 +1639,7 @@ function renderTabs() {
 }
 
 function renderCurrentView() {
-  if (state.view === "studio") return `${renderStudioHero()}${renderStemMixer()}${renderPads()}${renderDecks()}`;
+  if (state.view === "studio") return `${renderStemMixer()}${renderPads()}${renderDecks()}`;
   if (state.view === "song") return renderSongEditor();
   if (state.view === "open tools") return renderOpenMusicToolLab();
   if (state.view === "patterns") return renderPatternEditor();
@@ -1671,58 +1662,7 @@ function renderCurrentView() {
   if (state.view === "beat dna") return renderBeatDNAPanel();
   if (state.view === "settings") return renderSettingsPanel();
   if (state.view === "help") return renderHelpCenter();
-  return renderStudioHero();
-}
-
-function renderStudioHero() {
-  const loadedStems = state.stems.filter((stem) => stem.buffer).length;
-  const loadedPads = state.pads.filter((pad) => pad.buffer).length;
-  const activeDecks = Object.values(state.decks).filter((deck) => deck.buffer).length;
-  return `
-    <section class="hero ultra-workspace-shell" aria-label="LottoMind Stem Studio overview">
-      <aside class="ultra-left-dock ultra-workspace-dock" aria-label="Quick workspace dock">
-        ${["studio", "song", "pads", "stems", "mixer", "ai master", "suno prompt", "video prompt", "beat lottery", "settings"].map((tab) => `<button type="button" class="ultra-dock-button ${state.view === tab ? "is-active" : ""}" data-action="set-view" data-view="${tab}">${titleCase(tab).replace("Beat Lottery", "Beat2Lotto+")}</button>`).join("")}
-      </aside>
-      <div class="hero-content ultra-main-stage ultra-workspace-hero">
-        <div class="ultra-hero-copy">
-          <p class="micro">ULTRA Studio Cockpit</p>
-          <h2>Beat DNA • Stem Mixing • Suno Prompts • Creative Number Signals</h2>
-          <p>Load stems, trim waveforms, perform pads, sequence drums, mix decks, master locally, and generate creative outputs from the same beat DNA.</p>
-          <div class="ultra-quick-card-grid">
-            <button type="button" class="ultra-quick-card" data-action="set-view" data-view="song">Build Beat</button>
-            <button type="button" class="ultra-quick-card" data-action="set-view" data-view="stems">Mix Stems</button>
-            <button type="button" class="ultra-quick-card" data-action="set-view" data-view="ai master">Master Track</button>
-            <button type="button" class="ultra-quick-card" data-action="generate-creative-bundle">Generate Bundle</button>
-          </div>
-        </div>
-        <div class="hero-stats" aria-label="Session summary">
-          <div class="stat"><strong>${loadedStems}/8</strong><span class="micro">Stems loaded</span></div>
-          <div class="stat"><strong>${loadedPads}/16</strong><span class="micro">Pad samples</span></div>
-          <div class="stat"><strong>${activeDecks}/2</strong><span class="micro">Deck tracks</span></div>
-          <div class="stat"><strong>${state.bpm}</strong><span class="micro">BPM</span></div>
-        </div>
-        <div class="ultra-waveform-rail" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-      </div>
-      <div class="hero-art ultra-beat-dna-orb" aria-hidden="true">
-        <div class="hero-orbit ultra-scanline"></div>
-        <img src="${getAsset("hero")}" alt="" />
-      </div>
-      <aside class="ultra-right-inspector" aria-label="Project inspector">
-        <div class="ultra-inspector-card">
-          <span class="micro">Current project</span>
-          <strong>${escapeHtml(state.projectName)}</strong>
-        </div>
-        <div class="ultra-inspector-card">
-          <span class="micro">Transport</span>
-          <strong>${state.playing ? "Playing" : state.transport.paused ? "Paused" : "Ready"}</strong>
-        </div>
-        <div class="ultra-inspector-card">
-          <span class="micro">Last Beat DNA</span>
-          <strong>${state.beatDNA?.summary ? escapeHtml(state.beatDNA.summary.slice(0, 32)) : "Awaiting signal"}</strong>
-        </div>
-      </aside>
-    </section>
-  `;
+  return renderStemMixer();
 }
 
 function renderSongEditor() {
