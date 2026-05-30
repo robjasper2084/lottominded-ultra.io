@@ -197,6 +197,10 @@
   will-change: background-position, transform, filter;
 }
 
+.merch-drop-section .merch-section-copy h2 {
+  font-size: clamp(2.89rem, 9.35vw, 6.8rem);
+}
+
 .merch-hero p,
 .merch-section-copy p,
 .motion-gallery-copy p {
