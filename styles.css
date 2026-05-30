@@ -1133,8 +1133,11 @@ p {
 .prompt-lab-hero h1 {
   max-width: 12ch;
   margin: 0;
+  font-family: var(--body-font);
   font-size: clamp(3.1rem, 8vw, 8rem);
+  font-weight: 800;
   line-height: 0.9;
+  text-transform: none;
   color: transparent;
   background: linear-gradient(96deg, #f8fbff, #29f7ff 30%, #ffe071 60%, #f8fbff);
   -webkit-background-clip: text;
