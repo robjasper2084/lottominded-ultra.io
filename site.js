@@ -13,6 +13,7 @@ const soundtrackButtons = document.querySelectorAll("[data-soundtrack-toggle]");
 const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoClose = document.querySelector("[data-startup-video-close]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
+const compactHeaderLabels = document.body.classList.contains("prompt-lab-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const miniGameConfigs = {
   pick3: { label: "Pick 3", type: "digits", count: 3, min: 0, max: 9 },
@@ -25,7 +26,7 @@ function setHeaderCollapsed(collapsed) {
   if (!siteHeader || !headerToggle) return;
   siteHeader.classList.toggle("is-collapsed", collapsed);
   headerToggle.setAttribute("aria-expanded", String(!collapsed));
-  headerToggle.textContent = collapsed ? "Expand Menu" : "Shrink Menu";
+  headerToggle.textContent = collapsed ? "Show Menu" : compactHeaderLabels ? "Menu" : "Shrink Menu";
   localStorage.setItem(HEADER_COLLAPSED_KEY, collapsed ? "true" : "false");
 }
 
