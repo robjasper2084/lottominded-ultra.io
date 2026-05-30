@@ -1453,9 +1453,11 @@ function render() {
     <div class="top-shell ultra-cockpit-shell ${state.settings.stickyTransport ? "" : "not-sticky"} top-shell-${topShell.mode}" style="--top-shell-height:${topShell.height}px">
       ${renderTopShellControls()}
       <div class="top-shell-body" id="studio-top-shell-body">
-        ${renderHeader()}
-        ${renderTransport()}
         ${renderTabs()}
+        <div class="top-shell-main">
+          ${renderHeader()}
+          ${renderTransport()}
+        </div>
       </div>
     </div>
     <main class="view" data-view="${state.view}">

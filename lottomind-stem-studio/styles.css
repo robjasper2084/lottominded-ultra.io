@@ -307,7 +307,17 @@ canvas {
 }
 
 .top-shell-body {
+  display: grid;
+  grid-template-columns: minmax(144px, 176px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
   padding-top: 10px;
+}
+
+.top-shell-main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
 }
 
 .top-shell-compact .project-field,
@@ -556,15 +566,29 @@ canvas {
 
 .tabs {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 12px;
-  overflow-x: auto;
-  padding-bottom: 2px;
+  position: sticky;
+  top: 8px;
+  max-height: calc(min(var(--top-shell-height, 340px), 82vh) - 96px);
+  min-width: 0;
+  margin: 0;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid rgba(41, 247, 255, 0.2);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(41, 247, 255, 0.08), rgba(138, 92, 255, 0.045)),
+    rgba(3, 7, 16, 0.76);
+  box-shadow: inset 0 0 28px rgba(41, 247, 255, 0.04);
 }
 
 .tab {
-  flex: 0 0 auto;
+  width: 100%;
+  justify-content: flex-start;
   padding: 0.56rem 0.78rem;
+  text-align: left;
+  white-space: normal;
 }
 
 .hero {
@@ -2028,6 +2052,10 @@ canvas {
 }
 
 @media (max-width: 1180px) {
+  .top-shell-body {
+    grid-template-columns: minmax(120px, 148px) minmax(0, 1fr);
+  }
+
   .header,
   .transport,
   .hero,
@@ -2075,6 +2103,21 @@ canvas {
   .top-shell {
     margin: -10px -10px 12px;
     padding: 10px;
+  }
+
+  .top-shell-body {
+    grid-template-columns: minmax(96px, 118px) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .tabs {
+    max-height: calc(min(var(--top-shell-height, 340px), 82vh) - 86px);
+    padding: 8px;
+  }
+
+  .tab {
+    padding: 0.52rem 0.58rem;
+    font-size: 0.72rem;
   }
 
   .header,
