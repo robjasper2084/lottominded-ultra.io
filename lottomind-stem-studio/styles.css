@@ -764,6 +764,14 @@ canvas {
   min-width: 0;
 }
 
+.studio-song-editor {
+  margin-top: 14px;
+}
+
+.studio-song-editor .song-editor-screen {
+  border-color: rgba(94, 255, 157, 0.28);
+}
+
 .song-toolbar,
 .pattern-toolbar,
 .piano-roll-toolbar {
@@ -1058,17 +1066,92 @@ canvas {
 
 .stem-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(260px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
 }
 
 .channel {
   display: grid;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px;
   border: 1px solid rgba(130, 200, 255, 0.16);
-  border-radius: 12px;
+  border-radius: 10px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+}
+
+.stem-mixer-panel .panel-body {
+  padding: 12px;
+}
+
+.stem-mixer-panel .panel-header {
+  padding-bottom: 10px;
+}
+
+.stem-mixer-panel .channel {
+  font-size: 0.78rem;
+}
+
+.stem-mixer-panel .channel-top {
+  gap: 6px;
+}
+
+.stem-mixer-panel .channel-title strong {
+  font-size: 0.82rem;
+}
+
+.stem-mixer-panel .channel-title span {
+  font-size: 0.68rem;
+}
+
+.stem-mixer-panel .button-row,
+.stem-mixer-panel .control-grid,
+.stem-mixer-panel .eq-grid,
+.stem-mixer-panel .knob-grid {
+  gap: 5px;
+}
+
+.stem-mixer-panel .button-row button,
+.stem-mixer-panel .file-button {
+  min-height: 31px;
+  padding: 0.36rem 0.48rem;
+  border-radius: 8px;
+  font-size: 0.66rem;
+}
+
+.stem-mixer-panel canvas[data-waveform="stem"] {
+  height: 54px;
+}
+
+.stem-mixer-panel canvas[data-spectrum="stem"] {
+  height: 28px;
+}
+
+.stem-mixer-panel .stem-time-grid {
+  gap: 4px;
+}
+
+.stem-mixer-panel .stem-time-pill {
+  min-height: 30px;
+  padding: 4px 5px;
+  border-radius: 7px;
+  font-size: 0.66rem;
+}
+
+.stem-mixer-panel .stem-time-pill strong {
+  font-size: 0.55rem;
+}
+
+.stem-mixer-panel .control-grid,
+.stem-mixer-panel .eq-grid,
+.stem-mixer-panel .knob-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.view[data-view="studio"] .stem-mixer-panel .control-grid,
+.view[data-view="studio"] .stem-mixer-panel .eq-grid,
+.view[data-view="studio"] .stem-mixer-panel .knob-grid,
+.view[data-view="studio"] .stem-mixer-panel .channel > .button-row:last-child {
+  display: none;
 }
 
 .channel.selected,
@@ -2233,13 +2316,13 @@ canvas {
   }
 
   .stem-grid {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .channel {
-    min-width: 292px;
+    min-width: 0;
   }
 }
 
@@ -2249,6 +2332,10 @@ canvas {
   }
 
   .stem-time-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stem-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2339,6 +2426,12 @@ canvas {
 
   .panel-header {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .stem-grid {
+    grid-template-columns: 1fr;
   }
 }
 

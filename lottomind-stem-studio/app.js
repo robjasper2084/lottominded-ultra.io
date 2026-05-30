@@ -1671,7 +1671,7 @@ function renderTabs() {
 }
 
 function renderCurrentView() {
-  if (state.view === "studio") return `${renderStemMixer()}${renderPads()}`;
+  if (state.view === "studio") return `${renderStemMixer()}<div class="studio-song-editor">${renderSongEditor()}</div>${renderPads()}`;
   if (state.view === "song") return renderSongEditor();
   if (state.view === "open tools") return renderOpenMusicToolLab();
   if (state.view === "patterns") return renderPatternEditor();
@@ -3017,7 +3017,7 @@ function renderStemMixer() {
   const longestStem = Math.max(0, ...state.stems.map((channel) => getBufferDuration(channel)));
   const timelineStatus = state.transport.loopAll ? "Loop All armed" : state.transport.paused ? "Paused" : state.playing ? "Running" : "Ready";
   return `
-    <section class="panel" aria-label="Stem mixer console">
+    <section class="panel stem-mixer-panel" aria-label="Stem mixer console">
       <div class="panel-header">
         <div>
           <h2>Stem Mixing Console</h2>
