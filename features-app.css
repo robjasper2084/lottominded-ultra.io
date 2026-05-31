@@ -1,9 +1,25 @@
 .feature-console-page {
+  position: relative;
   min-height: 100vh;
   background:
     radial-gradient(circle at 50% 10%, rgba(94, 255, 157, 0.12), transparent 26rem),
     radial-gradient(circle at 78% 22%, rgba(255, 79, 216, 0.13), transparent 30rem),
     linear-gradient(145deg, #010207, #061225 56%, #080510);
+}
+
+.feature-console-page::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(255, 224, 113, 0.045) 1px, transparent 1px),
+    url("./assets/brand/generated-cinematic-hero.png") center / cover no-repeat;
+  background-size: 64px 64px, 64px 64px, cover;
+  opacity: 0.18;
+  mix-blend-mode: screen;
 }
 
 .compact-feature-header {
@@ -69,7 +85,8 @@
 }
 
 .feature-launch-grid {
-  padding: clamp(32px, 6vw, 72px) 0 54px;
+  padding: clamp(54px, 8vw, 92px) 0 54px;
+  border-top: 1px solid rgba(41, 247, 255, 0.14);
 }
 
 .section-kicker {
@@ -93,23 +110,52 @@
 }
 
 .feature-console-hero {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(280px, 0.86fr) minmax(360px, 1.14fr);
   gap: clamp(24px, 5vw, 64px);
   align-items: center;
-  padding: clamp(48px, 7vw, 86px) 0;
-  border-top: 1px solid rgba(41, 247, 255, 0.14);
+  min-height: min(820px, calc(100vh - 88px));
+  padding: clamp(48px, 7vw, 92px) 0 clamp(52px, 7vw, 96px);
+  overflow: hidden;
+}
+
+.feature-console-hero::before {
+  position: absolute;
+  inset: clamp(18px, 4vw, 48px) max(-12vw, -110px);
+  z-index: -1;
+  content: "";
+  border: 1px solid rgba(41, 247, 255, 0.16);
+  border-radius: 28px;
+  background:
+    linear-gradient(110deg, rgba(1, 2, 7, 0.88), rgba(6, 20, 38, 0.58) 46%, rgba(3, 5, 10, 0.82)),
+    url("./assets/brand/lm-records-studio-room.png") center / cover no-repeat;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 0 90px rgba(41, 247, 255, 0.08),
+    0 42px 140px rgba(0, 0, 0, 0.48);
+  opacity: 0.74;
 }
 
 .feature-console-copy h1 {
   margin: 0;
-  font-family: var(--display-font);
-  font-size: clamp(2.4rem, 6.4vw, 5.6rem);
-  line-height: 0.86;
+  max-width: 9ch;
+  font-family: var(--body-font);
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 950;
+  line-height: 0.92;
   text-transform: uppercase;
   text-shadow:
     0 0 22px rgba(41, 247, 255, 0.28),
     0 14px 42px rgba(0, 0, 0, 0.58);
+}
+
+.feature-console-eyebrow {
+  margin: 0 0 12px;
+  color: #ffe071;
+  font-family: var(--display-font);
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .feature-console-copy p {
@@ -325,6 +371,7 @@
 @media (max-width: 980px) {
   .feature-console-hero {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .command-panel-interface {
@@ -360,5 +407,15 @@
 
   .feature-tool-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feature-console-page *,
+  .feature-console-page *::before,
+  .feature-console-page *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition: none !important;
   }
 }
