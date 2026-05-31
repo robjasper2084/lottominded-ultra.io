@@ -1011,21 +1011,101 @@ p {
 }
 
 .home-page .feature-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(260px, 0.72fr) minmax(520px, 1.28fr);
   gap: clamp(24px, 4vw, 48px);
   align-items: start;
+  padding: clamp(48px, 6vw, 72px) clamp(18px, 3vw, 34px);
+  border: 1px solid rgba(41, 247, 255, 0.22);
+  border-radius: 22px;
+  background:
+    linear-gradient(115deg, rgba(7, 18, 32, 0.94), rgba(4, 9, 18, 0.76)),
+    radial-gradient(circle at 74% 28%, rgba(41, 247, 255, 0.16), transparent 28rem);
+  box-shadow:
+    0 34px 120px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.home-page .feature-band::before,
+.home-page .feature-band::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+}
+
+.home-page .feature-band::before {
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(rgba(255, 224, 113, 0.06) 1px, transparent 1px),
+    repeating-linear-gradient(115deg, transparent 0 5rem, rgba(41, 247, 255, 0.12) 5.05rem 5.15rem, transparent 5.2rem 10rem);
+  background-size: 5rem 5rem, 5rem 5rem, auto;
+  opacity: 0.55;
+  animation: home-feature-web-drift 15s linear infinite;
+}
+
+.home-page .feature-band::after {
+  background:
+    linear-gradient(90deg, rgba(3, 5, 10, 0.78), rgba(3, 5, 10, 0.28) 52%, rgba(3, 5, 10, 0.68)),
+    radial-gradient(circle at 24% 24%, rgba(255, 224, 113, 0.12), transparent 18rem),
+    radial-gradient(circle at 82% 62%, rgba(255, 79, 216, 0.12), transparent 20rem);
+}
+
+.feature-motion-video {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.34;
+  filter: saturate(1.18) contrast(1.08) brightness(0.76);
+  transform: scale(1.05);
 }
 
 .home-page .feature-band h2,
 .home-page .prompt-band h2 {
-  font-size: clamp(1.95rem, 4.6vw, 4rem);
-  line-height: 1;
+  font-size: clamp(2.55rem, 5.5vw, 5.15rem);
+  line-height: 0.96;
 }
 
 .home-page .feature-band h2,
 .home-page .feature-lede {
+  position: relative;
+  z-index: 1;
   grid-column: 1;
+}
+
+.home-page .feature-band h2 {
+  max-width: 9.6ch;
+  font-family: "Aptos Display", "Segoe UI Variable Display", Inter, var(--body-font);
+  font-weight: 900;
+  text-transform: none;
+  color: transparent;
+  background: linear-gradient(96deg, #f8fbff 0%, #b9f7ff 34%, #ffe071 68%, #f8fbff 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 0 24px rgba(41, 247, 255, 0.28),
+    0 18px 46px rgba(0, 0, 0, 0.56);
+  animation: home-feature-heading-flow 5.6s ease-in-out infinite alternate;
+}
+
+.home-page .feature-lede {
+  max-width: 560px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid rgba(255, 224, 113, 0.68);
+  border-radius: 14px;
+  background: rgba(3, 5, 10, 0.34);
+  backdrop-filter: blur(10px);
 }
 
 .home-page .prompt-band-top {
@@ -1055,10 +1135,55 @@ p {
 }
 
 .home-page .feature-grid article {
+  position: relative;
+  overflow: hidden;
   min-height: 170px;
+  border-color: rgba(130, 200, 255, 0.22);
+  background:
+    linear-gradient(150deg, rgba(18, 37, 56, 0.9), rgba(10, 13, 25, 0.86)),
+    radial-gradient(circle at 20% 0%, rgba(41, 247, 255, 0.14), transparent 14rem);
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.home-page .feature-grid article::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 42%, rgba(255, 255, 255, 0.16) 48%, transparent 56%),
+    repeating-linear-gradient(90deg, rgba(41, 247, 255, 0.07) 0 1px, transparent 1px 3.4rem);
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: opacity 180ms ease;
+}
+
+.home-page .feature-grid article:hover,
+.home-page .feature-grid article:focus-within {
+  border-color: rgba(41, 247, 255, 0.66);
+  box-shadow:
+    0 28px 82px rgba(0, 0, 0, 0.36),
+    0 0 24px rgba(41, 247, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transform: translate3d(0, -0.35rem, 0);
+}
+
+.home-page .feature-grid article:hover::after,
+.home-page .feature-grid article:focus-within::after {
+  opacity: 1;
+  animation: home-feature-card-sweep 900ms ease;
 }
 
 .home-page .feature-grid {
+  position: relative;
+  z-index: 1;
   grid-column: 2;
   grid-row: 1 / span 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1071,6 +1196,10 @@ p {
   grid-row: auto;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
   padding: clamp(18px, 3vw, 28px);
+  border-color: rgba(94, 255, 157, 0.34);
+  background:
+    linear-gradient(135deg, rgba(7, 51, 63, 0.95), rgba(12, 18, 38, 0.84)),
+    radial-gradient(circle at 86% 18%, rgba(94, 255, 157, 0.16), transparent 18rem);
 }
 
 .home-page .feature-grid article:not(.feature-spotlight) {
@@ -1722,6 +1851,35 @@ footer {
   color: var(--muted);
 }
 
+@keyframes home-feature-web-drift {
+  0% {
+    background-position: 0 0, 0 0, -8rem 0;
+  }
+  100% {
+    background-position: 5rem 5rem, -5rem 5rem, 8rem 0;
+  }
+}
+
+@keyframes home-feature-heading-flow {
+  0% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 0 rgba(41, 247, 255, 0));
+  }
+  100% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 18px rgba(41, 247, 255, 0.22));
+  }
+}
+
+@keyframes home-feature-card-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (max-width: 980px) {
   .site-header {
     grid-template-columns: 1fr;
@@ -1958,6 +2116,16 @@ footer {
 
   .domain-strip-video {
     display: none;
+  }
+
+  .feature-motion-video {
+    display: none;
+  }
+
+  .home-page .feature-band::before,
+  .home-page .feature-band h2,
+  .home-page .feature-grid article::after {
+    animation: none;
   }
 
   .hero-copy,
