@@ -969,10 +969,22 @@ p {
   font-size: clamp(0.98rem, 1.25vw, 1.1rem);
 }
 
+.home-page .feature-band {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(520px, 1.28fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: start;
+}
+
 .home-page .feature-band h2,
 .home-page .prompt-band h2 {
   font-size: clamp(1.95rem, 4.6vw, 4rem);
   line-height: 1;
+}
+
+.home-page .feature-band h2,
+.home-page .feature-lede {
+  grid-column: 1;
 }
 
 .home-page .prompt-band-top {
@@ -1006,19 +1018,22 @@ p {
 }
 
 .home-page .feature-grid {
-  grid-template-columns: minmax(220px, 0.76fr) minmax(360px, 1.24fr);
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
+  margin-top: 0;
 }
 
 .home-page .feature-grid .feature-spotlight {
-  grid-column: 2;
-  grid-row: 1 / span 2;
+  grid-column: 1 / -1;
+  grid-row: auto;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
   padding: clamp(18px, 3vw, 28px);
 }
 
 .home-page .feature-grid article:not(.feature-spotlight) {
-  grid-column: 1;
+  grid-column: auto;
 }
 
 .home-page .feature-grid .feature-spotlight > .eyebrow,
@@ -1755,6 +1770,16 @@ footer {
   .home-page .prompt-band-top .prompt-video-card {
     grid-column: auto;
     grid-row: auto;
+  }
+
+  .home-page .feature-band {
+    display: block;
+  }
+
+  .home-page .feature-grid {
+    grid-column: auto;
+    grid-row: auto;
+    margin-top: 24px;
   }
 
   .home-page .feature-grid .feature-spotlight {
