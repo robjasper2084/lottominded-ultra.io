@@ -4349,9 +4349,69 @@ function renderSequencer() {
             </div>
             ${state.pads.map((pad, row) => renderStepRow(pad, row)).join("")}
           </div>
+          ${renderSequencerBeat2LottoPanel()}
         </div>
       </div>
     </section>
+  `;
+}
+
+function renderSequencerBeat2LottoPanel() {
+  const activeSteps = state.sequencer.pattern.reduce(
+    (total, row) => total + row.slice(0, state.sequencer.steps).filter(Boolean).length,
+    0
+  );
+  const seed = `${state.bpm} BPM | ${state.sequencer.steps} steps | ${activeSteps} hits`;
+  const samplerName = state.sampler.fileName || "No sampler loaded";
+  return `
+    <aside class="sequencer-beat2lotto-panel" aria-label="Beat2Lotto sequencer bridge">
+      <div>
+        <p class="eyebrow">Beat2Lotto+</p>
+        <h3>Turn this groove into signal sets.</h3>
+        <p>Use the current BPM, timing grid, swing, and pad hits as a creative seed for entertainment-only number signals.</p>
+      </div>
+      <div class="beat2lotto-seed">
+        <span>Current seed</span>
+        <strong>${escapeHtml(seed)}</strong>
+      </div>
+      ${renderSequencerLotteryPreview()}
+      <div class="button-row">
+        <button type="button" data-action="generate-sequencer-lottery">Generate Signals Here</button>
+        <a class="app-top-link beat2lotto-panel-action" href="../beat2lotto-plus.html">Open Beat2Lotto+</a>
+      </div>
+      <div class="sequencer-sample-bridge" aria-label="Sequencer sampler bridge">
+        <div>
+          <p class="eyebrow">Sample to Sequence</p>
+          <strong>${escapeHtml(samplerName)}</strong>
+        </div>
+        <div class="button-row">
+          <label class="file-button">Load Sample<input type="file" accept="audio/*" data-file="sampler" aria-label="Load sampler audio for sequencer" /></label>
+          <button type="button" data-action="preview-sampler">Preview</button>
+          <button type="button" data-action="slice-sampler-to-pads">Slice To Pads</button>
+          <button type="button" data-action="seed-sampler-sequencer">Put On Steps</button>
+        </div>
+        <p class="micro">Loads into the sampler, slices or assigns to pads, then the step sequencer triggers those pad samples.</p>
+      </div>
+      <p class="micro">Creative number generation only. Not a prediction. Lottery outcomes are random.</p>
+    </aside>
+  `;
+}
+
+function renderSequencerLotteryPreview() {
+  const result = state.beatLottery.lastGenerated;
+  if (!result) {
+    return `<div class="sequencer-lottery-preview"><strong>No signals yet</strong><span>Generate here to keep the sequencer on screen.</span></div>`;
+  }
+  const set = result.sets?.[0];
+  const numbers = set?.type === "digits"
+    ? set.digits.join("-")
+    : [...(set?.main || []).map((number) => String(number).padStart(2, "0")), set?.special ? `${set.specialName || "Special"} ${String(set.special).padStart(2, "0")}` : ""].filter(Boolean).join(" ");
+  return `
+    <div class="sequencer-lottery-preview">
+      <strong>${escapeHtml(result.gameName)}</strong>
+      <span>${escapeHtml(numbers || "Ready")}</span>
+      <button type="button" data-action="copy-lottery-all">Copy Signals</button>
+    </div>
   `;
 }
 
@@ -6323,6 +6383,14 @@ async function handleAction(action, target) {
       state.view = "beat lottery";
       toast("Creative number signals generated. Not a prediction.");
       render();
+      break;
+    case "generate-sequencer-lottery":
+      generateLotteryFromBeat();
+      toast("Creative number signals generated in the sequencer panel. Not a prediction.");
+      render();
+      break;
+    case "seed-sampler-sequencer":
+      seedSamplerToSequencer();
       break;
     case "generate-beat-lottery-and-suno":
     case "generate-creative-bundle":
@@ -10241,6 +10309,19 @@ function randomGroove() {
 function toggleStep(row, step) {
   state.sequencer.pattern[row][step] = !state.sequencer.pattern[row][step];
   queueRender();
+}
+
+function seedSamplerToSequencer() {
+  if (!state.sampler.buffer) return toast("Load a sampler audio file first.");
+  const padIndex = clamp(Number(state.selectedPadIndex) || 0, 0, state.pads.length - 1);
+  const pad = state.pads[padIndex];
+  pad.buffer = cloneBuffer(state.sampler.buffer);
+  pad.sampleName = state.sampler.fileName || "Sampler";
+  pad.mode = "one-shot";
+  if (!state.sequencer.pattern[padIndex]) state.sequencer.pattern[padIndex] = Array(64).fill(false);
+  state.sequencer.pattern[padIndex] = state.sequencer.pattern[padIndex].map((_, step) => step < state.sequencer.steps && step % 4 === 0);
+  toast(`${pad.sampleName} assigned to ${pad.name} and written to the sequencer.`);
+  render();
 }
 
 function switchPadBank(bank) {

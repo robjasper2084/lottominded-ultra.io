@@ -1423,7 +1423,7 @@ canvas {
 
 .pad-layout {
   display: grid;
-  grid-template-columns: minmax(390px, 1fr) minmax(210px, 0.42fr);
+  grid-template-columns: minmax(430px, 1fr) minmax(150px, 0.24fr);
   gap: 10px;
   align-items: start;
 }
@@ -1674,11 +1674,6 @@ canvas {
   font-size: 0.72rem;
 }
 
-.sequencer-grid {
-  overflow-x: auto;
-  padding-bottom: 3px;
-}
-
 .sequencer {
   width: min(100%, 760px);
   transform: translate3d(var(--sequencer-x, 0), var(--sequencer-y, 0), 0);
@@ -1753,10 +1748,123 @@ canvas {
   font-size: 0.68rem;
 }
 
+.sequencer-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 0.62fr) minmax(240px, 0.38fr);
+  gap: 10px;
+  align-items: stretch;
+  overflow: visible;
+  padding-bottom: 3px;
+}
+
 .step-table {
   display: grid;
   min-width: 520px;
+  max-width: 100%;
+  overflow-x: auto;
   gap: 2px;
+}
+
+.sequencer-beat2lotto-panel {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  gap: 10px;
+  min-height: 100%;
+  min-width: 0;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(94, 255, 157, 0.32);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(94, 255, 157, 0.16), rgba(41, 247, 255, 0.08) 42%, rgba(255, 224, 113, 0.07)),
+    linear-gradient(rgba(41, 247, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.06) 1px, transparent 1px),
+    rgba(3, 12, 22, 0.86);
+  background-size: auto, 26px 26px, 26px 26px, auto;
+  box-shadow: inset 0 0 28px rgba(41, 247, 255, 0.08), 0 14px 34px rgba(0, 0, 0, 0.18);
+}
+
+.sequencer-beat2lotto-panel::after {
+  position: absolute;
+  inset: auto -18% -35% 18%;
+  height: 62%;
+  content: "";
+  background: radial-gradient(circle, rgba(41, 247, 255, 0.2), transparent 62%);
+  pointer-events: none;
+}
+
+.sequencer-beat2lotto-panel h3 {
+  max-width: 12ch;
+  margin: 0 0 0.36rem;
+  color: #f8fbff;
+  font-size: clamp(1.04rem, 2.5vw, 1.48rem);
+  line-height: 0.98;
+}
+
+.sequencer-beat2lotto-panel p {
+  max-width: 38ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.beat2lotto-seed {
+  display: grid;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(255, 224, 113, 0.28);
+  border-radius: 12px;
+  color: #fff4bd;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.beat2lotto-seed span {
+  color: var(--muted);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.beat2lotto-seed strong {
+  font-size: 0.72rem;
+}
+
+.beat2lotto-panel-action {
+  min-height: 32px;
+}
+
+.sequencer-lottery-preview,
+.sequencer-sample-bridge {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.24);
+}
+
+.sequencer-lottery-preview strong,
+.sequencer-sample-bridge strong {
+  color: #f8fbff;
+}
+
+.sequencer-lottery-preview span {
+  color: #fff2b4;
+  font-size: clamp(0.9rem, 2vw, 1.26rem);
+  font-weight: 900;
+}
+
+.sequencer-lottery-preview button,
+.sequencer-sample-bridge button,
+.sequencer-sample-bridge .file-button {
+  min-height: 28px;
+  padding: 0.26rem 0.46rem;
+  font-size: 0.62rem;
 }
 
 .step-row {
@@ -2498,6 +2606,10 @@ canvas {
     padding: 10px;
   }
 
+  .sequencer-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stem-time-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2621,20 +2733,20 @@ canvas {
 .pad-16-panel {
   grid-column: 2;
   grid-row: 1;
-  gap: 5px;
-  max-height: 520px;
+  gap: 3px;
+  max-height: 330px;
   overflow: auto;
-  padding: 6px;
-  font-size: 0.6rem;
+  padding: 4px;
+  font-size: 0.5rem;
 }
 
 .pad-16-panel .section-head {
-  gap: 5px;
+  gap: 3px;
 }
 
 .pad-16-panel .section-head h3 {
-  margin-bottom: 2px;
-  font-size: 0.72rem;
+  margin-bottom: 1px;
+  font-size: 0.58rem;
 }
 
 .pad-16-panel .section-head p {
@@ -2699,22 +2811,23 @@ canvas {
 }
 
 .pad-16-control-strip {
-  gap: 4px;
-  padding: 4px;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 8px;
 }
 
 .pad-16-panel button,
 .pad-16-panel select,
 .pad-16-panel input {
-  min-height: 22px;
-  padding: 0.24rem 0.34rem;
-  border-radius: 6px;
-  font-size: 0.55rem;
+  min-height: 18px;
+  padding: 0.16rem 0.24rem;
+  border-radius: 5px;
+  font-size: 0.46rem;
 }
 
 .pad-16-panel .toggle-line {
-  gap: 4px;
-  font-size: 0.58rem;
+  gap: 3px;
+  font-size: 0.48rem;
 }
 
 .pad-16-mode-tabs,
@@ -2729,21 +2842,21 @@ canvas {
 }
 
 .pad-16-panel .pad-16-mode-tabs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px;
 }
 
 .pad-16-panel .pad-16-function-controls {
   grid-template-columns: 1fr;
-  gap: 4px;
-}
-
-.pad-16-panel .field {
   gap: 3px;
 }
 
+.pad-16-panel .field {
+  gap: 2px;
+}
+
 .pad-16-panel .field span {
-  font-size: 0.52rem;
+  font-size: 0.43rem;
 }
 
 .pad-16-function-controls .field,
@@ -2753,13 +2866,13 @@ canvas {
 
 .pad-16-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(34px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(4, minmax(24px, 1fr));
+  gap: 3px;
 }
 
 .pad-16-level {
-  min-height: 34px;
-  padding: 0.18rem;
+  min-height: 24px;
+  padding: 0.1rem;
   border-color: color-mix(in srgb, var(--pad-color, var(--cyan)) 52%, rgba(255,255,255,.12));
   background:
     radial-gradient(circle at 50% calc(100% - 10px), color-mix(in srgb, var(--pad-color, var(--cyan)) 32%, transparent), transparent 56%),
@@ -2769,15 +2882,15 @@ canvas {
 
 .pad-16-level-source {
   outline: 1px solid var(--gold);
-  outline-offset: -3px;
+  outline-offset: -2px;
 }
 
 .pad-16-level strong {
-  font-size: 0.56rem;
+  font-size: 0.44rem;
 }
 
 .pad-16-level span {
-  font-size: 0.48rem;
+  font-size: 0.38rem;
 }
 
 .pad-16-level-reference {
@@ -2798,10 +2911,10 @@ canvas {
 .pad-16-level-ratchet::before,
 .pad-16-level-slice::before {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 26px;
-  height: 8px;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 5px;
   border-radius: 999px;
   content: "";
   background: repeating-linear-gradient(90deg, var(--gold), var(--gold) 3px, transparent 3px, transparent 6px);
@@ -2815,12 +2928,12 @@ canvas {
   z-index: 1;
   align-self: end;
   width: fit-content;
-  padding: 2px 6px;
+  padding: 1px 4px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   color: #f8fbff;
   background: rgba(0, 0, 0, 0.32);
-  font-size: 0.6rem;
+  font-size: 0.42rem;
   letter-spacing: 0.02em;
 }
 
