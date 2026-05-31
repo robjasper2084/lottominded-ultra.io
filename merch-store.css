@@ -503,9 +503,27 @@
 }
 
 .product-grid {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+  perspective: 1100px;
+}
+
+.product-grid::before {
+  position: absolute;
+  inset: -1.5rem -1rem;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 22%, rgba(41, 247, 255, 0.16) 28%, transparent 36%),
+    radial-gradient(circle at 20% 30%, rgba(61, 255, 159, 0.12), transparent 16rem),
+    radial-gradient(circle at 82% 58%, rgba(255, 209, 102, 0.1), transparent 14rem);
+  opacity: 0.72;
+  transform: translate3d(-18%, 0, 0);
+  animation: merch-product-grid-sweep 8s ease-in-out infinite;
 }
 
 .product-card,
@@ -518,14 +536,61 @@
 }
 
 .product-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: grid;
   grid-template-rows: auto 1fr;
   min-height: 100%;
   scroll-margin-top: 7.5rem;
+  transform: translate3d(0, 1.2rem, 0) rotateX(0deg);
+  transform-origin: center bottom;
+  animation:
+    merch-product-rise 720ms cubic-bezier(0.2, 0.8, 0.18, 1) both,
+    merch-product-float 7s ease-in-out 900ms infinite alternate;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
 }
 
 .product-card.featured {
   grid-column: span 1;
+}
+
+.product-card:nth-child(2) {
+  animation-delay: 120ms, 1.15s;
+}
+
+.product-card:nth-child(3) {
+  animation-delay: 240ms, 1.35s;
+}
+
+.product-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 0 42%, rgba(255, 255, 255, 0.3) 48%, transparent 56%);
+  opacity: 0;
+  transform: translateX(-120%);
+  transition: opacity 180ms ease;
+}
+
+.product-card::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0 55%, rgba(41, 247, 255, 0.08)),
+    repeating-linear-gradient(90deg, rgba(41, 247, 255, 0.08) 0 1px, transparent 1px 4rem);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 220ms ease;
 }
 
 .product-card img {
@@ -534,9 +599,16 @@
   object-fit: cover;
   display: block;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  filter: saturate(1.02) contrast(1.02);
+  transform: scale(1);
+  transition:
+    transform 360ms ease,
+    filter 360ms ease;
 }
 
 .product-card div {
+  position: relative;
+  z-index: 3;
   padding: 1.1rem;
 }
 
@@ -552,6 +624,35 @@
 .product-card p {
   color: #bcd4e8;
   line-height: 1.55;
+}
+
+.product-card:hover,
+.product-card:focus-within {
+  border-color: rgba(41, 247, 255, 0.78);
+  box-shadow:
+    0 1.8rem 4.6rem rgba(0, 0, 0, 0.44),
+    0 0 28px rgba(41, 247, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  filter: brightness(1.04);
+  transform: translate3d(0, -0.6rem, 1rem) rotateX(2deg);
+  animation-play-state: paused;
+}
+
+.product-card:hover::before,
+.product-card:focus-within::before {
+  opacity: 1;
+  animation: merch-product-shine 900ms ease;
+}
+
+.product-card:hover::after,
+.product-card:focus-within::after {
+  opacity: 0.8;
+}
+
+.product-card:hover img,
+.product-card:focus-within img {
+  filter: saturate(1.18) contrast(1.08) brightness(1.05);
+  transform: scale(1.045);
 }
 
 .product-row {
@@ -936,6 +1037,47 @@
   }
 }
 
+@keyframes merch-product-grid-sweep {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: translate3d(-18%, 0, 0);
+  }
+  50% {
+    opacity: 0.82;
+    transform: translate3d(18%, 0, 0);
+  }
+}
+
+@keyframes merch-product-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.2rem, 0) rotateX(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotateX(0deg);
+  }
+}
+
+@keyframes merch-product-float {
+  from {
+    transform: translate3d(0, 0, 0) rotateX(0deg);
+  }
+  to {
+    transform: translate3d(0, -0.28rem, 0) rotateX(1.2deg);
+  }
+}
+
+@keyframes merch-product-shine {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(120%);
+  }
+}
+
 @keyframes merch-strip-scan {
   0%,
   12% {
@@ -1050,8 +1192,22 @@
   .merch-strip::before,
   .merch-strip::after,
   .merch-strip a,
+  .product-grid::before,
+  .product-card,
+  .product-card::before,
+  .product-card::after,
+  .product-card img,
   .gallery-grid img {
     animation: none;
     transition: none;
+  }
+
+  .product-card,
+  .product-card:hover,
+  .product-card:focus-within,
+  .product-card img,
+  .product-card:hover img,
+  .product-card:focus-within img {
+    transform: none;
   }
 }
