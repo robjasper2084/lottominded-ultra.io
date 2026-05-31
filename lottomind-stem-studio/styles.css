@@ -1149,8 +1149,8 @@ canvas {
 
 .stem-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
-  gap: 9px;
+  grid-template-columns: repeat(auto-fit, minmax(207px, 1fr));
+  gap: 10px;
 }
 
 .channel {
@@ -1163,65 +1163,65 @@ canvas {
 }
 
 .stem-mixer-panel .panel-body {
-  padding: 12px;
+  padding: 13px;
 }
 
 .stem-mixer-panel .panel-header {
-  padding-bottom: 10px;
+  padding-bottom: 11px;
 }
 
 .stem-mixer-panel .channel {
-  font-size: 0.78rem;
+  font-size: 0.86rem;
 }
 
 .stem-mixer-panel .channel-top {
-  gap: 6px;
+  gap: 7px;
 }
 
 .stem-mixer-panel .channel-title strong {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .stem-mixer-panel .channel-title span {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .stem-mixer-panel .button-row,
 .stem-mixer-panel .control-grid,
 .stem-mixer-panel .eq-grid,
 .stem-mixer-panel .knob-grid {
-  gap: 5px;
+  gap: 6px;
 }
 
 .stem-mixer-panel .button-row button,
 .stem-mixer-panel .file-button {
-  min-height: 31px;
-  padding: 0.36rem 0.48rem;
-  border-radius: 8px;
-  font-size: 0.66rem;
+  min-height: 34px;
+  padding: 0.4rem 0.53rem;
+  border-radius: 9px;
+  font-size: 0.73rem;
 }
 
 .stem-mixer-panel canvas[data-waveform="stem"] {
-  height: 60px;
+  height: 66px;
 }
 
 .stem-mixer-panel canvas[data-spectrum="stem"] {
-  height: 31px;
+  height: 34px;
 }
 
 .stem-mixer-panel .stem-time-grid {
-  gap: 4px;
+  gap: 5px;
 }
 
 .stem-mixer-panel .stem-time-pill {
-  min-height: 30px;
-  padding: 4px 5px;
-  border-radius: 7px;
-  font-size: 0.66rem;
+  min-height: 33px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  font-size: 0.73rem;
 }
 
 .stem-mixer-panel .stem-time-pill strong {
-  font-size: 0.55rem;
+  font-size: 0.61rem;
 }
 
 .stem-mixer-panel .control-grid,
@@ -2591,7 +2591,7 @@ canvas {
   }
 
   .stem-grid {
-    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(171px, 1fr));
     overflow: visible;
     padding-bottom: 0;
   }
