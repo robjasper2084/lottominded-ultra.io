@@ -19,6 +19,8 @@ const STORAGE = {
   keyboardMappings: "lottominded.ultra.keyboardMappings.v1",
   floatingTransportPosition: "lottominded.ultra.floatingTransportPosition.v1",
   floatingStemMixerPosition: "lottominded.ultra.floatingStemMixerPosition.v1",
+  floatingSequencerPosition: "lottominded.ultra.floatingSequencerPosition.v1",
+  sequencerLayout: "lottominded.ultra.sequencerLayout.v1",
   topShellLayout: "lottominded.ultra.topShellLayout.v1"
 };
 const PAD_KEYS = ["1", "2", "3", "4", "q", "w", "e", "r", "a", "s", "d", "f", "z", "x", "c", "v"];
@@ -487,10 +489,26 @@ function saveTopShellLayout() {
   localStorage.setItem(STORAGE.topShellLayout, JSON.stringify(state.ui.topShell));
 }
 
+function loadSequencerLayout() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE.sequencerLayout) || "{}");
+    return {
+      size: ["compact", "expanded"].includes(saved.size) ? saved.size : "compact"
+    };
+  } catch (error) {
+    return { size: "compact" };
+  }
+}
+
+function saveSequencerLayout() {
+  localStorage.setItem(STORAGE.sequencerLayout, JSON.stringify(state.ui.sequencer));
+}
+
 const state = {
   view: "studio",
   ui: {
-    topShell: loadTopShellLayout()
+    topShell: loadTopShellLayout(),
+    sequencer: loadSequencerLayout()
   },
   projectName: "Untitled Stem Studio Session",
   bpm: Number(localStorage.getItem("lss-bpm")) || 120,
@@ -1477,6 +1495,7 @@ function render() {
   initUltraCockpit();
   initFloatingTransport();
   initFloatingStemMixer();
+  initFloatingSequencer();
 }
 
 function renderTopShellControls() {
@@ -3083,12 +3102,18 @@ function renderMixer() {
 }
 
 function renderMixerStrip(channel) {
+  ensureMixerChannelTone(channel);
   return `
     <article class="mixer-strip" style="--strip-color:${channel.color}">
       <strong>${escapeHtml(channel.name)}</strong>
       <div class="vu"><span style="--vu:${Math.round((channel.volume || 0) * 60)}%"></span></div>
       ${rangeControl("Volume", "mixer-channel", "volume", channel.volume, 0, 1.5, 0.01, channel.id)}
       ${rangeControl("Pan", "mixer-channel", "pan", channel.pan, -1, 1, 0.01, channel.id)}
+      <div class="mixer-eq-grid" aria-label="${escapeAttr(channel.name)} three-band EQ">
+        ${rangeControl("Low", "mixer-eq", "low", channel.eq.low, -18, 18, 1, channel.id)}
+        ${rangeControl("Mid", "mixer-eq", "mid", channel.eq.mid, -18, 18, 1, channel.id)}
+        ${rangeControl("High", "mixer-eq", "high", channel.eq.high, -18, 18, 1, channel.id)}
+      </div>
       <div class="effect-slots">
         ${channel.effects.map((effect) => `<span>${escapeHtml(effect)}</span>`).join("")}
       </div>
@@ -4281,15 +4306,19 @@ function renderKitBrowser() {
 }
 
 function renderSequencer() {
+  const sequencerSize = state.ui.sequencer?.size || "compact";
   return `
-    <section class="panel sequencer" aria-label="Step sequencer">
-      <div class="panel-header">
+    <section class="panel sequencer sequencer-${sequencerSize}" data-floating-sequencer aria-label="Step sequencer">
+      <div class="panel-header" data-floating-sequencer-handle>
         <div>
           <h2>Drum Machine and Sequencer</h2>
           <p class="micro">Toggle 16-step or 64-step patterns, record pads, add swing, humanize, quantize, and trigger the performance grid.</p>
+          <small class="sequencer-drag-chip">Drag sequencer</small>
         </div>
         <div class="button-row">
           ${helpButton("sequencer")}
+          <button type="button" data-action="set-sequencer-size" data-size="compact" aria-pressed="${sequencerSize === "compact"}">Shrink</button>
+          <button type="button" data-action="set-sequencer-size" data-size="expanded" aria-pressed="${sequencerSize === "expanded"}">Expand</button>
           <button type="button" data-action="start-sequencer">${state.sequencer.playing ? "Restart" : "Play Sequence"}</button>
           <button type="button" data-action="pause-sequencer">Pause Sequence</button>
           <button type="button" data-action="stop-sequencer">Stop Sequence</button>
@@ -5686,7 +5715,7 @@ function getDivisionMs(division = state.transport.timingDivision) {
 
 async function handleAction(action, target) {
   const id = target.dataset.id;
-  const noAudioActions = new Set(["set-view", "toggle-top-shell-mode", "set-top-shell-mode", "set-top-shell-height"]);
+  const noAudioActions = new Set(["set-view", "toggle-top-shell-mode", "set-top-shell-mode", "set-top-shell-height", "set-sequencer-size"]);
   if (!noAudioActions.has(action)) await ensureAudio();
   switch (action) {
     case "set-view":
@@ -5703,6 +5732,11 @@ async function handleAction(action, target) {
       break;
     case "set-top-shell-height":
       setTopShellHeight(target.value);
+      break;
+    case "set-sequencer-size":
+      state.ui.sequencer.size = target.dataset.size === "expanded" ? "expanded" : "compact";
+      saveSequencerLayout();
+      render();
       break;
     case "open-settings":
       state.view = "settings";
@@ -6690,6 +6724,42 @@ function setChannelEq(channelId, band, value) {
   if (band === "low") channel.nodes.low.gain.value = channel.eq.low;
   if (band === "mid") channel.nodes.mid.gain.value = channel.eq.mid;
   if (band === "high") channel.nodes.high.gain.value = channel.eq.high;
+}
+
+function ensureMixerChannelTone(channel) {
+  if (!channel.eq) channel.eq = { low: 0, mid: 0, high: 0 };
+  if (!Number.isFinite(Number(channel.eq.low))) channel.eq.low = 0;
+  if (!Number.isFinite(Number(channel.eq.mid))) channel.eq.mid = 0;
+  if (!Number.isFinite(Number(channel.eq.high))) channel.eq.high = 0;
+  return channel;
+}
+
+function getMixerChannel(channelId) {
+  const channel = state.mixerChannels.find((item) => item.id === channelId);
+  return channel ? ensureMixerChannelTone(channel) : null;
+}
+
+function getStemForMixerChannel(channelId) {
+  const index = state.mixerChannels.findIndex((item) => item.id === channelId);
+  return index >= 0 ? state.stems[index] : null;
+}
+
+function setMixerChannelParam(channelId, prop, value) {
+  const channel = getMixerChannel(channelId);
+  if (!channel) return;
+  channel[prop] = Number(value);
+  const stem = getStemForMixerChannel(channelId);
+  if (!stem) return;
+  if (prop === "volume") setChannelGain(stem.id, Number(value));
+  if (prop === "pan") setChannelPan(stem.id, Number(value));
+}
+
+function setMixerChannelEq(channelId, band, value) {
+  const channel = getMixerChannel(channelId);
+  if (!channel) return;
+  channel.eq[band] = Number(value);
+  const stem = getStemForMixerChannel(channelId);
+  if (stem) setChannelEq(stem.id, band, Number(value));
 }
 
 function truncateStem(channelId) {
@@ -11240,6 +11310,8 @@ function onRangeInput(event) {
     }
   }
   if (scope === "channel-eq") setChannelEq(id, prop, value);
+  if (scope === "mixer-channel") setMixerChannelParam(id, prop, value);
+  if (scope === "mixer-eq") setMixerChannelEq(id, prop, value);
   if (scope === "deck") {
     const deck = state.decks[id];
     deck[prop] = value;
@@ -11688,6 +11760,85 @@ function initFloatingStemMixer() {
   function onMouseUp() {
     finishDrag();
   }
+
+  handle.addEventListener("pointerdown", (event) => {
+    if ((event.button && event.button !== 0) || event.target.closest("button, input, select, label, a")) return;
+    startDrag(event.clientX, event.clientY);
+    handle.setPointerCapture?.(event.pointerId);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", finishDrag);
+    event.preventDefault();
+  });
+
+  handle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0 || event.target.closest("button, input, select, label, a")) return;
+    startDrag(event.clientX, event.clientY);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    event.preventDefault();
+  });
+}
+
+function initFloatingSequencer() {
+  const sequencer = document.querySelector("[data-floating-sequencer]");
+  const handle = sequencer?.querySelector("[data-floating-sequencer-handle]");
+  if (!sequencer || !handle) return;
+
+  let position = { x: 0, y: 0 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE.floatingSequencerPosition) || "{}");
+    if (Number.isFinite(saved.x) && Number.isFinite(saved.y)) position = { x: saved.x, y: saved.y };
+  } catch (error) {
+    position = { x: 0, y: 0 };
+  }
+
+  const applyPosition = () => {
+    const rect = sequencer.getBoundingClientRect();
+    const baseLeft = rect.left - position.x;
+    const baseTop = rect.top - position.y;
+    const minX = Math.min(0, 12 - baseLeft);
+    const maxX = Math.max(minX, window.innerWidth - baseLeft - Math.min(sequencer.offsetWidth, window.innerWidth - 24) - 12);
+    const minY = Math.min(0, 12 - baseTop);
+    const maxY = Math.max(minY, window.innerHeight - baseTop - Math.min(sequencer.offsetHeight, window.innerHeight * 0.68) - 12);
+    position.x = clamp(position.x, minX, maxX);
+    position.y = clamp(position.y, minY, maxY);
+    sequencer.style.setProperty("--sequencer-x", `${Math.round(position.x)}px`);
+    sequencer.style.setProperty("--sequencer-y", `${Math.round(position.y)}px`);
+  };
+
+  applyPosition();
+  requestAnimationFrame(applyPosition);
+
+  let dragState = null;
+  const finishDrag = () => {
+    if (!dragState) return;
+    dragState = null;
+    sequencer.classList.remove("is-dragging");
+    localStorage.setItem(STORAGE.floatingSequencerPosition, JSON.stringify(position));
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", finishDrag);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+
+  const startDrag = (clientX, clientY) => {
+    dragState = { startX: clientX, startY: clientY, originX: position.x, originY: position.y };
+    sequencer.classList.add("is-dragging");
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!dragState) return;
+    position.x = dragState.originX + clientX - dragState.startX;
+    position.y = dragState.originY + clientY - dragState.startY;
+    applyPosition();
+  };
+
+  function onPointerMove(event) { moveDrag(event.clientX, event.clientY); }
+  function onPointerUp() { finishDrag(); }
+  function onMouseMove(event) { moveDrag(event.clientX, event.clientY); }
+  function onMouseUp() { finishDrag(); }
 
   handle.addEventListener("pointerdown", (event) => {
     if ((event.button && event.button !== 0) || event.target.closest("button, input, select, label, a")) return;

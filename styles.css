@@ -1005,9 +1005,20 @@ p {
   min-height: 170px;
 }
 
+.home-page .feature-grid {
+  grid-template-columns: minmax(220px, 0.76fr) minmax(360px, 1.24fr);
+  align-items: start;
+}
+
 .home-page .feature-grid .feature-spotlight {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
   padding: clamp(18px, 3vw, 28px);
+}
+
+.home-page .feature-grid article:not(.feature-spotlight) {
+  grid-column: 1;
 }
 
 .home-page .feature-grid .feature-spotlight > .eyebrow,
@@ -1747,7 +1758,13 @@ footer {
   }
 
   .home-page .feature-grid .feature-spotlight {
+    grid-column: auto;
+    grid-row: auto;
     grid-template-columns: 1fr;
+  }
+
+  .home-page .feature-grid article:not(.feature-spotlight) {
+    grid-column: auto;
   }
 
   .home-page .feature-actions-side {
