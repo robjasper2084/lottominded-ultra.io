@@ -302,6 +302,42 @@ canvas {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.top-shell-waveform-link {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-color: rgba(41, 247, 255, 0.48);
+  color: #e9fbff;
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.18), rgba(138, 92, 255, 0.1)),
+    rgba(6, 14, 28, 0.74);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.top-shell-waveform-link:hover,
+.top-shell-waveform-link:focus-visible,
+.top-shell-waveform-link.is-active {
+  color: #061016;
+  border-color: rgba(255, 224, 113, 0.74);
+  background: linear-gradient(135deg, var(--gold), var(--green), var(--cyan));
+  box-shadow: 0 0 24px rgba(41, 247, 255, 0.18);
+}
+
+.top-shell-waveform-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  color: #061016;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
 .switch-track {
   position: relative;
   width: 44px;
@@ -2217,6 +2253,92 @@ canvas {
     url("assets/brand/lm-beat-dna.svg") right 16px center / 190px auto no-repeat;
 }
 
+.beat-dna-action-row {
+  position: relative;
+  isolation: isolate;
+  justify-content: flex-end;
+  max-width: min(100%, 640px);
+  padding: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(255, 224, 113, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 84% 32%, rgba(255, 224, 113, 0.18), transparent 9rem),
+    linear-gradient(135deg, rgba(5, 19, 34, 0.92), rgba(12, 42, 70, 0.72));
+  background-size: 30px 30px, 30px 30px, auto, auto;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 16px 40px rgba(0, 0, 0, 0.26);
+}
+
+.beat-dna-action-row::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 12%, rgba(41, 247, 255, 0.2) 42%, transparent 68%);
+  opacity: 0.55;
+  transform: translateX(-65%);
+  animation: beat-dna-action-scan 5.8s ease-in-out infinite;
+}
+
+.beat-dna-action-backplate {
+  position: absolute;
+  inset: 8px;
+  z-index: -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+.beat-dna-action-backplate img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(41, 247, 255, 0.38));
+}
+
+.beat-dna-art-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0.5rem 0.68rem;
+  border-color: rgba(41, 247, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    linear-gradient(135deg, rgba(41, 247, 255, 0.18), rgba(138, 92, 255, 0.12)),
+    rgba(3, 11, 22, 0.88);
+}
+
+.beat-dna-art-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 224, 113, 0.72);
+}
+
+.beat-dna-action-icon {
+  display: inline-grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(94, 255, 157, 0.34);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(41, 247, 255, 0.18), rgba(3, 11, 22, 0.8));
+}
+
+.beat-dna-action-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 .beat-lottery-hero {
   align-items: center;
   background:
@@ -2279,6 +2401,16 @@ canvas {
   overflow-wrap: anywhere;
   color: var(--gold);
   font-family: var(--mono);
+}
+
+@keyframes beat-dna-action-scan {
+  0%, 42% {
+    transform: translateX(-72%);
+  }
+
+  76%, 100% {
+    transform: translateX(72%);
+  }
 }
 
 .lottery-number-row {
@@ -2622,6 +2754,14 @@ canvas {
 @media (max-width: 720px) {
   .app {
     padding: 10px;
+  }
+
+  .beat-dna-action-row {
+    justify-content: stretch;
+  }
+
+  .beat-dna-art-button {
+    flex: 1 1 180px;
   }
 
   .sequencer-grid {
@@ -3566,18 +3706,24 @@ canvas {
 }
 
 .ultra-command-deck.is-floating-transport .ultra-timing-strip {
-  grid-template-columns: minmax(64px, 0.65fr) minmax(84px, 0.78fr) minmax(84px, 0.78fr) minmax(96px, 1fr) minmax(96px, 1fr) minmax(96px, 1fr);
+  grid-template-columns: minmax(48px, 0.62fr) minmax(66px, 0.72fr) minmax(66px, 0.72fr) minmax(74px, 0.92fr) minmax(74px, 0.92fr) minmax(74px, 0.92fr);
+  max-height: 58px;
+  overflow: hidden;
 }
 
 .ultra-command-deck.is-floating-transport .ultra-timing-card input,
 .ultra-command-deck.is-floating-transport .ultra-timing-card select {
-  min-height: 24px;
-  padding: 0.25rem 0.4rem;
-  font-size: 0.62rem;
+  min-height: 18px;
+  padding: 0.12rem 0.28rem;
+  font-size: 0.52rem;
 }
 
 .ultra-command-deck.is-floating-transport .ultra-timing-card span {
-  font-size: 0.58rem;
+  font-size: 0.48rem;
+}
+
+.ultra-command-deck.is-floating-transport .ultra-timing-card {
+  gap: 2px;
 }
 
 .ultra-command-deck.is-floating-transport .transport-status {

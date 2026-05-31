@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=mascot-cursor-1" />
+    <link rel="stylesheet" href="./styles.css?v=home-members-download-1" />
   </head>
   <body class="home-page">
     <header class="site-header" data-site-header>
@@ -22,19 +22,34 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Primary">
-        <a href="https://lottomind.one/">Lottomind</a>
-        <a href="./features-app.html">Features</a>
-        <a href="./prompt-lab.html#beat2lotto">Beat2Lotto+</a>
-        <a href="./merch-store.html">Merch</a>
-        <a href="./prompt-lab.html">Prompts</a>
-        <a href="./how-to-use.html">Guide</a>
+        <a href="https://lottomind.one/" data-icon="LM">Lottomind</a>
+        <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+</a>
+        <a href="./merch-store.html" data-icon="DR">Merch</a>
+        <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
+        <a href="./how-to-use.html" data-icon="GO">Guide</a>
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <button class="direct-action soundtrack-toggle" type="button" data-soundtrack-toggle>Demo Music</button>
+        <a class="direct-action member-nav-action" href="#members">Members</a>
+        <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
       </div>
     </header>
-    <audio id="siteSoundtrack" src="./assets/audio/default-stems/2%20Drums.mp3" preload="auto" loop></audio>
+
+    <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+</span>
+      </a>
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto" aria-hidden="true" tabindex="-1">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+</span>
+      </a>
+    </section>
 
     <aside class="startup-video-modal" data-startup-video aria-label="Lottominded Ultra intro video">
       <div class="startup-video-panel" role="dialog" aria-modal="true" aria-labelledby="startupVideoTitle">
@@ -141,6 +156,7 @@
             </p>
             <div class="feature-actions feature-actions-side">
               <a class="primary-action" href="./features-app.html">Open Feature Console</a>
+              <a class="secondary-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
               <a class="secondary-action" href="./lottomind-stem-studio/index.html">Launch Studio</a>
             </div>
             <a class="secondary-action" href="./lottomind-stem-studio/index.html">Open Studio Tools</a>
@@ -169,6 +185,56 @@
       </section>
 
 
+      <section class="member-gate marketing-section reveal-section" id="members" data-reveal>
+        <div class="member-copy">
+          <p class="eyebrow">Members only test build</p>
+          <h2>Sign up to download the LOTTOMINDED ULTRA app.</h2>
+          <p>
+            Join the private test list, unlock the current GitHub Pages build package, and help shape the browser studio
+            before the public drop. Use it for testing, feedback, and sharing with trusted collaborators.
+          </p>
+          <div class="member-badges" aria-label="Member test features">
+            <span>Live GitHub Pages preview</span>
+            <span>Download test ZIP</span>
+            <span>Local-first studio</span>
+          </div>
+        </div>
+        <form class="member-form" data-member-form>
+          <label>
+            Name
+            <input type="text" name="name" autocomplete="name" placeholder="Your name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Testing focus
+            <select name="focus" required>
+              <option value="">Choose one</option>
+              <option>Stem studio</option>
+              <option>Beat2Lotto+</option>
+              <option>Prompt lab</option>
+              <option>Merch and gallery</option>
+            </select>
+          </label>
+          <label class="member-check">
+            <input type="checkbox" name="permission" required />
+            <span>I understand this is a test build and I will use audio and media I own or have permission to use.</span>
+          </label>
+          <button class="primary-action" type="submit">Unlock Download</button>
+          <a
+            class="secondary-action member-download is-locked"
+            href="https://github.com/robjasper2084/lottominded-ultra.io/archive/refs/heads/main.zip"
+            data-member-download
+            aria-disabled="true"
+          >
+            Sign up to download
+          </a>
+          <p class="member-message" data-member-message>Members get the download link after signup.</p>
+        </form>
+      </section>
+
       <section class="access-band marketing-section reveal-section" data-reveal>
         <h2>Ready for studio sessions.</h2>
         <p>
@@ -190,6 +256,6 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=home-feature-motion-1" defer></script>
+    <script src="./site.js?v=home-members-download-1" defer></script>
   </body>
 </html>

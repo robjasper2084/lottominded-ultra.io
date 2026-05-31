@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=mascot-cursor-1" />
-    <link rel="stylesheet" href="./merch-store.css?v=merch-product-motion-1" />
+    <link rel="stylesheet" href="./merch-store.css?v=merch-drop-columns-1" />
   </head>
   <body class="merch-store-page">
     <header class="site-header merch-site-header" data-site-header>
@@ -51,17 +51,34 @@
           </div>
         </div>
         <div class="merch-hero-product" aria-hidden="true">
-          <img src="./assets/merch/metro-cap-hero.png" alt="" />
+          <video class="merch-product-video" autoplay muted loop playsinline preload="metadata" poster="./assets/merch/metro-cap-hero.png">
+            <source src="./assets/video/merch-hero-blended.mp4" type="video/mp4" />
+          </video>
           <span>Limited Signal Capsule</span>
         </div>
       </section>
 
       <section class="merch-strip" aria-label="Store highlights">
-        <a href="#hoodies">Hoodies</a>
-        <a href="#caps">Caps</a>
-        <a href="#polos">Polos</a>
-        <a href="#gallery">Gallery Prints</a>
-        <a href="#motion-drops">Motion Drops</a>
+        <div class="merch-strip-track">
+          <a href="#hoodies">Hoodies</a>
+          <a href="#caps">Caps</a>
+          <a href="#polos">Polos</a>
+          <a href="#gallery">Gallery Prints</a>
+          <a href="#motion-drops">Motion Drops</a>
+          <a href="#hoodies">Frequency Vault</a>
+          <a href="#caps">Signal Caps</a>
+          <a href="#polos">Metro Polo</a>
+        </div>
+        <div class="merch-strip-track" aria-hidden="true">
+          <a href="#hoodies" tabindex="-1">Hoodies</a>
+          <a href="#caps" tabindex="-1">Caps</a>
+          <a href="#polos" tabindex="-1">Polos</a>
+          <a href="#gallery" tabindex="-1">Gallery Prints</a>
+          <a href="#motion-drops" tabindex="-1">Motion Drops</a>
+          <a href="#hoodies" tabindex="-1">Frequency Vault</a>
+          <a href="#caps" tabindex="-1">Signal Caps</a>
+          <a href="#polos" tabindex="-1">Metro Polo</a>
+        </div>
       </section>
 
       <section class="merch-section merch-drop-section" id="drop" data-reveal>
@@ -157,11 +174,11 @@
 
     <footer>
       <span>LOTTOMINDED ULTRA</span>
-      <span>Merch store, art gallery, and motion drop room.</span>
+      <span>All rights reserved.</span>
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=merch-drop-video-6" defer></script>
-    <script src="./merch-store.js?v=merch-drop-video-6" defer></script>
+    <script src="./site.js?v=merch-drop-columns-1" defer></script>
+    <script src="./merch-store.js?v=merch-size-tune-1" defer></script>
   </body>
 </html>

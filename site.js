@@ -13,12 +13,16 @@ const soundtrackButtons = document.querySelectorAll("[data-soundtrack-toggle]");
 const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoClose = document.querySelector("[data-startup-video-close]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
+const memberForm = document.querySelector("[data-member-form]");
+const memberDownload = document.querySelector("[data-member-download]");
+const memberMessage = document.querySelector("[data-member-message]");
 const compactHeaderLabels =
   document.body.classList.contains("prompt-lab-page") ||
   document.body.classList.contains("home-page") ||
   document.body.classList.contains("merch-store-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
+const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const miniGameConfigs = {
   pick3: { label: "Pick 3", type: "digits", count: 3, min: 0, max: 9 },
   pick4: { label: "Pick 4", type: "digits", count: 4, min: 0, max: 9 },
@@ -136,7 +140,54 @@ soundtrackButtons.forEach((button) => {
   });
 });
 
-window.setTimeout(playSiteSoundtrack, 600);
+if (soundtrackButtons.length) {
+  window.setTimeout(playSiteSoundtrack, 600);
+}
+
+function setMemberDownloadUnlocked(unlocked, profile = null) {
+  if (!memberDownload) return;
+  memberDownload.classList.toggle("is-locked", !unlocked);
+  memberDownload.setAttribute("aria-disabled", String(!unlocked));
+  memberDownload.textContent = unlocked ? "Download Test Build" : "Sign up to download";
+  if (memberMessage) {
+    memberMessage.textContent = unlocked
+      ? `Unlocked for ${profile?.name || "member"}. Download the test ZIP or share the live GitHub Pages preview.`
+      : "Members get the download link after signup.";
+  }
+}
+
+let storedMemberProfile = null;
+try {
+  storedMemberProfile = JSON.parse(localStorage.getItem(MEMBER_SIGNUP_KEY) || "null");
+} catch {
+  storedMemberProfile = null;
+}
+
+setMemberDownloadUnlocked(Boolean(storedMemberProfile?.email), storedMemberProfile);
+
+memberForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(memberForm);
+  const profile = {
+    name: String(formData.get("name") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    focus: String(formData.get("focus") || "").trim(),
+    joinedAt: new Date().toISOString()
+  };
+  if (!profile.name || !profile.email || !profile.focus || !memberForm.checkValidity()) {
+    memberForm.reportValidity();
+    return;
+  }
+  localStorage.setItem(MEMBER_SIGNUP_KEY, JSON.stringify(profile));
+  setMemberDownloadUnlocked(true, profile);
+});
+
+memberDownload?.addEventListener("click", (event) => {
+  if (memberDownload.getAttribute("aria-disabled") !== "true") return;
+  event.preventDefault();
+  memberForm?.querySelector("input, select, button")?.focus();
+  memberForm?.reportValidity();
+});
 
 function hashString(input) {
   let hash = 2166136261;

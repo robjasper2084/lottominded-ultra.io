@@ -1,4 +1,4 @@
-const CACHE_NAME = "lottomind-stem-studio-v28";
+const CACHE_NAME = "lottomind-stem-studio-v33";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -49,6 +49,21 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  const acceptsHtml = event.request.headers.get("accept")?.includes("text/html");
+  const isFreshShellAsset = event.request.mode === "navigate" || acceptsHtml || /\.(?:css|js)$/i.test(url.pathname);
+
+  if (isFreshShellAsset) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        return response;
+      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       const copy = response.clone();

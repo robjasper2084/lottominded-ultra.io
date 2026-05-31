@@ -1514,6 +1514,10 @@ function renderTopShellControls() {
         <span class="switch-track"><span class="switch-dot"></span></span>
         <span>${expanded ? "Header Open" : "Header Closed"}</span>
       </button>
+      <button type="button" class="top-shell-waveform-link ${state.view === "waveform studio" ? "is-active" : ""}" data-action="set-view" data-view="waveform studio" aria-pressed="${state.view === "waveform studio"}">
+        <span class="top-shell-waveform-icon" aria-hidden="true">WF</span>
+        <span>Waveform Studio</span>
+      </button>
       <label class="top-shell-height-control">
         <span>Height</span>
         <input type="range" min="118" max="620" step="8" value="${state.ui.topShell.height}" data-action="set-top-shell-height" aria-label="Header panel height" />
@@ -5128,12 +5132,18 @@ function renderBeatDNAPanel() {
           <h2>Beat DNA Engine</h2>
           <p class="micro">One local analysis engine feeds Beat -> Suno Prompt and Creative Number Signals.</p>
         </div>
-        <div class="button-row">
+        <div class="button-row beat-dna-action-row" aria-label="Beat DNA actions">
+          <div class="beat-dna-action-backplate" aria-hidden="true">
+            <img src="${getAsset("beatDNA")}" alt="" />
+            <img src="${getAsset("sunoPrompt")}" alt="" />
+            <img src="${getAsset("beatLottery")}" alt="" />
+            <img src="${getAsset("creativeBundle")}" alt="" />
+          </div>
           ${helpButton("beat-dna")}
-          <button type="button" data-action="analyze-beat-dna">Analyze Beat DNA</button>
-          <button type="button" data-action="generate-suno-prompt">Generate Suno Prompt</button>
-          <button type="button" data-action="generate-beat-lottery">Generate Number Signals</button>
-          <button type="button" data-action="generate-creative-bundle">Generate Both</button>
+          <button class="beat-dna-art-button" type="button" data-action="analyze-beat-dna"><span class="beat-dna-action-icon"><img src="${getAsset("beatDNA")}" alt="" /></span><span>Analyze Beat DNA</span></button>
+          <button class="beat-dna-art-button" type="button" data-action="generate-suno-prompt"><span class="beat-dna-action-icon"><img src="${getAsset("sunoPrompt")}" alt="" /></span><span>Generate Suno Prompt</span></button>
+          <button class="beat-dna-art-button" type="button" data-action="generate-beat-lottery"><span class="beat-dna-action-icon"><img src="${getAsset("beatLottery")}" alt="" /></span><span>Generate Number Signals</span></button>
+          <button class="beat-dna-art-button" type="button" data-action="generate-creative-bundle"><span class="beat-dna-action-icon"><img src="${getAsset("creativeBundle")}" alt="" /></span><span>Generate Both</span></button>
         </div>
       </div>
       <div class="panel-body beat-dna-grid">
@@ -12011,19 +12021,26 @@ document.addEventListener("keydown", async (event) => {
     }
   }
   if (isTextEditingTarget(document.activeElement)) return;
+  if (event.code === "Space") {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.repeat) return;
+    if (state.playing) stopAll();
+    else await playAll();
+    return;
+  }
   if (await triggerMappedComputerKey(event)) return;
   if (handleSongEditorShortcut(event)) {
     event.preventDefault();
     return;
   }
-  if (event.code === "Space") {
-    event.preventDefault();
-    if (state.playing) stopAll();
-    else playAll();
-  }
 });
 
 document.addEventListener("keyup", (event) => {
+  if (event.code === "Space" && !isTextEditingTarget(document.activeElement)) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
   releaseMappedComputerKey(event);
 });
 
