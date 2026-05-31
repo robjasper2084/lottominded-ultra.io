@@ -29,10 +29,28 @@
   --lm-theme-accent: #29f7ff;
   --lm-theme-accent-2: #8a5cff;
   --lm-theme-gold: #ffe071;
+  --lm-mascot-cursor: url("../assets/cursor/lottomind-mascot-cursor.png") 24 5, auto;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+body * {
+  cursor: var(--lm-mascot-cursor);
+}
+
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="url"],
+textarea {
+  cursor: text;
 }
 
 html {
