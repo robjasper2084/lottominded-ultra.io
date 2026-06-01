@@ -713,6 +713,33 @@
   box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.34);
 }
 
+.gallery-motion-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: -0.5rem 0 1.5rem;
+}
+
+.gallery-motion-rail video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(3, 8, 16, 0.76);
+  box-shadow: 0 1.2rem 3.5rem rgba(0, 0, 0, 0.3);
+  filter: saturate(1.14) contrast(1.06) brightness(0.82);
+  transition: transform 300ms ease, filter 300ms ease;
+}
+
+.gallery-motion-rail video:hover,
+.gallery-motion-rail video:focus-visible {
+  filter: saturate(1.24) contrast(1.1) brightness(0.94);
+  transform: translateY(-0.25rem);
+}
+
 .product-card {
   position: relative;
   overflow: hidden;
@@ -1399,6 +1426,7 @@
   .merch-section-copy,
   .motion-gallery,
   .product-grid,
+  .gallery-motion-rail,
   .gallery-grid {
     grid-template-columns: 1fr;
   }
@@ -1449,6 +1477,7 @@
   .product-card::before,
   .product-card::after,
   .product-card img,
+  .gallery-motion-rail video,
   .gallery-grid img {
     animation: none;
     transition: none;

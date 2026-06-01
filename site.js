@@ -13,6 +13,7 @@ const soundtrackButtons = document.querySelectorAll("[data-soundtrack-toggle]");
 const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoClose = document.querySelector("[data-startup-video-close]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
+const domainStrip = document.querySelector(".domain-strip");
 const memberForm = document.querySelector("[data-member-form]");
 const memberDownload = document.querySelector("[data-member-download]");
 const memberMessage = document.querySelector("[data-member-message]");
@@ -23,6 +24,18 @@ const compactHeaderLabels =
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
+const SUPPORT_EMAIL = "robjasper2084@gmail.com";
+let soundtrackStartedFromPage = false;
+let soundtrackStartedFromHover = false;
+if (siteSoundtrack) {
+  siteSoundtrack.loop = false;
+  siteSoundtrack.removeAttribute("loop");
+  siteSoundtrack.addEventListener("ended", () => {
+    soundtrackStartedFromPage = false;
+    soundtrackStartedFromHover = false;
+    setSoundtrackButtonState(false);
+  });
+}
 const miniGameConfigs = {
   pick3: { label: "Pick 3", type: "digits", count: 3, min: 0, max: 9 },
   pick4: { label: "Pick 4", type: "digits", count: 4, min: 0, max: 9 },
@@ -95,6 +108,7 @@ siteBackButton?.addEventListener("click", () => {
 function closeStartupVideo() {
   startupVideoModal?.classList.add("is-hidden");
   startupVideoPlayer?.pause();
+  playSiteSoundtrack({ fromPage: true });
 }
 
 startupVideoClose?.addEventListener("click", closeStartupVideo);
@@ -102,7 +116,18 @@ startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo();
 });
 
+function isEditableTarget(target) {
+  return Boolean(target?.closest?.("input, textarea, select, [contenteditable='true']"));
+}
+
 document.addEventListener("keydown", (event) => {
+  if (event.code === "Space" && !isEditableTarget(event.target)) {
+    const soundtrackToggle = event.target?.closest?.("[data-soundtrack-toggle]");
+    if (soundtrackToggle || document.body.classList.contains("home-page")) {
+      event.preventDefault();
+      if (soundtrackToggle) event.stopPropagation();
+    }
+  }
   if (event.key === "Escape" && !startupVideoModal?.classList.contains("is-hidden")) {
     closeStartupVideo();
   }
@@ -117,11 +142,13 @@ function setSoundtrackButtonState(isPlaying, blocked = false) {
   });
 }
 
-async function playSiteSoundtrack() {
+async function playSiteSoundtrack(options = {}) {
   if (!siteSoundtrack) return;
   try {
-    siteSoundtrack.volume = 0.32;
+    siteSoundtrack.volume = options.volume ?? 0.42;
     await siteSoundtrack.play();
+    if (options.fromPage) soundtrackStartedFromPage = true;
+    if (options.fromHover) soundtrackStartedFromHover = true;
     setSoundtrackButtonState(true);
   } catch {
     setSoundtrackButtonState(false, true);
@@ -129,6 +156,12 @@ async function playSiteSoundtrack() {
 }
 
 soundtrackButtons.forEach((button) => {
+  button.addEventListener("keydown", (event) => {
+    if (event.code === "Space") {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  });
   button.addEventListener("click", async () => {
     if (!siteSoundtrack) return;
     if (siteSoundtrack.paused) {
@@ -140,9 +173,17 @@ soundtrackButtons.forEach((button) => {
   });
 });
 
-if (soundtrackButtons.length) {
-  window.setTimeout(playSiteSoundtrack, 600);
-}
+domainStrip?.addEventListener("pointerenter", () => {
+  if (!siteSoundtrack || soundtrackStartedFromPage) return;
+  playSiteSoundtrack({ fromHover: true, volume: 0.38 });
+});
+
+domainStrip?.addEventListener("pointerleave", () => {
+  if (!siteSoundtrack || !soundtrackStartedFromHover || soundtrackStartedFromPage) return;
+  siteSoundtrack.pause();
+  soundtrackStartedFromHover = false;
+  setSoundtrackButtonState(false);
+});
 
 function setMemberDownloadUnlocked(unlocked, profile = null) {
   if (!memberDownload) return;
@@ -154,6 +195,17 @@ function setMemberDownloadUnlocked(unlocked, profile = null) {
       ? `Unlocked for ${profile?.name || "member"}. Download the test ZIP or share the live GitHub Pages preview.`
       : "Members get the download link after signup.";
   }
+}
+
+function openSupportMailDraft(subject, fields) {
+  const body = [
+    subject,
+    "",
+    ...Object.entries(fields).map(([label, value]) => `${label}: ${String(value).trim()}`),
+    "",
+    `Sent from ${window.location.href}`
+  ].join("\n");
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 let storedMemberProfile = null;
@@ -180,6 +232,16 @@ memberForm?.addEventListener("submit", (event) => {
   }
   localStorage.setItem(MEMBER_SIGNUP_KEY, JSON.stringify(profile));
   setMemberDownloadUnlocked(true, profile);
+  if (memberMessage) {
+    memberMessage.textContent = "Download unlocked. An email draft to robjasper2084@gmail.com is opening so the signup can be sent.";
+  }
+  openSupportMailDraft("LOTTOMINDED ULTRA Member Signup", {
+    Name: profile.name,
+    Email: profile.email,
+    "Testing focus": profile.focus,
+    Permission: "Confirmed test-build and owned-media notice",
+    Joined: profile.joinedAt
+  });
 });
 
 memberDownload?.addEventListener("click", (event) => {

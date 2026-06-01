@@ -1472,8 +1472,17 @@ p {
 
 .home-page .feature-spotlight h3 {
   max-width: 760px;
+  font-family: "Aptos Display", "Segoe UI Variable Display", Inter, var(--body-font);
   font-size: clamp(1.45rem, 3vw, 2.5rem);
+  font-weight: 900;
   line-height: 1.06;
+  letter-spacing: 0.01em;
+  color: transparent;
+  background: linear-gradient(100deg, #f8fbff 0%, #bff7ff 38%, #ffe071 66%, #5eff9d 100%);
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   transform-origin: left center;
   transition:
     filter 260ms ease,
@@ -1485,13 +1494,12 @@ p {
 
 .home-page .feature-spotlight:hover h3,
 .home-page .feature-spotlight:focus-within h3 {
-  letter-spacing: 0.045em;
+  letter-spacing: 0.012em;
   filter: drop-shadow(0 0 24px rgba(41, 247, 255, 0.28));
   text-shadow:
     0.06em -0.02em 0 rgba(41, 247, 255, 0.28),
     -0.05em 0.04em 0 rgba(255, 224, 113, 0.24),
     0 18px 38px rgba(0, 0, 0, 0.56);
-  animation: home-feature-heading-explode 620ms ease-in-out infinite alternate;
 }
 
 .home-page .feature-actions-side {
@@ -2048,11 +2056,15 @@ p {
 .manual-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(260px, 0.95fr);
+  grid-template-columns: minmax(260px, 0.95fr) minmax(0, 1.05fr);
   gap: clamp(22px, 5vw, 58px);
   align-items: center;
   min-height: 66vh;
   overflow: hidden;
+}
+
+.manual-page .direct-launch {
+  justify-content: flex-start;
 }
 
 .manual-hero h1 {
@@ -2310,6 +2322,104 @@ p {
   font-size: 0.84rem;
 }
 
+.prompt-video-showcase {
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: stretch;
+  border-top: 1px solid rgba(41, 247, 255, 0.18);
+  background:
+    radial-gradient(circle at 82% 18%, rgba(41, 247, 255, 0.14), transparent 28rem),
+    radial-gradient(circle at 8% 90%, rgba(255, 224, 113, 0.1), transparent 22rem);
+}
+
+.prompt-video-copy {
+  align-self: center;
+}
+
+.prompt-video-copy h2 {
+  max-width: 11ch;
+  margin: 0;
+  font-family: var(--display-font);
+  font-size: clamp(2.4rem, 6vw, 5.6rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  color: #effbff;
+  text-shadow: 0 0 24px rgba(41, 247, 255, 0.28);
+}
+
+.prompt-video-copy p {
+  max-width: 38rem;
+  color: #d7e8f7;
+  font-size: clamp(1rem, 1.55vw, 1.18rem);
+  line-height: 1.62;
+}
+
+.prompt-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.prompt-video-panel {
+  position: relative;
+  overflow: hidden;
+  min-height: 31rem;
+  display: grid;
+  align-items: end;
+  border: 1px solid rgba(41, 247, 255, 0.26);
+  border-radius: var(--radius);
+  background: rgba(3, 8, 16, 0.72);
+  box-shadow: 0 1.8rem 5rem rgba(0, 0, 0, 0.34);
+  isolation: isolate;
+}
+
+.prompt-video-panel video {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.78;
+  filter: saturate(1.14) contrast(1.08) brightness(0.78);
+  transform: scale(1.04);
+  transition: transform 600ms ease, filter 600ms ease, opacity 600ms ease;
+}
+
+.prompt-video-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(3, 5, 10, 0.04), rgba(3, 5, 10, 0.88)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 4.5rem);
+}
+
+.prompt-video-panel:hover video,
+.prompt-video-panel:focus-within video {
+  opacity: 0.92;
+  filter: saturate(1.24) contrast(1.12) brightness(0.86);
+  transform: scale(1.1);
+}
+
+.prompt-video-panel div {
+  padding: 1.1rem;
+}
+
+.prompt-video-panel h3 {
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+}
+
+.prompt-video-panel p {
+  margin: 0.5rem 0 0;
+  color: rgba(237, 248, 255, 0.78);
+  line-height: 1.5;
+}
+
 .access-band {
   border-top: 1px solid var(--line);
 }
@@ -2473,6 +2583,8 @@ footer {
   .instruction-grid,
   .prompt-launch-panel,
   .prompt-app-suite,
+  .prompt-video-showcase,
+  .prompt-video-grid,
   .member-gate {
     grid-template-columns: 1fr;
   }
@@ -2659,6 +2771,10 @@ footer {
   }
 
   .beat2lotto-video-blend video {
+    display: none;
+  }
+
+  .prompt-video-panel video {
     display: none;
   }
 

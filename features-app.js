@@ -2,6 +2,7 @@ const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
 
 const studioUrl = "./lottomind-stem-studio/index.html";
+const supportEmail = "robjasper2084@gmail.com";
 const features = [
   { name: "Beat DNA Engine", route: "#beat-dna", color: "rgba(41,247,255,0.28)", copy: "Analyze rhythm, stems, pads, decks, mixer movement, and arrangement into a reusable creative fingerprint." },
   { name: "Stem Studio", route: "#stems", color: "rgba(94,255,157,0.25)", copy: "Load owned stems, trim channels, balance levels, pan, EQ, filter, send, mute, solo, and export maps." },
@@ -18,6 +19,7 @@ const features = [
   { name: "Suno Prompt", route: "#suno-prompt", color: "rgba(255,224,113,0.25)", copy: "Turn the current Beat DNA into simple prompts, custom style tags, hook lyrics, instrumentals, and exclusions." },
   { name: "Video Prompt", route: "#video-prompt", color: "rgba(255,79,216,0.24)", copy: "Generate cinematic AI video prompts, platform-ready formats, camera motion, shot lists, and negative prompts." },
   { name: "Beat Lottery", route: "#beat-lottery", color: "rgba(94,255,157,0.24)", copy: "Create beat-seeded entertainment number sets with responsible-play reminders and configurable game formats." },
+  { name: "Lottery Spheres", href: "./lottery-spheres.html#spheres", color: "rgba(255,224,113,0.3)", copy: "Open the interactive branded sphere room for floating lottery balls, pointer motion, and creative signal rerolls." },
   { name: "Creative Bundle", route: "#creative-bundle", color: "rgba(41,247,255,0.2)", copy: "Generate Beat DNA, Suno prompt, video prompt, and creative number signals together from one session." },
   { name: "Sampler", route: "#sampler", color: "rgba(255,224,113,0.22)", copy: "Trim samples, preview slices, assign pads, adjust gain, pitch, and playback feel." },
   { name: "How To Drive Manual", href: "./how-to-use.html", color: "rgba(255,224,113,0.25)", copy: "Open the step-by-step guide for studio controls, Beat2Lotto+ audio import, sheet music notes, safety, and prompt workflows." },
@@ -44,3 +46,42 @@ if (featuredList) {
     </a>
   `).join("");
 }
+
+function formatLabel(key) {
+  return key
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function buildMailto(subject, entries) {
+  const lines = entries.map(([key, value]) => `${formatLabel(key)}: ${String(value).trim()}`);
+  const body = [
+    subject,
+    "",
+    ...lines,
+    "",
+    `Sent from ${window.location.href}`
+  ].join("\n");
+  return `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+document.querySelectorAll("[data-feature-mail-form]").forEach((form) => {
+  const status = form.querySelector("[data-mail-status]");
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const formData = new FormData(form);
+    const entries = Array.from(formData.entries()).filter(([, value]) => String(value).trim());
+    const subject = form.dataset.mailSubject || "LOTTOMINDED ULTRA Website Message";
+
+    if (status) {
+      status.textContent = "Opening an email draft to robjasper2084@gmail.com. Send it to finish.";
+    }
+    window.location.href = buildMailto(subject, entries);
+    form.reset();
+  });
+});

@@ -10,8 +10,8 @@
     <title>LOTTOMINDED ULTRA | Feature Console</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=feature-nav-compact-1" />
-    <link rel="stylesheet" href="./features-app.css?v=feature-nav-compact-1" />
+    <link rel="stylesheet" href="./styles.css?v=feature-support-mail-1" />
+    <link rel="stylesheet" href="./features-app.css?v=feature-module-center-1" />
   </head>
   <body class="feature-console-page">
     <video class="feature-page-video-bg" autoplay muted loop playsinline aria-hidden="true">
@@ -28,6 +28,7 @@
         <a href="./">Home</a>
         <a href="https://lottomind.one/">Lottomind.one</a>
         <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
+        <a href="./lottery-spheres.html#spheres">Lottery Spheres</a>
         <a href="./merch-store.html">Merch + Gallery</a>
       </nav>
     </header>
@@ -45,6 +46,7 @@
           <div class="feature-console-actions">
             <a class="primary-action" href="./lottomind-stem-studio/index.html">Launch Editing Studio</a>
             <a class="secondary-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
+            <a class="secondary-action" href="./lottery-spheres.html#spheres">Lottery Spheres</a>
             <a class="secondary-action" href="#feature-grid">Browse Tools</a>
           </div>
         </div>
@@ -69,6 +71,70 @@
         <h2>Choose a module and jump straight in.</h2>
         <div class="feature-tool-grid" id="featureToolGrid"></div>
       </section>
+
+      <section class="feature-support-suite" id="support" aria-labelledby="feature-support-title">
+        <div class="feature-support-copy">
+          <p class="section-kicker">Contact + Support</p>
+          <h2 id="feature-support-title">Get help, send feedback, or join the list.</h2>
+          <p>
+            Support requests, beta feedback, download questions, and mailing-list signups are
+            routed to <a href="mailto:robjasper2084@gmail.com">robjasper2084@gmail.com</a>.
+          </p>
+          <div class="feature-support-links" aria-label="Support quick links">
+            <a href="mailto:robjasper2084@gmail.com?subject=LOTTOMINDED%20ULTRA%20Support">Email Support</a>
+            <a href="./how-to-use.html">Open Guide</a>
+            <a href="./#members">Members Download</a>
+          </div>
+        </div>
+
+        <form class="feature-mail-panel" action="mailto:robjasper2084@gmail.com" method="post" enctype="text/plain" data-feature-mail-form data-mail-subject="LOTTOMINDED ULTRA Support Request">
+          <p class="feature-mail-kicker">Support Desk</p>
+          <label>
+            Name
+            <input type="text" name="name" autocomplete="name" placeholder="Your name" required />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            What do you need?
+            <select name="request_type" required>
+              <option value="">Choose one</option>
+              <option>App support</option>
+              <option>Beta feedback</option>
+              <option>Download help</option>
+              <option>Booking or collaboration</option>
+            </select>
+          </label>
+          <label>
+            Message
+            <textarea name="message" rows="5" placeholder="Tell us what you need help with." required></textarea>
+          </label>
+          <button class="primary-action" type="submit">Send Support Email</button>
+          <p class="feature-mail-status" data-mail-status>Email drafts open addressed to robjasper2084@gmail.com.</p>
+        </form>
+
+        <form class="feature-mail-panel feature-list-panel" action="mailto:robjasper2084@gmail.com" method="post" enctype="text/plain" data-feature-mail-form data-mail-subject="LOTTOMINDED ULTRA Mailing List Signup">
+          <p class="feature-mail-kicker">Mailing List</p>
+          <label>
+            Email
+            <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Interest
+            <select name="interest" required>
+              <option value="">Choose one</option>
+              <option>Studio app updates</option>
+              <option>Beat2Lotto+ drops</option>
+              <option>Merch releases</option>
+              <option>All LOTTOMINDED updates</option>
+            </select>
+          </label>
+          <button class="secondary-action" type="submit">Join Mailing List</button>
+          <p class="feature-mail-status" data-mail-status>New subscriber notes forward to robjasper2084@gmail.com.</p>
+        </form>
+      </section>
     </main>
 
     <footer>
@@ -77,6 +143,6 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./features-app.js?v=feature-nav-compact-1" defer></script>
+    <script src="./features-app.js?v=feature-support-mail-1" defer></script>
   </body>
 </html>

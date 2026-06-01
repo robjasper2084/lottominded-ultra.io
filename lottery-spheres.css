@@ -1,0 +1,409 @@
+.lottery-spheres-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 224, 113, 0.16), transparent 31rem),
+    radial-gradient(circle at 78% 12%, rgba(41, 247, 255, 0.2), transparent 34rem),
+    linear-gradient(145deg, #010307 0%, #04111b 48%, #07020b 100%);
+}
+
+.lottery-spheres-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: minmax(15rem, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(0.8rem, 2vw, 1.4rem);
+  padding: 0.72rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(63, 244, 221, 0.22);
+  background: rgba(1, 4, 10, 0.78);
+  box-shadow: 0 1.1rem 3rem rgba(0, 0, 0, 0.34);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.lottery-spheres-header .site-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.lottery-spheres-header .brand {
+  min-width: 0;
+}
+
+.lottery-spheres-header .site-header-toggle {
+  min-height: 2.15rem;
+  padding-inline: 0.78rem;
+  border-radius: 999px;
+}
+
+.lottery-spheres-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  gap: 0.35rem;
+  width: auto;
+  max-width: 100%;
+  padding: 0.3rem;
+  border: 1px solid rgba(41, 247, 255, 0.28);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.095), rgba(138, 92, 255, 0.06)),
+    rgba(3, 7, 16, 0.68);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 1.5rem rgba(41, 247, 255, 0.1);
+}
+
+.lottery-spheres-header nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  min-height: 1.88rem;
+  padding: 0.34rem 0.58rem 0.34rem 0.38rem;
+  overflow: hidden;
+  border: 1px solid rgba(130, 200, 255, 0.2);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(41, 247, 255, 0.04)),
+    rgba(255, 255, 255, 0.02);
+  color: #f5fbff;
+  font-size: 0.6rem;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.lottery-spheres-header nav a::before {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 1.12rem;
+  width: 1.12rem;
+  height: 1.12rem;
+  place-items: center;
+  content: attr(data-icon);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.64), rgba(255, 224, 113, 0.38)),
+    url("./assets/brand/lm-orb-mark.webp") center / cover;
+  color: rgba(255, 255, 255, 0.72);
+  font-family: var(--ui-font);
+  font-size: 0.4rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 0.85rem rgba(41, 247, 255, 0.28);
+}
+
+.lottery-spheres-header nav a:hover,
+.lottery-spheres-header nav a:focus-visible {
+  border-color: rgba(41, 247, 255, 0.62);
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.2), rgba(255, 224, 113, 0.11)),
+    rgba(9, 22, 35, 0.9);
+  transform: translateY(-1px);
+}
+
+.sphere-stage {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(18rem, 0.86fr) minmax(16rem, 0.44fr);
+  align-items: end;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(8rem, 13vh, 10rem) clamp(1rem, 5vw, 5rem) clamp(2rem, 7vw, 5rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.sphere-canvas,
+.sphere-grid,
+.sphere-scanline {
+  position: absolute;
+  inset: 0;
+}
+
+.sphere-canvas {
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.sphere-grid {
+  z-index: -2;
+  opacity: 0.5;
+  background:
+    linear-gradient(rgba(41, 247, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+}
+
+.sphere-scanline {
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 54% 42%, rgba(41, 247, 255, 0.16), transparent 26rem),
+    linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.1), transparent);
+  mix-blend-mode: screen;
+  animation: sphereSweep 7s ease-in-out infinite alternate;
+}
+
+.sphere-copy {
+  max-width: 56rem;
+  padding: clamp(1.25rem, 3vw, 2.4rem);
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  background:
+    linear-gradient(135deg, rgba(5, 20, 31, 0.74), rgba(2, 5, 12, 0.32)),
+    radial-gradient(circle at 0 0, rgba(94, 255, 157, 0.15), transparent 23rem);
+  box-shadow: 0 1.6rem 5rem rgba(0, 0, 0, 0.32), inset 0 0 4rem rgba(41, 247, 255, 0.05);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.sphere-copy h1 {
+  margin: 0;
+  max-width: 11ch;
+  font-family: var(--display-font);
+  font-size: clamp(4rem, 12vw, 10.5rem);
+  line-height: 0.82;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: #eefbff;
+  text-shadow:
+    0 0.08em 0 rgba(255, 224, 113, 0.35),
+    0 0 1.5rem rgba(41, 247, 255, 0.42),
+    0 0 4.5rem rgba(94, 255, 157, 0.2);
+}
+
+.sphere-copy p {
+  max-width: 46rem;
+  margin: 1.35rem 0 0;
+  color: rgba(237, 248, 255, 0.82);
+  font-size: clamp(1rem, 1.45vw, 1.32rem);
+  line-height: 1.65;
+}
+
+.sphere-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.6rem;
+}
+
+.sphere-actions .primary-action,
+.sphere-actions .secondary-action {
+  min-width: 10.5rem;
+}
+
+.sphere-readout {
+  justify-self: end;
+  width: min(100%, 26rem);
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 224, 113, 0.34);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(145deg, rgba(10, 25, 39, 0.82), rgba(0, 0, 0, 0.54)),
+    radial-gradient(circle at 70% 0, rgba(255, 79, 216, 0.16), transparent 16rem);
+  box-shadow: 0 0 3rem rgba(41, 247, 255, 0.16);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.sphere-readout img {
+  width: 3.2rem;
+  height: 3.2rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 1rem rgba(41, 247, 255, 0.7));
+}
+
+.sphere-readout span {
+  display: block;
+  margin-top: 0.9rem;
+  color: var(--gold);
+  font-family: var(--display-font);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.sphere-readout strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #effbff;
+  font-size: clamp(1.7rem, 4vw, 3.15rem);
+  line-height: 1;
+}
+
+.sphere-live-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(41, 247, 255, 0.18);
+}
+
+.sphere-live-stats div {
+  min-width: 0;
+}
+
+.sphere-live-stats span {
+  margin: 0 0 0.35rem;
+  color: rgba(237, 248, 255, 0.62);
+  font-family: var(--ui-font);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.sphere-live-stats strong {
+  margin: 0;
+  color: #5eff9d;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sphere-live-stats meter {
+  display: block;
+  width: 100%;
+  height: 0.82rem;
+}
+
+.sphere-live-stats meter::-webkit-meter-bar {
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sphere-live-stats meter::-webkit-meter-optimum-value {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #29f7ff, #5eff9d, #ffe071);
+  box-shadow: 0 0 1rem rgba(41, 247, 255, 0.42);
+}
+
+.sphere-readout p {
+  margin: 0.85rem 0 0;
+  color: rgba(237, 248, 255, 0.7);
+  line-height: 1.5;
+}
+
+.sphere-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 5vw, 5rem) clamp(4rem, 8vw, 7rem);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.58));
+}
+
+.sphere-info-grid article {
+  min-height: 13rem;
+  padding: 1.3rem;
+  border: 1px solid rgba(41, 247, 255, 0.22);
+  border-radius: 0.5rem;
+  background: linear-gradient(145deg, rgba(14, 34, 51, 0.7), rgba(4, 7, 16, 0.78));
+}
+
+.sphere-info-grid span {
+  color: var(--gold);
+  font-family: var(--display-font);
+  font-size: 0.82rem;
+}
+
+.sphere-info-grid h2 {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.8rem, 5vw, 3.8rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.sphere-info-grid p {
+  color: rgba(237, 248, 255, 0.74);
+  line-height: 1.55;
+}
+
+@keyframes sphereSweep {
+  from {
+    transform: translate3d(-4%, -2%, 0) scale(1);
+    opacity: 0.62;
+  }
+  to {
+    transform: translate3d(4%, 2%, 0) scale(1.06);
+    opacity: 0.94;
+  }
+}
+
+@media (max-width: 880px) {
+  .lottery-spheres-header {
+    position: sticky;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .lottery-spheres-header nav {
+    justify-self: stretch;
+    justify-content: center;
+    border-radius: 1.2rem;
+  }
+
+  .lottery-spheres-header nav a {
+    flex: 1 1 8rem;
+    justify-content: center;
+  }
+
+  .sphere-stage,
+  .sphere-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sphere-stage {
+    align-items: end;
+    min-height: 92svh;
+  }
+
+  .sphere-copy h1 {
+    max-width: 100%;
+    font-size: clamp(3rem, 14vw, 4.7rem);
+    line-height: 0.88;
+  }
+
+  .sphere-readout {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 560px) {
+  .sphere-stage {
+    padding-top: 3rem;
+  }
+
+  .sphere-copy {
+    padding: 1.05rem;
+  }
+
+  .sphere-copy h1 {
+    font-size: clamp(2.65rem, 13vw, 3.65rem);
+  }
+
+  .sphere-actions .primary-action,
+  .sphere-actions .secondary-action {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere-scanline {
+    animation: none;
+  }
+}
