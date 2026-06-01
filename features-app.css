@@ -1,10 +1,24 @@
 .feature-console-page {
   position: relative;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 50% 10%, rgba(94, 255, 157, 0.12), transparent 26rem),
     radial-gradient(circle at 78% 22%, rgba(255, 79, 216, 0.13), transparent 30rem),
     linear-gradient(145deg, #010207, #061225 56%, #080510);
+}
+
+.feature-page-video-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.22;
+  filter: saturate(1.18) contrast(1.08) brightness(0.58);
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
 .feature-console-page::before {
@@ -16,10 +30,9 @@
   background:
     linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px),
     linear-gradient(rgba(255, 224, 113, 0.045) 1px, transparent 1px),
-    url("./assets/brand/generated-cinematic-hero.png") center / cover no-repeat;
+    linear-gradient(145deg, rgba(1, 2, 7, 0.86), rgba(6, 18, 37, 0.76) 56%, rgba(8, 5, 16, 0.88));
   background-size: 64px 64px, 64px 64px, cover;
-  opacity: 0.18;
-  mix-blend-mode: screen;
+  opacity: 0.94;
 }
 
 .compact-feature-header {
@@ -32,11 +45,11 @@
 }
 
 .compact-feature-header nav {
-  gap: 10px;
+  gap: 8px;
   align-items: stretch;
-  padding: 6px;
+  padding: 5px;
   border: 1px solid rgba(41, 247, 255, 0.2);
-  border-radius: 18px;
+  border-radius: 14px;
   background:
     linear-gradient(90deg, rgba(41, 247, 255, 0.08), rgba(255, 79, 216, 0.05)),
     rgba(2, 8, 18, 0.72);
@@ -45,10 +58,13 @@
 
 .compact-feature-header nav a {
   position: relative;
-  min-width: min(190px, 100%);
+  min-width: min(152px, 100%);
+  min-height: 35px;
+  padding: 0 12px;
   border-color: rgba(41, 247, 255, 0.26);
-  border-radius: 12px;
+  border-radius: 10px;
   color: #edf9ff;
+  font-size: 0.7rem;
   letter-spacing: 0.02em;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.025)),
