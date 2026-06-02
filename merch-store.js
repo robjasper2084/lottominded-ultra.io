@@ -144,10 +144,20 @@ function pauseMerchIntroAudio() {
   });
 }
 
+function resetMerchCapsuleVideo() {
+  if (!merchSoundVideo) return;
+  try {
+    merchSoundVideo.currentTime = 0;
+  } catch {
+    // Some browsers block seeking before metadata is ready.
+  }
+}
+
 async function playMerchCapsuleSound() {
   if (!merchSoundVideo || !merchSoundToggle) return;
   let played = false;
   pauseMerchIntroAudio();
+  resetMerchCapsuleVideo();
   try {
     merchSoundVideo.muted = false;
     merchSoundVideo.volume = 0.78;
@@ -155,6 +165,10 @@ async function playMerchCapsuleSound() {
     played = true;
   } catch {
     played = false;
+    merchSoundVideo.muted = true;
+    merchSoundVideo.play().catch(() => {
+      // Unmuted autoplay is browser-gated; muted visual playback is the fallback.
+    });
   }
   if (played) {
     merchSoundToggle.textContent = "Sound on";
@@ -163,6 +177,13 @@ async function playMerchCapsuleSound() {
     merchSoundToggle.textContent = "Tap for sound";
     merchSoundToggle.classList.remove("is-playing");
   }
+}
+
+function startMerchCapsuleOnPageOpen() {
+  if (!merchSoundVideo) return;
+  merchSoundVideo.autoplay = true;
+  merchSoundVideo.playsInline = true;
+  playMerchCapsuleSound();
 }
 
 function pauseMerchCapsuleSound() {
@@ -272,10 +293,30 @@ document.addEventListener("click", (event) => {
 });
 
 merchSoundCard?.addEventListener("pointerenter", playMerchCapsuleSound);
-merchSoundVideo?.addEventListener("pointerdown", pauseMerchIntroAudio);
+merchSoundVideo?.addEventListener("pointerdown", () => {
+  pauseMerchIntroAudio();
+  resetMerchCapsuleVideo();
+});
+merchSoundVideo?.addEventListener("click", (event) => {
+  event.preventDefault();
+  playMerchCapsuleSound();
+});
 merchSoundVideo?.addEventListener("play", pauseMerchIntroAudio);
 merchSoundVideo?.addEventListener("volumechange", () => {
-  if (!merchSoundVideo.muted) pauseMerchIntroAudio();
+  if (!merchSoundVideo.muted) {
+    pauseMerchIntroAudio();
+    resetMerchCapsuleVideo();
+  }
+});
+
+window.addEventListener("load", () => {
+  window.setTimeout(startMerchCapsuleOnPageOpen, 180);
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    startMerchCapsuleOnPageOpen();
+  }
 });
 
 const revealObserver = new IntersectionObserver(

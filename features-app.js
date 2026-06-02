@@ -1,3 +1,4 @@
+(() => {
 const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
 
@@ -29,8 +30,8 @@ const features = [
 const grid = document.querySelector("#featureToolGrid");
 if (grid) {
   grid.innerHTML = features.map((feature, index) => `
-    <a class="feature-tool-card" href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}" data-feature-index="${index}">
-      <h3>${feature.name}</h3>
+    <a class="feature-tool-card kinetic-hover" href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}" data-feature-index="${index}">
+      <h3 class="kinetic-word" data-kinetic="${feature.name}">${feature.name}</h3>
       <p>${feature.copy}</p>
       <span>Open Module</span>
     </a>
@@ -85,3 +86,135 @@ document.querySelectorAll("[data-feature-mail-form]").forEach((form) => {
     form.reset();
   });
 });
+
+function setupFeaturePuckField() {
+  const field = document.querySelector("[data-feature-puck-field]");
+  if (!field) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const puckSrc = field.dataset.puckSrc || "./assets/brand/lottomind-branded-puck.png";
+  const puckCount = window.innerWidth < 720 ? 5 : 9;
+  const pointer = {
+    x: window.innerWidth * 0.5,
+    y: window.innerHeight * 0.42,
+    active: false,
+    lastMove: 0
+  };
+  let bounds = {
+    width: window.innerWidth,
+    height: window.innerHeight
+  };
+
+  const pucks = Array.from({ length: puckCount }, (_, index) => {
+    const element = document.createElement("span");
+    element.className = "branded-puck feature-puck";
+    element.style.setProperty("--puck-opacity", String(0.44 + (index % 4) * 0.08));
+
+    const image = document.createElement("img");
+    image.src = puckSrc;
+    image.alt = "";
+    element.appendChild(image);
+    field.appendChild(element);
+
+    const wide = window.innerWidth >= 720;
+    const size = (wide ? 108 : 82) + Math.random() * (wide ? 142 : 72);
+    const puck = {
+      element,
+      x: Math.random() * Math.max(1, bounds.width - size),
+      y: Math.random() * Math.max(1, bounds.height - size),
+      vx: (Math.random() - 0.5) * (wide ? 0.58 : 0.34),
+      vy: (Math.random() - 0.5) * (wide ? 0.48 : 0.28),
+      size,
+      rotation: Math.random() * 360,
+      spin: (Math.random() - 0.5) * 0.5
+    };
+
+    element.style.setProperty("--puck-size", `${size}px`);
+    return puck;
+  });
+
+  function placePuck(puck) {
+    puck.element.style.transform = `translate3d(${puck.x}px, ${puck.y}px, 0) rotate(${puck.rotation}deg)`;
+  }
+
+  function resizeField() {
+    bounds = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+
+    pucks.forEach((puck) => {
+      puck.x = Math.min(Math.max(0, puck.x), Math.max(0, bounds.width - puck.size));
+      puck.y = Math.min(Math.max(0, puck.y), Math.max(0, bounds.height - puck.size));
+      placePuck(puck);
+    });
+  }
+
+  function setPointer(event) {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+    pointer.lastMove = performance.now();
+    field.style.setProperty("--puck-pointer-x", `${event.clientX}px`);
+    field.style.setProperty("--puck-pointer-y", `${event.clientY}px`);
+  }
+
+  function animate(now) {
+    if (reduceMotion.matches) {
+      pucks.forEach((puck, index) => {
+        const columns = Math.min(puckCount, 3);
+        const row = Math.floor(index / columns);
+        const column = index % columns;
+        puck.x = bounds.width * (0.14 + column * 0.34) - puck.size * 0.5;
+        puck.y = bounds.height * (0.18 + row * 0.26) - puck.size * 0.5;
+        puck.rotation = index * 18;
+        placePuck(puck);
+      });
+      return;
+    }
+
+    const pointerIsHot = pointer.active && now - pointer.lastMove < 1500;
+
+    pucks.forEach((puck) => {
+      if (pointerIsHot) {
+        const centerX = puck.x + puck.size * 0.5;
+        const centerY = puck.y + puck.size * 0.5;
+        const deltaX = centerX - pointer.x;
+        const deltaY = centerY - pointer.y;
+        const distance = Math.max(52, Math.hypot(deltaX, deltaY));
+        const force = Math.min(1, 220 / distance) * 0.038;
+        puck.vx += (deltaX / distance) * force;
+        puck.vy += (deltaY / distance) * force;
+      }
+
+      puck.vx *= 0.992;
+      puck.vy *= 0.992;
+      puck.x += puck.vx;
+      puck.y += puck.vy;
+      puck.rotation += puck.spin + puck.vx * 0.12;
+
+      if (puck.x < -puck.size * 0.2 || puck.x > bounds.width - puck.size * 0.8) {
+        puck.vx *= -0.94;
+        puck.x = Math.min(Math.max(-puck.size * 0.2, puck.x), bounds.width - puck.size * 0.8);
+      }
+
+      if (puck.y < -puck.size * 0.15 || puck.y > bounds.height - puck.size * 0.7) {
+        puck.vy *= -0.94;
+        puck.y = Math.min(Math.max(-puck.size * 0.15, puck.y), bounds.height - puck.size * 0.7);
+      }
+
+      puck.element.classList.toggle("is-pointer-hot", pointerIsHot);
+      placePuck(puck);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener("pointermove", setPointer, { passive: true });
+  window.addEventListener("resize", resizeField, { passive: true });
+  resizeField();
+  requestAnimationFrame(animate);
+}
+
+setupFeaturePuckField();
+})();

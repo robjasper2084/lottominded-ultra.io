@@ -8,15 +8,27 @@
   const energyMeter = document.querySelector("[data-sphere-energy]");
   const orbitOutput = document.querySelector("[data-sphere-orbit]");
   const rerollButton = document.querySelector("[data-reroll-spheres]");
+  const moveCountOutput = document.querySelector("[data-sphere-move-count]");
+  const pick6Output = document.querySelector("[data-sphere-pick6]");
+  const pick3Output = document.querySelector("[data-sphere-pick3]");
+  const pick4Output = document.querySelector("[data-sphere-pick4]");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  const palette = [
+  const sphereTheme = stage.dataset.spheresTheme || "default";
+  const standardPalette = [
     { face: "#effbff", rim: "#ffe071", glow: "rgba(255, 224, 113, 0.52)", ink: "#05111c" },
     { face: "#29f7ff", rim: "#eefbff", glow: "rgba(41, 247, 255, 0.58)", ink: "#03101a" },
     { face: "#5eff9d", rim: "#fff3a0", glow: "rgba(94, 255, 157, 0.46)", ink: "#03120b" },
     { face: "#ff65db", rim: "#ffe071", glow: "rgba(255, 101, 219, 0.44)", ink: "#fff7d1" },
     { face: "#ffffff", rim: "#29f7ff", glow: "rgba(255, 255, 255, 0.32)", ink: "#07111b" }
   ];
+  const goldenPalette = [
+    { face: "#fff3a8", rim: "#d59a22", glow: "rgba(255, 207, 82, 0.58)", trail: "rgba(255, 199, 76, 0.13)", shadow: "#2a1700", center: "rgba(255, 248, 211, 0.88)", number: "#241300" },
+    { face: "#ffe071", rim: "#a96d12", glow: "rgba(255, 176, 39, 0.5)", trail: "rgba(255, 177, 44, 0.11)", shadow: "#261300", center: "rgba(255, 239, 168, 0.9)", number: "#241300" },
+    { face: "#ffd15a", rim: "#fff0a6", glow: "rgba(255, 224, 113, 0.54)", trail: "rgba(255, 224, 113, 0.12)", shadow: "#3a2100", center: "rgba(255, 250, 222, 0.9)", number: "#241300" },
+    { face: "#f6b83c", rim: "#ffe071", glow: "rgba(255, 185, 60, 0.48)", trail: "rgba(255, 185, 60, 0.1)", shadow: "#231100", center: "rgba(255, 242, 190, 0.88)", number: "#241300" }
+  ];
+  const palette = sphereTheme === "golden" ? goldenPalette : standardPalette;
 
   const pointer = { x: 0, y: 0, active: false };
   let width = 1;
@@ -25,6 +37,9 @@
   let balls = [];
   let raf = 0;
   let energy = 58;
+  let moveTriggerCount = 0;
+  let lastMovePoint = null;
+  let lastMoveTriggerAt = 0;
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -43,8 +58,37 @@
     return pool.slice(0, 5).sort((a, b) => a - b);
   }
 
+  function makeUniqueSet(count, max) {
+    const pool = Array.from({ length: max }, (_, index) => index + 1);
+    for (let i = pool.length - 1; i > 0; i -= 1) {
+      const swapIndex = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[swapIndex]] = [pool[swapIndex], pool[i]];
+    }
+    return pool.slice(0, count).sort((a, b) => a - b);
+  }
+
+  function makeDigitSet(count) {
+    return Array.from({ length: count }, () => Math.floor(Math.random() * 10));
+  }
+
   function setSignal(numbers) {
     if (signalOutput) signalOutput.textContent = numbers.map(pad).join(" - ");
+  }
+
+  function setGeneratedSets() {
+    const pick6 = makeUniqueSet(6, 69);
+    const pick3 = makeDigitSet(3);
+    const pick4 = makeDigitSet(4);
+    if (pick6Output) pick6Output.textContent = pick6.map(pad).join(" - ");
+    if (pick3Output) pick3Output.textContent = pick3.join(" - ");
+    if (pick4Output) pick4Output.textContent = pick4.join(" - ");
+    if (moveCountOutput) moveCountOutput.textContent = "Generated after 3 ball moves. Move 3 more times for a fresh set.";
+    setSignal(pick6.slice(0, 5));
+  }
+
+  function updateMoveTriggerLabel() {
+    if (!moveCountOutput || moveTriggerCount === 0) return;
+    moveCountOutput.textContent = `${moveTriggerCount}/3 ball moves captured.`;
   }
 
   function setEnergy(value) {
@@ -79,6 +123,9 @@
         color: paletteItem
       };
     });
+    moveTriggerCount = 0;
+    lastMovePoint = null;
+    if (moveCountOutput) moveCountOutput.textContent = "Move the balls 3 times to generate sets.";
   }
 
   function resize() {
@@ -123,7 +170,7 @@
     const trailSize = ball.size * 2.2;
     const glow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, trailSize);
     glow.addColorStop(0, ball.color.glow);
-    glow.addColorStop(0.42, "rgba(41, 247, 255, 0.08)");
+    glow.addColorStop(0.42, ball.color.trail || "rgba(41, 247, 255, 0.08)");
     glow.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = glow;
     ctx.beginPath();
@@ -138,7 +185,7 @@
     gradient.addColorStop(0, "#ffffff");
     gradient.addColorStop(0.2, ball.color.face);
     gradient.addColorStop(0.62, ball.color.rim);
-    gradient.addColorStop(1, "#05101a");
+    gradient.addColorStop(1, ball.color.shadow || "#05101a");
 
     ctx.save();
     ctx.shadowColor = ball.color.glow;
@@ -157,12 +204,12 @@
     ctx.stroke();
 
     ctx.globalAlpha = 1;
-    ctx.fillStyle = "rgba(0, 5, 12, 0.82)";
+    ctx.fillStyle = ball.color.center || "rgba(0, 5, 12, 0.82)";
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, r * 0.44, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = ball.color.rim;
+    ctx.fillStyle = ball.color.number || ball.color.rim;
     ctx.font = `900 ${Math.max(16, r * 0.55)}px ${getComputedStyle(document.documentElement).getPropertyValue("--body-font") || "Inter, sans-serif"}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -227,6 +274,26 @@
     pointer.x = event.clientX - rect.left;
     pointer.y = event.clientY - rect.top;
     pointer.active = true;
+
+    const now = performance.now();
+    if (!lastMovePoint) {
+      lastMovePoint = { x: pointer.x, y: pointer.y };
+      moveTriggerCount = 1;
+      lastMoveTriggerAt = now;
+      updateMoveTriggerLabel();
+      return;
+    }
+    const distance = Math.hypot(pointer.x - lastMovePoint.x, pointer.y - lastMovePoint.y);
+    if (distance > 90 && now - lastMoveTriggerAt > 250) {
+      moveTriggerCount += 1;
+      lastMoveTriggerAt = now;
+      lastMovePoint = { x: pointer.x, y: pointer.y };
+      updateMoveTriggerLabel();
+      if (moveTriggerCount >= 3) {
+        moveTriggerCount = 0;
+        setGeneratedSets();
+      }
+    }
   }
 
   stage.addEventListener("pointermove", updatePointer);

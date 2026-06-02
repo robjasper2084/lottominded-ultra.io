@@ -299,6 +299,61 @@
   line-height: 1.5;
 }
 
+.sphere-generated-sets {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(41, 247, 255, 0.2);
+}
+
+.sphere-generated-sets > strong {
+  color: var(--gold);
+  font-family: var(--display-font);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.sphere-generated-sets > span {
+  margin: 0;
+  color: rgba(237, 248, 255, 0.7);
+  font-family: var(--ui-font);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.sphere-generated-sets dl {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.sphere-generated-sets div {
+  display: grid;
+  grid-template-columns: 4.6rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.sphere-generated-sets dt,
+.sphere-generated-sets dd {
+  margin: 0;
+}
+
+.sphere-generated-sets dt {
+  color: #ffe071;
+  font-family: var(--display-font);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.sphere-generated-sets dd {
+  color: #effbff;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 0.9rem rgba(41, 247, 255, 0.28);
+}
+
 .sphere-info-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -308,11 +363,54 @@
 }
 
 .sphere-info-grid article {
+  position: relative;
+  isolation: isolate;
   min-height: 13rem;
   padding: 1.3rem;
+  overflow: hidden;
   border: 1px solid rgba(41, 247, 255, 0.22);
   border-radius: 0.5rem;
   background: linear-gradient(145deg, rgba(14, 34, 51, 0.7), rgba(4, 7, 16, 0.78));
+  transition:
+    border-color 260ms ease,
+    background 260ms ease,
+    transform 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.sphere-info-grid article::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(12, 92, 255, 0.72), rgba(41, 247, 255, 0.42), rgba(12, 92, 255, 0.72)),
+    repeating-linear-gradient(90deg, transparent 0 1.8rem, rgba(255, 255, 255, 0.16) 1.86rem 1.92rem);
+  opacity: 0;
+  transform: translateX(-16%) scaleX(0.82);
+  transition: opacity 260ms ease, transform 420ms ease;
+}
+
+.sphere-info-grid article:hover,
+.sphere-info-grid article:focus-within {
+  border-color: rgba(41, 247, 255, 0.64);
+  background: linear-gradient(145deg, rgba(11, 65, 130, 0.78), rgba(4, 7, 16, 0.88));
+  box-shadow:
+    0 1.6rem 4.4rem rgba(0, 0, 0, 0.36),
+    0 0 2rem rgba(41, 247, 255, 0.16);
+  transform: translateY(-0.22rem);
+}
+
+.sphere-info-grid article:focus-visible {
+  outline: 2px solid rgba(255, 224, 113, 0.78);
+  outline-offset: 4px;
+}
+
+.sphere-info-grid article:hover::before,
+.sphere-info-grid article:focus-within::before {
+  opacity: 0.82;
+  transform: translateX(0) scaleX(1);
 }
 
 .sphere-info-grid span {
@@ -322,15 +420,93 @@
 }
 
 .sphere-info-grid h2 {
+  position: relative;
+  display: inline-block;
   margin: 0.4rem 0 0;
+  color: #effbff;
   font-size: clamp(1.8rem, 5vw, 3.8rem);
   line-height: 0.9;
   text-transform: uppercase;
+  transition: color 220ms ease, transform 260ms ease, text-shadow 260ms ease;
+}
+
+.sphere-info-grid h2::before,
+.sphere-info-grid h2::after {
+  position: absolute;
+  inset: 0;
+  content: attr(data-kinetic);
+  color: transparent;
+  pointer-events: none;
+  opacity: 0;
+  -webkit-text-stroke: 1px rgba(245, 251, 255, 0.9);
+  text-stroke: 1px rgba(245, 251, 255, 0.9);
+  text-shadow: none;
+  mix-blend-mode: screen;
+}
+
+.sphere-info-grid h2::before {
+  transform: translate3d(-0.18em, -0.04em, 0);
+}
+
+.sphere-info-grid h2::after {
+  transform: translate3d(0.16em, 0.06em, 0);
+  -webkit-text-stroke-color: rgba(255, 224, 113, 0.76);
+  text-stroke-color: rgba(255, 224, 113, 0.76);
+}
+
+.sphere-info-grid article:hover h2,
+.sphere-info-grid article:focus-within h2 {
+  color: transparent;
+  transform: translateX(0.08rem);
+  -webkit-text-stroke: 0.055em rgba(245, 251, 255, 0.82);
+  text-stroke: 0.055em rgba(245, 251, 255, 0.82);
+}
+
+.sphere-info-grid article:hover h2::before,
+.sphere-info-grid article:focus-within h2::before {
+  animation: sphereKineticWord 820ms cubic-bezier(0.16, 0.92, 0.28, 1) infinite alternate;
+  opacity: 1;
+}
+
+.sphere-info-grid article:hover h2::after,
+.sphere-info-grid article:focus-within h2::after {
+  animation: sphereKineticWordBack 980ms cubic-bezier(0.16, 0.92, 0.28, 1) infinite alternate;
+  opacity: 0.86;
 }
 
 .sphere-info-grid p {
   color: rgba(237, 248, 255, 0.74);
   line-height: 1.55;
+}
+
+@keyframes sphereKineticWord {
+  0% {
+    transform: translate3d(-0.24em, -0.04em, 0);
+    opacity: 0.54;
+  }
+  52% {
+    transform: translate3d(0.04em, 0.02em, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0.22em, -0.015em, 0);
+    opacity: 0.72;
+  }
+}
+
+@keyframes sphereKineticWordBack {
+  0% {
+    transform: translate3d(0.22em, 0.08em, 0);
+    opacity: 0.44;
+  }
+  58% {
+    transform: translate3d(-0.02em, -0.01em, 0);
+    opacity: 0.94;
+  }
+  100% {
+    transform: translate3d(-0.18em, 0.05em, 0);
+    opacity: 0.64;
+  }
 }
 
 @keyframes sphereSweep {
@@ -341,6 +517,24 @@
   to {
     transform: translate3d(4%, 2%, 0) scale(1.06);
     opacity: 0.94;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere-info-grid article,
+  .sphere-info-grid article::before,
+  .sphere-info-grid h2,
+  .sphere-info-grid h2::before,
+  .sphere-info-grid h2::after {
+    animation: none;
+    transition: none;
+  }
+
+  .sphere-info-grid article:hover,
+  .sphere-info-grid article:focus-within,
+  .sphere-info-grid article:hover h2,
+  .sphere-info-grid article:focus-within h2 {
+    transform: none;
   }
 }
 

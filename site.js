@@ -154,6 +154,109 @@ function setGamePipOffset(x, y) {
   gamePip.style.setProperty("--game-pip-y", `${Math.round(next.y)}px`);
 }
 
+function setupGuidePuckField() {
+  const field = document.querySelector("[data-guide-puck-field]");
+  if (!field) return;
+
+  const pucks = Array.from(field.querySelectorAll(".branded-puck"));
+  if (!pucks.length) return;
+
+  field.classList.add("is-reactive");
+  const pointer = {
+    x: window.innerWidth * 0.52,
+    y: window.innerHeight * 0.42,
+    active: false,
+    lastMove: 0,
+  };
+
+  const puckState = pucks.map((element, index) => {
+    const columns = Math.min(3, pucks.length);
+    const row = Math.floor(index / columns);
+    const column = index % columns;
+    const baseX = window.innerWidth * (0.12 + column * 0.34);
+    const baseY = window.innerHeight * (0.18 + row * 0.3);
+    return {
+      element,
+      baseX,
+      baseY,
+      x: baseX,
+      y: baseY,
+      vx: (index % 2 ? 0.28 : -0.22),
+      vy: (index % 3 ? -0.18 : 0.22),
+      rotation: index * 24 - 18,
+      spin: (index % 2 ? 0.18 : -0.14),
+      size: 150 + index * 26,
+    };
+  });
+
+  function resizeGuideField() {
+    puckState.forEach((puck, index) => {
+      const columns = Math.min(3, pucks.length);
+      const row = Math.floor(index / columns);
+      const column = index % columns;
+      puck.baseX = window.innerWidth * (0.12 + column * 0.34);
+      puck.baseY = window.innerHeight * (0.18 + row * 0.3);
+      puck.size = Math.max(110, Math.min(320, 130 + window.innerWidth * 0.035 + index * 22));
+      puck.element.style.setProperty("--puck-size", `${puck.size}px`);
+    });
+  }
+
+  function moveGuidePointer(event) {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+    pointer.lastMove = performance.now();
+    field.style.setProperty("--guide-pointer-x", `${event.clientX}px`);
+    field.style.setProperty("--guide-pointer-y", `${event.clientY}px`);
+    field.style.setProperty("--guide-field-x", `${(event.clientX / window.innerWidth - 0.5) * 24}px`);
+    field.style.setProperty("--guide-field-y", `${(event.clientY / window.innerHeight - 0.5) * 18}px`);
+    document.body.style.setProperty("--guide-pointer-x", `${event.clientX}px`);
+    document.body.style.setProperty("--guide-pointer-y", `${event.clientY}px`);
+  }
+
+  function renderGuideField(now) {
+    const hot = pointer.active && now - pointer.lastMove < 1600;
+    const driftScale = reducedMotionQuery.matches ? 0 : 1;
+
+    puckState.forEach((puck, index) => {
+      const orbitX = Math.cos(now * 0.00032 + index) * 42 * driftScale;
+      const orbitY = Math.sin(now * 0.00028 + index * 1.7) * 34 * driftScale;
+      const targetX = puck.baseX + orbitX;
+      const targetY = puck.baseY + orbitY;
+
+      puck.vx += (targetX - puck.x) * 0.006;
+      puck.vy += (targetY - puck.y) * 0.006;
+
+      if (hot && !reducedMotionQuery.matches) {
+        const dx = puck.x + puck.size * 0.5 - pointer.x;
+        const dy = puck.y + puck.size * 0.5 - pointer.y;
+        const distance = Math.max(80, Math.hypot(dx, dy));
+        const force = Math.min(1, 280 / distance) * 0.42;
+        puck.vx += (dx / distance) * force;
+        puck.vy += (dy / distance) * force;
+      }
+
+      puck.vx *= 0.88;
+      puck.vy *= 0.88;
+      puck.x += puck.vx;
+      puck.y += puck.vy;
+      puck.rotation += puck.spin * driftScale + puck.vx * 0.08;
+
+      puck.element.classList.toggle("is-hot", hot);
+      puck.element.style.transform = `translate3d(${puck.x}px, ${puck.y}px, 0) rotate(${puck.rotation}deg)`;
+    });
+
+    window.requestAnimationFrame(renderGuideField);
+  }
+
+  resizeGuideField();
+  document.addEventListener("pointermove", moveGuidePointer, { passive: true });
+  window.addEventListener("resize", resizeGuideField, { passive: true });
+  window.requestAnimationFrame(renderGuideField);
+}
+
+setupGuidePuckField();
+
 function showGamePip() {
   if (!gamePip) return;
   if (gamePip.classList.contains("is-open")) return;
