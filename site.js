@@ -17,6 +17,7 @@ const domainStrip = document.querySelector(".domain-strip");
 const gamePip = document.querySelector("[data-game-pip]");
 const gamePipClose = document.querySelector("[data-game-pip-close]");
 const gamePipFrame = gamePip?.querySelector("iframe");
+const gamePipHead = gamePip?.querySelector(".home-game-pip-head");
 const memberForm = document.querySelector("[data-member-form]");
 const memberDownload = document.querySelector("[data-member-download]");
 const memberMessage = document.querySelector("[data-member-message]");
@@ -32,6 +33,11 @@ const SUPPORT_EMAIL = "robjasper2084@gmail.com";
 let soundtrackStartedFromPage = false;
 let soundtrackStartedFromHover = false;
 let gamePipHideTimer = 0;
+let gamePipOpenedAt = 0;
+let gamePipShouldResumeSoundtrack = false;
+let gamePipResumeFromPage = false;
+let gamePipResumeFromHover = false;
+let gamePipDragState = null;
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
   siteSoundtrack.removeAttribute("loop");
@@ -116,31 +122,112 @@ function closeStartupVideo() {
   playSiteSoundtrack({ fromPage: true });
 }
 
+function getGamePipOffset() {
+  if (!gamePip) return { x: 0, y: 0 };
+  const styles = getComputedStyle(gamePip);
+  return {
+    x: parseFloat(styles.getPropertyValue("--game-pip-x")) || 0,
+    y: parseFloat(styles.getPropertyValue("--game-pip-y")) || 0,
+  };
+}
+
+function clampGamePipOffset(x, y) {
+  if (!gamePip) return { x, y };
+  const margin = 12;
+  const rect = gamePip.getBoundingClientRect();
+  const baseLeft = (window.innerWidth - rect.width) / 2;
+  const baseTop = (window.innerHeight - rect.height) / 2;
+  const minX = margin - baseLeft;
+  const maxX = window.innerWidth - margin - rect.width - baseLeft;
+  const minY = margin - baseTop;
+  const maxY = window.innerHeight - margin - rect.height - baseTop;
+  return {
+    x: Math.min(Math.max(x, minX), maxX),
+    y: Math.min(Math.max(y, minY), maxY),
+  };
+}
+
+function setGamePipOffset(x, y) {
+  if (!gamePip) return;
+  const next = clampGamePipOffset(x, y);
+  gamePip.style.setProperty("--game-pip-x", `${Math.round(next.x)}px`);
+  gamePip.style.setProperty("--game-pip-y", `${Math.round(next.y)}px`);
+}
+
 function showGamePip() {
   if (!gamePip) return;
+  if (gamePip.classList.contains("is-open")) return;
   window.clearTimeout(gamePipHideTimer);
   if (gamePipFrame && !gamePipFrame.getAttribute("src")) {
     gamePipFrame.setAttribute("src", gamePipFrame.dataset.src || "");
   }
   gamePip.classList.add("is-open");
   gamePip.setAttribute("aria-hidden", "false");
+  gamePipOpenedAt = Date.now();
   if (siteSoundtrack) {
+    gamePipShouldResumeSoundtrack = !siteSoundtrack.paused;
+    gamePipResumeFromPage = soundtrackStartedFromPage;
+    gamePipResumeFromHover = soundtrackStartedFromHover;
     siteSoundtrack.pause();
     soundtrackStartedFromHover = false;
     setSoundtrackButtonState(false);
   }
 }
 
-function hideGamePip() {
+function resumeGamePipSoundtrack() {
+  if (!siteSoundtrack || !gamePipShouldResumeSoundtrack) return;
+  playSiteSoundtrack({
+    fromPage: gamePipResumeFromPage,
+    fromHover: gamePipResumeFromHover,
+    volume: siteSoundtrack.volume || 0.42,
+  });
+}
+
+function hideGamePip(options = {}) {
   if (!gamePip) return;
   gamePip.classList.remove("is-open");
   gamePip.setAttribute("aria-hidden", "true");
   if (gamePipFrame) gamePipFrame.removeAttribute("src");
+  if (options.resumeSoundtrack) resumeGamePipSoundtrack();
+  gamePipShouldResumeSoundtrack = false;
+  gamePipResumeFromPage = false;
+  gamePipResumeFromHover = false;
 }
 
 function scheduleHideGamePip() {
   window.clearTimeout(gamePipHideTimer);
   gamePipHideTimer = window.setTimeout(hideGamePip, 260);
+}
+
+function startGamePipDrag(event) {
+  if (!gamePip || event.target.closest("[data-game-pip-close]")) return;
+  if (event.button !== undefined && event.button !== 0) return;
+  event.preventDefault();
+  const offset = getGamePipOffset();
+  gamePipDragState = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    offsetX: offset.x,
+    offsetY: offset.y,
+  };
+  gamePip.classList.add("is-dragging");
+  gamePipHead?.setPointerCapture?.(event.pointerId);
+}
+
+function updateGamePipDrag(event) {
+  if (!gamePipDragState || event.pointerId !== gamePipDragState.pointerId) return;
+  setGamePipOffset(
+    gamePipDragState.offsetX + event.clientX - gamePipDragState.startX,
+    gamePipDragState.offsetY + event.clientY - gamePipDragState.startY,
+  );
+}
+
+function endGamePipDrag(event) {
+  if (!gamePipDragState || event.pointerId !== gamePipDragState.pointerId) return;
+  gamePipDragState = null;
+  gamePip?.classList.remove("is-dragging");
+  gamePipHead?.releasePointerCapture?.(event.pointerId);
 }
 
 startupVideoClose?.addEventListener("click", closeStartupVideo);
@@ -164,14 +251,16 @@ document.addEventListener("keydown", (event) => {
     closeStartupVideo();
   }
   if (event.key === "Escape" && gamePip?.classList.contains("is-open")) {
-    hideGamePip();
+    hideGamePip({ resumeSoundtrack: true });
   }
 });
 
 function setSoundtrackButtonState(isPlaying, blocked = false) {
   soundtrackButtons.forEach((button) => {
-    const playLabel = conciseSoundtrackLabels ? "Demo Music" : "Play Demo Music";
-    const pauseLabel = conciseSoundtrackLabels ? "Pause Music" : "Pause Demo Music";
+    const defaultPlayLabel = conciseSoundtrackLabels ? "Demo Music" : "Play Demo Music";
+    const defaultPauseLabel = conciseSoundtrackLabels ? "Pause Music" : "Pause Demo Music";
+    const playLabel = button.dataset.soundtrackPlayLabel || defaultPlayLabel;
+    const pauseLabel = button.dataset.soundtrackPauseLabel || defaultPauseLabel;
     button.textContent = blocked ? playLabel : isPlaying ? pauseLabel : playLabel;
     button.setAttribute("aria-pressed", String(isPlaying));
   });
@@ -209,11 +298,27 @@ soundtrackButtons.forEach((button) => {
 });
 
 domainStrip?.addEventListener("pointerenter", () => {
+  if (gamePipDragState) return;
+  if (gamePip?.classList.contains("is-open")) {
+    if (Date.now() - gamePipOpenedAt > 400) {
+      hideGamePip({ resumeSoundtrack: true });
+    }
+    return;
+  }
   showGamePip();
 });
 
 gamePip?.addEventListener("pointerenter", () => window.clearTimeout(gamePipHideTimer));
-gamePipClose?.addEventListener("click", hideGamePip);
+gamePipClose?.addEventListener("click", () => hideGamePip({ resumeSoundtrack: true }));
+gamePipHead?.addEventListener("pointerdown", startGamePipDrag);
+document.addEventListener("pointermove", updateGamePipDrag);
+document.addEventListener("pointerup", endGamePipDrag);
+document.addEventListener("pointercancel", endGamePipDrag);
+window.addEventListener("resize", () => {
+  if (!gamePip) return;
+  const offset = getGamePipOffset();
+  setGamePipOffset(offset.x, offset.y);
+});
 
 function setMemberDownloadUnlocked(unlocked, profile = null) {
   if (!memberDownload) return;

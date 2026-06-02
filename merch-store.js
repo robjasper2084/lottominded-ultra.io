@@ -8,13 +8,7 @@ const cartNote = document.querySelector("[data-cart-note]");
 const merchSoundCard = document.querySelector("[data-merch-sound-card]");
 const merchSoundVideo = document.querySelector("[data-merch-sound-video]");
 const merchSoundToggle = document.querySelector("[data-merch-sound-toggle]");
-const merchFallbackAudio = typeof Audio !== "undefined" ? new Audio("./assets/audio/lottominded-main-theme.mp3") : null;
 const CART_STORAGE_KEY = "lottomind.merch.cart.v1";
-
-if (merchFallbackAudio) {
-  merchFallbackAudio.loop = true;
-  merchFallbackAudio.volume = 0.46;
-}
 
 function loadCart() {
   try {
@@ -137,9 +131,23 @@ function copyTextArea(targetId, button) {
   });
 }
 
+function pauseMerchIntroAudio() {
+  document.querySelectorAll("audio, video").forEach((media) => {
+    if (media === merchSoundVideo) return;
+    const isIntroMedia =
+      media.id === "siteSoundtrack" ||
+      media.closest("[data-startup-video]") ||
+      media.classList.contains("startup-video-player");
+    if (media.tagName === "AUDIO" || isIntroMedia || !media.muted) {
+      media.pause();
+    }
+  });
+}
+
 async function playMerchCapsuleSound() {
   if (!merchSoundVideo || !merchSoundToggle) return;
   let played = false;
+  pauseMerchIntroAudio();
   try {
     merchSoundVideo.muted = false;
     merchSoundVideo.volume = 0.78;
@@ -147,12 +155,6 @@ async function playMerchCapsuleSound() {
     played = true;
   } catch {
     played = false;
-  }
-  try {
-    await merchFallbackAudio?.play();
-    played = true;
-  } catch {
-    // Browser audio policies may require a click before sound can start.
   }
   if (played) {
     merchSoundToggle.textContent = "Sound on";
@@ -166,7 +168,6 @@ async function playMerchCapsuleSound() {
 function pauseMerchCapsuleSound() {
   if (!merchSoundVideo || !merchSoundToggle) return;
   merchSoundVideo.muted = true;
-  merchFallbackAudio?.pause();
   merchSoundToggle.textContent = "Play sound";
   merchSoundToggle.classList.remove("is-playing");
 }
@@ -174,6 +175,15 @@ function pauseMerchCapsuleSound() {
 document.addEventListener("pointermove", (event) => {
   merchRoot.style.setProperty("--mx", `${event.clientX}px`);
   merchRoot.style.setProperty("--my", `${event.clientY}px`);
+  if (merchSoundCard) {
+    const cardRect = merchSoundCard.getBoundingClientRect();
+    const insideCard =
+      event.clientX >= cardRect.left &&
+      event.clientX <= cardRect.right &&
+      event.clientY >= cardRect.top &&
+      event.clientY <= cardRect.bottom;
+    merchSoundCard.classList.toggle("is-hover-grown", insideCard);
+  }
   if (!merchHero) return;
   const rect = merchHero.getBoundingClientRect();
   const x = event.clientX - rect.left - rect.width / 2;
@@ -262,6 +272,11 @@ document.addEventListener("click", (event) => {
 });
 
 merchSoundCard?.addEventListener("pointerenter", playMerchCapsuleSound);
+merchSoundVideo?.addEventListener("pointerdown", pauseMerchIntroAudio);
+merchSoundVideo?.addEventListener("play", pauseMerchIntroAudio);
+merchSoundVideo?.addEventListener("volumechange", () => {
+  if (!merchSoundVideo.muted) pauseMerchIntroAudio();
+});
 
 const revealObserver = new IntersectionObserver(
   (entries) => {

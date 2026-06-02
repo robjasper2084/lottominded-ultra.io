@@ -1236,6 +1236,8 @@ button {
 .home-game-pip {
   position: fixed;
   inset: 50% auto auto 50%;
+  --game-pip-x: 0px;
+  --game-pip-y: 0px;
   z-index: 60;
   width: min(84vw, 980px);
   height: min(74vh, 620px);
@@ -1253,14 +1255,18 @@ button {
     inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -46%) scale(0.96);
+  transform: translate(calc(-50% + var(--game-pip-x)), calc(-46% + var(--game-pip-y))) scale(0.96);
   transition: opacity 180ms ease, transform 220ms ease;
 }
 
 .home-game-pip.is-open {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translate(calc(-50% + var(--game-pip-x)), calc(-50% + var(--game-pip-y))) scale(1);
+}
+
+.home-game-pip.is-dragging {
+  transition: opacity 180ms ease;
 }
 
 .home-game-pip-head {
@@ -1272,6 +1278,13 @@ button {
   border-bottom: 1px solid rgba(255, 224, 113, 0.26);
   color: #f9e2a1;
   background: rgba(8, 7, 6, 0.92);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.home-game-pip.is-dragging .home-game-pip-head {
+  cursor: grabbing;
 }
 
 .home-game-pip-head strong {
@@ -1590,13 +1603,15 @@ p {
 }
 
 .home-page .feature-band h2 {
-  font-size: clamp(3.22rem, 6.96vw, 6.51rem);
-  max-width: 9.6ch;
-  font-family: "Aptos Display", "Segoe UI Variable Display", Inter, var(--body-font);
+  font-size: clamp(3.05rem, 6.45vw, 6.2rem);
+  max-width: 10.2ch;
+  font-family: var(--display-font);
   font-weight: 900;
-  text-transform: none;
+  text-transform: uppercase;
   color: transparent;
-  background: linear-gradient(96deg, #f8fbff 0%, #b9f7ff 34%, #ffe071 68%, #f8fbff 100%);
+  background:
+    linear-gradient(100deg, #effbff 0%, #97efff 26%, #ffe071 52%, #5eff9d 78%, #effbff 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(41, 247, 255, 0.72));
   background-size: 220% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -2373,7 +2388,68 @@ p {
 }
 
 .prompt-lab-beat2lotto-top {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
   padding-top: clamp(2.5rem, 6vw, 5rem);
+  padding-inline: clamp(1rem, 5vw, 5rem);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 224, 113, 0.16), transparent 31rem),
+    radial-gradient(circle at 78% 12%, rgba(41, 247, 255, 0.2), transparent 34rem),
+    linear-gradient(145deg, #010307 0%, #04111b 48%, #07020b 100%);
+}
+
+.prompt-lab-beat2lotto-top .beat2lotto-hero,
+.prompt-lab-beat2lotto-top .beat2lotto-console {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+}
+
+.prompt-lab-sphere-canvas,
+.prompt-lab-sphere-grid,
+.prompt-lab-sphere-scanline {
+  position: absolute;
+  inset: 0;
+}
+
+.prompt-lab-sphere-canvas {
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.prompt-lab-sphere-grid {
+  z-index: -2;
+  opacity: 0.5;
+  background:
+    linear-gradient(rgba(41, 247, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 84%, transparent);
+}
+
+.prompt-lab-sphere-scanline {
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 54% 42%, rgba(41, 247, 255, 0.16), transparent 26rem),
+    linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.1), transparent);
+  mix-blend-mode: screen;
+  animation: sphereSweep 7s ease-in-out infinite alternate;
+}
+
+@keyframes sphereSweep {
+  from {
+    transform: translateX(-12%);
+    opacity: 0.45;
+  }
+
+  to {
+    transform: translateX(12%);
+    opacity: 0.82;
+  }
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero {
