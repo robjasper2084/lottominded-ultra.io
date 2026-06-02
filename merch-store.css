@@ -213,6 +213,37 @@
   filter: saturate(1.18) contrast(1.05);
 }
 
+.merch-hero-video-toggle {
+  position: absolute;
+  right: clamp(1rem, 3vw, 3.25rem);
+  top: clamp(5.5rem, 9vw, 7rem);
+  z-index: 3;
+  min-height: 34px;
+  padding: 0.45rem 0.76rem;
+  border: 1px solid rgba(41, 247, 255, 0.42);
+  border-radius: 999px;
+  color: #eafff6;
+  background:
+    linear-gradient(135deg, rgba(41, 247, 255, 0.22), rgba(255, 224, 113, 0.12)),
+    rgba(2, 8, 18, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 24px rgba(41, 247, 255, 0.16);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.merch-hero-video-toggle:hover,
+.merch-hero-video-toggle:focus-visible,
+.merch-hero-video-toggle.is-playing {
+  color: #06120f;
+  border-color: rgba(255, 224, 113, 0.72);
+  background: linear-gradient(135deg, #e9ff82, #29f7ff);
+  box-shadow: 0 0 30px rgba(41, 247, 255, 0.28);
+}
+
 .merch-hero-glass {
   max-width: 760px;
   transform: translate3d(var(--hero-copy-x, 0), var(--hero-copy-y, 0), 0);
@@ -611,6 +642,7 @@
 .merch-drop-section {
   position: relative;
   isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 1.22fr);
   gap: clamp(1.2rem, 3vw, 2rem);
@@ -619,6 +651,25 @@
   background:
     radial-gradient(circle at 16% 24%, rgba(41, 247, 255, 0.13), transparent 26rem),
     radial-gradient(circle at 86% 42%, rgba(255, 224, 113, 0.1), transparent 24rem);
+}
+
+.merch-drop-section::after,
+.gallery-section::before {
+  position: absolute;
+  inset: -8rem;
+  z-index: -2;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(116deg, transparent 0 47%, rgba(41, 247, 255, 0.22) 47.2% 47.8%, transparent 48% 100%),
+    linear-gradient(64deg, transparent 0 46%, rgba(255, 224, 113, 0.15) 46.2% 46.9%, transparent 47.2% 100%),
+    repeating-linear-gradient(90deg, transparent 0 5.8rem, rgba(41, 247, 255, 0.06) 5.85rem 5.94rem, transparent 6rem 11rem),
+    radial-gradient(circle at var(--mx, 55%) var(--my, 35%), rgba(41, 247, 255, 0.18), transparent 18rem);
+  background-size: 18rem 18rem, 24rem 20rem, auto, auto;
+  opacity: 0.72;
+  transform: translate3d(0, 0, 0) rotate(-4deg);
+  animation: merchArrowField 16s linear infinite;
+  mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
 }
 
 .merch-drop-section::before {
@@ -1005,11 +1056,24 @@
 }
 
 .gallery-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(18rem, 40rem) minmax(22rem, 1fr);
   gap: 1.35rem clamp(1.5rem, 4vw, 3.6rem);
   align-items: start;
   scroll-margin-top: 7.5rem;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(41, 247, 255, 0.1), transparent 23rem),
+    radial-gradient(circle at 76% 70%, rgba(255, 224, 113, 0.08), transparent 24rem);
+}
+
+.gallery-section::before {
+  z-index: -1;
+  opacity: 0.58;
+  animation-duration: 19s;
+  transform: translate3d(0, 0, 0) rotate(5deg);
 }
 
 .gallery-section .merch-section-copy {
@@ -1409,6 +1473,17 @@
   }
 }
 
+@keyframes merchArrowField {
+  from {
+    background-position: 0 0, 6rem 3rem, 0 0, 50% 50%;
+    transform: translate3d(-1.5rem, -0.5rem, 0) rotate(-4deg);
+  }
+  to {
+    background-position: 18rem 18rem, -16rem 20rem, 11rem 0, 50% 50%;
+    transform: translate3d(1.5rem, 0.5rem, 0) rotate(-4deg);
+  }
+}
+
 @keyframes merch-drop-web-pulse {
   0% {
     opacity: 0.26;
@@ -1689,6 +1764,8 @@
   .gallery-section .merch-section-copy p,
   .gallery-section .merch-section-copy p::before,
   .gallery-section .merch-section-copy p::after,
+  .merch-drop-section::after,
+  .gallery-section::before,
   .merch-drop-section .merch-section-copy::before,
   .merch-drop-section .merch-section-copy::after,
   .merch-drop-section .merch-section-copy h2::after,

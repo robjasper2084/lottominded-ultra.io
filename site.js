@@ -319,6 +319,275 @@ function setupGuidePuckField() {
 
 setupGuidePuckField();
 
+function setupInstrumentKeyboard() {
+  const keyboard = document.querySelector("[data-instrument-keyboard]");
+  if (!keyboard) return;
+
+  const noteFreq = {
+    C4: 261.63,
+    "C#4": 277.18,
+    D4: 293.66,
+    "D#4": 311.13,
+    E4: 329.63,
+    F4: 349.23,
+    "F#4": 369.99,
+    G4: 392,
+    "G#4": 415.3,
+    A4: 440,
+    "A#4": 466.16,
+    B4: 493.88,
+    C5: 523.25,
+  };
+  let audioContext = null;
+  let scaleTimer = 0;
+
+  function getKeyboardAudio() {
+    if (!audioContext) {
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextCtor) return null;
+      audioContext = new AudioContextCtor();
+    }
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+    return audioContext;
+  }
+
+  function playKeyboardNote(noteName, duration = 0.42, peak = 0.16) {
+    const frequency = noteFreq[noteName];
+    const context = getKeyboardAudio();
+    if (!frequency || !context) return;
+
+    const now = context.currentTime;
+    const osc = context.createOscillator();
+    const body = context.createOscillator();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    const bodyGain = context.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(frequency, now);
+    body.type = "sine";
+    body.frequency.setValueAtTime(frequency / 2, now);
+    bodyGain.gain.setValueAtTime(0.035, now);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + duration * 0.9);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(2800, now);
+    filter.frequency.exponentialRampToValueAtTime(920, now + duration);
+    filter.Q.setValueAtTime(0.86, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(peak, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(peak * 0.44, now + 0.09);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    body.connect(bodyGain);
+    bodyGain.connect(gain);
+    gain.connect(context.destination);
+    osc.start(now);
+    body.start(now);
+    osc.stop(now + duration + 0.04);
+    body.stop(now + duration + 0.04);
+  }
+
+  function setKeyPressed(key, pressed) {
+    key.classList.toggle("is-pressed", Boolean(pressed));
+  }
+
+  function playScale(scaleKey) {
+    const scale = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
+    window.clearInterval(scaleTimer);
+    let index = 0;
+    scaleKey.classList.add("is-demo-active");
+    playKeyboardNote(scale[index], 0.28, 0.12);
+    index += 1;
+    scaleTimer = window.setInterval(() => {
+      playKeyboardNote(scale[index], 0.28, 0.12);
+      index += 1;
+      if (index >= scale.length) {
+        window.clearInterval(scaleTimer);
+        scaleTimer = 0;
+        scaleKey.classList.remove("is-demo-active");
+      }
+    }, 190);
+  }
+
+  function routeInstrumentKey(key) {
+    const action = key.dataset.action;
+    if (action === "toggle-scale") {
+      playScale(key);
+      return;
+    }
+    if (action === "back") {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = "./index.html";
+      }
+      return;
+    }
+    const target = key.dataset.href || key.getAttribute("href");
+    if (target) window.location.href = target;
+  }
+
+  keyboard.querySelectorAll("[data-note]").forEach((key) => {
+    key.addEventListener("pointerenter", () => playKeyboardNote(key.dataset.note, 0.22, 0.075), { passive: true });
+    key.addEventListener("pointerdown", () => {
+      playKeyboardNote(key.dataset.note);
+      setKeyPressed(key, true);
+    });
+    key.addEventListener("pointerup", () => setKeyPressed(key, false));
+    key.addEventListener("pointercancel", () => setKeyPressed(key, false));
+    key.addEventListener("pointerleave", () => setKeyPressed(key, false));
+    key.addEventListener("click", (event) => {
+      event.preventDefault();
+      setKeyPressed(key, true);
+      window.setTimeout(() => {
+        setKeyPressed(key, false);
+        routeInstrumentKey(key);
+      }, 120);
+    });
+    key.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      playKeyboardNote(key.dataset.note);
+      routeInstrumentKey(key);
+    });
+  });
+
+  window.addEventListener("pagehide", () => window.clearInterval(scaleTimer));
+}
+
+setupInstrumentKeyboard();
+
+function setupPromptBallpassGame() {
+  const game = document.querySelector("[data-ballpass-game]");
+  const canvas = game?.querySelector("[data-ballpass-canvas]");
+  if (!game || !canvas) return;
+
+  const context = canvas.getContext("2d");
+  if (!context) return;
+
+  const puck = new Image();
+  puck.src = "./assets/brand/lottomind-branded-puck.png";
+
+  const pointer = { x: 0.72, y: 0.48, active: false, burst: 0 };
+  const balls = Array.from({ length: 9 }, (_, index) => ({
+    t: index / 9,
+    speed: 0.00012 + index * 0.00001,
+    radius: 12 + (index % 3) * 5,
+    color: index % 2 ? "#ffe071" : "#29f7ff",
+  }));
+
+  function resizeBallpass() {
+    const rect = game.getBoundingClientRect();
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+    canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  function drawBallpass(now) {
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    if (!width || !height) {
+      window.requestAnimationFrame(drawBallpass);
+      return;
+    }
+
+    context.clearRect(0, 0, width, height);
+    const centerX = width * 0.54;
+    const centerY = height * 0.52;
+    const pointerX = pointer.x * width;
+    const pointerY = pointer.y * height;
+    const laneRadiusX = width * 0.34;
+    const laneRadiusY = height * 0.28;
+
+    context.save();
+    context.globalCompositeOperation = "lighter";
+    context.lineWidth = 2;
+    context.strokeStyle = "rgba(41, 247, 255, 0.22)";
+    for (let i = 0; i < 4; i += 1) {
+      context.beginPath();
+      context.ellipse(centerX, centerY, laneRadiusX - i * 28, laneRadiusY - i * 18, -0.22, 0, Math.PI * 2);
+      context.stroke();
+    }
+
+    balls.forEach((ball, index) => {
+      const drift = reducedMotionQuery.matches ? 0 : now * ball.speed;
+      const angle = (ball.t + drift) * Math.PI * 2;
+      const pullX = (pointerX - centerX) * 0.08;
+      const pullY = (pointerY - centerY) * 0.08;
+      const x = centerX + Math.cos(angle) * (laneRadiusX - index * 7) + pullX;
+      const y = centerY + Math.sin(angle) * (laneRadiusY - index * 4) + pullY;
+      const glow = pointer.active ? 1.3 : 0.86;
+
+      context.beginPath();
+      context.fillStyle = ball.color;
+      context.shadowColor = ball.color;
+      context.shadowBlur = 18 * glow;
+      context.arc(x, y, ball.radius * glow, 0, Math.PI * 2);
+      context.fill();
+      context.shadowBlur = 0;
+      context.fillStyle = "rgba(3, 5, 10, 0.78)";
+      context.font = "800 12px Inter, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(String((index + 1) * 7).padStart(2, "0"), x, y);
+    });
+
+    const puckSize = Math.min(width, height) * (pointer.active ? 0.2 : 0.17);
+    const puckX = pointerX - puckSize / 2;
+    const puckY = pointerY - puckSize / 2;
+    if (puck.complete) {
+      context.shadowColor = "rgba(255, 224, 113, 0.55)";
+      context.shadowBlur = 28 + pointer.burst * 18;
+      context.drawImage(puck, puckX, puckY, puckSize, puckSize);
+    } else {
+      context.beginPath();
+      context.fillStyle = "#ffe071";
+      context.arc(pointerX, pointerY, puckSize / 2, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    if (pointer.burst > 0.01) {
+      context.beginPath();
+      context.strokeStyle = `rgba(255, 224, 113, ${pointer.burst})`;
+      context.lineWidth = 3;
+      context.arc(pointerX, pointerY, puckSize * (1.1 + (1 - pointer.burst) * 1.4), 0, Math.PI * 2);
+      context.stroke();
+      pointer.burst *= 0.92;
+    }
+    context.restore();
+
+    window.requestAnimationFrame(drawBallpass);
+  }
+
+  game.addEventListener("pointermove", (event) => {
+    const rect = game.getBoundingClientRect();
+    pointer.x = Math.max(0.08, Math.min(0.92, (event.clientX - rect.left) / rect.width));
+    pointer.y = Math.max(0.12, Math.min(0.88, (event.clientY - rect.top) / rect.height));
+    pointer.active = true;
+  }, { passive: true });
+  game.addEventListener("pointerleave", () => {
+    pointer.active = false;
+  });
+  game.addEventListener("click", () => {
+    pointer.burst = 1;
+  });
+  window.addEventListener("resize", resizeBallpass, { passive: true });
+  puck.addEventListener("load", () => pointer.burst = 0.6);
+  resizeBallpass();
+  window.requestAnimationFrame(drawBallpass);
+}
+
+setupPromptBallpassGame();
+
 function showGamePip() {
   if (!gamePip) return;
   if (gamePip.classList.contains("is-open")) return;

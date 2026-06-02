@@ -180,10 +180,10 @@
 .feature-console-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(280px, 0.86fr) minmax(360px, 1.14fr);
+  grid-template-columns: minmax(0, 760px);
   gap: clamp(24px, 5vw, 64px);
   align-items: center;
-  min-height: min(820px, calc(100vh - 88px));
+  min-height: min(620px, calc(100vh - 88px));
   padding: clamp(48px, 7vw, 92px) 0 clamp(52px, 7vw, 96px);
   overflow: hidden;
 }
@@ -241,6 +241,7 @@
 
 .feature-command-panel {
   position: relative;
+  margin: clamp(10px, 3vw, 28px) 0 clamp(44px, 6vw, 76px);
   min-height: 500px;
   overflow: hidden;
   isolation: isolate;

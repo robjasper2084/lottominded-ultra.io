@@ -8,7 +8,10 @@ const cartNote = document.querySelector("[data-cart-note]");
 const merchSoundCard = document.querySelector("[data-merch-sound-card]");
 const merchSoundVideo = document.querySelector("[data-merch-sound-video]");
 const merchSoundToggle = document.querySelector("[data-merch-sound-toggle]");
+let merchHeroVideo = document.querySelector(".merch-hero-video");
+let merchHeroSoundToggle = document.querySelector("[data-merch-hero-sound-toggle]");
 const CART_STORAGE_KEY = "lottomind.merch.cart.v1";
+let merchHeroToggleAt = 0;
 
 function loadCart() {
   try {
@@ -19,6 +22,20 @@ function loadCart() {
 }
 
 const bag = loadCart();
+
+function getMerchHeroVideo() {
+  if (!merchHeroVideo || !document.contains(merchHeroVideo)) {
+    merchHeroVideo = document.querySelector(".merch-hero-video");
+  }
+  return merchHeroVideo;
+}
+
+function getMerchHeroSoundToggle() {
+  if (!merchHeroSoundToggle || !document.contains(merchHeroSoundToggle)) {
+    merchHeroSoundToggle = document.querySelector("[data-merch-hero-sound-toggle]");
+  }
+  return merchHeroSoundToggle;
+}
 
 function saveCart() {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(bag));
@@ -131,9 +148,9 @@ function copyTextArea(targetId, button) {
   });
 }
 
-function pauseMerchIntroAudio() {
+function pauseMerchIntroAudio(exceptMedia = merchSoundVideo) {
   document.querySelectorAll("audio, video").forEach((media) => {
-    if (media === merchSoundVideo) return;
+    if (media === exceptMedia) return;
     const isIntroMedia =
       media.id === "siteSoundtrack" ||
       media.closest("[data-startup-video]") ||
@@ -142,6 +159,35 @@ function pauseMerchIntroAudio() {
       media.pause();
     }
   });
+}
+
+function setMerchHeroSoundState(active) {
+  const button = getMerchHeroSoundToggle();
+  if (!button) return;
+  button.classList.toggle("is-playing", active);
+  button.setAttribute("aria-pressed", String(active));
+  button.textContent = active ? "Mute hero" : "Hero sound";
+}
+
+async function playMerchHeroSound() {
+  const video = getMerchHeroVideo();
+  if (!video) return;
+  pauseMerchIntroAudio(video);
+  video.muted = false;
+  video.volume = 0.62;
+  setMerchHeroSoundState(true);
+  try {
+    await video.play();
+  } catch {
+    setMerchHeroSoundState(!video.muted);
+  }
+}
+
+function pauseMerchHeroSound() {
+  const video = getMerchHeroVideo();
+  if (!video) return;
+  video.muted = true;
+  setMerchHeroSoundState(false);
 }
 
 function resetMerchCapsuleVideo() {
@@ -193,6 +239,31 @@ function pauseMerchCapsuleSound() {
   merchSoundToggle.classList.remove("is-playing");
 }
 
+function toggleMerchHeroSound(event) {
+  const now = performance.now();
+  if (event?.type === "click" && now - merchHeroToggleAt < 320) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+  merchHeroToggleAt = now;
+  event?.preventDefault();
+  event?.stopPropagation();
+  const video = getMerchHeroVideo();
+  if (video?.muted) {
+    playMerchHeroSound();
+  } else {
+    pauseMerchHeroSound();
+  }
+}
+
+function bindMerchHeroSoundToggle() {
+  const button = getMerchHeroSoundToggle();
+  if (!button || button.dataset.soundBound === "true") return;
+  button.dataset.soundBound = "true";
+  button.addEventListener("click", toggleMerchHeroSound);
+}
+
 document.addEventListener("pointermove", (event) => {
   merchRoot.style.setProperty("--mx", `${event.clientX}px`);
   merchRoot.style.setProperty("--my", `${event.clientY}px`);
@@ -216,6 +287,11 @@ document.addEventListener("pointermove", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (event.target.closest("[data-merch-hero-sound-toggle]")) {
+    toggleMerchHeroSound(event);
+    return;
+  }
+
   if (event.target.closest("[data-merch-sound-toggle]")) {
     event.preventDefault();
     event.stopPropagation();
@@ -292,6 +368,8 @@ document.addEventListener("click", (event) => {
   }
 });
 
+bindMerchHeroSoundToggle();
+document.addEventListener("DOMContentLoaded", bindMerchHeroSoundToggle);
 merchSoundCard?.addEventListener("pointerenter", playMerchCapsuleSound);
 merchSoundVideo?.addEventListener("pointerdown", () => {
   pauseMerchIntroAudio();

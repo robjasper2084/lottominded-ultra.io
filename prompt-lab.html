@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=tm-audio-layout-3" />
+    <link rel="stylesheet" href="./styles.css?v=piano-ballpass-2" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=golden-lotto-balls-1" />
   </head>
   <body class="prompt-lab-page">
@@ -110,7 +110,7 @@
 
           <div class="lotto-output-panel">
             <div class="lotto-output-head">
-              <h2 class="kinetic-word" data-kinetic="BEAT-SEEDED ENTERTAINMENT PICKS" tabindex="0">Beat-seeded entertainment picks</h2>
+              <h2>Beat-seeded entertainment picks</h2>
               <span>Creative number generation â€¢ Not a prediction</span>
             </div>
             <div id="lottoOutput" class="lotto-output-grid" aria-live="polite"></div>
@@ -121,7 +121,14 @@
       <section class="prompt-lab-hero marketing-section reveal-section" data-reveal>
         <div>
           <p class="eyebrow">Prompt Lab Branch Page</p>
-          <h1 class="kinetic-word" data-kinetic="BUILD CLEAN PROMPTS FROM YOUR BEAT." tabindex="0">BUILD CLEAN PROMPTS FROM YOUR BEAT.</h1>
+          <h1 class="prompt-word-balls" aria-label="BUILD CLEAN PROMPTS FROM YOUR BEAT.">
+            <span>BUILD</span>
+            <span>CLEAN</span>
+            <span>PROMPTS</span>
+            <span>FROM</span>
+            <span>YOUR</span>
+            <span>BEAT.</span>
+          </h1>
           <p>
             One focused page for the creative generators: Beat -> Suno Prompt, Beat -> Video Prompt,
             and Beat2Lotto+&trade; Signals. Start with the built-in Verse 1 demo rhythm or type your own beat
@@ -132,6 +139,39 @@
             <a class="secondary-action" href="#beat-video">Generate Video</a>
             <a class="secondary-action" href="#beat2lotto">Generate Signals</a>
           </div>
+        </div>
+        <div class="prompt-ballpass-game" data-ballpass-game aria-label="Branded ball-pass motion game">
+          <canvas data-ballpass-canvas></canvas>
+          <div class="prompt-ballpass-hud">
+            <span>Ballpass</span>
+            <strong>Guide the signal puck</strong>
+            <small>Move your pointer through the lane.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="prompt-video-showcase video-only-showcase marketing-section reveal-section" aria-label="AI video prompt examples" data-reveal>
+        <div class="prompt-explosion-fx" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="prompt-video-grid">
+          <article class="prompt-video-panel">
+            <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.84">
+              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
+            </video>
+            <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
+            <div>
+              <h3>Beat2Lotto Signal Blend</h3>
+              <p>Orb movement, waveform overlays, number-light pulses, and bass-drop camera energy.</p>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -188,31 +228,6 @@
           </p>
         </article>
       </section>
-
-      <section class="prompt-video-showcase video-only-showcase marketing-section reveal-section" aria-label="AI video prompt examples" data-reveal>
-        <div class="prompt-explosion-fx" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="prompt-video-grid">
-          <article class="prompt-video-panel">
-            <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.84">
-              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
-            </video>
-            <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
-            <div>
-              <h3>Beat2Lotto Signal Blend</h3>
-              <p>Orb movement, waveform overlays, number-light pulses, and bass-drop camera energy.</p>
-            </div>
-          </article>
-        </div>
-      </section>
     </main>
 
     <footer>
@@ -221,7 +236,7 @@
     </footer>
 
     <script src="./beat2lotto-plus.js?v=prompt-lab-top-1" defer></script>
-    <script src="./site.js?v=tm-audio-layout-3" defer></script>
+    <script src="./site.js?v=piano-ballpass-2" defer></script>
     <script src="./lottery-spheres.js?v=lottery-red-sixth-1" defer></script>
   </body>
 </html>
