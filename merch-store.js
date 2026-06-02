@@ -5,7 +5,16 @@ const bagCount = document.querySelector("[data-bag-count]");
 const bagItems = document.querySelector("[data-bag-items]");
 const bagTotal = document.querySelector("[data-bag-total]");
 const cartNote = document.querySelector("[data-cart-note]");
+const merchSoundCard = document.querySelector("[data-merch-sound-card]");
+const merchSoundVideo = document.querySelector("[data-merch-sound-video]");
+const merchSoundToggle = document.querySelector("[data-merch-sound-toggle]");
+const merchFallbackAudio = typeof Audio !== "undefined" ? new Audio("./assets/audio/lottominded-main-theme.mp3") : null;
 const CART_STORAGE_KEY = "lottomind.merch.cart.v1";
+
+if (merchFallbackAudio) {
+  merchFallbackAudio.loop = true;
+  merchFallbackAudio.volume = 0.46;
+}
 
 function loadCart() {
   try {
@@ -128,6 +137,40 @@ function copyTextArea(targetId, button) {
   });
 }
 
+async function playMerchCapsuleSound() {
+  if (!merchSoundVideo || !merchSoundToggle) return;
+  let played = false;
+  try {
+    merchSoundVideo.muted = false;
+    merchSoundVideo.volume = 0.78;
+    await merchSoundVideo.play();
+    played = true;
+  } catch {
+    played = false;
+  }
+  try {
+    await merchFallbackAudio?.play();
+    played = true;
+  } catch {
+    // Browser audio policies may require a click before sound can start.
+  }
+  if (played) {
+    merchSoundToggle.textContent = "Sound on";
+    merchSoundToggle.classList.add("is-playing");
+  } else {
+    merchSoundToggle.textContent = "Tap for sound";
+    merchSoundToggle.classList.remove("is-playing");
+  }
+}
+
+function pauseMerchCapsuleSound() {
+  if (!merchSoundVideo || !merchSoundToggle) return;
+  merchSoundVideo.muted = true;
+  merchFallbackAudio?.pause();
+  merchSoundToggle.textContent = "Play sound";
+  merchSoundToggle.classList.remove("is-playing");
+}
+
 document.addEventListener("pointermove", (event) => {
   merchRoot.style.setProperty("--mx", `${event.clientX}px`);
   merchRoot.style.setProperty("--my", `${event.clientY}px`);
@@ -142,6 +185,17 @@ document.addEventListener("pointermove", (event) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (event.target.closest("[data-merch-sound-toggle]")) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (merchSoundVideo?.muted) {
+      playMerchCapsuleSound();
+    } else {
+      pauseMerchCapsuleSound();
+    }
+    return;
+  }
+
   const stripLink = event.target.closest(".merch-strip a[href^='#']");
   if (stripLink) {
     const target = document.getElementById(stripLink.getAttribute("href").slice(1));
@@ -206,6 +260,8 @@ document.addEventListener("click", (event) => {
     bagDrawer?.classList.remove("is-open");
   }
 });
+
+merchSoundCard?.addEventListener("pointerenter", playMerchCapsuleSound);
 
 const revealObserver = new IntersectionObserver(
   (entries) => {

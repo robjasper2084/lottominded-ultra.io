@@ -383,6 +383,28 @@
   background: linear-gradient(90deg, rgba(2, 5, 12, 0.84), rgba(2, 5, 12, 0.56));
 }
 
+.merch-sound-toggle {
+  position: absolute;
+  right: 0.85rem;
+  bottom: 3.7rem;
+  z-index: 4;
+  min-height: 2.25rem;
+  padding-inline: 0.9rem;
+  border: 1px solid rgba(255, 224, 113, 0.48);
+  border-radius: 999px;
+  color: #07120f;
+  background: linear-gradient(135deg, #fff17a, #29f7ff);
+  box-shadow: 0 0 1.3rem rgba(41, 247, 255, 0.24);
+  font-size: 0.68rem;
+}
+
+.merch-sound-toggle.is-playing {
+  color: #effbff;
+  background:
+    linear-gradient(180deg, rgba(41, 247, 255, 0.2), rgba(255, 224, 113, 0.1)),
+    rgba(3, 8, 16, 0.86);
+}
+
 .merch-strip {
   position: relative;
   display: flex;
@@ -715,8 +737,9 @@
 
 .gallery-motion-rail {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
+  width: min(100%, 32rem);
   margin: -0.5rem 0 1.5rem;
 }
 

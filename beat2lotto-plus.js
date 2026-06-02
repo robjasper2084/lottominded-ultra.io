@@ -243,8 +243,10 @@ function buildSheetPrompts(section = "both") {
     `Sync motion to ${bpm} BPM with cyan, violet, gold, and deep-black lighting.`,
     "Avoid copyrighted logos, celebrity likenesses, and unreadable text."
   ].join(" ");
-  if (section === "music" || section === "both") document.querySelector("#sheetSunoPrompt").value = musicPrompt;
-  if (section === "video" || section === "both") document.querySelector("#sheetVideoPrompt").value = videoPrompt;
+  const musicField = document.querySelector("#sheetSunoPrompt");
+  const videoField = document.querySelector("#sheetVideoPrompt");
+  if (musicField && (section === "music" || section === "both")) musicField.value = musicPrompt;
+  if (videoField && (section === "video" || section === "both")) videoField.value = videoPrompt;
 }
 
 async function copySheetPrompts() {

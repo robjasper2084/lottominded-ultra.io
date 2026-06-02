@@ -1,0 +1,11 @@
+{
+  "frameSize": 256,
+  "ezra": {
+    "file": "ezra-missing-moves-v3.png",
+    "frames": 23
+  },
+  "kalyx": {
+    "file": "kalyx-missing-moves-v3.png",
+    "frames": 18
+  }
+}

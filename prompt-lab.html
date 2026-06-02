@@ -10,10 +10,11 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=prompt-title-excite-1" />
+    <link rel="stylesheet" href="./styles.css?v=prompt-home-header-1" />
+    <link rel="stylesheet" href="./beat2lotto-plus.css?v=prompt-lab-top-1" />
   </head>
   <body class="prompt-lab-page">
-    <header class="site-header" data-site-header>
+    <header class="site-header home-like-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
@@ -22,16 +23,98 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Prompt Lab navigation">
-        <a href="./">Home</a>
-        <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a href="#beat2lotto">Beat2Lotto+</a>
-        <a href="./lottery-spheres.html#spheres">Lottery Spheres</a>
-        <a href="./merch-store.html">Merch + Gallery</a>
-        <a href="./beat2lotto-plus.html">Audio Import</a>
+        <a href="https://lottomind.one/" data-icon="LM">Lottomind</a>
+        <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="#beat2lotto" data-icon="B2">Beat2Lotto+</a>
+        <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
+        <a href="./merch-store.html" data-icon="DR">Merch</a>
+        <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
+        <a href="./how-to-use.html" data-icon="GO">Guide</a>
       </nav>
+      <div class="direct-launch" aria-label="Direct studio launch">
+        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+        <a class="direct-action beat2lotto-tab-copy" href="#beat2lotto"><span aria-hidden="true">â—Ž</span> Beat2Lotto+</a>
+      </div>
     </header>
 
     <main>
+      <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ copied console">
+        <section class="beat2lotto-hero">
+          <div>
+            <h1>Beat2Lotto+</h1>
+            <p>
+              A standalone creative number signal console powered by beat-style inputs. Import a beat or
+              music file, enter a BPM, groove, mood, or session phrase, then generate beat-seeded
+              entertainment picks for journaling, creative play, and studio rituals.
+            </p>
+            <p class="lotto-safety">
+              Beat2Lotto+ is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
+              draw times, prizes, and eligibility with official lottery sources before playing.
+            </p>
+          </div>
+          <div class="beat2lotto-orb" aria-hidden="true">
+            <span>+</span>
+          </div>
+        </section>
+
+        <section class="beat2lotto-console" aria-label="Beat2Lotto+ generator">
+          <div class="lotto-controls">
+            <label class="file-drop">
+              <span>Import beat or music</span>
+              <input id="lottoAudioFile" type="file" accept="audio/*" />
+              <small>Local analysis only. Audio never uploads.</small>
+            </label>
+            <div id="beatAnalysis" class="beat-analysis-card" aria-live="polite">
+              <strong>No beat imported yet</strong>
+              <span>Generate from typed Beat DNA, or load audio to seed the digits.</span>
+            </div>
+            <label>
+              <span>Session seed</span>
+              <input id="lottoSeed" type="text" value="neon drums, 120 BPM, late-night bounce" />
+            </label>
+            <label>
+              <span>BPM</span>
+              <input id="lottoBpm" type="number" min="40" max="220" value="120" />
+            </label>
+            <label>
+              <span>Game format</span>
+              <select id="lottoGame">
+                <option value="pick3">Pick 3</option>
+                <option value="pick4">Pick 4</option>
+                <option value="cash5">Cash 5 / Fantasy 5</option>
+                <option value="lotto6">Lotto 6</option>
+                <option value="powerball">Powerball Style</option>
+                <option value="mega">Mega Millions Style</option>
+              </select>
+            </label>
+            <label>
+              <span>Sets</span>
+              <input id="lottoCount" type="number" min="1" max="12" value="5" />
+            </label>
+            <label>
+              <span>Method</span>
+              <select id="lottoMethod">
+                <option>Beat DNA</option>
+                <option>Rhythm Signature</option>
+                <option>Drum Pattern</option>
+                <option>Stem Mix</option>
+                <option>Random + Beat DNA</option>
+              </select>
+            </label>
+            <button class="primary-action" type="button" id="generateLotto">Generate Number Signals</button>
+            <button class="secondary-action" type="button" id="copyLotto">Copy All</button>
+          </div>
+
+          <div class="lotto-output-panel">
+            <div class="lotto-output-head">
+              <h2>Beat-seeded entertainment picks</h2>
+              <span>Creative number generation â€¢ Not a prediction</span>
+            </div>
+            <div id="lottoOutput" class="lotto-output-grid" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
+
       <section class="prompt-lab-hero marketing-section reveal-section" data-reveal>
         <div>
           <p class="eyebrow">Prompt Lab Branch Page</p>
@@ -72,7 +155,7 @@
           <button class="secondary-action" type="button" data-copy-target="miniVideoOutput">Copy Video Prompt</button>
         </article>
 
-        <article class="prompt-mini-app" id="beat2lotto" data-mini-app="numbers">
+        <article class="prompt-mini-app" id="beat2lotto-mini" data-mini-app="numbers">
           <div class="beat2lotto-video-blend" aria-hidden="true">
             <video autoplay muted loop playsinline preload="metadata">
               <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
@@ -114,15 +197,6 @@
         <div class="prompt-video-grid">
           <article class="prompt-video-panel">
             <video autoplay muted loop playsinline preload="metadata">
-              <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            </video>
-            <div>
-              <h3>Bloom Through Gloom</h3>
-              <p>Slow push, glowing subject, soft lens bloom, emotional rise, clean cinematic finish.</p>
-            </div>
-          </article>
-          <article class="prompt-video-panel">
-            <video autoplay muted loop playsinline preload="metadata">
               <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
             </video>
             <div>
@@ -139,6 +213,7 @@
       <span>Local prompt generation. No uploads, no auto-submit, no prediction claims.</span>
     </footer>
 
-    <script src="./site.js?v=prompt-title-excite-1" defer></script>
+    <script src="./beat2lotto-plus.js?v=prompt-lab-top-1" defer></script>
+    <script src="./site.js?v=prompt-home-header-1" defer></script>
   </body>
 </html>

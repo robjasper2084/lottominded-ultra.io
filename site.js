@@ -14,19 +14,24 @@ const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoClose = document.querySelector("[data-startup-video-close]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
 const domainStrip = document.querySelector(".domain-strip");
+const gamePip = document.querySelector("[data-game-pip]");
+const gamePipClose = document.querySelector("[data-game-pip-close]");
+const gamePipFrame = gamePip?.querySelector("iframe");
 const memberForm = document.querySelector("[data-member-form]");
 const memberDownload = document.querySelector("[data-member-download]");
 const memberMessage = document.querySelector("[data-member-message]");
 const compactHeaderLabels =
   document.body.classList.contains("prompt-lab-page") ||
   document.body.classList.contains("home-page") ||
-  document.body.classList.contains("merch-store-page");
+  document.body.classList.contains("merch-store-page") ||
+  document.body.classList.contains("feature-console-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const SUPPORT_EMAIL = "robjasper2084@gmail.com";
 let soundtrackStartedFromPage = false;
 let soundtrackStartedFromHover = false;
+let gamePipHideTimer = 0;
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
   siteSoundtrack.removeAttribute("loop");
@@ -111,6 +116,33 @@ function closeStartupVideo() {
   playSiteSoundtrack({ fromPage: true });
 }
 
+function showGamePip() {
+  if (!gamePip) return;
+  window.clearTimeout(gamePipHideTimer);
+  if (gamePipFrame && !gamePipFrame.getAttribute("src")) {
+    gamePipFrame.setAttribute("src", gamePipFrame.dataset.src || "");
+  }
+  gamePip.classList.add("is-open");
+  gamePip.setAttribute("aria-hidden", "false");
+  if (siteSoundtrack) {
+    siteSoundtrack.pause();
+    soundtrackStartedFromHover = false;
+    setSoundtrackButtonState(false);
+  }
+}
+
+function hideGamePip() {
+  if (!gamePip) return;
+  gamePip.classList.remove("is-open");
+  gamePip.setAttribute("aria-hidden", "true");
+  if (gamePipFrame) gamePipFrame.removeAttribute("src");
+}
+
+function scheduleHideGamePip() {
+  window.clearTimeout(gamePipHideTimer);
+  gamePipHideTimer = window.setTimeout(hideGamePip, 260);
+}
+
 startupVideoClose?.addEventListener("click", closeStartupVideo);
 startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo();
@@ -130,6 +162,9 @@ document.addEventListener("keydown", (event) => {
   }
   if (event.key === "Escape" && !startupVideoModal?.classList.contains("is-hidden")) {
     closeStartupVideo();
+  }
+  if (event.key === "Escape" && gamePip?.classList.contains("is-open")) {
+    hideGamePip();
   }
 });
 
@@ -174,16 +209,11 @@ soundtrackButtons.forEach((button) => {
 });
 
 domainStrip?.addEventListener("pointerenter", () => {
-  if (!siteSoundtrack || soundtrackStartedFromPage) return;
-  playSiteSoundtrack({ fromHover: true, volume: 0.38 });
+  showGamePip();
 });
 
-domainStrip?.addEventListener("pointerleave", () => {
-  if (!siteSoundtrack || !soundtrackStartedFromHover || soundtrackStartedFromPage) return;
-  siteSoundtrack.pause();
-  soundtrackStartedFromHover = false;
-  setSoundtrackButtonState(false);
-});
+gamePip?.addEventListener("pointerenter", () => window.clearTimeout(gamePipHideTimer));
+gamePipClose?.addEventListener("click", hideGamePip);
 
 function setMemberDownloadUnlocked(unlocked, profile = null) {
   if (!memberDownload) return;

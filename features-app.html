@@ -10,27 +10,34 @@
     <title>LOTTOMINDED ULTRA | Feature Console</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=feature-support-mail-1" />
-    <link rel="stylesheet" href="./features-app.css?v=feature-module-center-1" />
+    <link rel="stylesheet" href="./styles.css?v=home-like-header-1" />
+    <link rel="stylesheet" href="./features-app.css?v=feature-home-header-1" />
   </head>
   <body class="feature-console-page">
     <video class="feature-page-video-bg" autoplay muted loop playsinline aria-hidden="true">
       <source src="./assets/video/home-feature-motion.mp4" type="video/mp4" />
     </video>
-    <header class="site-header compact-feature-header">
+    <header class="site-header home-like-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
           <span>LOTTOMINDED ULTRA</span>
         </a>
+        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Feature console navigation">
-        <a href="./">Home</a>
-        <a href="https://lottomind.one/">Lottomind.one</a>
-        <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a href="./lottery-spheres.html#spheres">Lottery Spheres</a>
-        <a href="./merch-store.html">Merch + Gallery</a>
+        <a href="https://lottomind.one/" data-icon="LM">Lottomind</a>
+        <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+</a>
+        <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
+        <a href="./merch-store.html" data-icon="DR">Merch</a>
+        <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
+        <a href="./how-to-use.html" data-icon="GO">Guide</a>
       </nav>
+      <div class="direct-launch" aria-label="Direct studio launch">
+        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+        <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">â—Ž</span> Beat2Lotto+</a>
+      </div>
     </header>
 
     <main class="feature-console-shell">
@@ -83,7 +90,7 @@
           <div class="feature-support-links" aria-label="Support quick links">
             <a href="mailto:robjasper2084@gmail.com?subject=LOTTOMINDED%20ULTRA%20Support">Email Support</a>
             <a href="./how-to-use.html">Open Guide</a>
-            <a href="./#members">Members Download</a>
+            <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
           </div>
         </div>
 
@@ -143,6 +150,7 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./features-app.js?v=feature-support-mail-1" defer></script>
+    <script src="./site.js?v=home-like-header-1" defer></script>
+    <script src="./features-app.js?v=feature-home-header-1" defer></script>
   </body>
 </html>

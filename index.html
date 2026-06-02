@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=home-hide-member-copy-1" />
+    <link rel="stylesheet" href="./styles.css?v=home-game-pip-1" />
   </head>
   <body class="home-page">
     <header class="site-header" data-site-header>
@@ -32,7 +32,6 @@
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action member-nav-action" href="#members">Members</a>
         <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
       </div>
     </header>
@@ -98,6 +97,13 @@
           <strong>Stem Studio &middot; Beat DNA &middot; AI Prompts &middot; Mastering &middot; Creative Signals</strong>
           <span>Local-first production tools wrapped in a cinematic LM Records brand system.</span>
         </div>
+        <aside class="home-game-pip" data-game-pip aria-label="GOTHTECHNOLOGY game popup" aria-hidden="true">
+          <div class="home-game-pip-head">
+            <strong>GOTHTECHNOLOGY</strong>
+            <button type="button" data-game-pip-close aria-label="Close game popup">Close</button>
+          </div>
+          <iframe data-src="./games/gothtechnology2/index.html" title="Playable GOTHTECHNOLOGY game" loading="lazy"></iframe>
+        </aside>
       </section>
 
       <section class="prompt-band prompt-band-top marketing-section reveal-section" id="prompt" data-reveal>
@@ -199,55 +205,6 @@
         </p>
       </section>
 
-      <section class="member-gate marketing-section reveal-section" id="members" data-reveal>
-        <div class="member-copy">
-          <p class="eyebrow">Members only test build</p>
-          <h2>Sign up to download the LOTTOMINDED ULTRA app.</h2>
-          <p>
-            Join the private test list, unlock the current GitHub Pages build package, and help shape the browser studio
-            before the public drop. Use it for testing, feedback, and sharing with trusted collaborators.
-          </p>
-          <div class="member-badges" aria-label="Member test features">
-            <span>Live GitHub Pages preview</span>
-            <span>Download test ZIP</span>
-            <span>Local-first studio</span>
-          </div>
-        </div>
-        <form class="member-form" action="mailto:robjasper2084@gmail.com" method="post" enctype="text/plain" data-member-form>
-          <label>
-            Name
-            <input type="text" name="name" autocomplete="name" placeholder="Your name" required />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
-          </label>
-          <label>
-            Testing focus
-            <select name="focus" required>
-              <option value="">Choose one</option>
-              <option>Stem studio</option>
-              <option>Beat2Lotto+</option>
-              <option>Prompt lab</option>
-              <option>Merch and gallery</option>
-            </select>
-          </label>
-          <label class="member-check">
-            <input type="checkbox" name="permission" required />
-            <span>I understand this is a test build and I will use audio and media I own or have permission to use.</span>
-          </label>
-          <button class="primary-action" type="submit">Unlock Download</button>
-          <a
-            class="secondary-action member-download is-locked"
-            href="https://github.com/robjasper2084/lottominded-ultra.io/archive/refs/heads/main.zip"
-            data-member-download
-            aria-disabled="true"
-          >
-            Sign up to download
-          </a>
-          <p class="member-message" data-member-message>Members get the download link after signup.</p>
-        </form>
-      </section>
     </main>
 
     <audio id="siteSoundtrack" preload="auto">
@@ -260,6 +217,6 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=home-hide-member-copy-1" defer></script>
+    <script src="./site.js?v=home-game-pip-1" defer></script>
   </body>
 </html>

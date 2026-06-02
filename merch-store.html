@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=mascot-cursor-1" />
-    <link rel="stylesheet" href="./merch-store.css?v=merch-video-restore-1" />
+    <link rel="stylesheet" href="./merch-store.css?v=merch-sound-gallery-1" />
   </head>
   <body class="merch-store-page">
     <header class="site-header merch-site-header" data-site-header>
@@ -50,10 +50,11 @@
             <a class="secondary-action" href="#gallery">View Gallery</a>
           </div>
         </div>
-        <div class="merch-hero-product" aria-hidden="true">
-          <video class="merch-product-video" autoplay muted loop playsinline preload="metadata" poster="./assets/merch/metro-cap-hero.png">
+        <div class="merch-hero-product" data-merch-sound-card>
+          <video class="merch-product-video" autoplay muted loop playsinline controls preload="metadata" poster="./assets/merch/metro-cap-hero.png" data-merch-sound-video>
             <source src="./assets/video/merch-hero-blended.mp4" type="video/mp4" />
           </video>
+          <button class="merch-sound-toggle" type="button" data-merch-sound-toggle>Play sound</button>
           <span>Limited Signal Capsule</span>
         </div>
       </section>
@@ -146,12 +147,6 @@
         </div>
         <div class="gallery-motion-rail" aria-label="Gallery motion previews">
           <video autoplay muted loop playsinline preload="metadata">
-            <source src="./assets/merch/merch-motion-01.mp4" type="video/mp4" />
-          </video>
-          <video autoplay muted loop playsinline preload="metadata">
-            <source src="./assets/merch/merch-motion-02.mp4" type="video/mp4" />
-          </video>
-          <video autoplay muted loop playsinline preload="metadata">
             <source src="./assets/merch/merch-motion-03.mp4" type="video/mp4" />
           </video>
         </div>
@@ -190,6 +185,6 @@
     </footer>
 
     <script src="./site.js?v=merch-drop-columns-1" defer></script>
-    <script src="./merch-store.js?v=merch-size-tune-1" defer></script>
+    <script src="./merch-store.js?v=merch-sound-gallery-1" defer></script>
   </body>
 </html>
