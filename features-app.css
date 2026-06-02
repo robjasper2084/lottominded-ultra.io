@@ -291,7 +291,7 @@
   z-index: 3;
   display: grid;
   grid-template-columns: minmax(180px, 0.72fr) minmax(240px, 1fr);
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
   gap: 16px;
   min-height: 500px;
   padding: clamp(18px, 4vw, 34px);
@@ -329,9 +329,10 @@
 
 .command-readout {
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 3;
   align-self: end;
   justify-self: start;
+  margin-top: auto;
   display: grid;
   gap: 10px;
   width: min(100%, 460px);
@@ -360,7 +361,7 @@
 .command-module-list {
   grid-column: 1 / -1;
   grid-row: 1;
-  align-self: center;
+  align-self: start;
   justify-self: center;
   display: grid;
   gap: 10px;

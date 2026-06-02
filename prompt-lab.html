@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=kinetic-guide-push-1" />
+    <link rel="stylesheet" href="./styles.css?v=tm-audio-layout-3" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=golden-lotto-balls-1" />
   </head>
   <body class="prompt-lab-page">
@@ -23,9 +23,9 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Prompt Lab navigation">
-        <a href="https://lottomind.one/" data-icon="LM">Lottomind</a>
+        <a href="https://lottomind.one/" data-icon="LM">Lottomind&trade;</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="#beat2lotto" data-icon="B2">Beat2Lotto+</a>
+        <a href="#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
         <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
         <a href="./merch-store.html" data-icon="DR">Merch</a>
         <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
@@ -44,14 +44,14 @@
         <div class="prompt-lab-sphere-grid" aria-hidden="true"></div>
         <section class="beat2lotto-hero">
           <div>
-            <h1>Beat2Lotto+</h1>
+            <h1>Beat2Lotto+<span class="tm" aria-hidden="true"></span></h1>
             <p>
               A standalone creative number signal console powered by beat-style inputs. Import a beat or
               music file, enter a BPM, groove, mood, or session phrase, then generate beat-seeded
               entertainment picks for journaling, creative play, and studio rituals.
             </p>
             <p class="lotto-safety">
-              Beat2Lotto+ is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
+              Beat2Lotto+&trade; is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
               draw times, prizes, and eligibility with official lottery sources before playing.
             </p>
           </div>
@@ -124,7 +124,7 @@
           <h1 class="kinetic-word" data-kinetic="BUILD CLEAN PROMPTS FROM YOUR BEAT." tabindex="0">BUILD CLEAN PROMPTS FROM YOUR BEAT.</h1>
           <p>
             One focused page for the creative generators: Beat -> Suno Prompt, Beat -> Video Prompt,
-            and Beat2Lotto+ Signals. Start with the built-in Verse 1 demo rhythm or type your own beat
+            and Beat2Lotto+&trade; Signals. Start with the built-in Verse 1 demo rhythm or type your own beat
             seed, then copy a clean prompt or entertainment-only signal set.
           </p>
           <div class="hero-actions">
@@ -164,7 +164,7 @@
               <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
             </video>
           </div>
-          <h2>Beat2Lotto+ Signals</h2>
+          <h2>Beat2Lotto+&trade; Signals</h2>
           <p>Generate entertainment-only number signals from a typed seed, then open the full audio-import app.</p>
           <label><span>Creative seed</span><input id="miniLottoSeed" type="text" value="Verse 1 stems, 120 BPM, syncopated drums, violet synth lift" /></label>
           <label>
@@ -180,7 +180,7 @@
           <textarea id="miniLottoOutput" rows="7" readonly></textarea>
           <div class="button-row">
             <button class="secondary-action" type="button" data-copy-target="miniLottoOutput">Copy Signals</button>
-            <a class="secondary-action" href="./beat2lotto-plus.html">Open Full Beat2Lotto+</a>
+            <a class="secondary-action" href="./beat2lotto-plus.html">Open Full Beat2Lotto+&trade;</a>
           </div>
           <p class="mini-disclaimer">
             Beat-seeded entertainment picks. Creative number generation. Not a prediction. Lottery outcomes are random.
@@ -189,14 +189,7 @@
         </article>
       </section>
 
-      <section class="prompt-video-showcase marketing-section reveal-section" aria-label="AI video prompt examples" data-reveal>
-        <div class="prompt-video-copy">
-          <h2>AI video prompts with real motion references.</h2>
-          <p>
-            Use the video prompt builder, then preview the kind of movement language that works for launch reels,
-            studio teasers, and Beat2Lotto+ signal clips.
-          </p>
-        </div>
+      <section class="prompt-video-showcase video-only-showcase marketing-section reveal-section" aria-label="AI video prompt examples" data-reveal>
         <div class="prompt-explosion-fx" aria-hidden="true">
           <span></span>
           <span></span>
@@ -209,9 +202,10 @@
         </div>
         <div class="prompt-video-grid">
           <article class="prompt-video-panel">
-            <video autoplay muted loop playsinline preload="metadata">
+            <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.84">
               <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
             </video>
+            <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
             <div>
               <h3>Beat2Lotto Signal Blend</h3>
               <p>Orb movement, waveform overlays, number-light pulses, and bass-drop camera energy.</p>
@@ -227,7 +221,7 @@
     </footer>
 
     <script src="./beat2lotto-plus.js?v=prompt-lab-top-1" defer></script>
-    <script src="./site.js?v=kinetic-guide-push-1" defer></script>
-    <script src="./lottery-spheres.js?v=lottery-move-sets-1" defer></script>
+    <script src="./site.js?v=tm-audio-layout-3" defer></script>
+    <script src="./lottery-spheres.js?v=lottery-red-sixth-1" defer></script>
   </body>
 </html>

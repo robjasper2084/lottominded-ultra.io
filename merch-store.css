@@ -783,6 +783,11 @@
   -webkit-mask-composite: source-in;
 }
 
+.merch-drop-video video[data-inline-sound-video] {
+  opacity: 0.94;
+  filter: saturate(1.16) contrast(1.08) brightness(0.9);
+}
+
 .product-grid {
   position: relative;
   isolation: isolate;

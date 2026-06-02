@@ -102,6 +102,27 @@ footer span:first-child {
   text-transform: uppercase;
 }
 
+.brand span,
+footer span:first-child,
+.tm,
+.tm-text {
+  white-space: nowrap;
+}
+
+.brand span::after,
+footer span:first-child::after,
+.tm::after {
+  content: "\2122";
+  margin-left: 0.08em;
+  color: var(--gold);
+  font-size: 0.52em;
+  line-height: 0;
+  text-shadow:
+    0 0 0.65rem rgba(255, 224, 113, 0.58),
+    0 0 1rem rgba(41, 247, 255, 0.24);
+  vertical-align: super;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -1123,6 +1144,15 @@ button {
   opacity: 0.84;
 }
 
+.beat2lotto-tab-copy::after {
+  content: "\2122";
+  margin-left: 0.06em;
+  color: var(--gold);
+  font-size: 0.58em;
+  line-height: 0;
+  vertical-align: super;
+}
+
 .beat2lotto-tab-copy span {
   display: inline-grid;
   place-items: center;
@@ -1776,10 +1806,12 @@ p {
 }
 
 .home-page .feature-band h2 {
-  font-size: clamp(3.05rem, 6.45vw, 6.2rem);
-  max-width: 10.2ch;
+  font-size: clamp(2.75rem, 4.9vw, 4.85rem);
+  max-width: 9.2ch;
   font-family: var(--display-font);
   font-weight: 900;
+  line-height: 0.92;
+  overflow-wrap: break-word;
   text-transform: uppercase;
   color: transparent;
   background:
@@ -2378,6 +2410,16 @@ p {
     inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
+.prompt-video-card.audio-enabled-card {
+  background:
+    radial-gradient(circle at 72% 16%, rgba(41, 247, 255, 0.2), transparent 14rem),
+    linear-gradient(145deg, rgba(4, 20, 34, 0.78), rgba(2, 6, 14, 0.94));
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.34),
+    0 0 32px rgba(41, 247, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
 .prompt-video-card::after {
   position: absolute;
   inset: 0;
@@ -2395,6 +2437,11 @@ p {
   filter: saturate(1.14) contrast(1.08) brightness(0.88);
 }
 
+.prompt-video-card video[data-inline-sound-video] {
+  opacity: 0.92;
+  filter: saturate(1.12) contrast(1.08) brightness(0.82);
+}
+
 .prompt-video-card span {
   position: absolute;
   right: 16px;
@@ -2406,6 +2453,42 @@ p {
   font-weight: 900;
   text-transform: uppercase;
   text-shadow: 0 0 18px rgba(0, 0, 0, 0.62);
+}
+
+.prompt-video-card.audio-enabled-card span {
+  bottom: 46px;
+  padding: 8px 10px;
+  border-left: 2px solid rgba(255, 224, 113, 0.72);
+  background: linear-gradient(90deg, rgba(3, 5, 10, 0.7), transparent);
+}
+
+.inline-sound-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  min-height: 2.15rem;
+  padding: 0.42rem 0.72rem;
+  border: 1px solid rgba(255, 224, 113, 0.44);
+  border-radius: 999px;
+  color: #f8fbff;
+  font-family: var(--display-font);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  background:
+    linear-gradient(135deg, rgba(255, 224, 113, 0.18), rgba(41, 247, 255, 0.14)),
+    rgba(3, 7, 16, 0.78);
+  box-shadow:
+    0 0 1.2rem rgba(41, 247, 255, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.inline-sound-button.is-active {
+  border-color: rgba(94, 255, 157, 0.72);
+  color: #071018;
+  background: linear-gradient(135deg, #fff08a, #5eff9d 52%, #29f7ff);
 }
 
 .prompt-visual-column {
@@ -2695,6 +2778,10 @@ p {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.76fr) minmax(520px, 1.24fr);
+  gap: clamp(1.1rem, 3vw, 2.8rem);
+  align-items: start;
   width: 100%;
   padding: clamp(4.8rem, 7vw, 6.4rem) clamp(1rem, 4vw, 3.4rem) clamp(2rem, 4vw, 3.2rem);
   background:
@@ -2705,8 +2792,8 @@ p {
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero,
 .prompt-lab-beat2lotto-top .beat2lotto-console {
-  width: min(100%, 1110px);
-  margin-inline: auto;
+  width: 100%;
+  margin-inline: 0;
 }
 
 .prompt-lab-sphere-canvas,
@@ -2756,15 +2843,23 @@ p {
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero {
-  grid-template-columns: minmax(0, 0.94fr) minmax(14rem, 0.42fr);
-  gap: clamp(1.2rem, 4vw, 3.4rem);
-  min-height: clamp(25rem, 46vh, 34rem);
-  padding: clamp(1rem, 2vw, 1.8rem) 0 clamp(0.8rem, 2vw, 1.4rem);
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: clamp(1rem, 2.4vw, 1.8rem);
+  min-height: 0;
+  padding: clamp(0.9rem, 2vw, 1.3rem);
+  border: 1px solid rgba(41, 247, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(2, 8, 18, 0.34);
+  backdrop-filter: blur(12px);
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero h1 {
-  max-width: 10ch;
-  font-size: clamp(3.2rem, 8.2vw, 7.1rem);
+  max-width: 9ch;
+  font-size: clamp(3rem, 6vw, 5.6rem);
+  line-height: 0.88;
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero p {
@@ -2773,13 +2868,15 @@ p {
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-orb {
-  width: min(100%, 17rem);
-  justify-self: center;
+  width: min(100%, 12.5rem);
+  justify-self: start;
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-console {
+  grid-column: 2;
+  grid-row: 1;
   grid-template-columns: minmax(14rem, 0.38fr) minmax(0, 1fr);
-  margin-top: clamp(-1.2rem, -1vw, -0.35rem);
+  margin-top: 0;
   margin-bottom: 0;
   padding: clamp(0.9rem, 1.5vw, 1.25rem);
 }
@@ -3029,6 +3126,15 @@ p {
     radial-gradient(circle at 8% 90%, rgba(255, 224, 113, 0.1), transparent 22rem);
 }
 
+.prompt-video-showcase.video-only-showcase {
+  grid-template-columns: 1fr;
+  padding-top: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.prompt-video-showcase.video-only-showcase .prompt-video-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .prompt-video-showcase::before,
 .prompt-video-showcase::after {
   position: absolute;
@@ -3157,10 +3263,14 @@ p {
   transition: transform 600ms ease, filter 600ms ease, opacity 600ms ease;
 }
 
+.prompt-video-panel video[data-inline-sound-video] {
+  z-index: 0;
+}
+
 .prompt-video-panel::before {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 1;
   content: "";
   background:
     linear-gradient(180deg, rgba(3, 5, 10, 0.04), rgba(3, 5, 10, 0.88)),
@@ -3170,7 +3280,7 @@ p {
 .prompt-video-panel::after {
   position: absolute;
   inset: -28%;
-  z-index: -1;
+  z-index: 1;
   content: "";
   pointer-events: none;
   background:
@@ -3190,6 +3300,8 @@ p {
 }
 
 .prompt-video-panel div {
+  position: relative;
+  z-index: 2;
   padding: 1.1rem;
 }
 
@@ -3439,8 +3551,14 @@ footer {
     min-height: auto;
   }
 
+  .prompt-lab-beat2lotto-top {
+    grid-template-columns: 1fr;
+  }
+
   .prompt-lab-beat2lotto-top .beat2lotto-hero,
   .prompt-lab-beat2lotto-top .beat2lotto-console {
+    grid-column: 1;
+    grid-row: auto;
     grid-template-columns: 1fr;
   }
 

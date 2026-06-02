@@ -354,6 +354,17 @@
   text-shadow: 0 0 0.9rem rgba(41, 247, 255, 0.28);
 }
 
+.sphere-generated-sets dd span {
+  display: inline;
+}
+
+.sphere-generated-sets dd .is-sixth-digit {
+  color: #ff3b4a;
+  text-shadow:
+    0 0 0.75rem rgba(255, 59, 74, 0.76),
+    0 0 1.2rem rgba(255, 224, 113, 0.28);
+}
+
 .sphere-info-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

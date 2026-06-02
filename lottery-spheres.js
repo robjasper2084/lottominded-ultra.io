@@ -79,7 +79,11 @@
     const pick6 = makeUniqueSet(6, 69);
     const pick3 = makeDigitSet(3);
     const pick4 = makeDigitSet(4);
-    if (pick6Output) pick6Output.textContent = pick6.map(pad).join(" - ");
+    if (pick6Output) {
+      pick6Output.innerHTML = pick6
+        .map((number, index) => `<span class="${index === 5 ? "is-sixth-digit" : ""}">${pad(number)}</span>`)
+        .join('<span class="pick-separator"> - </span>');
+    }
     if (pick3Output) pick3Output.textContent = pick3.join(" - ");
     if (pick4Output) pick4Output.textContent = pick4.join(" - ");
     if (moveCountOutput) moveCountOutput.textContent = "Generated after 3 ball moves. Move 3 more times for a fresh set.";

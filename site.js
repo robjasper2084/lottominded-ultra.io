@@ -18,6 +18,7 @@ const gamePip = document.querySelector("[data-game-pip]");
 const gamePipClose = document.querySelector("[data-game-pip-close]");
 const gamePipFrame = gamePip?.querySelector("iframe");
 const gamePipHead = gamePip?.querySelector(".home-game-pip-head");
+const inlineSoundVideos = document.querySelectorAll("[data-inline-sound-video]");
 const memberForm = document.querySelector("[data-member-form]");
 const memberDownload = document.querySelector("[data-member-download]");
 const memberMessage = document.querySelector("[data-member-message]");
@@ -25,7 +26,8 @@ const compactHeaderLabels =
   document.body.classList.contains("prompt-lab-page") ||
   document.body.classList.contains("home-page") ||
   document.body.classList.contains("merch-store-page") ||
-  document.body.classList.contains("feature-console-page");
+  document.body.classList.contains("feature-console-page") ||
+  document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
@@ -115,6 +117,66 @@ siteBackButton?.addEventListener("click", () => {
   }
   window.location.href = "./";
 });
+
+function setupInlineSoundVideos() {
+  inlineSoundVideos.forEach((video) => {
+    video.controls = true;
+    video.playsInline = true;
+    const soundSurface =
+      video.closest("[data-inline-sound-card]") ||
+      video.closest(".prompt-video-card, .prompt-video-panel, .merch-drop-video") ||
+      video;
+    const soundButton = soundSurface.querySelector("[data-inline-sound-button]");
+
+    const setSoundButtonState = (active) => {
+      if (!soundButton) return;
+      soundButton.classList.toggle("is-active", active);
+      soundButton.setAttribute("aria-pressed", String(active));
+    };
+
+    setSoundButtonState(false);
+
+    const playWithSound = async () => {
+      document.querySelectorAll("audio, video").forEach((media) => {
+        if (media === video) return;
+        const isSiteAudio =
+          media.id === "siteSoundtrack" ||
+          media.closest("[data-startup-video]") ||
+          media.classList.contains("startup-video-player");
+        if (media.tagName === "AUDIO" || isSiteAudio || !media.muted) {
+          media.pause();
+        }
+      });
+
+      try {
+        video.muted = false;
+        video.volume = Number(video.dataset.inlineSoundVolume || 0.82);
+        await video.play();
+        video.classList.add("is-sound-active");
+        setSoundButtonState(true);
+      } catch {
+        video.controls = true;
+        video.classList.remove("is-sound-active");
+        setSoundButtonState(!video.muted);
+      }
+    };
+
+    video.addEventListener("click", playWithSound);
+    if (soundSurface !== video) {
+      soundSurface.addEventListener("click", playWithSound);
+    }
+    soundButton?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      playWithSound();
+    });
+    video.addEventListener("focus", playWithSound);
+    if (video.dataset.inlineSoundHover === "true") {
+      video.addEventListener("pointerenter", playWithSound, { passive: true });
+    }
+  });
+}
+
+setupInlineSoundVideos();
 
 function closeStartupVideo() {
   startupVideoModal?.classList.add("is-hidden");
