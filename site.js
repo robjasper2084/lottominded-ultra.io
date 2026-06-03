@@ -49,6 +49,161 @@ function setupNavKineticLabels() {
 
 setupNavKineticLabels();
 
+function setupFeatureDropdown() {
+  if (!siteHeader) return;
+  const featureLink = Array.from(siteHeader.querySelectorAll("nav a")).find((link) =>
+    link.getAttribute("href")?.includes("features-app.html"),
+  );
+  if (!featureLink) return;
+
+  const featureItems = [
+    ["Beat DNA Engine", "./lottomind-stem-studio/index.html#beat-dna"],
+    ["Stem Studio", "./lottomind-stem-studio/index.html#stems"],
+    ["DJ Decks", "./lottomind-stem-studio/index.html#dj-decks"],
+    ["Touch Pads", "./lottomind-stem-studio/index.html#pads"],
+    ["16-Level Pads", "./lottomind-stem-studio/index.html#pads"],
+    ["Song Editor", "./lottomind-stem-studio/index.html#song"],
+    ["Waveform Studio", "./lottomind-stem-studio/index.html#song"],
+    ["Piano Roll", "./lottomind-stem-studio/index.html#piano-roll"],
+    ["Pattern Editor", "./lottomind-stem-studio/index.html#patterns"],
+    ["AI Master", "./lottomind-stem-studio/index.html#ai-master"],
+    ["Vocal Remover", "./lottomind-stem-studio/index.html#vocal-remover"],
+    ["Stem Splitter", "./lottomind-stem-studio/index.html#stem-splitter"],
+    ["Suno Prompt", "./lottomind-stem-studio/index.html#suno-prompt"],
+    ["Video Prompt", "./lottomind-stem-studio/index.html#video-prompt"],
+    ["Beat Lottery", "./lottomind-stem-studio/index.html#beat-lottery"],
+    ["Lottery Spheres", "./lottery-spheres.html#spheres"],
+    ["Creative Bundle", "./lottomind-stem-studio/index.html#creative-bundle"],
+    ["Sampler", "./lottomind-stem-studio/index.html#sampler"],
+    ["How To Drive Manual", "./how-to-use.html"],
+    ["Open Tools Lab", "./features-app.html#support"]
+  ];
+
+  const menu = document.createElement("div");
+  menu.className = "feature-nav-dropdown";
+  menu.id = "featureNavDropdown";
+  menu.setAttribute("role", "menu");
+  menu.setAttribute("aria-label", "LOTTOMINDED ULTRA features");
+  menu.innerHTML = `
+    <div class="feature-nav-dropdown-head">
+      <span>Feature Deck</span>
+      <strong>LOTTOMINDED ULTRA modules</strong>
+    </div>
+    <div class="feature-nav-dropdown-grid">
+      ${featureItems.map(([label, href]) => `<a href="${href}" role="menuitem">${label}</a>`).join("")}
+    </div>
+  `;
+  siteHeader.appendChild(menu);
+
+  featureLink.setAttribute("aria-haspopup", "true");
+  featureLink.setAttribute("aria-expanded", "false");
+  featureLink.setAttribute("aria-controls", menu.id);
+
+  let closeTimer = 0;
+
+  const openMenu = () => {
+    clearTimeout(closeTimer);
+    siteHeader.classList.add("is-feature-menu-open");
+    featureLink.setAttribute("aria-expanded", "true");
+  };
+
+  const scheduleClose = () => {
+    clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      siteHeader.classList.remove("is-feature-menu-open");
+      featureLink.setAttribute("aria-expanded", "false");
+    }, 140);
+  };
+
+  featureLink.addEventListener("mouseenter", openMenu);
+  featureLink.addEventListener("focus", openMenu);
+  featureLink.addEventListener("click", (event) => {
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (!isCoarsePointer || siteHeader.classList.contains("is-feature-menu-open")) return;
+    event.preventDefault();
+    openMenu();
+  });
+  menu.addEventListener("mouseenter", openMenu);
+  menu.addEventListener("mouseleave", scheduleClose);
+  siteHeader.addEventListener("mouseleave", scheduleClose);
+  siteHeader.addEventListener("focusout", () => {
+    window.setTimeout(() => {
+      if (!siteHeader.contains(document.activeElement)) scheduleClose();
+    }, 0);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    siteHeader.classList.remove("is-feature-menu-open");
+    featureLink.setAttribute("aria-expanded", "false");
+  });
+}
+
+setupFeatureDropdown();
+
+function initPageTransitions() {
+  if (reducedMotionQuery.matches) return;
+
+  const wipe = document.createElement("div");
+  wipe.className = "page-wipe";
+  wipe.setAttribute("aria-hidden", "true");
+  document.body.appendChild(wipe);
+
+  const supportsViewTransitions = "startViewTransition" in document;
+  let transitionPending = false;
+
+  document.addEventListener("click", (event) => {
+    if (supportsViewTransitions || transitionPending) return;
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest?.("a[href]");
+    if (!link || link.getAttribute("aria-disabled") === "true" || link.hasAttribute("disabled")) return;
+    if (link.target && link.target !== "_self") return;
+    if (link.hasAttribute("download") || link.dataset.noTransition === "true") return;
+
+    const rawHref = link.getAttribute("href") || "";
+    if (!rawHref || /^(mailto|tel|javascript|data):/i.test(rawHref)) return;
+
+    const destination = new URL(link.href, window.location.href);
+    if (destination.origin !== window.location.origin) return;
+
+    const samePage =
+      destination.pathname === window.location.pathname &&
+      destination.search === window.location.search;
+    if (samePage && destination.hash) return;
+    if (destination.href === window.location.href) return;
+
+    event.preventDefault();
+    transitionPending = true;
+    document.body.classList.add("is-page-leaving");
+    wipe.classList.add("is-active");
+    window.setTimeout(() => {
+      window.location.href = destination.href;
+    }, 260);
+  });
+
+  window.addEventListener("pageshow", () => {
+    transitionPending = false;
+    document.body.classList.remove("is-page-leaving");
+    wipe.classList.remove("is-active");
+  });
+}
+
+initPageTransitions();
+
+function setupManualPianoHeader() {
+  if (!document.body.classList.contains("manual-page") || !siteHeader) return;
+  const pianoHeader = document.querySelector(".ultra-piano-header");
+  const headerMain = siteHeader.querySelector(".site-header-main");
+  if (!pianoHeader || pianoHeader.closest("header") === siteHeader) return;
+
+  document.body.classList.add("has-manual-instrument-header");
+  siteHeader.classList.add("manual-instrument-header");
+  pianoHeader.classList.add("ultra-piano-header-compact");
+  pianoHeader.setAttribute("aria-label", "Compact interactive piano navigation header");
+  siteHeader.insertBefore(pianoHeader, headerMain?.nextSibling || siteHeader.firstChild);
+}
+
+setupManualPianoHeader();
+
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
   siteSoundtrack.removeAttribute("loop");
@@ -98,53 +253,295 @@ if (kineticHero && !reducedMotionQuery.matches) {
 }
 
 function setupMerchAkariField() {
-  const dropSection = document.querySelector("[data-merch-akari]");
-  if (!dropSection) return;
+  const akariSections = document.querySelectorAll("[data-merch-akari]");
+  if (!akariSections.length) return;
 
-  const setDropPointer = (event) => {
-    const rect = dropSection.getBoundingClientRect();
-    const localX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
-    const localY = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
-    dropSection.classList.add("is-akari-hot");
-    dropSection.style.setProperty("--drop-light-x", `${(localX * 100).toFixed(2)}%`);
-    dropSection.style.setProperty("--drop-light-y", `${(localY * 100).toFixed(2)}%`);
-    const shiftX = (localX - 0.5) * 42;
-    const shiftY = (localY - 0.5) * 28;
-    dropSection.style.setProperty("--drop-field-x", `${shiftX.toFixed(2)}px`);
-    dropSection.style.setProperty("--drop-field-y", `${shiftY.toFixed(2)}px`);
-    dropSection.style.setProperty("--drop-field-rx", `${(shiftX * -0.35).toFixed(2)}px`);
-    dropSection.style.setProperty("--drop-field-ry", `${(shiftY * -0.35).toFixed(2)}px`);
-    dropSection.style.setProperty("--drop-field-tilt", `${((localX - 0.5) * 1.4).toFixed(2)}deg`);
-  };
+  akariSections.forEach((section) => {
+    const setDropPointer = (event) => {
+      const rect = section.getBoundingClientRect();
+      const localX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      const localY = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      section.classList.add("is-akari-hot");
+      section.style.setProperty("--drop-light-x", `${(localX * 100).toFixed(2)}%`);
+      section.style.setProperty("--drop-light-y", `${(localY * 100).toFixed(2)}%`);
+      const shiftX = (localX - 0.5) * 42;
+      const shiftY = (localY - 0.5) * 28;
+      section.style.setProperty("--drop-field-x", `${shiftX.toFixed(2)}px`);
+      section.style.setProperty("--drop-field-y", `${shiftY.toFixed(2)}px`);
+      section.style.setProperty("--drop-field-rx", `${(shiftX * -0.35).toFixed(2)}px`);
+      section.style.setProperty("--drop-field-ry", `${(shiftY * -0.35).toFixed(2)}px`);
+      section.style.setProperty("--drop-field-tilt", `${((localX - 0.5) * 1.4).toFixed(2)}deg`);
+    };
 
-  dropSection.addEventListener("pointerenter", (event) => {
-    dropSection.classList.add("is-akari-hot");
-    setDropPointer(event);
-  }, { passive: true });
-  dropSection.addEventListener("pointermove", setDropPointer, { passive: true });
-  dropSection.addEventListener("pointerleave", () => {
-    dropSection.classList.remove("is-akari-hot");
-  }, { passive: true });
+    section.addEventListener("pointerenter", (event) => {
+      section.classList.add("is-akari-hot");
+      setDropPointer(event);
+    }, { passive: true });
+    section.addEventListener("pointermove", setDropPointer, { passive: true });
+    section.addEventListener("pointerleave", () => {
+      section.classList.remove("is-akari-hot");
+    }, { passive: true });
+  });
 }
 
 setupMerchAkariField();
 
-if ("IntersectionObserver" in window && revealSections.length) {
+function setupSwipeRails() {
+  const rails = document.querySelectorAll("[data-swipe-rail]");
+  if (!rails.length) return;
+
+  rails.forEach((rail) => {
+    let activePointerId = null;
+    let startX = 0;
+    let startScrollLeft = 0;
+    let dragged = false;
+
+    const releaseRail = () => {
+      if (activePointerId !== null && rail.releasePointerCapture) {
+        try {
+          rail.releasePointerCapture(activePointerId);
+        } catch {
+          // Pointer capture may already be released by the browser.
+        }
+      }
+      activePointerId = null;
+      rail.classList.remove("is-swiping");
+    };
+
+    rail.addEventListener("dragstart", (event) => event.preventDefault());
+
+    rail.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest("button, a, input, select, textarea")) return;
+      activePointerId = event.pointerId;
+      startX = event.clientX;
+      startScrollLeft = rail.scrollLeft;
+      dragged = false;
+      rail.classList.add("is-swiping");
+      rail.setPointerCapture?.(event.pointerId);
+    });
+
+    rail.addEventListener("pointermove", (event) => {
+      if (activePointerId !== event.pointerId) return;
+      const deltaX = event.clientX - startX;
+      if (Math.abs(deltaX) > 3) dragged = true;
+      rail.scrollLeft = startScrollLeft - deltaX;
+      if (dragged) event.preventDefault();
+    }, { passive: false });
+
+    rail.addEventListener("pointerup", releaseRail);
+    rail.addEventListener("pointercancel", releaseRail);
+    rail.addEventListener("lostpointercapture", releaseRail);
+
+    rail.addEventListener("click", (event) => {
+      if (!dragged) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dragged = false;
+    }, true);
+
+    rail.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      rail.scrollBy({ left: direction * Math.max(rail.clientWidth * 0.82, 220), behavior: "smooth" });
+    });
+  });
+}
+
+setupSwipeRails();
+
+function initSplitText() {
+  document.querySelectorAll(".motion-text-split h1 > span, .hero h1 > span").forEach((span) => {
+    if (!span.dataset.text) span.dataset.text = span.textContent.trim();
+  });
+  window.requestAnimationFrame(() => document.body.classList.add("motion-page-ready"));
+}
+
+function inferMotion(element, index) {
+  if (element.dataset.motion) return element.dataset.motion;
+  if (element.matches(".feature-tool-card, .command-module-list a")) return index % 2 ? "fly-right" : "fly-left";
+  if (element.matches(".prompt-mini-app, .product-card, .gallery-grid article, .manual-dropdowns details")) return "pop";
+  if (element.matches(".manual-hero, .feature-console-hero, .merch-hero")) return "blur";
+  if (element.matches(".instruction-grid article")) return index % 2 ? "fly-right" : "fly-left";
+  return "rise";
+}
+
+function initMotionReveal() {
+  const motionSelector = [
+    "[data-reveal]",
+    "[data-motion]",
+    ".motion-rise",
+    ".motion-fly-left",
+    ".motion-fly-right",
+    ".motion-pop",
+    ".motion-blur-in",
+    ".motion-flip",
+    ".hero-copy",
+    ".feature-tool-card",
+    ".command-module-list a",
+    ".prompt-mini-app",
+    ".product-card",
+    ".gallery-grid article",
+    ".instruction-grid article",
+    ".manual-dropdowns details"
+  ].join(",");
+  const targets = Array.from(document.querySelectorAll(motionSelector));
+
+  targets.forEach((target, index) => {
+    if (!target.dataset.motion) target.dataset.motion = inferMotion(target, index);
+    target.classList.add(`motion-${target.dataset.motion === "blur" ? "blur-in" : target.dataset.motion}`);
+    target.style.setProperty("--stagger-index", String(index % 8));
+    if (!target.style.getPropertyValue("--motion-delay")) {
+      target.style.setProperty("--motion-delay", `${Math.min(520, (index % 8) * 70)}ms`);
+    }
+  });
+
+  if (!targets.length) return;
+  if (!("IntersectionObserver" in window) || reducedMotionQuery.matches) {
+    targets.forEach((target) => target.classList.add("is-visible"));
+    return;
+  }
+
   const revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          revealObserver.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
       });
     },
-    { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
+    { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
   );
-  revealSections.forEach((section) => revealObserver.observe(section));
-} else {
-  revealSections.forEach((section) => section.classList.add("is-visible"));
+  targets.forEach((target) => revealObserver.observe(target));
 }
+
+function initMagneticCards() {
+  if (reducedMotionQuery.matches || window.matchMedia("(pointer: coarse)").matches) return;
+  const selectors = [
+    ".home-page .feature-grid article",
+    ".home-page .prompt-launch-card",
+    ".home-page .prompt-brief-card",
+    ".member-gate",
+    ".primary-action",
+    ".secondary-action",
+    ".direct-action",
+    ".feature-tool-card",
+    ".command-module-list a",
+    ".prompt-mini-app",
+    ".product-card",
+    ".gallery-grid article",
+    ".feature-mail-panel",
+    ".manual-dropdowns details"
+  ].join(",");
+
+  document.querySelectorAll(selectors).forEach((card) => {
+    if (card.dataset.magneticBound === "true") return;
+    card.dataset.magneticBound = "true";
+    card.classList.add("magnetic-card", "signal-hover");
+    card.addEventListener("pointermove", (event) => {
+      if (isEditableTarget(event.target)) return;
+      const rect = card.getBoundingClientRect();
+      const localX = (event.clientX - rect.left) / Math.max(1, rect.width);
+      const localY = (event.clientY - rect.top) / Math.max(1, rect.height);
+      card.style.setProperty("--magnetic-x", `${((localX - 0.5) * 8).toFixed(2)}px`);
+      card.style.setProperty("--magnetic-y", `${((localY - 0.5) * 8).toFixed(2)}px`);
+      card.style.setProperty("--magnetic-rx", `${((0.5 - localY) * 4).toFixed(2)}deg`);
+      card.style.setProperty("--magnetic-ry", `${((localX - 0.5) * 5).toFixed(2)}deg`);
+      card.classList.add("is-magnetic-hot");
+    }, { passive: true });
+    card.addEventListener("pointerleave", () => {
+      card.classList.remove("is-magnetic-hot");
+      card.style.setProperty("--magnetic-x", "0px");
+      card.style.setProperty("--magnetic-y", "0px");
+      card.style.setProperty("--magnetic-rx", "0deg");
+      card.style.setProperty("--magnetic-ry", "0deg");
+    }, { passive: true });
+  });
+}
+
+function pulseElement(element, className = "is-copy-pulsed", duration = 900) {
+  if (!element) return;
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  window.setTimeout(() => element.classList.remove(className), duration);
+}
+
+function markTypingOutput(field) {
+  if (!field) return;
+  field.classList.add("is-typing-output");
+  field.closest(".prompt-mini-app")?.classList.add("is-output-typing");
+  window.setTimeout(() => {
+    field.classList.remove("is-typing-output");
+    field.closest(".prompt-mini-app")?.classList.remove("is-output-typing");
+  }, 1150);
+}
+
+function initCopyPulse() {
+  document.addEventListener("click", (event) => {
+    const copyButton = event.target.closest?.("[data-copy-target], #copyLotto, #copySheetPrompts");
+    if (copyButton) pulseElement(copyButton);
+
+    const miniAction = event.target.closest?.("[data-mini-action]")?.dataset.miniAction;
+    if (miniAction) {
+      window.setTimeout(() => {
+        const targetId = {
+          suno: "miniSunoOutput",
+          video: "miniVideoOutput",
+          numbers: "miniLottoOutput"
+        }[miniAction];
+        markTypingOutput(document.getElementById(targetId));
+      }, 0);
+    }
+  });
+}
+
+function initAnchorGlow() {
+  const links = Array.from(document.querySelectorAll("a[href*='#']")).filter((link) => {
+    try {
+      const url = new URL(link.href, window.location.href);
+      return url.origin === window.location.origin && url.pathname === window.location.pathname && url.hash;
+    } catch {
+      return false;
+    }
+  });
+  if (!links.length) return;
+
+  const setActive = (hash) => {
+    links.forEach((link) => {
+      const active = new URL(link.href, window.location.href).hash === hash;
+      link.classList.toggle("nav-signal-active", active);
+      if (active) link.setAttribute("aria-current", "location");
+      else if (link.getAttribute("aria-current") === "location") link.removeAttribute("aria-current");
+    });
+  };
+
+  links.forEach((link) => {
+    link.addEventListener("click", () => {
+      const hash = new URL(link.href, window.location.href).hash;
+      window.setTimeout(() => setActive(hash), 0);
+    });
+  });
+  setActive(window.location.hash);
+  window.addEventListener("hashchange", () => setActive(window.location.hash));
+}
+
+initSplitText();
+initMotionReveal();
+initMagneticCards();
+initCopyPulse();
+initAnchorGlow();
+
+window.lottomindRefreshMotion = () => {
+  initSplitText();
+  initMotionReveal();
+  initMagneticCards();
+  initAnchorGlow();
+};
+
+window.addEventListener("lottomind:motion-refresh", window.lottomindRefreshMotion);
 
 setHeaderCollapsed(localStorage.getItem(HEADER_COLLAPSED_KEY) === "true");
 headerToggle?.addEventListener("click", () => {
@@ -378,9 +775,24 @@ function setupInstrumentKeyboard() {
     "A#4": 466.16,
     B4: 493.88,
     C5: 523.25,
+    "C#5": 554.37,
+    D5: 587.33,
+    "D#5": 622.25,
+    E5: 659.25,
+    F5: 698.46,
+    "F#5": 739.99,
+    G5: 783.99,
+    "G#5": 830.61,
+    A5: 880,
+    "A#5": 932.33,
+    B5: 987.77,
+    C6: 1046.5,
   };
   let audioContext = null;
   let scaleTimer = 0;
+  let wheelGate = 0;
+  let lastWheelNote = "";
+  const pressTimers = new WeakMap();
 
   function getKeyboardAudio() {
     if (!audioContext) {
@@ -435,11 +847,27 @@ function setupInstrumentKeyboard() {
   }
 
   function setKeyPressed(key, pressed) {
+    window.clearTimeout(pressTimers.get(key));
     key.classList.toggle("is-pressed", Boolean(pressed));
   }
 
+  function pressKeyMomentarily(key, duration = 150) {
+    setKeyPressed(key, true);
+    pressTimers.set(
+      key,
+      window.setTimeout(() => setKeyPressed(key, false), duration),
+    );
+  }
+
+  function pressHoveredKey(key) {
+    if (!key.classList.contains("is-pressed")) {
+      playKeyboardNote(key.dataset.note, 0.2, 0.07);
+    }
+    setKeyPressed(key, true);
+  }
+
   function playScale(scaleKey) {
-    const scale = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"];
+    const scale = ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5", "G5", "A5", "B5", "C6"];
     window.clearInterval(scaleTimer);
     let index = 0;
     scaleKey.classList.add("is-demo-active");
@@ -475,7 +903,12 @@ function setupInstrumentKeyboard() {
   }
 
   keyboard.querySelectorAll("[data-note]").forEach((key) => {
-    key.addEventListener("pointerenter", () => playKeyboardNote(key.dataset.note, 0.22, 0.075), { passive: true });
+    key.addEventListener(
+      "pointerenter",
+      () => pressHoveredKey(key),
+      { passive: true },
+    );
+    key.addEventListener("mouseenter", () => pressHoveredKey(key), { passive: true });
     key.addEventListener("pointerdown", () => {
       playKeyboardNote(key.dataset.note);
       setKeyPressed(key, true);
@@ -483,6 +916,7 @@ function setupInstrumentKeyboard() {
     key.addEventListener("pointerup", () => setKeyPressed(key, false));
     key.addEventListener("pointercancel", () => setKeyPressed(key, false));
     key.addEventListener("pointerleave", () => setKeyPressed(key, false));
+    key.addEventListener("mouseleave", () => setKeyPressed(key, false));
     key.addEventListener("click", (event) => {
       event.preventDefault();
       setKeyPressed(key, true);
@@ -495,9 +929,26 @@ function setupInstrumentKeyboard() {
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
       playKeyboardNote(key.dataset.note);
-      routeInstrumentKey(key);
+      pressKeyMomentarily(key, 130);
+      window.setTimeout(() => routeInstrumentKey(key), 130);
     });
   });
+
+  keyboard.addEventListener(
+    "wheel",
+    (event) => {
+      const key = event.target.closest?.("[data-note]");
+      if (!key) return;
+      event.preventDefault();
+      const now = window.performance.now();
+      if (key.dataset.note === lastWheelNote && now - wheelGate < 95) return;
+      wheelGate = now;
+      lastWheelNote = key.dataset.note;
+      playKeyboardNote(key.dataset.note, 0.18, 0.06);
+      pressKeyMomentarily(key, 320);
+    },
+    { passive: false },
+  );
 
   window.addEventListener("pagehide", () => window.clearInterval(scaleTimer));
 }
@@ -635,14 +1086,15 @@ function setupMascotMotionCursor() {
   const cursor = document.createElement("div");
   cursor.className = "mascot-motion-cursor";
   cursor.setAttribute("aria-hidden", "true");
+  document.body.classList.add("has-mascot-motion-cursor");
   document.body.append(cursor);
 
   const spriteMap = {
     idle: [[0, 0]],
-    right: [[1, 0], [2, 0], [3, 0], [5, 1]],
-    left: [[1, 0], [2, 0], [3, 0], [5, 1]],
-    up: [[5, 0], [5, 3]],
-    down: [[2, 3], [3, 3], [4, 3]],
+    right: [[1, 0], [2, 0], [3, 0]],
+    left: [[1, 0], [2, 0], [3, 0]],
+    up: [[5, 0]],
+    down: [[4, 0]],
   };
   const position = { x: -120, y: -120 };
   const last = { x: -120, y: -120, time: 0 };
@@ -651,6 +1103,7 @@ function setupMascotMotionCursor() {
   let frameIndex = 0;
   let frameTimer = 0;
   let idleTimer = 0;
+  let heldScrollState = "";
   let visible = false;
 
   function setSpriteFrame(now) {
@@ -667,9 +1120,12 @@ function setupMascotMotionCursor() {
 
   function render(now) {
     setSpriteFrame(now);
-    const lift = state === "up" ? -22 : state === "down" ? 14 : state === "idle" ? 0 : -4;
-    const tilt = state === "up" ? -10 : state === "down" ? 14 : state === "right" || state === "left" ? 4 : 0;
-    cursor.style.transform = `translate3d(${Math.round(position.x + 14)}px, ${Math.round(position.y + lift + 12)}px, 0) scaleX(${facing}) rotate(${tilt * facing}deg)`;
+    const tilt = state === "up" ? -5 : state === "down" ? 3 : state === "right" || state === "left" ? 4 : 0;
+    const width = cursor.offsetWidth || 74;
+    const height = cursor.offsetHeight || Math.round(width * 184 / 220);
+    const x = Math.round(position.x - width * 0.5);
+    const y = Math.round(position.y - height * 0.52);
+    cursor.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${facing}) rotate(${tilt * facing}deg)`;
     if (visible) cursor.classList.add("is-visible");
     window.requestAnimationFrame(render);
   }
@@ -692,13 +1148,16 @@ function setupMascotMotionCursor() {
     visible = true;
     window.clearTimeout(idleTimer);
 
-    if (absX < 2 && absY < 2) {
-      state = "idle";
-    } else if (absY > absX * 1.1) {
-      state = dy < 0 ? "up" : "down";
-    } else {
+    if (absX >= 2 && absX >= absY * 0.35) {
       state = dx < 0 ? "left" : "right";
       facing = dx < 0 ? -1 : 1;
+      heldScrollState = "";
+    } else if (heldScrollState) {
+      state = heldScrollState;
+    } else if (absX < 2 && absY < 2) {
+      state = "idle";
+    } else {
+      state = facing < 0 ? "left" : "right";
     }
 
     if (state !== "idle") frameIndex %= (spriteMap[state] || spriteMap.idle).length;
@@ -706,9 +1165,30 @@ function setupMascotMotionCursor() {
     last.y = event.clientY;
     last.time = now;
     idleTimer = window.setTimeout(() => {
+      if (heldScrollState) return;
       state = "idle";
       frameIndex = 0;
     }, 180);
+  }, { passive: true });
+
+  window.addEventListener("wheel", (event) => {
+    if (isEditableTarget(event.target)) return;
+    visible = true;
+    window.clearTimeout(idleTimer);
+
+    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) > 2) {
+      state = event.deltaX < 0 ? "left" : "right";
+      facing = event.deltaX < 0 ? -1 : 1;
+      heldScrollState = "";
+    } else if (event.deltaY > 0) {
+      state = "down";
+      heldScrollState = "down";
+    } else if (event.deltaY < 0) {
+      state = "up";
+      heldScrollState = "up";
+    }
+
+    frameIndex = 0;
   }, { passive: true });
 
   document.addEventListener("pointerleave", () => {

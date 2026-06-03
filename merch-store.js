@@ -110,11 +110,15 @@ function addToCart(button) {
   }
   updateBag();
   bagDrawer?.classList.add("is-open");
+  bagDrawer?.classList.add("is-cart-popping");
+  button.classList.add("is-add-popping");
 
   const oldText = button.textContent;
   button.textContent = "Added";
   window.setTimeout(() => {
     button.textContent = oldText;
+    button.classList.remove("is-add-popping");
+    bagDrawer?.classList.remove("is-cart-popping");
   }, 900);
 }
 

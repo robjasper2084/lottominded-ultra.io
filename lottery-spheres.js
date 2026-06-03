@@ -209,6 +209,17 @@
     ctx.arc(ball.x, ball.y, r, 0, Math.PI * 2);
     ctx.fill();
 
+    if (pulse > 0.015) {
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      ctx.globalAlpha = Math.min(0.48, 0.16 + pulse * 0.58);
+      ctx.fillStyle = `hsl(${(time * 0.06 + ball.number * 17 + audioPulseIndex * 9) % 360}, 92%, 62%)`;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, r * (0.86 + pulse * 0.2), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     if (ball.asset && accentImage?.complete) {
       ctx.save();
       ctx.beginPath();

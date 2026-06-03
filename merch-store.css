@@ -312,7 +312,8 @@
 .motion-gallery-copy .explosive-zoom-heading {
   position: relative;
   isolation: isolate;
-  overflow: visible;
+  overflow: hidden;
+  max-width: min(100%, 11ch);
   transition:
     color 280ms ease,
     filter 280ms ease,
@@ -354,7 +355,7 @@
 .motion-gallery-copy .explosive-zoom-heading:focus,
 .motion-gallery-copy .explosive-zoom-heading:focus-visible {
   color: #effbff;
-  transform: scale(1.5);
+  transform: scale(1.06);
   filter:
     drop-shadow(0 0 1.2rem rgba(41, 247, 255, 0.42))
     drop-shadow(0 1.2rem 1.8rem rgba(0, 0, 0, 0.4));
@@ -639,7 +640,8 @@
   padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 5vw, 5rem);
 }
 
-.merch-drop-section {
+.merch-drop-section,
+.gallery-section {
   --drop-light-x: 50%;
   --drop-light-y: 42%;
   --drop-field-x: 0px;
@@ -647,6 +649,9 @@
   --drop-field-rx: 0px;
   --drop-field-ry: 0px;
   --drop-field-tilt: 0deg;
+}
+
+.merch-drop-section {
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -682,7 +687,8 @@
   transition: transform 180ms ease, opacity 200ms ease;
 }
 
-.merch-drop-section.is-akari-hot .merch-akari-field {
+.merch-drop-section.is-akari-hot .merch-akari-field,
+.gallery-section.is-akari-hot .merch-akari-field {
   opacity: 1;
 }
 
@@ -715,7 +721,8 @@
   transition: opacity 180ms ease, transform 180ms ease;
 }
 
-.merch-drop-section.is-akari-hot .merch-akari-field::after {
+.merch-drop-section.is-akari-hot .merch-akari-field::after,
+.gallery-section.is-akari-hot .merch-akari-field::after {
   opacity: 0.86;
 }
 
@@ -999,6 +1006,54 @@
   perspective: 1100px;
 }
 
+.merch-swipe-rail {
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.35rem;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(41, 247, 255, 0.72) rgba(3, 8, 16, 0.42);
+  touch-action: pan-x;
+  cursor: grab;
+}
+
+.merch-swipe-rail::-webkit-scrollbar {
+  height: 0.72rem;
+}
+
+.merch-swipe-rail::-webkit-scrollbar-track {
+  background: rgba(3, 8, 16, 0.54);
+  border-radius: 999px;
+}
+
+.merch-swipe-rail::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(3, 8, 16, 0.76);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fff36b, #00f5ff, #3dff9f);
+}
+
+.merch-swipe-rail:focus-visible {
+  outline: 2px solid #29f7ff;
+  outline-offset: 0.35rem;
+}
+
+.merch-swipe-rail.is-swiping {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+.product-grid.merch-swipe-rail {
+  display: flex;
+  grid-template-columns: none;
+  align-items: stretch;
+  gap: clamp(0.85rem, 2vw, 1.05rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.3rem 0.25rem 1rem;
+  perspective: none;
+}
+
 .product-grid::before {
   position: absolute;
   inset: -1.5rem -1rem;
@@ -1072,6 +1127,16 @@
     border-color 220ms ease,
     box-shadow 220ms ease,
     filter 220ms ease;
+}
+
+.product-grid.merch-swipe-rail .product-card {
+  flex: 0 0 clamp(16rem, 26vw, 22rem);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.product-grid.merch-swipe-rail .product-card.featured {
+  flex-basis: clamp(17rem, 29vw, 24rem);
 }
 
 .product-card.featured {
@@ -1170,8 +1235,43 @@
 
 .product-card:hover img,
 .product-card:focus-within img {
+  object-fit: contain;
   filter: saturate(1.18) contrast(1.08) brightness(1.05);
-  transform: scale(1.045);
+  transform: scale(1);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(41, 247, 255, 0.14), transparent 58%),
+    rgba(2, 8, 15, 0.9);
+}
+
+.product-hover-price {
+  position: absolute;
+  top: 0.78rem;
+  right: 0.78rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.1rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid rgba(255, 224, 113, 0.7);
+  border-radius: 999px;
+  color: #071016;
+  background: linear-gradient(135deg, #fff36b, #ffd166 52%, #29f7ff);
+  box-shadow: 0 0 1.2rem rgba(255, 224, 113, 0.24);
+  font-family: var(--display-font);
+  font-size: 0.95rem;
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0.45rem, -0.45rem, 0) scale(0.9);
+  transition: opacity 180ms ease, transform 220ms ease;
+}
+
+.product-card:hover .product-hover-price,
+.product-card:focus-within .product-hover-price {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .product-row {
@@ -1215,8 +1315,15 @@
   align-items: start;
   scroll-margin-top: 7.5rem;
   background:
+    radial-gradient(circle at var(--drop-light-x) var(--drop-light-y), rgba(255, 224, 113, 0.14), transparent 23rem),
     radial-gradient(circle at 22% 20%, rgba(41, 247, 255, 0.1), transparent 23rem),
-    radial-gradient(circle at 76% 70%, rgba(255, 224, 113, 0.08), transparent 24rem);
+    radial-gradient(circle at 76% 70%, rgba(255, 224, 113, 0.08), transparent 24rem),
+    linear-gradient(135deg, rgba(2, 6, 12, 0.96), rgba(5, 17, 29, 0.9) 54%, rgba(4, 8, 18, 0.96));
+}
+
+.gallery-section .merch-akari-field {
+  opacity: 0.76;
+  filter: saturate(1.18) hue-rotate(-8deg);
 }
 
 .gallery-section::before {
@@ -1348,6 +1455,7 @@
 
 .motion-gallery-copy {
   align-self: center;
+  overflow: hidden;
 }
 
 .gallery-grid {
@@ -1359,8 +1467,25 @@
   width: min(100%, 40rem);
 }
 
+.gallery-grid.merch-swipe-rail {
+  display: flex;
+  grid-template-columns: none;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: min(100%, 42rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2rem 0.25rem 0.95rem;
+}
+
 .gallery-grid article {
   overflow: hidden;
+}
+
+.gallery-grid.merch-swipe-rail article {
+  flex: 0 0 clamp(10rem, 16vw, 14rem);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .gallery-grid img {
@@ -1378,7 +1503,17 @@
 
 .gallery-grid span {
   display: block;
-  padding: 0.7rem;
+  padding: 0.7rem 0.7rem 0.28rem;
+}
+
+.gallery-price {
+  display: block;
+  padding: 0 0.7rem 0.72rem;
+  color: #ffd166;
+  font-family: var(--display-font);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
 }
 
 .bag-drawer {
@@ -1923,6 +2058,22 @@
     grid-row: auto;
   }
 
+  .product-grid.merch-swipe-rail,
+  .gallery-grid.merch-swipe-rail {
+    display: flex;
+    grid-template-columns: none;
+    width: 100%;
+  }
+
+  .product-grid.merch-swipe-rail .product-card,
+  .product-grid.merch-swipe-rail .product-card.featured {
+    flex-basis: min(82vw, 22rem);
+  }
+
+  .gallery-grid.merch-swipe-rail article {
+    flex-basis: min(44vw, 12.5rem);
+  }
+
   .merch-hero {
     min-height: auto;
     padding-top: 10rem;
@@ -1937,7 +2088,66 @@
   }
 }
 
+.product-card,
+.gallery-grid article {
+  transform-style: preserve-3d;
+}
+
+.product-card.is-add-popping,
+.product-card:has(.is-add-popping) {
+  animation: lmCopyPulse 820ms ease both;
+}
+
+.product-card .product-row button.is-add-popping {
+  color: #071018;
+  background: linear-gradient(135deg, var(--gold), var(--green), var(--cyan));
+  box-shadow: 0 0 28px rgba(255, 224, 113, 0.34);
+}
+
+.product-card:hover,
+.product-card:focus-within {
+  filter: saturate(1.14);
+}
+
+.gallery-grid article:hover,
+.gallery-grid article:focus-within {
+  border-color: rgba(255, 224, 113, 0.62);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.36),
+    0 0 28px rgba(41, 247, 255, 0.14);
+}
+
+.gallery-grid article:hover img,
+.gallery-grid article:focus-within img {
+  transform: scale(1.08) translate3d(var(--magnetic-x, 0), var(--magnetic-y, 0), 0);
+}
+
+.bag-drawer.is-cart-popping {
+  animation: merchCartPop 620ms cubic-bezier(0.16, 0.92, 0.28, 1) both;
+}
+
+@keyframes merchCartPop {
+  0% {
+    transform: translateX(102%) scale(0.96);
+  }
+  48% {
+    transform: translateX(-0.35rem) scale(1.015);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .bag-drawer.is-cart-popping,
+  .product-card.is-add-popping,
+  .product-card:has(.is-add-popping),
+  .gallery-grid article:hover img,
+  .gallery-grid article:focus-within img {
+    animation: none !important;
+    transform: none !important;
+  }
+
   .merch-store-page [data-reveal],
   .merch-store-page .merch-site-header::before,
   .merch-store-page .merch-site-header::after,

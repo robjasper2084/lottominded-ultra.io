@@ -16,6 +16,26 @@ const pianoNotes = [
 let importedBeatAnalysis = null;
 let sheetFileLabel = "";
 let beatPulseTimer = 0;
+let beatAudioUrl = "";
+let beatAudioContext = null;
+let beatAnalyser = null;
+let beatSourceNode = null;
+let beatEnergyRaf = 0;
+let beatTimeDomainData = null;
+
+function pulseElement(element, className = "is-copy-pulsed", duration = 900) {
+  if (!element) return;
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+  window.setTimeout(() => element.classList.remove(className), duration);
+}
+
+function markTypingOutput(field) {
+  if (!field) return;
+  field.classList.add("is-typing-output");
+  window.setTimeout(() => field.classList.remove("is-typing-output"), 1150);
+}
 
 function clamp01(value) {
   return Math.max(0, Math.min(1, Number(value) || 0));
@@ -69,6 +89,132 @@ function playBeatEnergySeries(series, bpm = 120) {
     emitBeatEnergy(series[index], { index, length: series.length, bpm });
     if (loops >= 3) window.clearInterval(beatPulseTimer);
   }, stepMs);
+}
+
+function setBeatPlaybackStatus(message) {
+  const status = document.querySelector("#beatPlaybackStatus");
+  if (status) status.textContent = message;
+}
+
+function setBeatPlaybackEnergy(energy) {
+  const playback = document.querySelector("#beatPlayback");
+  if (playback) playback.style.setProperty("--beat-live-energy", clamp01(energy).toFixed(3));
+}
+
+function stopLiveBeatEnergy() {
+  if (beatEnergyRaf) window.cancelAnimationFrame(beatEnergyRaf);
+  beatEnergyRaf = 0;
+  setBeatPlaybackEnergy(0);
+}
+
+function prepareBeatPlayback(file) {
+  const playback = document.querySelector("#beatPlayback");
+  const audio = document.querySelector("#lottoAudioPlayer");
+  const button = document.querySelector("#playBeatAudio");
+  if (!playback || !audio || !button || !file) return;
+
+  stopLiveBeatEnergy();
+  window.clearInterval(beatPulseTimer);
+  if (!audio.paused) audio.pause();
+  if (beatAudioUrl) URL.revokeObjectURL(beatAudioUrl);
+  beatAudioUrl = URL.createObjectURL(file);
+  audio.src = beatAudioUrl;
+  audio.load();
+  playback.hidden = false;
+  button.disabled = false;
+  button.textContent = "Play uploaded beat";
+  setBeatPlaybackStatus("Ready for local playback. Balls react while the beat plays.");
+}
+
+function resetBeatPlayback() {
+  const playback = document.querySelector("#beatPlayback");
+  const audio = document.querySelector("#lottoAudioPlayer");
+  const button = document.querySelector("#playBeatAudio");
+  stopLiveBeatEnergy();
+  if (audio && !audio.paused) audio.pause();
+  if (audio) audio.removeAttribute("src");
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Play uploaded beat";
+  }
+  if (playback) playback.hidden = true;
+  if (beatAudioUrl) URL.revokeObjectURL(beatAudioUrl);
+  beatAudioUrl = "";
+}
+
+async function ensureBeatAnalyser() {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  if (!audio?.src) return null;
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextCtor) {
+    setBeatPlaybackStatus("This browser cannot analyze playback audio.");
+    return null;
+  }
+  if (!beatAudioContext) {
+    beatAudioContext = new AudioContextCtor();
+  }
+  if (beatAudioContext.state === "suspended") {
+    await beatAudioContext.resume();
+  }
+  if (!beatAnalyser) {
+    beatAnalyser = beatAudioContext.createAnalyser();
+    beatAnalyser.fftSize = 512;
+    beatTimeDomainData = new Uint8Array(beatAnalyser.fftSize);
+  }
+  if (!beatSourceNode) {
+    beatSourceNode = beatAudioContext.createMediaElementSource(audio);
+    beatSourceNode.connect(beatAnalyser);
+    beatAnalyser.connect(beatAudioContext.destination);
+  }
+  return { audio, analyser: beatAnalyser };
+}
+
+function renderLiveBeatEnergy() {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  if (!audio || audio.paused || audio.ended || !beatAnalyser || !beatTimeDomainData) {
+    stopLiveBeatEnergy();
+    return;
+  }
+
+  beatAnalyser.getByteTimeDomainData(beatTimeDomainData);
+  let sumSquares = 0;
+  let peak = 0;
+  for (const sample of beatTimeDomainData) {
+    const centered = (sample - 128) / 128;
+    const abs = Math.abs(centered);
+    sumSquares += centered * centered;
+    if (abs > peak) peak = abs;
+  }
+  const rms = Math.sqrt(sumSquares / beatTimeDomainData.length);
+  const energy = clamp01(rms * 2.2 + peak * 0.42);
+  setBeatPlaybackEnergy(energy);
+  emitBeatEnergy(energy, {
+    source: "beat2lotto-live-audio",
+    index: Math.floor(audio.currentTime * 12),
+    currentTime: audio.currentTime
+  });
+  beatEnergyRaf = window.requestAnimationFrame(renderLiveBeatEnergy);
+}
+
+async function toggleBeatPlayback() {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  const button = document.querySelector("#playBeatAudio");
+  if (!audio?.src || !button) return;
+
+  if (!audio.paused) {
+    audio.pause();
+    button.textContent = "Play uploaded beat";
+    setBeatPlaybackStatus("Playback paused. Press play to wake the spheres again.");
+    return;
+  }
+
+  window.clearInterval(beatPulseTimer);
+  const setup = await ensureBeatAnalyser();
+  if (!setup) return;
+  await audio.play();
+  button.textContent = "Pause uploaded beat";
+  setBeatPlaybackStatus("Playing locally. Golden balls are reacting to the beat.");
+  renderLiveBeatEnergy();
 }
 
 function hashString(input) {
@@ -149,7 +295,7 @@ function renderResults() {
     `Beat2Lotto+ - ${game.label} - ${method} - Set ${index + 1}: ${formatSet(set, game)} - Beat-seeded entertainment picks. Creative number generation. Not a prediction. Verify official rules.`
   )).join("\n");
   output.innerHTML = sets.map((set, index) => `
-    <article class="lotto-set-card">
+    <article class="lotto-set-card motion-pop" style="--motion-delay:${Math.min(420, index * 65)}ms">
       <strong>Set ${index + 1} - ${game.label}</strong>
       <div class="lotto-number-row">
         ${set.main.map((number) => `<span class="lotto-ball">${game.type === "digits" ? number : String(number).padStart(2, "0")}</span>`).join("")}
@@ -159,12 +305,15 @@ function renderResults() {
       <p class="lotto-note">Game rules, matrices, draw times, prizes, and eligibility vary by jurisdiction. Verify with the official lottery before playing.</p>
     </article>
   `).join("");
+  output.classList.add("is-results-fresh");
+  window.setTimeout(() => output.classList.remove("is-results-fresh"), 900);
 }
 
 async function copyResults() {
   const text = document.querySelector("#lottoOutput").dataset.copyText || "";
   if (!text) return;
   await copyText(text);
+  pulseElement(document.querySelector("#copyLotto"));
 }
 
 async function analyzeBeatFile(file) {
@@ -212,6 +361,7 @@ async function analyzeBeatFile(file) {
       energySignature,
       energySeries
     };
+    prepareBeatPlayback(file);
     status.innerHTML = `
       <strong>${escapeHtml(file.name)}</strong>
       <span>${buffer.duration.toFixed(1)}s - ${buffer.sampleRate} Hz - ${buffer.numberOfChannels} channel${buffer.numberOfChannels === 1 ? "" : "s"}</span>
@@ -224,6 +374,7 @@ async function analyzeBeatFile(file) {
   } catch (error) {
     importedBeatAnalysis = null;
     window.clearInterval(beatPulseTimer);
+    resetBeatPlayback();
     status.innerHTML = `<strong>Audio could not be decoded</strong><span>Try a browser-supported WAV, MP3, M4A, or OGG file.</span>`;
   }
 }
@@ -307,12 +458,15 @@ function buildSheetPrompts(section = "both") {
   const videoField = document.querySelector("#sheetVideoPrompt");
   if (musicField && (section === "music" || section === "both")) musicField.value = musicPrompt;
   if (videoField && (section === "video" || section === "both")) videoField.value = videoPrompt;
+  if (section === "music" || section === "both") markTypingOutput(musicField);
+  if (section === "video" || section === "both") markTypingOutput(videoField);
 }
 
 async function copySheetPrompts() {
   const music = document.querySelector("#sheetSunoPrompt")?.value || "";
   const video = document.querySelector("#sheetVideoPrompt")?.value || "";
   await copyText(`Music Prompt:\n${music}\n\nVideo Prompt:\n${video}`.trim());
+  pulseElement(document.querySelector("#copySheetPrompts"));
 }
 
 async function copyText(text) {
@@ -341,6 +495,16 @@ function escapeHtml(value) {
 document.querySelector("#generateLotto")?.addEventListener("click", renderResults);
 document.querySelector("#copyLotto")?.addEventListener("click", copyResults);
 document.querySelector("#lottoAudioFile")?.addEventListener("change", (event) => analyzeBeatFile(event.target.files?.[0]));
+document.querySelector("#playBeatAudio")?.addEventListener("click", toggleBeatPlayback);
+document.querySelector("#lottoAudioPlayer")?.addEventListener("ended", () => {
+  const button = document.querySelector("#playBeatAudio");
+  if (button) button.textContent = "Play uploaded beat";
+  setBeatPlaybackStatus("Playback ended. Press play to run it again from the top.");
+  stopLiveBeatEnergy();
+});
+document.querySelector("#lottoAudioPlayer")?.addEventListener("pause", () => {
+  if (!document.querySelector("#lottoAudioPlayer")?.ended) stopLiveBeatEnergy();
+});
 document.querySelector("#sheetMusicFile")?.addEventListener("change", (event) => handleSheetFile(event.target.files?.[0]));
 document.querySelector("#scanSheet")?.addEventListener("click", scanSheetToNotes);
 document.querySelector("#clearNotes")?.addEventListener("click", () => {
@@ -354,6 +518,9 @@ document.querySelector("#noteSequence")?.addEventListener("input", syncNoteChips
 document.querySelector("#pianoKeyboard")?.addEventListener("click", (event) => {
   const key = event.target.closest("[data-note]");
   if (key) addNote(key.dataset.note);
+});
+window.addEventListener("beforeunload", () => {
+  if (beatAudioUrl) URL.revokeObjectURL(beatAudioUrl);
 });
 
 renderKeyboard();

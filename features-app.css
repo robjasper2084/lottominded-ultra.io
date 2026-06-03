@@ -620,7 +620,82 @@
   }
 }
 
+.feature-command-panel,
+.feature-tool-card,
+.command-module-list a,
+.feature-mail-panel {
+  position: relative;
+  isolation: isolate;
+}
+
+.feature-command-panel::after {
+  animation: lmBorderBeam 5.8s ease-in-out infinite;
+}
+
+.feature-tool-card::before,
+.command-module-list a::before,
+.feature-mail-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, transparent 0 36%, var(--feature-color, rgba(41, 247, 255, 0.22)) 48%, rgba(255, 224, 113, 0.2) 58%, transparent 72%);
+  opacity: 0;
+  transform: translateX(-80%);
+}
+
+.feature-tool-card:hover::before,
+.feature-tool-card:focus-visible::before,
+.command-module-list a:hover::before,
+.command-module-list a:focus-visible::before,
+.feature-mail-panel:focus-within::before {
+  opacity: 1;
+  animation: lmBorderBeam 980ms ease both;
+}
+
+.feature-tool-card h3::after,
+.command-module-list strong::after {
+  display: inline-block;
+  width: 0.52rem;
+  height: 0.52rem;
+  margin-left: 0.45rem;
+  content: "";
+  border-radius: 999px;
+  background: var(--feature-color, var(--cyan));
+  box-shadow: 0 0 14px currentColor;
+  animation: lmPulseGlow 2.2s ease-in-out infinite;
+}
+
+.feature-launch-grid {
+  position: relative;
+}
+
+.feature-launch-grid::before {
+  position: absolute;
+  inset: 5.2rem 1.2rem auto;
+  height: 2px;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(41, 247, 255, 0.62), rgba(255, 224, 113, 0.48), transparent);
+  box-shadow: 0 0 22px rgba(41, 247, 255, 0.24);
+  opacity: 0.78;
+  animation: lmBorderBeam 7s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .feature-command-panel::after,
+  .feature-tool-card::before,
+  .command-module-list a::before,
+  .feature-mail-panel::before,
+  .feature-tool-card h3::after,
+  .command-module-list strong::after,
+  .feature-launch-grid::before {
+    animation: none !important;
+  }
+
   .feature-console-page *,
   .feature-console-page *::before,
   .feature-console-page *::after {

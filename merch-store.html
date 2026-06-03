@@ -10,8 +10,8 @@
     <title>LOTTOMINDED ULTRA | Merch + Gallery Store</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=mascot-audio-1" />
-    <link rel="stylesheet" href="./merch-store.css?v=drop-akari-1" />
+    <link rel="stylesheet" href="./styles.css?v=cinematic-motion-1" />
+    <link rel="stylesheet" href="./merch-store.css?v=cinematic-motion-1" />
   </head>
   <body class="merch-store-page">
     <header class="site-header home-like-header" data-site-header>
@@ -101,7 +101,7 @@
           <h2>Drop-ready apparel with a studio signal.</h2>
           <div class="merch-drop-video" aria-label="Merch drop motion video">
             <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.82">
-              <source src="./assets/merch/merch-motion-03.mp4" type="video/mp4" />
+              <source src="./assets/merch/merch-drop-user-video.mp4" type="video/mp4" />
             </video>
             <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
           </div>
@@ -110,9 +110,28 @@
             or another storefront later.
           </p>
         </div>
-        <div class="product-grid" aria-label="Merch products">
+        <div class="product-grid merch-swipe-rail" aria-label="Merch products" data-swipe-rail tabindex="0">
+          <article class="product-card">
+            <img src="./assets/merch/detroit-embroidered-hoodie-closeup.png" alt="Close-up of embroidered Detroit hoodie graphic" />
+            <span class="product-hover-price" aria-hidden="true">$200</span>
+            <div>
+              <h3>Detroit Embroidery Hoodie</h3>
+              <p>Close-detail fleece concept with textured skyline embroidery and launch-team color hits.</p>
+              <div class="product-row"><strong>$200</strong><button type="button" data-add-item="Detroit Embroidery Hoodie" data-item-price="200">Add to Cart</button></div>
+            </div>
+          </article>
+          <article class="product-card">
+            <img src="./assets/merch/innovation-floor-model-hoodie.png" alt="Model wearing navy Innovation Floor hoodie" />
+            <span class="product-hover-price" aria-hidden="true">$49</span>
+            <div>
+              <h3>Innovation Floor Model Hoodie</h3>
+              <p>Studio-ready navy hoodie with oversized Innovation Floor mark and clean editorial product fit.</p>
+              <div class="product-row"><strong>$49</strong><button type="button" data-add-item="Innovation Floor Model Hoodie" data-item-price="49">Add to Cart</button></div>
+            </div>
+          </article>
           <article class="product-card featured" id="hoodies">
             <img src="./assets/merch/innovation-floor-hoodie.png" alt="Navy Innovation Floor hoodie product photo" />
+            <span class="product-hover-price" aria-hidden="true">$84</span>
             <div>
               <h3>Innovation Floor Hoodie</h3>
               <p>Navy heavyweight fleece with a bold Innovation Floor skyline graphic and launch-team presence.</p>
@@ -121,6 +140,7 @@
           </article>
           <article class="product-card" id="caps">
             <img src="./assets/merch/gallery-orb-06.png" alt="Navy embroidered LottoMind baseball cap product photo" />
+            <span class="product-hover-price" aria-hidden="true">$38</span>
             <div>
               <h3>1701 Signal Cap</h3>
               <p>Navy structured cap with embroidered skyline signal mark and everyday launch-team fit.</p>
@@ -129,10 +149,47 @@
           </article>
           <article class="product-card" id="polos">
             <img src="./assets/merch/gallery-orb-02.png" alt="Metro Signal Polo product photo" />
+            <span class="product-hover-price" aria-hidden="true">$54</span>
             <div>
               <h3>Metro Signal Polo</h3>
               <p>Clean collared piece for demos, pop-ups, listening sessions, and product meetings.</p>
               <div class="product-row"><strong>$54</strong><button type="button" data-add-item="Metro Signal Polo" data-item-price="54">Add to Cart</button></div>
+            </div>
+          </article>
+          <article class="product-card">
+            <img src="./assets/merch/boogie-man-sweater.png" alt="Blue patterned Boogie Man knit sweater product photo" />
+            <span class="product-hover-price" aria-hidden="true">$365</span>
+            <div>
+              <h3>Boogie Man Knit Sweater</h3>
+              <p>Collector knit with skyline, moon, waveform, and bold nocturne graphic language.</p>
+              <div class="product-row"><strong>$365</strong><button type="button" data-add-item="Boogie Man Knit Sweater" data-item-price="365">Add to Cart</button></div>
+            </div>
+          </article>
+          <article class="product-card">
+            <img src="./assets/merch/detroit-1701-hoodie.png" alt="Navy City of Detroit 1701 hoodie product photo" />
+            <span class="product-hover-price" aria-hidden="true">$72</span>
+            <div>
+              <h3>City of Detroit 1701 Hoodie</h3>
+              <p>Navy fleece with the 1701 skyline badge, sun mark, and everyday streetwear silhouette.</p>
+              <div class="product-row"><strong>$72</strong><button type="button" data-add-item="City of Detroit 1701 Hoodie" data-item-price="72">Add to Cart</button></div>
+            </div>
+          </article>
+          <article class="product-card">
+            <img src="./assets/merch/cyber-brain-glow-hoodie.png" alt="Black cyber brain glow hoodie product photo" />
+            <span class="product-hover-price" aria-hidden="true">$150</span>
+            <div>
+              <h3>Cyber Brain Glow Hoodie</h3>
+              <p>Black tech-fleece visual with electric brain circuitry and blue stage-light energy.</p>
+              <div class="product-row"><strong>$150</strong><button type="button" data-add-item="Cyber Brain Glow Hoodie" data-item-price="150">Add to Cart</button></div>
+            </div>
+          </article>
+          <article class="product-card">
+            <img src="./assets/merch/lottomind-coin-hoodie-cap.png" alt="Black LottoMind coin hoodie and matching cap product photo" />
+            <span class="product-hover-price" aria-hidden="true">$75</span>
+            <div>
+              <h3>LottoMind Coin Set</h3>
+              <p>Black hoodie and cap drop with purple coin emblem, gold edgework, and matched set styling.</p>
+              <div class="product-row"><strong>$75</strong><button type="button" data-add-item="LottoMind Coin Set" data-item-price="75">Add to Cart</button></div>
             </div>
           </article>
         </div>
@@ -152,7 +209,15 @@
         </div>
       </section>
 
-      <section class="merch-section gallery-section" id="gallery" data-reveal>
+      <section class="merch-section gallery-section" id="gallery" data-reveal data-merch-akari>
+        <div class="merch-akari-field" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div class="merch-section-copy">
           <h2 class="kinetic-word" data-kinetic="ART GALLERY STORE" tabindex="0">Art gallery store</h2>
           <p>
@@ -165,14 +230,21 @@
             <source src="./assets/merch/merch-motion-03.mp4" type="video/mp4" />
           </video>
         </div>
-        <div class="gallery-grid">
-          <article><img src="./assets/merch/innovation-floor-hoodie.png" alt="Innovation Floor hoodie gallery artwork" /><span>Innovation Floor</span></article>
-          <article><img src="./assets/merch/gallery-orb-01.png" alt="Neon LottoMind gallery artwork" /><span>Neural Vault I</span></article>
-          <article><img src="./assets/merch/gallery-orb-02.png" alt="Neon LottoMind gallery artwork" /><span>Signal Crown</span></article>
-          <article><img src="./assets/merch/gallery-orb-03.png" alt="Neon LottoMind gallery artwork" /><span>Frequency Halo</span></article>
-          <article><img src="./assets/merch/gallery-orb-04.png" alt="Neon LottoMind gallery artwork" /><span>Live Orb Study</span></article>
-          <article><img src="./assets/merch/gallery-orb-05.png" alt="Neon LottoMind gallery artwork" /><span>Cyber Brain Plate</span></article>
-          <article><img src="./assets/merch/gallery-orb-06.png" alt="Neon LottoMind gallery artwork" /><span>Studio Signal</span></article>
+        <div class="gallery-grid merch-swipe-rail" data-swipe-rail tabindex="0">
+          <article><img src="./assets/merch/city-of-detroit-1701-mark.png" alt="City of Detroit 1701 gallery artwork" /><span>City 1701 Mark</span><strong class="gallery-price">$42</strong></article>
+          <article><img src="./assets/merch/innovation-floor-model-hoodie.png" alt="Innovation Floor model hoodie gallery artwork" /><span>Model Drop</span><strong class="gallery-price">$49</strong></article>
+          <article><img src="./assets/merch/boogie-man-sweater.png" alt="Boogie Man knit sweater gallery artwork" /><span>Boogie Knit</span><strong class="gallery-price">$365</strong></article>
+          <article><img src="./assets/merch/innovation-floor-hoodie.png" alt="Innovation Floor hoodie gallery artwork" /><span>Innovation Floor</span><strong class="gallery-price">$84</strong></article>
+          <article><img src="./assets/merch/detroit-embroidered-hoodie-closeup.png" alt="Detroit embroidered hoodie closeup gallery artwork" /><span>Embroidery Detail</span><strong class="gallery-price">$200</strong></article>
+          <article><img src="./assets/merch/detroit-1701-hoodie.png" alt="Detroit 1701 hoodie gallery artwork" /><span>1701 Hoodie</span><strong class="gallery-price">$72</strong></article>
+          <article><img src="./assets/merch/cyber-brain-glow-hoodie.png" alt="Cyber brain glow hoodie gallery artwork" /><span>Cyber Brain Glow</span><strong class="gallery-price">$150</strong></article>
+          <article><img src="./assets/merch/lottomind-coin-hoodie-cap.png" alt="LottoMind coin hoodie and cap gallery artwork" /><span>Coin Hoodie Set</span><strong class="gallery-price">$75</strong></article>
+          <article><img src="./assets/merch/gallery-orb-01.png" alt="Neon LottoMind gallery artwork" /><span>Neural Vault I</span><strong class="gallery-price">$68</strong></article>
+          <article><img src="./assets/merch/gallery-orb-02.png" alt="Neon LottoMind gallery artwork" /><span>Signal Crown</span><strong class="gallery-price">$54</strong></article>
+          <article><img src="./assets/merch/gallery-orb-03.png" alt="Neon LottoMind gallery artwork" /><span>Frequency Halo</span><strong class="gallery-price">$38</strong></article>
+          <article><img src="./assets/merch/gallery-orb-04.png" alt="Neon LottoMind gallery artwork" /><span>Live Orb Study</span><strong class="gallery-price">$72</strong></article>
+          <article><img src="./assets/merch/gallery-orb-05.png" alt="Neon LottoMind gallery artwork" /><span>Cyber Brain Plate</span><strong class="gallery-price">$54</strong></article>
+          <article><img src="./assets/merch/gallery-orb-06.png" alt="Neon LottoMind gallery artwork" /><span>Studio Signal</span><strong class="gallery-price">$38</strong></article>
         </div>
       </section>
 
@@ -200,7 +272,7 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=drop-akari-1" defer></script>
-    <script src="./merch-store.js?v=hero-arrows-sound-11" defer></script>
+    <script src="./site.js?v=cinematic-motion-1" defer></script>
+    <script src="./merch-store.js?v=cinematic-motion-1" defer></script>
   </body>
 </html>

@@ -10,8 +10,8 @@
     <title>Beat2Lotto+ | Creative Number Signals</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=tm-audio-layout-3" />
-    <link rel="stylesheet" href="./beat2lotto-plus.css?v=golden-lotto-balls-1" />
+    <link rel="stylesheet" href="./styles.css?v=cinematic-motion-1" />
+    <link rel="stylesheet" href="./beat2lotto-plus.css?v=cinematic-motion-1" />
   </head>
   <body class="beat2lotto-page">
     <header class="site-header beat2lotto-header">
@@ -56,6 +56,14 @@
             <input id="lottoAudioFile" type="file" accept="audio/*" />
             <small>Local analysis only. Audio never uploads.</small>
           </label>
+          <div class="beat-playback-card" id="beatPlayback" hidden>
+            <audio id="lottoAudioPlayer" preload="metadata"></audio>
+            <button type="button" id="playBeatAudio" disabled>Play uploaded beat</button>
+            <div class="beat-playback-meter" aria-hidden="true">
+              <span id="beatPlaybackEnergy"></span>
+            </div>
+            <small id="beatPlaybackStatus">Upload music to unlock playback.</small>
+          </div>
           <div id="beatAnalysis" class="beat-analysis-card" aria-live="polite">
             <strong>No beat imported yet</strong>
             <span>Generate from typed Beat DNA, or load audio to seed the digits.</span>
@@ -164,6 +172,6 @@
       <span>Entertainment-only creative number signals. No wagers, no ticket sales, no outcome claims.</span>
     </footer>
 
-    <script src="./beat2lotto-plus.js?v=audio-spheres-1" defer></script>
+    <script src="./beat2lotto-plus.js?v=cinematic-motion-1" defer></script>
   </body>
 </html>

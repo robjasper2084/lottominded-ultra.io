@@ -30,7 +30,7 @@ const features = [
 const grid = document.querySelector("#featureToolGrid");
 if (grid) {
   grid.innerHTML = features.map((feature, index) => `
-    <a class="feature-tool-card kinetic-hover" href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}" data-feature-index="${index}">
+    <a class="feature-tool-card kinetic-hover" href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}" data-feature-index="${index}" data-motion="${index % 2 ? "fly-right" : "fly-left"}">
       <h3 class="kinetic-word" data-kinetic="${feature.name}">${feature.name}</h3>
       <p>${feature.copy}</p>
       <span>Open Module</span>
@@ -40,13 +40,15 @@ if (grid) {
 
 const featuredList = document.querySelector("#featuredModuleList");
 if (featuredList) {
-  featuredList.innerHTML = features.slice(0, 5).map((feature) => `
-    <a href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}">
+  featuredList.innerHTML = features.slice(0, 5).map((feature, index) => `
+    <a href="${feature.href || `${studioUrl}${feature.route}`}" style="--feature-color:${feature.color}" data-motion="${index % 2 ? "fly-right" : "fly-left"}">
       <strong>${feature.name}</strong>
       <span>${feature.copy}</span>
     </a>
   `).join("");
 }
+
+window.dispatchEvent(new Event("lottomind:motion-refresh"));
 
 function formatLabel(key) {
   return key
