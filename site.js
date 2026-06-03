@@ -97,6 +97,38 @@ if (kineticHero && !reducedMotionQuery.matches) {
   });
 }
 
+function setupMerchAkariField() {
+  const dropSection = document.querySelector("[data-merch-akari]");
+  if (!dropSection) return;
+
+  const setDropPointer = (event) => {
+    const rect = dropSection.getBoundingClientRect();
+    const localX = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    const localY = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+    dropSection.classList.add("is-akari-hot");
+    dropSection.style.setProperty("--drop-light-x", `${(localX * 100).toFixed(2)}%`);
+    dropSection.style.setProperty("--drop-light-y", `${(localY * 100).toFixed(2)}%`);
+    const shiftX = (localX - 0.5) * 42;
+    const shiftY = (localY - 0.5) * 28;
+    dropSection.style.setProperty("--drop-field-x", `${shiftX.toFixed(2)}px`);
+    dropSection.style.setProperty("--drop-field-y", `${shiftY.toFixed(2)}px`);
+    dropSection.style.setProperty("--drop-field-rx", `${(shiftX * -0.35).toFixed(2)}px`);
+    dropSection.style.setProperty("--drop-field-ry", `${(shiftY * -0.35).toFixed(2)}px`);
+    dropSection.style.setProperty("--drop-field-tilt", `${((localX - 0.5) * 1.4).toFixed(2)}deg`);
+  };
+
+  dropSection.addEventListener("pointerenter", (event) => {
+    dropSection.classList.add("is-akari-hot");
+    setDropPointer(event);
+  }, { passive: true });
+  dropSection.addEventListener("pointermove", setDropPointer, { passive: true });
+  dropSection.addEventListener("pointerleave", () => {
+    dropSection.classList.remove("is-akari-hot");
+  }, { passive: true });
+}
+
+setupMerchAkariField();
+
 if ("IntersectionObserver" in window && revealSections.length) {
   const revealObserver = new IntersectionObserver(
     (entries) => {

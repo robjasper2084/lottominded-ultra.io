@@ -640,6 +640,13 @@
 }
 
 .merch-drop-section {
+  --drop-light-x: 50%;
+  --drop-light-y: 42%;
+  --drop-field-x: 0px;
+  --drop-field-y: 0px;
+  --drop-field-rx: 0px;
+  --drop-field-ry: 0px;
+  --drop-field-tilt: 0deg;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -649,8 +656,151 @@
   align-items: stretch;
   border-block: 1px solid rgba(41, 247, 255, 0.18);
   background:
+    radial-gradient(circle at var(--drop-light-x) var(--drop-light-y), rgba(94, 255, 157, 0.14), transparent 21rem),
     radial-gradient(circle at 16% 24%, rgba(41, 247, 255, 0.13), transparent 26rem),
-    radial-gradient(circle at 86% 42%, rgba(255, 224, 113, 0.1), transparent 24rem);
+    radial-gradient(circle at 86% 42%, rgba(255, 224, 113, 0.1), transparent 24rem),
+    linear-gradient(135deg, rgba(2, 6, 12, 0.96), rgba(4, 17, 25, 0.8) 54%, rgba(8, 6, 20, 0.9));
+  transition: background-position 220ms ease;
+}
+
+.merch-akari-field {
+  position: absolute;
+  inset: -12%;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at var(--drop-light-x) var(--drop-light-y), rgba(41, 247, 255, 0.24), transparent 24rem),
+    radial-gradient(ellipse at 18% 20%, rgba(255, 224, 113, 0.2), transparent 26rem),
+    radial-gradient(ellipse at 82% 78%, rgba(94, 255, 157, 0.18), transparent 24rem),
+    linear-gradient(145deg, rgba(255, 224, 113, 0.08), rgba(41, 247, 255, 0.09) 54%, rgba(255, 79, 216, 0.07));
+  filter: saturate(1.08);
+  opacity: 0.9;
+  transform:
+    translate3d(var(--drop-field-x), var(--drop-field-y), 0)
+    rotate(var(--drop-field-tilt));
+  transition: transform 180ms ease, opacity 200ms ease;
+}
+
+.merch-drop-section.is-akari-hot .merch-akari-field {
+  opacity: 1;
+}
+
+.merch-akari-field::before,
+.merch-akari-field::after {
+  position: absolute;
+  inset: -8%;
+  content: "";
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.merch-akari-field::before {
+  background:
+    radial-gradient(ellipse at 18% 34%, rgba(255, 224, 113, 0.34), transparent 24rem),
+    radial-gradient(ellipse at 46% 20%, rgba(41, 247, 255, 0.18), transparent 20rem),
+    radial-gradient(ellipse at 72% 54%, rgba(94, 255, 157, 0.28), transparent 26rem),
+    radial-gradient(ellipse at 38% 86%, rgba(255, 79, 216, 0.16), transparent 20rem);
+  filter: blur(28px);
+  opacity: 0.72;
+  animation: merch-akari-smoke 14s ease-in-out infinite alternate;
+}
+
+.merch-akari-field::after {
+  background:
+    radial-gradient(circle at var(--drop-light-x) var(--drop-light-y), rgba(255, 255, 210, 0.34), transparent 0 4rem, rgba(41, 247, 255, 0.18) 7rem, transparent 18rem),
+    linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.12), transparent);
+  opacity: 0.58;
+  transform: translate3d(var(--drop-field-rx), var(--drop-field-ry), 0);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.merch-drop-section.is-akari-hot .merch-akari-field::after {
+  opacity: 0.86;
+}
+
+.merch-akari-field span {
+  position: absolute;
+  left: var(--bar-x, 0%);
+  top: var(--bar-y, 0%);
+  width: var(--bar-w, 28rem);
+  height: var(--bar-h, 0.42rem);
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--bar-color, #29f7ff) 12% 88%, transparent);
+  box-shadow:
+    0 0 0.8rem var(--bar-glow, rgba(41, 247, 255, 0.58)),
+    0 0 2.2rem var(--bar-glow, rgba(41, 247, 255, 0.34)),
+    0 0 4.8rem var(--bar-glow-soft, rgba(41, 247, 255, 0.18));
+  opacity: 0.82;
+  transform:
+    translate3d(var(--drop-field-x), var(--drop-field-y), 0)
+    scaleX(var(--bar-scale, 1));
+  transform-origin: center;
+  animation: merch-akari-bar-drift var(--bar-speed, 9s) ease-in-out infinite alternate;
+}
+
+.merch-akari-field span:nth-child(1) {
+  --bar-x: -8%;
+  --bar-y: 18%;
+  --bar-w: clamp(18rem, 38vw, 36rem);
+  --bar-color: #ffb229;
+  --bar-glow: rgba(255, 178, 41, 0.62);
+  --bar-glow-soft: rgba(255, 224, 113, 0.22);
+  --bar-depth: 0.14;
+  --bar-speed: 11s;
+}
+
+.merch-akari-field span:nth-child(2) {
+  --bar-x: 36%;
+  --bar-y: 27%;
+  --bar-w: clamp(14rem, 28vw, 28rem);
+  --bar-color: #29f7ff;
+  --bar-glow: rgba(41, 247, 255, 0.62);
+  --bar-depth: -0.22;
+  --bar-speed: 9s;
+}
+
+.merch-akari-field span:nth-child(3) {
+  --bar-x: 66%;
+  --bar-y: 44%;
+  --bar-w: clamp(12rem, 25vw, 24rem);
+  --bar-color: #dfff4d;
+  --bar-glow: rgba(223, 255, 77, 0.58);
+  --bar-glow-soft: rgba(94, 255, 157, 0.22);
+  --bar-depth: 0.32;
+  --bar-speed: 12s;
+}
+
+.merch-akari-field span:nth-child(4) {
+  --bar-x: 4%;
+  --bar-y: 71%;
+  --bar-w: clamp(20rem, 42vw, 40rem);
+  --bar-color: #5eff9d;
+  --bar-glow: rgba(94, 255, 157, 0.66);
+  --bar-depth: -0.16;
+  --bar-speed: 10s;
+}
+
+.merch-akari-field span:nth-child(5) {
+  --bar-x: 54%;
+  --bar-y: 80%;
+  --bar-w: clamp(16rem, 34vw, 32rem);
+  --bar-color: #ffd34f;
+  --bar-glow: rgba(255, 211, 79, 0.58);
+  --bar-glow-soft: rgba(255, 79, 216, 0.18);
+  --bar-depth: 0.26;
+  --bar-speed: 13s;
+}
+
+.merch-akari-field span:nth-child(6) {
+  --bar-x: 78%;
+  --bar-y: 12%;
+  --bar-w: clamp(10rem, 20vw, 20rem);
+  --bar-color: #29f7ff;
+  --bar-glow: rgba(41, 247, 255, 0.54);
+  --bar-depth: -0.3;
+  --bar-speed: 8s;
+  opacity: 0.62;
 }
 
 .merch-drop-section::after,
@@ -661,12 +811,12 @@
   content: "";
   pointer-events: none;
   background:
-    linear-gradient(116deg, transparent 0 47%, rgba(41, 247, 255, 0.22) 47.2% 47.8%, transparent 48% 100%),
-    linear-gradient(64deg, transparent 0 46%, rgba(255, 224, 113, 0.15) 46.2% 46.9%, transparent 47.2% 100%),
-    repeating-linear-gradient(90deg, transparent 0 5.8rem, rgba(41, 247, 255, 0.06) 5.85rem 5.94rem, transparent 6rem 11rem),
-    radial-gradient(circle at var(--mx, 55%) var(--my, 35%), rgba(41, 247, 255, 0.18), transparent 18rem);
+    linear-gradient(116deg, transparent 0 47%, rgba(41, 247, 255, 0.14) 47.2% 47.8%, transparent 48% 100%),
+    linear-gradient(64deg, transparent 0 46%, rgba(255, 224, 113, 0.1) 46.2% 46.9%, transparent 47.2% 100%),
+    repeating-linear-gradient(90deg, transparent 0 5.8rem, rgba(41, 247, 255, 0.05) 5.85rem 5.94rem, transparent 6rem 11rem),
+    radial-gradient(circle at var(--drop-light-x, 55%) var(--drop-light-y, 35%), rgba(41, 247, 255, 0.12), transparent 18rem);
   background-size: 18rem 18rem, 24rem 20rem, auto, auto;
-  opacity: 0.72;
+  opacity: 0.48;
   transform: translate3d(0, 0, 0) rotate(-4deg);
   animation: merchArrowField 16s linear infinite;
   mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
@@ -1473,6 +1623,39 @@
   }
 }
 
+@keyframes merch-akari-smoke {
+  0% {
+    transform: translate3d(-2.4rem, -1.2rem, 0) scale(1);
+    opacity: 0.52;
+  }
+  55% {
+    transform: translate3d(1.6rem, 0.8rem, 0) scale(1.04);
+    opacity: 0.78;
+  }
+  100% {
+    transform: translate3d(2.8rem, -0.6rem, 0) scale(1.08);
+    opacity: 0.66;
+  }
+}
+
+@keyframes merch-akari-bar-drift {
+  0% {
+    filter: brightness(0.84) saturate(1);
+    opacity: 0.52;
+    --bar-scale: 0.88;
+  }
+  48% {
+    filter: brightness(1.28) saturate(1.18);
+    opacity: 0.96;
+    --bar-scale: 1.08;
+  }
+  100% {
+    filter: brightness(0.96) saturate(1.08);
+    opacity: 0.72;
+    --bar-scale: 0.94;
+  }
+}
+
 @keyframes merchArrowField {
   from {
     background-position: 0 0, 6rem 3rem, 0 0, 50% 50%;
@@ -1765,6 +1948,10 @@
   .gallery-section .merch-section-copy p::before,
   .gallery-section .merch-section-copy p::after,
   .merch-drop-section::after,
+  .merch-akari-field,
+  .merch-akari-field::before,
+  .merch-akari-field::after,
+  .merch-akari-field span,
   .gallery-section::before,
   .merch-drop-section .merch-section-copy::before,
   .merch-drop-section .merch-section-copy::after,
