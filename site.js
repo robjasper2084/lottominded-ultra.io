@@ -200,6 +200,28 @@ function setupManualPianoHeader() {
   pianoHeader.classList.add("ultra-piano-header-compact");
   pianoHeader.setAttribute("aria-label", "Compact interactive piano navigation header");
   siteHeader.insertBefore(pianoHeader, headerMain?.nextSibling || siteHeader.firstChild);
+
+  const canHoverReveal = window.matchMedia("(hover: hover) and (pointer: fine)");
+  if (!canHoverReveal.matches) return;
+
+  let hideRevealTimer = 0;
+  const showReveal = () => {
+    window.clearTimeout(hideRevealTimer);
+    siteHeader.classList.add("is-header-revealed");
+  };
+  const hideReveal = () => {
+    window.clearTimeout(hideRevealTimer);
+    hideRevealTimer = window.setTimeout(() => {
+      if (!siteHeader.contains(document.activeElement)) {
+        siteHeader.classList.remove("is-header-revealed");
+      }
+    }, 140);
+  };
+
+  siteHeader.addEventListener("mouseenter", showReveal);
+  siteHeader.addEventListener("mouseleave", hideReveal);
+  siteHeader.addEventListener("focusin", showReveal);
+  siteHeader.addEventListener("focusout", hideReveal);
 }
 
 setupManualPianoHeader();
@@ -1081,6 +1103,7 @@ function setupPromptBallpassGame() {
 setupPromptBallpassGame();
 
 function setupMascotMotionCursor() {
+  if (document.body.dataset.cursorMode !== "mascot") return;
   if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
 
   const cursor = document.createElement("div");
