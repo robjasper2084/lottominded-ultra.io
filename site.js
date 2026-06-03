@@ -226,6 +226,58 @@ function setupManualPianoHeader() {
 
 setupManualPianoHeader();
 
+function setupHomeHeaderHoverReveal() {
+  const canUseHoverReveal =
+    document.body.classList.contains("home-page") ||
+    document.body.classList.contains("prompt-lab-page");
+  if (!canUseHoverReveal || !siteHeader) return;
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+  document.body.classList.add("has-home-header-hover-reveal");
+  const hoverSensor = document.createElement("div");
+  hoverSensor.className = "home-header-hover-sensor";
+  hoverSensor.setAttribute("aria-hidden", "true");
+  document.body.append(hoverSensor);
+  let hideHomeHeaderTimer = 0;
+
+  const setHidden = (hidden) => {
+    siteHeader.classList.toggle("is-home-header-hidden", hidden);
+    document.body.classList.toggle("is-home-header-hidden", hidden);
+  };
+
+  const revealHeader = () => {
+    window.clearTimeout(hideHomeHeaderTimer);
+    setHidden(false);
+  };
+
+  const scheduleHeaderHide = () => {
+    window.clearTimeout(hideHomeHeaderTimer);
+    hideHomeHeaderTimer = window.setTimeout(() => {
+      if (siteHeader.matches(":hover") || siteHeader.contains(document.activeElement)) return;
+      setHidden(true);
+    }, 260);
+  };
+
+  siteHeader.addEventListener("mouseenter", revealHeader);
+  siteHeader.addEventListener("mouseleave", scheduleHeaderHide);
+  siteHeader.addEventListener("focusin", revealHeader);
+  siteHeader.addEventListener("focusout", scheduleHeaderHide);
+  hoverSensor.addEventListener("mouseenter", revealHeader);
+  hoverSensor.addEventListener("pointerenter", revealHeader);
+  document.addEventListener("pointermove", (event) => {
+    if (siteHeader.classList.contains("is-home-header-hidden")) {
+      if (event.clientY <= 24) revealHeader();
+      return;
+    }
+    if (siteHeader.contains(document.activeElement)) return;
+    const headerBottom = siteHeader.getBoundingClientRect().bottom;
+    if (event.clientY > headerBottom + 28) setHidden(true);
+  }, { passive: true });
+  window.setTimeout(scheduleHeaderHide, 1400);
+}
+
+setupHomeHeaderHoverReveal();
+
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
   siteSoundtrack.removeAttribute("loop");
