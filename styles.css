@@ -16,6 +16,7 @@
   --display-font: "Cinzel", "Trajan Pro", "Copperplate Gothic Bold", "Copperplate", "Georgia", serif;
   --body-font: Inter, "Aptos", "Trebuchet MS", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --lm-mascot-cursor: url("./assets/cursor/lottomind-mascot-cursor.png") 24 5, auto;
+  --lm-mascot-action-sheet: url("./assets/cursor/lottomind-mascot-action-sheet.png");
   font-family: var(--body-font);
 }
 
@@ -81,6 +82,49 @@ body::after {
   background:
     linear-gradient(#010207 0 18px, transparent 18px calc(100% - 18px), #010207 calc(100% - 18px)),
     radial-gradient(ellipse at center, transparent 46%, rgba(0, 0, 0, 0.34) 100%);
+}
+
+.mascot-motion-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 90;
+  width: clamp(58px, 7vw, 92px);
+  aspect-ratio: 229 / 192;
+  pointer-events: none;
+  opacity: 0;
+  background-image: var(--lm-mascot-action-sheet);
+  background-repeat: no-repeat;
+  background-size: 600% 400%;
+  background-position: 0% 0%;
+  filter:
+    drop-shadow(0 0 0.6rem rgba(255, 224, 113, 0.36))
+    drop-shadow(0 0 1.2rem rgba(138, 92, 255, 0.44))
+    drop-shadow(0 0.7rem 0.9rem rgba(0, 0, 0, 0.55));
+  mix-blend-mode: screen;
+  transform: translate3d(-120px, -120px, 0) scaleX(1);
+  transform-origin: 50% 62%;
+  transition: opacity 180ms ease, filter 180ms ease;
+  will-change: transform, background-position;
+}
+
+.mascot-motion-cursor.is-visible {
+  opacity: 0.92;
+}
+
+.mascot-motion-cursor.is-up {
+  filter:
+    drop-shadow(0 0 0.8rem rgba(94, 255, 157, 0.38))
+    drop-shadow(0 0 1.6rem rgba(41, 247, 255, 0.42))
+    drop-shadow(0 0.8rem 1rem rgba(0, 0, 0, 0.48));
+}
+
+.mascot-motion-cursor.is-down {
+  opacity: 0.82;
+  filter:
+    drop-shadow(0 0 0.6rem rgba(255, 79, 216, 0.36))
+    drop-shadow(0 0 1.2rem rgba(255, 224, 113, 0.3))
+    drop-shadow(0 0.9rem 1rem rgba(0, 0, 0, 0.6));
 }
 
 a {
@@ -644,6 +688,72 @@ nav {
 .home-like-header nav a:hover::after,
 .home-like-header nav a:focus-visible::after {
   opacity: 0.86;
+}
+
+.home-page .site-header nav a,
+.home-like-header nav a {
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    text-shadow 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.home-page .site-header nav a::after,
+.home-like-header nav a::after {
+  inset: 50% auto auto calc(1.88rem + 0.34rem);
+  height: auto;
+  max-width: calc(100% - 2.2rem);
+  overflow: hidden;
+  content: attr(data-nav-label);
+  background: none;
+  color: transparent;
+  font-family: var(--display-font);
+  font-size: inherit;
+  line-height: 1;
+  opacity: 0;
+  text-overflow: clip;
+  text-shadow: none;
+  white-space: nowrap;
+  -webkit-text-stroke: 0.08em rgba(245, 251, 255, 0.88);
+  text-stroke: 0.08em rgba(245, 251, 255, 0.88);
+  transform: translate3d(-0.08rem, -50%, 0);
+  mix-blend-mode: screen;
+}
+
+.home-page .site-header nav a:hover,
+.home-page .site-header nav a:focus-visible,
+.home-like-header nav a:hover,
+.home-like-header nav a:focus-visible {
+  border-color: rgba(41, 247, 255, 0.66);
+  color: rgba(245, 251, 255, 0.34);
+  text-shadow:
+    0 0 0.9rem rgba(41, 247, 255, 0.5),
+    0 0 1.4rem rgba(255, 224, 113, 0.24);
+  transform: translateY(-1px);
+}
+
+.home-page .site-header nav a:hover::after,
+.home-page .site-header nav a:focus-visible::after,
+.home-like-header nav a:hover::after,
+.home-like-header nav a:focus-visible::after {
+  opacity: 1;
+  animation: navKineticOutline 760ms cubic-bezier(0.16, 0.92, 0.28, 1) infinite alternate;
+}
+
+@keyframes navKineticOutline {
+  from {
+    transform: translate3d(-0.12rem, -55%, 0);
+    -webkit-text-stroke-color: rgba(245, 251, 255, 0.92);
+    text-stroke-color: rgba(245, 251, 255, 0.92);
+  }
+
+  to {
+    transform: translate3d(0.12rem, -45%, 0);
+    -webkit-text-stroke-color: rgba(255, 224, 113, 0.82);
+    text-stroke-color: rgba(255, 224, 113, 0.82);
+  }
 }
 
 .home-like-header .direct-launch {
@@ -3296,15 +3406,25 @@ p {
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(280px, 0.76fr) minmax(520px, 1.24fr);
-  gap: clamp(1.1rem, 3vw, 2.8rem);
+  grid-template-columns: 1fr;
+  gap: clamp(1rem, 2.4vw, 1.6rem);
   align-items: start;
-  width: 100%;
-  padding: clamp(4.8rem, 7vw, 6.4rem) clamp(1rem, 4vw, 3.4rem) clamp(2rem, 4vw, 3.2rem);
+  width: min(calc(100% - 32px), 1180px);
+  margin: clamp(4.8rem, 7vw, 6.4rem) auto clamp(1.8rem, 4vw, 3rem);
+  padding: clamp(1rem, 2.6vw, 1.5rem);
+  border: 1px solid rgba(41, 247, 255, 0.18);
+  border-radius: 18px;
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 224, 113, 0.16), transparent 31rem),
     radial-gradient(circle at 78% 12%, rgba(41, 247, 255, 0.2), transparent 34rem),
     linear-gradient(145deg, #010307 0%, #04111b 48%, #07020b 100%);
+}
+
+.prompt-lab-beat2lotto-top.is-audio-reactive {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 224, 113, 0.14),
+    inset 0 0 7rem rgba(255, 224, 113, 0.12),
+    0 0 6rem rgba(41, 247, 255, 0.16);
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero,
@@ -3361,8 +3481,9 @@ p {
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero {
   grid-column: 1;
-  grid-row: 1;
-  grid-template-columns: 1fr;
+  grid-row: auto;
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 13rem);
+  align-items: center;
   align-content: start;
   gap: clamp(1rem, 2.4vw, 1.8rem);
   min-height: 0;
@@ -3374,9 +3495,10 @@ p {
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero h1 {
-  max-width: 9ch;
-  font-size: clamp(3rem, 6vw, 5.6rem);
-  line-height: 0.88;
+  max-width: 100%;
+  font-size: clamp(3rem, 7vw, 5.8rem);
+  line-height: 0.84;
+  overflow-wrap: normal;
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-hero p {
@@ -3385,23 +3507,67 @@ p {
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-orb {
-  width: min(100%, 12.5rem);
-  justify-self: start;
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 13rem);
+  justify-self: end;
+}
+
+.prompt-lab-beat2lotto-top .beat2lotto-coin-orb {
+  border-color: rgba(255, 224, 113, 0.58);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 224, 113, 0.26), transparent 38%),
+    rgba(3, 5, 10, 0.92);
+  box-shadow:
+    0 0 3.4rem rgba(255, 224, 113, 0.22),
+    0 0 4.8rem rgba(41, 247, 255, 0.14),
+    inset 0 0 2.6rem rgba(255, 224, 113, 0.18);
+}
+
+.prompt-lab-beat2lotto-top .beat2lotto-coin-orb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0.88;
+  filter: saturate(1.08) contrast(1.08) brightness(0.86);
+  transform: scale(1.36);
+  mix-blend-mode: screen;
+}
+
+.prompt-lab-beat2lotto-top .beat2lotto-coin-orb::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.52), transparent 0 13%, transparent 26%),
+    linear-gradient(135deg, rgba(255, 224, 113, 0.18), transparent 42%, rgba(41, 247, 255, 0.15));
+  box-shadow: inset 0 0 0 2px rgba(255, 224, 113, 0.24);
+}
+
+.prompt-lab-beat2lotto-top .beat2lotto-coin-orb span {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 2;
+  font-size: clamp(3.8rem, 10vw, 7rem);
+  transform: translate(-50%, -50%);
 }
 
 .prompt-lab-beat2lotto-top .beat2lotto-console {
-  grid-column: 2;
-  grid-row: 1;
-  grid-template-columns: minmax(14rem, 0.38fr) minmax(0, 1fr);
+  grid-column: 1;
+  grid-row: auto;
+  grid-template-columns: minmax(16rem, 0.34fr) minmax(0, 1fr);
   margin-top: 0;
   margin-bottom: 0;
   padding: clamp(0.9rem, 1.5vw, 1.25rem);
 }
 
 .prompt-lab-beat2lotto-top .lotto-output-head h2 {
-  max-width: 16ch;
-  font-size: clamp(2rem, 4.5vw, 3.9rem);
-  line-height: 0.9;
+  max-width: 18ch;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.92;
 }
 
 .prompt-lab-beat2lotto-top .lotto-controls {
@@ -3668,6 +3834,7 @@ p {
 }
 
 #beat2lotto-mini {
+  order: -2;
   overflow: hidden;
   isolation: isolate;
 }

@@ -40,6 +40,15 @@ let gamePipShouldResumeSoundtrack = false;
 let gamePipResumeFromPage = false;
 let gamePipResumeFromHover = false;
 let gamePipDragState = null;
+
+function setupNavKineticLabels() {
+  document.querySelectorAll(".site-header nav a").forEach((link) => {
+    if (!link.dataset.navLabel) link.dataset.navLabel = link.textContent.trim();
+  });
+}
+
+setupNavKineticLabels();
+
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
   siteSoundtrack.removeAttribute("loop");
@@ -587,6 +596,98 @@ function setupPromptBallpassGame() {
 }
 
 setupPromptBallpassGame();
+
+function setupMascotMotionCursor() {
+  if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
+
+  const cursor = document.createElement("div");
+  cursor.className = "mascot-motion-cursor";
+  cursor.setAttribute("aria-hidden", "true");
+  document.body.append(cursor);
+
+  const spriteMap = {
+    idle: [[0, 0]],
+    right: [[1, 0], [2, 0], [3, 0], [5, 1]],
+    left: [[1, 0], [2, 0], [3, 0], [5, 1]],
+    up: [[5, 0], [5, 3]],
+    down: [[2, 3], [3, 3], [4, 3]],
+  };
+  const position = { x: -120, y: -120 };
+  const last = { x: -120, y: -120, time: 0 };
+  let state = "idle";
+  let facing = 1;
+  let frameIndex = 0;
+  let frameTimer = 0;
+  let idleTimer = 0;
+  let visible = false;
+
+  function setSpriteFrame(now) {
+    const frames = spriteMap[state] || spriteMap.idle;
+    if (now - frameTimer > (state === "idle" ? 460 : 115)) {
+      frameIndex = (frameIndex + 1) % frames.length;
+      frameTimer = now;
+    }
+    const [column, row] = frames[frameIndex] || frames[0];
+    cursor.style.backgroundPosition = `${column * 20}% ${row * 33.333}%`;
+    cursor.classList.toggle("is-up", state === "up");
+    cursor.classList.toggle("is-down", state === "down");
+  }
+
+  function render(now) {
+    setSpriteFrame(now);
+    const lift = state === "up" ? -22 : state === "down" ? 14 : state === "idle" ? 0 : -4;
+    const tilt = state === "up" ? -10 : state === "down" ? 14 : state === "right" || state === "left" ? 4 : 0;
+    cursor.style.transform = `translate3d(${Math.round(position.x + 14)}px, ${Math.round(position.y + lift + 12)}px, 0) scaleX(${facing}) rotate(${tilt * facing}deg)`;
+    if (visible) cursor.classList.add("is-visible");
+    window.requestAnimationFrame(render);
+  }
+
+  document.addEventListener("pointermove", (event) => {
+    if (isEditableTarget(event.target)) {
+      cursor.classList.remove("is-visible");
+      visible = false;
+      return;
+    }
+
+    const now = performance.now();
+    const dx = last.time ? event.clientX - last.x : 0;
+    const dy = last.time ? event.clientY - last.y : 0;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    position.x = event.clientX;
+    position.y = event.clientY;
+    visible = true;
+    window.clearTimeout(idleTimer);
+
+    if (absX < 2 && absY < 2) {
+      state = "idle";
+    } else if (absY > absX * 1.1) {
+      state = dy < 0 ? "up" : "down";
+    } else {
+      state = dx < 0 ? "left" : "right";
+      facing = dx < 0 ? -1 : 1;
+    }
+
+    if (state !== "idle") frameIndex %= (spriteMap[state] || spriteMap.idle).length;
+    last.x = event.clientX;
+    last.y = event.clientY;
+    last.time = now;
+    idleTimer = window.setTimeout(() => {
+      state = "idle";
+      frameIndex = 0;
+    }, 180);
+  }, { passive: true });
+
+  document.addEventListener("pointerleave", () => {
+    visible = false;
+    cursor.classList.remove("is-visible");
+  }, { passive: true });
+
+  window.requestAnimationFrame(render);
+}
+
+setupMascotMotionCursor();
 
 function showGamePip() {
   if (!gamePip) return;

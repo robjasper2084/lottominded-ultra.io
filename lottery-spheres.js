@@ -29,6 +29,8 @@
     { face: "#f6b83c", rim: "#ffe071", glow: "rgba(255, 185, 60, 0.48)", trail: "rgba(255, 185, 60, 0.1)", shadow: "#231100", center: "rgba(255, 242, 190, 0.88)", number: "#241300" }
   ];
   const palette = sphereTheme === "golden" ? goldenPalette : standardPalette;
+  const accentImage = stage.dataset.spheresAccentSrc ? new Image() : null;
+  if (accentImage) accentImage.src = stage.dataset.spheresAccentSrc;
 
   const pointer = { x: 0, y: 0, active: false };
   let width = 1;
@@ -37,9 +39,16 @@
   let balls = [];
   let raf = 0;
   let energy = 58;
+  let audioPulse = 0;
+  let audioPulseUntil = 0;
+  let audioPulseIndex = 0;
   let moveTriggerCount = 0;
   let lastMovePoint = null;
   let lastMoveTriggerAt = 0;
+
+  function clamp01(value) {
+    return Math.max(0, Math.min(1, Number(value) || 0));
+  }
 
   function pad(value) {
     return String(value).padStart(2, "0");
@@ -123,6 +132,7 @@
         vy: randomBetween(-0.24, 0.24),
         size,
         number,
+        asset: Boolean(accentImage && index < (width < 720 ? 1 : 2)),
         phase: randomBetween(0, Math.PI * 2),
         color: paletteItem
       };
@@ -147,10 +157,10 @@
     render(performance.now());
   }
 
-  function drawBackdrop(time) {
+  function drawBackdrop(time, pulse = 0) {
     const drift = reduceMotion.matches ? 0 : Math.sin(time * 0.00032) * 70;
     const gradient = ctx.createRadialGradient(width * 0.55 + drift, height * 0.45, 0, width * 0.55, height * 0.45, Math.max(width, height) * 0.8);
-    gradient.addColorStop(0, "rgba(41, 247, 255, 0.2)");
+    gradient.addColorStop(0, `rgba(41, 247, 255, ${0.2 + pulse * 0.16})`);
     gradient.addColorStop(0.28, "rgba(4, 18, 34, 0.32)");
     gradient.addColorStop(0.72, "rgba(4, 6, 14, 0.74)");
     gradient.addColorStop(1, "rgba(0, 0, 0, 0.95)");
@@ -170,8 +180,8 @@
     ctx.restore();
   }
 
-  function drawTrail(ball, time) {
-    const trailSize = ball.size * 2.2;
+  function drawTrail(ball, time, pulse = 0) {
+    const trailSize = ball.size * (2.2 + pulse * 0.8);
     const glow = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, trailSize);
     glow.addColorStop(0, ball.color.glow);
     glow.addColorStop(0.42, ball.color.trail || "rgba(41, 247, 255, 0.08)");
@@ -182,9 +192,9 @@
     ctx.fill();
   }
 
-  function drawBall(ball, time) {
+  function drawBall(ball, time, pulse = 0) {
     const shimmer = reduceMotion.matches ? 0 : Math.sin(time * 0.002 + ball.phase) * ball.size * 0.04;
-    const r = ball.size + shimmer;
+    const r = ball.size * (1 + pulse * 0.22) + shimmer;
     const gradient = ctx.createRadialGradient(ball.x - r * 0.32, ball.y - r * 0.38, r * 0.08, ball.x, ball.y, r);
     gradient.addColorStop(0, "#ffffff");
     gradient.addColorStop(0.2, ball.color.face);
@@ -198,6 +208,26 @@
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, r, 0, Math.PI * 2);
     ctx.fill();
+
+    if (ball.asset && accentImage?.complete) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, r * 0.92, 0, Math.PI * 2);
+      ctx.clip();
+      const imageSize = r * 2.55;
+      ctx.globalAlpha = 0.86;
+      ctx.drawImage(accentImage, ball.x - imageSize * 0.5, ball.y - imageSize * 0.5, imageSize, imageSize);
+      ctx.restore();
+      ctx.globalAlpha = 0.92;
+      ctx.strokeStyle = "rgba(255, 224, 113, 0.86)";
+      ctx.lineWidth = Math.max(2, r * 0.065);
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, r * 0.9, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+      return;
+    }
 
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.8;
@@ -221,7 +251,7 @@
     ctx.restore();
   }
 
-  function updateBall(ball, time) {
+  function updateBall(ball, time, pulse = 0) {
     if (reduceMotion.matches) return;
 
     const orbitX = Math.cos(time * 0.00042 + ball.phase) * width * 0.065;
@@ -240,6 +270,12 @@
       ball.vy += (dy / distance) * force * 0.72;
     }
 
+    if (pulse > 0.02) {
+      const kick = pulse * (ball.asset ? 0.95 : 0.58);
+      ball.vx += Math.cos(time * 0.004 + ball.phase + audioPulseIndex) * kick;
+      ball.vy += Math.sin(time * 0.0036 + ball.phase) * kick;
+    }
+
     ball.vx *= 0.972;
     ball.vy *= 0.972;
     ball.x += ball.vx;
@@ -256,17 +292,24 @@
   }
 
   function render(time) {
+    const pulse = reduceMotion.matches ? 0 : audioPulse;
+    if (audioPulse > 0.004) audioPulse *= time < audioPulseUntil ? 0.94 : 0.82;
+    if (audioPulse < 0.004) audioPulse = 0;
+    stage.style.setProperty("--audio-pulse", pulse.toFixed(3));
+    stage.classList.toggle("is-audio-reactive", pulse > 0.05);
+
     ctx.clearRect(0, 0, width, height);
-    drawBackdrop(time);
+    drawBackdrop(time, pulse);
     if (!reduceMotion.matches) {
-      const targetEnergy = pointer.active ? 82 + Math.sin(time * 0.006) * 10 : 42 + Math.sin(time * 0.0018) * 8;
+      const idleEnergy = 42 + Math.sin(time * 0.0018) * 8;
+      const targetEnergy = Math.max(pointer.active ? 82 + Math.sin(time * 0.006) * 10 : idleEnergy, 44 + pulse * 56);
       setEnergy(energy + (targetEnergy - energy) * 0.04);
     }
     balls.forEach((ball) => {
-      updateBall(ball, time);
-      drawTrail(ball, time);
+      updateBall(ball, time, pulse);
+      drawTrail(ball, time, pulse);
     });
-    balls.forEach((ball) => drawBall(ball, time));
+    balls.forEach((ball) => drawBall(ball, time, pulse));
 
     if (!reduceMotion.matches) {
       raf = window.requestAnimationFrame(render);
@@ -304,6 +347,19 @@
   stage.addEventListener("pointerdown", updatePointer);
   stage.addEventListener("pointerleave", () => {
     pointer.active = false;
+  });
+
+  window.addEventListener("lottomind:beat-energy", (event) => {
+    const nextPulse = clamp01(event.detail?.energy);
+    if (!nextPulse) return;
+    audioPulse = Math.max(audioPulse, nextPulse);
+    audioPulseUntil = performance.now() + 900;
+    audioPulseIndex = Number(event.detail?.index) || audioPulseIndex + 1;
+    balls.forEach((ball, index) => {
+      const angle = (index / Math.max(1, balls.length)) * Math.PI * 2 + audioPulseIndex * 0.13;
+      ball.vx += Math.cos(angle) * nextPulse * (ball.asset ? 1.25 : 0.68);
+      ball.vy += Math.sin(angle) * nextPulse * (ball.asset ? 1.05 : 0.58);
+    });
   });
 
   rerollButton?.addEventListener("click", () => {

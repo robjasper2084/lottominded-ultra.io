@@ -15,6 +15,61 @@ const pianoNotes = [
 
 let importedBeatAnalysis = null;
 let sheetFileLabel = "";
+let beatPulseTimer = 0;
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, Number(value) || 0));
+}
+
+function emitBeatEnergy(energy, detail = {}) {
+  window.dispatchEvent(new CustomEvent("lottomind:beat-energy", {
+    detail: {
+      source: "beat2lotto-upload",
+      energy: clamp01(energy),
+      ...detail
+    }
+  }));
+}
+
+function buildEnergySeries(data, duration) {
+  const bucketCount = Math.max(24, Math.min(96, Math.round(duration * 5) || 36));
+  const bucketSize = Math.max(1, Math.floor(data.length / bucketCount));
+  const series = [];
+  let maxEnergy = 0;
+  for (let bucket = 0; bucket < bucketCount; bucket += 1) {
+    const start = bucket * bucketSize;
+    const end = Math.min(data.length, start + bucketSize);
+    let sumSquares = 0;
+    let localPeak = 0;
+    for (let index = start; index < end; index += 1) {
+      const sample = data[index] || 0;
+      const abs = Math.abs(sample);
+      sumSquares += sample * sample;
+      if (abs > localPeak) localPeak = abs;
+    }
+    const rms = Math.sqrt(sumSquares / Math.max(1, end - start));
+    const energy = rms * 0.78 + localPeak * 0.22;
+    maxEnergy = Math.max(maxEnergy, energy);
+    series.push(energy);
+  }
+  const scale = maxEnergy || 1;
+  return series.map((energy) => clamp01(Math.pow(energy / scale, 0.72)));
+}
+
+function playBeatEnergySeries(series, bpm = 120) {
+  window.clearInterval(beatPulseTimer);
+  if (!series?.length) return;
+  let index = 0;
+  let loops = 0;
+  const stepMs = Math.max(90, Math.min(240, (60000 / Math.max(40, Math.min(220, bpm))) / 2));
+  emitBeatEnergy(series[0], { index: 0, length: series.length, bpm });
+  beatPulseTimer = window.setInterval(() => {
+    index = (index + 1) % series.length;
+    if (index === 0) loops += 1;
+    emitBeatEnergy(series[index], { index, length: series.length, bpm });
+    if (loops >= 3) window.clearInterval(beatPulseTimer);
+  }, stepMs);
+}
 
 function hashString(input) {
   let hash = 2166136261;
@@ -144,6 +199,7 @@ async function analyzeBeatFile(file) {
     const sampleCount = Math.ceil(data.length / hop);
     const rms = Math.sqrt(sumSquares / Math.max(1, sampleCount));
     const energySignature = buckets.map((value) => Math.round((value / sampleCount) * 10000)).join("-");
+    const energySeries = buildEnergySeries(data, buffer.duration);
     importedBeatAnalysis = {
       fileName: file.name,
       duration: buffer.duration,
@@ -153,17 +209,21 @@ async function analyzeBeatFile(file) {
       rms,
       zeroCrossRate: crossings / Math.max(1, sampleCount),
       transientCount,
-      energySignature
+      energySignature,
+      energySeries
     };
     status.innerHTML = `
       <strong>${escapeHtml(file.name)}</strong>
       <span>${buffer.duration.toFixed(1)}s - ${buffer.sampleRate} Hz - ${buffer.numberOfChannels} channel${buffer.numberOfChannels === 1 ? "" : "s"}</span>
       <span>Peak ${(peak * 100).toFixed(1)}% - RMS ${(rms * 100).toFixed(1)}% - Transients ${transientCount}</span>
       <span>Seed signature ${energySignature}</span>
+      <span>Golden spheres are reacting to uploaded beat energy.</span>
     `;
+    playBeatEnergySeries(energySeries, Number(document.querySelector("#lottoBpm")?.value) || 120);
     renderResults();
   } catch (error) {
     importedBeatAnalysis = null;
+    window.clearInterval(beatPulseTimer);
     status.innerHTML = `<strong>Audio could not be decoded</strong><span>Try a browser-supported WAV, MP3, M4A, or OGG file.</span>`;
   }
 }
