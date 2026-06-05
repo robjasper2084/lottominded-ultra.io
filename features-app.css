@@ -153,7 +153,7 @@
 }
 
 .feature-launch-grid {
-  padding: clamp(54px, 8vw, 92px) 0 54px;
+  padding: clamp(26px, 4vw, 46px) 0 54px;
   border-top: 1px solid rgba(41, 247, 255, 0.14);
 }
 
@@ -675,7 +675,7 @@
 
 .feature-launch-grid::before {
   position: absolute;
-  inset: 5.2rem 1.2rem auto;
+  inset: 2.9rem 1.2rem auto;
   height: 2px;
   content: "";
   pointer-events: none;

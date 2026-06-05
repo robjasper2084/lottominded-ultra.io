@@ -5,203 +5,928 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="How to drive LOTTOMINDED ULTRA: launch the studio, load stems, perform, master, generate prompts, and use Beat2Lotto+ responsibly."
+      content="LottoMind beginner guide, app launch page, and simple user manual download."
     />
-    <title>How to Drive LOTTOMINDED ULTRA</title>
-    <meta name="theme-color" content="#03050a" />
+    <title>LottoMind | Simple User Guide</title>
+    <meta name="theme-color" content="#070707" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=nav-instrument-1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --black: #070707;
+        --black-2: #0a0a0a;
+        --panel: rgba(18, 16, 10, 0.82);
+        --panel-strong: rgba(8, 8, 8, 0.94);
+        --gold: #d4af37;
+        --warm-gold: #ffdf75;
+        --soft-gold: #fff2b8;
+        --line: rgba(212, 175, 55, 0.3);
+        --text: #fffaf0;
+        --muted: #d8cfb6;
+        --green: #87ffb3;
+        --shadow: rgba(0, 0, 0, 0.66);
+        --max: 1180px;
+        --display: "Cinzel", "Trajan Pro", "Copperplate Gothic Bold", Georgia, serif;
+        --body: Inter, Aptos, "Trebuchet MS", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--black);
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        overflow-x: hidden;
+        color: var(--text);
+        font-family: var(--body);
+        background:
+          radial-gradient(circle at 18% 8%, rgba(255, 223, 117, 0.22), transparent 28rem),
+          radial-gradient(circle at 84% 16%, rgba(212, 175, 55, 0.18), transparent 28rem),
+          linear-gradient(rgba(255, 223, 117, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 223, 117, 0.03) 1px, transparent 1px),
+          linear-gradient(145deg, #040404, #111006 44%, #070707 100%);
+        background-size: auto, auto, 72px 72px, 72px 72px, auto;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        content: "";
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 50% 0%, rgba(255, 223, 117, 0.12), transparent 34rem),
+          linear-gradient(120deg, transparent 0 24%, rgba(212, 175, 55, 0.08) 24.5% 25.2%, transparent 25.6% 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      .guide-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 14px clamp(16px, 4vw, 44px);
+        border-bottom: 1px solid rgba(255, 223, 117, 0.28);
+        background:
+          linear-gradient(180deg, rgba(15, 13, 7, 0.96), rgba(5, 5, 5, 0.91)),
+          rgba(7, 7, 7, 0.94);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.48);
+        backdrop-filter: blur(14px);
+      }
+
+      .brand {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--soft-gold);
+        font-family: var(--display);
+        font-size: clamp(1rem, 1.4vw, 1.25rem);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        text-transform: uppercase;
+        text-shadow: 0 0 18px rgba(255, 223, 117, 0.32);
+      }
+
+      .brand img {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.36);
+      }
+
+      .guide-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .guide-nav a,
+      .guide-button {
+        display: inline-flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 14px;
+        border: 1px solid rgba(255, 223, 117, 0.34);
+        border-radius: 999px;
+        color: var(--soft-gold);
+        background: rgba(255, 223, 117, 0.075);
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .guide-nav a:hover,
+      .guide-nav a:focus-visible,
+      .guide-button:hover,
+      .guide-button:focus-visible {
+        border-color: rgba(255, 223, 117, 0.8);
+        background: rgba(255, 223, 117, 0.14);
+        transform: translateY(-1px);
+      }
+
+      .guide-button {
+        color: #100e05;
+        background: linear-gradient(135deg, #fff2a8, #d4af37 55%, #87ffb3);
+      }
+
+      .home-signal-marquee {
+        position: sticky;
+        top: 72px;
+        z-index: 18;
+        display: flex;
+        overflow: hidden;
+        border-block: 1px solid rgba(255, 223, 117, 0.38);
+        background:
+          linear-gradient(90deg, rgba(7, 7, 7, 0.94), rgba(37, 27, 7, 0.72), rgba(7, 7, 7, 0.94)),
+          radial-gradient(circle at 15% 50%, rgba(255, 223, 117, 0.2), transparent 18rem);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+          0 14px 34px rgba(0, 0, 0, 0.28);
+        white-space: nowrap;
+      }
+
+      .home-signal-marquee::before,
+      .home-signal-marquee::after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        z-index: 2;
+        width: clamp(44px, 10vw, 130px);
+        content: "";
+        pointer-events: none;
+      }
+
+      .home-signal-marquee::before {
+        left: 0;
+        background: linear-gradient(90deg, #070707, transparent);
+      }
+
+      .home-signal-marquee::after {
+        right: 0;
+        background: linear-gradient(270deg, #070707, transparent);
+      }
+
+      .home-signal-marquee-track {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        min-width: max-content;
+        color: #fffaf0;
+        text-decoration: none;
+        animation: home-signal-marquee 19s linear infinite;
+        will-change: transform;
+      }
+
+      .home-signal-marquee:hover .home-signal-marquee-track,
+      .home-signal-marquee:focus-within .home-signal-marquee-track {
+        animation-play-state: paused;
+      }
+
+      .home-signal-marquee-track span {
+        position: relative;
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        padding-inline: clamp(18px, 3.2vw, 54px);
+        color: var(--soft-gold);
+        font-family: var(--display);
+        font-size: clamp(1rem, 2.4vw, 1.85rem);
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        text-shadow:
+          0 2px 0 rgba(0, 0, 0, 0.62),
+          0 0 20px rgba(255, 223, 117, 0.34);
+      }
+
+      .home-signal-marquee-track span:nth-child(odd) {
+        color: var(--warm-gold);
+      }
+
+      .home-signal-marquee-track span::after {
+        position: absolute;
+        right: -8px;
+        width: 10px;
+        height: 10px;
+        content: "";
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--green), rgba(135, 255, 179, 0.2));
+        box-shadow: 0 0 18px rgba(135, 255, 179, 0.66);
+      }
+
+      @keyframes home-signal-marquee {
+        from {
+          transform: translateX(0);
+        }
+
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      main {
+        overflow: hidden;
+      }
+
+      .section {
+        width: min(calc(100% - 32px), var(--max));
+        margin: 0 auto;
+        padding: clamp(48px, 8vw, 96px) 0;
+      }
+
+      .hero {
+        display: grid;
+        min-height: calc(100vh - 76px);
+        grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
+        gap: clamp(28px, 5vw, 68px);
+        align-items: center;
+        padding-top: clamp(36px, 5vw, 72px);
+      }
+
+      .hero-copy {
+        display: grid;
+        gap: 22px;
+        align-content: center;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--display);
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 100%;
+        margin: 0;
+        color: #fff8de;
+        font-size: clamp(2.9rem, 6.2vw, 5.7rem);
+        line-height: 0.9;
+        text-shadow:
+          0 1px 0 #fff7d0,
+          0 8px 0 rgba(0, 0, 0, 0.62),
+          0 0 34px rgba(255, 223, 117, 0.46);
+      }
+
+      .hero-copy p {
+        max-width: 650px;
+        margin: 0;
+        color: #efe5c8;
+        font-size: clamp(1.08rem, 1.8vw, 1.38rem);
+        font-weight: 750;
+        line-height: 1.65;
+      }
+
+      .hero-actions,
+      .manual-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .primary-action,
+      .secondary-action {
+        display: inline-flex;
+        min-height: 52px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 20px;
+        border: 1px solid rgba(255, 223, 117, 0.44);
+        border-radius: 10px;
+        font-family: var(--display);
+        font-size: 0.88rem;
+        font-weight: 950;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .primary-action {
+        color: #0e0b03;
+        background: linear-gradient(135deg, #fff7b6, #d4af37 56%, #87ffb3);
+        box-shadow: 0 0 36px rgba(212, 175, 55, 0.34);
+      }
+
+      .secondary-action {
+        color: var(--soft-gold);
+        background: rgba(255, 223, 117, 0.07);
+      }
+
+      .hero-card {
+        position: relative;
+        display: grid;
+        gap: 20px;
+        overflow: hidden;
+        padding: clamp(20px, 3vw, 34px);
+        border: 1px solid rgba(255, 223, 117, 0.38);
+        border-radius: 28px;
+        background:
+          radial-gradient(circle at 50% 10%, rgba(255, 223, 117, 0.24), transparent 17rem),
+          linear-gradient(145deg, rgba(24, 20, 8, 0.9), rgba(7, 7, 7, 0.92));
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+          0 34px 90px rgba(0, 0, 0, 0.54);
+      }
+
+      .hero-card::before {
+        position: absolute;
+        inset: 14px;
+        border: 1px solid rgba(255, 223, 117, 0.14);
+        border-radius: 22px;
+        content: "";
+        pointer-events: none;
+      }
+
+      .orb-stage {
+        display: grid;
+        place-items: center;
+        min-height: 280px;
+        border-radius: 22px;
+        background:
+          radial-gradient(circle, rgba(255, 223, 117, 0.22), transparent 58%),
+          radial-gradient(circle at 72% 18%, rgba(135, 255, 179, 0.12), transparent 16rem);
+      }
+
+      .orb-stage img {
+        width: min(56%, 280px);
+        border-radius: 50%;
+        filter:
+          drop-shadow(0 0 34px rgba(255, 223, 117, 0.34))
+          drop-shadow(0 30px 48px rgba(0, 0, 0, 0.62));
+      }
+
+      .signal-panel {
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+        border: 1px solid rgba(255, 223, 117, 0.22);
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.42);
+      }
+
+      .signal-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 14px;
+        align-items: center;
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .signal-row span:last-child {
+        color: var(--warm-gold);
+        font-family: var(--display);
+      }
+
+      .section-head {
+        display: grid;
+        gap: 12px;
+        max-width: 850px;
+        margin-bottom: 26px;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: var(--warm-gold);
+        font-family: var(--display);
+        font-size: 0.82rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        margin: 0;
+        color: #fff8de;
+        font-size: clamp(2.4rem, 5.6vw, 5.4rem);
+        line-height: 0.92;
+      }
+
+      .section-head p,
+      .manual-card p,
+      .faq p,
+      .feature-card p,
+      .step-card p,
+      .plain-copy p,
+      .warning p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.03rem;
+        font-weight: 650;
+        line-height: 1.62;
+      }
+
+      .plain-copy {
+        display: grid;
+        gap: 18px;
+        padding: clamp(22px, 4vw, 38px);
+        border: 1px solid rgba(255, 223, 117, 0.28);
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at 8% 0%, rgba(255, 223, 117, 0.14), transparent 16rem),
+          rgba(10, 10, 10, 0.72);
+      }
+
+      .plain-copy strong {
+        color: var(--soft-gold);
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .step-card,
+      .feature-card,
+      .manual-card,
+      .faq details,
+      .warning {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 223, 117, 0.24);
+        border-radius: 20px;
+        background:
+          radial-gradient(circle at 92% 18%, rgba(255, 223, 117, 0.12), transparent 10rem),
+          linear-gradient(145deg, rgba(20, 19, 14, 0.78), rgba(7, 7, 7, 0.88));
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+          0 24px 54px rgba(0, 0, 0, 0.32);
+      }
+
+      .step-card {
+        display: grid;
+        gap: 14px;
+        min-height: 190px;
+        padding: 22px;
+      }
+
+      .step-number {
+        display: inline-grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 50%;
+        color: #0a0802;
+        background: radial-gradient(circle at 30% 20%, #fff8d2, #d4af37 70%);
+        font-family: var(--display);
+        font-weight: 950;
+        box-shadow: 0 0 24px rgba(255, 223, 117, 0.32);
+      }
+
+      .step-card h3,
+      .feature-card h3,
+      .manual-card h3 {
+        margin: 0;
+        color: var(--soft-gold);
+        font-size: 1.18rem;
+        line-height: 1.1;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .feature-card {
+        display: grid;
+        gap: 14px;
+        min-height: 230px;
+        padding: 22px;
+      }
+
+      .feature-icon {
+        display: inline-grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border: 1px solid rgba(255, 223, 117, 0.38);
+        border-radius: 14px;
+        color: #0d0a02;
+        background: linear-gradient(135deg, #ffdf75, #d4af37);
+        font-family: var(--display);
+        font-weight: 950;
+      }
+
+      .manual-band {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(280px, 1.05fr);
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .manual-card {
+        display: grid;
+        gap: 18px;
+        padding: clamp(22px, 4vw, 38px);
+      }
+
+      .manual-preview {
+        min-height: 330px;
+        background:
+          linear-gradient(180deg, rgba(255, 223, 117, 0.16), rgba(0, 0, 0, 0.16)),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+          rgba(9, 8, 5, 0.9);
+        background-size: auto, 36px 36px, 36px 36px, auto;
+      }
+
+      .manual-preview .page {
+        display: grid;
+        gap: 16px;
+        margin: auto;
+        width: min(86%, 430px);
+        padding: 28px;
+        border: 1px solid rgba(255, 223, 117, 0.44);
+        border-radius: 16px;
+        background: rgba(5, 5, 5, 0.88);
+        box-shadow: 0 24px 58px rgba(0, 0, 0, 0.54);
+      }
+
+      .page-title {
+        color: #fff8de;
+        font-family: var(--display);
+        font-size: clamp(1.8rem, 4vw, 3.2rem);
+        font-weight: 950;
+        line-height: 0.94;
+        text-transform: uppercase;
+      }
+
+      .page-line {
+        height: 12px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(255, 223, 117, 0.8), transparent);
+      }
+
+      .page-line:nth-child(3) {
+        width: 72%;
+      }
+
+      .page-line:nth-child(4) {
+        width: 52%;
+      }
+
+      .warning {
+        display: grid;
+        gap: 16px;
+        padding: clamp(22px, 4vw, 34px);
+        border-color: rgba(255, 223, 117, 0.5);
+        background:
+          radial-gradient(circle at 12% 22%, rgba(255, 223, 117, 0.2), transparent 18rem),
+          rgba(11, 9, 4, 0.86);
+      }
+
+      .warning h2 {
+        font-size: clamp(1.8rem, 3.7vw, 3.6rem);
+      }
+
+      .faq {
+        display: grid;
+        gap: 12px;
+      }
+
+      .faq details {
+        padding: 0;
+      }
+
+      .faq summary {
+        min-height: 66px;
+        padding: 20px 22px;
+        color: var(--soft-gold);
+        cursor: pointer;
+        font-family: var(--display);
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .faq details p {
+        padding: 0 22px 22px;
+      }
+
+      footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 28px clamp(16px, 4vw, 44px);
+        border-top: 1px solid rgba(255, 223, 117, 0.22);
+        color: var(--muted);
+        background: rgba(0, 0, 0, 0.7);
+        font-weight: 800;
+      }
+
+      footer a {
+        color: var(--warm-gold);
+      }
+
+      @media (max-width: 940px) {
+        .guide-header {
+          grid-template-columns: 1fr;
+          justify-items: start;
+        }
+
+        .guide-nav {
+          justify-content: flex-start;
+        }
+
+        .hero,
+        .manual-band {
+          grid-template-columns: 1fr;
+        }
+
+        .steps,
+        .features {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 620px) {
+        .guide-header {
+          gap: 12px;
+        }
+
+        .guide-nav {
+          display: none;
+        }
+
+        .section {
+          width: min(calc(100% - 24px), var(--max));
+          padding: 42px 0;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 34px;
+        }
+
+        h1 {
+          font-size: clamp(3rem, 18vw, 4.8rem);
+        }
+
+        .steps,
+        .features {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-card {
+          border-radius: 20px;
+        }
+
+        .orb-stage {
+          min-height: 220px;
+        }
+      }
+    </style>
   </head>
-  <body class="manual-page">
-    <header class="site-header home-like-header" data-site-header>
-      <div class="site-header-main">
-        <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
-          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
-          <span>LOTTOMINDED ULTRA</span>
-        </a>
-        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
-      </div>
-      <nav aria-label="Primary" hidden style="display: none;">
-        <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
-        <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
-        <a href="./lottery-spheres.html#spheres" data-icon="SP">SELCIRM</a>
-        <a href="./merch-store.html" data-icon="DR">Merch</a>
-        <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
-        <a href="./how-to-use.html" data-icon="GO">Guide</a>
+  <body>
+    <header class="guide-header">
+      <a class="brand" href="./how-to-use.html" aria-label="LottoMind guide home">
+        <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+        <span>LottoMind</span>
+      </a>
+      <nav class="guide-nav" aria-label="LottoMind guide navigation">
+        <a href="#what">What It Is</a>
+        <a href="#how">How To Use</a>
+        <a href="#features">Features</a>
+        <a href="#manual">Manual</a>
+        <a href="#faq">FAQ</a>
       </nav>
-      <div class="direct-launch" aria-label="Direct studio launch">
-        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">O</span> Beat2Lotto+</a>
-      </div>
+      <a class="guide-button" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Launch App</a>
     </header>
 
-    <div class="branded-puck-field manual-puck-field" data-guide-puck-field aria-hidden="true">
-      <span class="branded-puck"><img src="./assets/brand/lottomind-branded-puck.png" alt="" /></span>
-      <span class="branded-puck"><img src="./assets/brand/lottomind-branded-puck.png" alt="" /></span>
-      <span class="branded-puck"><img src="./assets/brand/lottomind-branded-puck.png" alt="" /></span>
-      <span class="branded-puck"><img src="./assets/brand/lottomind-branded-puck.png" alt="" /></span>
-      <span class="branded-puck"><img src="./assets/brand/lottomind-branded-puck.png" alt="" /></span>
-    </div>
+    <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+&trade;</span>
+      </a>
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto" aria-hidden="true" tabindex="-1">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+&trade;</span>
+      </a>
+    </section>
 
     <main>
-      <section class="ultra-piano-header reveal-section" data-reveal aria-label="Interactive piano navigation header">
-        <div class="ultra-piano-bg" aria-hidden="true"></div>
-        <div class="ultra-top-panel">
-          <div class="ultra-status-panel">
-            <span class="ultra-eyebrow">Studio Status</span>
-            <div class="ultra-orb-mark" aria-hidden="true">LM</div>
-            <div class="status-chip"><span></span>Ultra Mode Online</div>
-            <div class="mini-eq" aria-hidden="true">
-              <span></span><span></span><span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-          <div class="ultra-brand-panel">
-            <h2>
-              <span>LOTTOMINDED</span>
-              <strong>ULTRA</strong>
-            </h2>
-            <p>How to drive the studio through playable navigation keys.</p>
-          </div>
-          <div class="ultra-wave-panel">
-            <span class="ultra-eyebrow">C Major Route</span>
-            <div class="wave-display" aria-hidden="true"></div>
-            <div class="meta-row">
-              <span>Keys <strong>25</strong></span>
-              <span>Scale <strong>C</strong></span>
-              <span>Links <strong>Live</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="ultra-instrument-shell">
-          <div class="ultra-left-controls" aria-hidden="true">
-            <div class="wheel-block"><span>Pitch</span><i></i></div>
-            <div class="wheel-block"><span>Mod</span><i></i></div>
-          </div>
-          <div class="ultra-keyboard-wrap" aria-label="Piano navigation keys" data-instrument-keyboard>
-            <div class="ultra-black-keys" aria-label="Sharp key navigation">
-              <button class="piano-key black" type="button" data-note="C#4" data-brand="LM" data-action="back" aria-label="Back key C sharp"><strong>C#</strong><small>Back</small></button>
-              <button class="piano-key black" type="button" data-note="D#4" data-brand="STEM" data-href="./lottomind-stem-studio/index.html" aria-label="Open studio key D sharp"><strong>D#</strong><small>Direct</small></button>
-              <button class="piano-key black" type="button" data-note="F#4" data-brand="SUNO" data-href="./prompt-lab.html#beat-suno" aria-label="Suno prompt key F sharp"><strong>F#</strong><small>Suno</small></button>
-              <button class="piano-key black" type="button" data-note="G#4" data-brand="VID" data-href="./prompt-lab.html#beat-video" aria-label="Video prompt key G sharp"><strong>G#</strong><small>Video</small></button>
-              <button class="piano-key black" type="button" data-note="A#4" data-brand="C" data-action="toggle-scale" aria-label="Play C scale key A sharp"><strong>A#</strong><small>C Scale</small></button>
-              <button class="piano-key black" type="button" data-note="C#5" data-brand="SP" data-href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key C sharp five"><strong>C#'</strong><small>Spheres</small></button>
-              <button class="piano-key black" type="button" data-note="D#5" data-brand="DR" data-href="./merch-store.html" aria-label="Merch key D sharp five"><strong>D#'</strong><small>Merch</small></button>
-              <button class="piano-key black" type="button" data-note="F#5" data-brand="B2+" data-href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key F sharp five"><strong>F#'</strong><small>Beat2</small></button>
-              <button class="piano-key black" type="button" data-note="G#5" data-brand="GO" data-href="./how-to-use.html" aria-label="Guide key G sharp five"><strong>G#'</strong><small>Guide</small></button>
-              <button class="piano-key black" type="button" data-note="A#5" data-brand="TOP" data-href="./index.html#top" aria-label="Website top key A sharp five"><strong>A#'</strong><small>Top</small></button>
-            </div>
-            <div class="ultra-white-keys" aria-label="C scale page navigation">
-              <a class="piano-key white" data-note="C4" data-brand="LM" href="./index.html" aria-label="Home key C"><strong>C</strong><small>Website</small></a>
-              <a class="piano-key white" data-note="D4" data-brand="LOTTO" href="https://lottomind.one/" aria-label="Lottomind key D"><strong>D</strong><small>Lottomind</small></a>
-              <a class="piano-key white is-accent-gold" data-note="E4" data-brand="STUDIO" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key E"><strong>E</strong><small>Studio</small></a>
-              <a class="piano-key white" data-note="F4" data-brand="FX" href="./features-app.html" aria-label="Features key F"><strong>F</strong><small>Features</small></a>
-              <a class="piano-key white" data-note="G4" data-brand="PR" href="./prompt-lab.html" aria-label="Prompt lab key G"><strong>G</strong><small>Prompts</small></a>
-              <a class="piano-key white is-accent-pink" data-note="A4" data-brand="MERCH" href="./merch-store.html" aria-label="Merch and gallery key A"><strong>A</strong><small>Merch</small></a>
-              <a class="piano-key white is-active-guide" data-note="B4" data-brand="GUIDE" href="./how-to-use.html" aria-label="Guide key B"><strong>B</strong><small>Guide</small></a>
-              <a class="piano-key white" data-note="C5" data-brand="B2+" href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key C five"><strong>C'</strong><small>Beat2Lotto+</small></a>
-              <a class="piano-key white" data-note="D5" data-brand="SP" href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key D five"><strong>D'</strong><small>Spheres</small></a>
-              <a class="piano-key white is-accent-gold" data-note="E5" data-brand="SONG" href="./prompt-lab.html#beat-suno" aria-label="Music prompt key E five"><strong>E'</strong><small>Music</small></a>
-              <a class="piano-key white" data-note="F5" data-brand="VID" href="./prompt-lab.html#beat-video" aria-label="Video prompt key F five"><strong>F'</strong><small>Video</small></a>
-              <a class="piano-key white" data-note="G5" data-brand="HELP" href="./features-app.html#support" aria-label="Feature support key G five"><strong>G'</strong><small>Support</small></a>
-              <a class="piano-key white is-accent-pink" data-note="A5" data-brand="DROP" href="./merch-store.html" aria-label="Merch drop key A five"><strong>A'</strong><small>Drop</small></a>
-              <a class="piano-key white" data-note="B5" data-brand="LAB" href="./prompt-lab.html" aria-label="Prompt lab key B five"><strong>B'</strong><small>Lab</small></a>
-              <a class="piano-key white is-accent-gold" data-note="C6" data-brand="ULTRA" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key C six"><strong>C''</strong><small>Studio+</small></a>
-            </div>
-            <div class="ultra-keyboard-footer" aria-hidden="true">
-              <span>Play</span><i></i><span>Create</span><i></i><span>Route</span>
-            </div>
-          </div>
-          <div class="ultra-right-controls" aria-hidden="true">
-            <div class="knob-panel">
-              <span class="ultra-eyebrow">Tone</span>
-              <div class="knob-row"><i></i><i></i><i></i><i></i></div>
-            </div>
-            <div class="pad-panel">
-              <span class="ultra-eyebrow">Pads</span>
-              <div class="pad-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="manual-section reveal-section" data-reveal>
-        <p class="eyebrow">Quick Flow</p>
-        <div class="instruction-grid" aria-label="How to use Lottominded Ultra">
-          <article><strong>1</strong><h3>Launch or Load</h3><p>Open the full studio, load local stems, or drag in audio you own.</p></article>
-          <article><strong>2</strong><h3>Build the Beat</h3><p>Use pads, piano roll, patterns, decks, mixer faders, waveform edits, and 16-Level performance pads.</p></article>
-          <article><strong>3</strong><h3>Perform + Sync</h3><p>Play all sources, sync-start both decks, loop, pause, resume, and record the mix.</p></article>
-          <article><strong>4</strong><h3>Master Locally</h3><p>Run AI-assisted mastering, EQ Brain, loudness checks, and export-ready WAV tools.</p></article>
-          <article><strong>5</strong><h3>Generate Prompts</h3><p>Create Suno song prompts, video prompts, hooks, storyboards, and exclude prompts.</p></article>
-          <article><strong>6</strong><h3>Creative Signals</h3><p>Use Beat2Lotto+&trade; for beat-seeded entertainment picks. Not a prediction.</p></article>
-        </div>
-      </section>
-
-      <section class="manual-section reveal-section" data-reveal>
-        <p class="eyebrow">Drop-Down Manual</p>
-        <div class="manual-dropdowns" aria-label="Instruction manual">
-          <details open>
-            <summary>Instruction Manual - Quick Start</summary>
-            <ol>
-              <li>Open Direct to launch the full studio, or use the standalone prompt apps.</li>
-              <li>Load audio you own, create a beat, or type a session seed.</li>
-              <li>Use Play All, Pause, Restart, Stop All, Loop, Loop All, synced decks, and record mix to perform the session.</li>
-              <li>Generate Suno prompts, video prompts, and Beat2Lotto+&trade; number signals from the same creative seed.</li>
-            </ol>
-          </details>
-          <details>
-            <summary>Beat2Lotto+&trade; Audio Import Manual</summary>
-            <ol>
-              <li>Open Beat2Lotto+&trade; and import a browser-supported audio file.</li>
-              <li>The app analyzes duration, peak, RMS, zero crossings, transient activity, and an energy signature locally.</li>
-              <li>Choose Pick 3, Pick 4, Cash 5, Lotto 6, Powerball-style, or Mega Millions-style output.</li>
-              <li>Generate beat-seeded entertainment picks. These are creative number generations, not predictions.</li>
-              <li>Verify game rules, matrices, draw times, prizes, and eligibility with official lottery sources before playing.</li>
-            </ol>
-          </details>
-          <details>
-            <summary>Sheet Music + Keyboard Prompt Manual</summary>
-            <ol>
-              <li>Upload a sheet image or PDF in Beat2Lotto+&trade;.</li>
-              <li>Preview the sheet locally, then confirm the melody with the on-screen keyboard or editable note lane.</li>
-              <li>Generate a music prompt from the note phrase, BPM, and session seed.</li>
-              <li>Generate a video prompt that turns the notes into camera motion, glowing staff lines, and beat-synced visuals.</li>
-            </ol>
-          </details>
-          <details>
-            <summary>Safety + Rights Manual</summary>
-            <p>
-              Use audio, sheet music, samples, and references you own or have permission to process. The website
-              does not upload audio, submit prompts to outside tools, sell tickets, or process wagers.
-            </p>
-          </details>
-        </div>
-      </section>
-
-      <section class="manual-hero reveal-section" data-reveal>
-        <img src="./assets/brand/beat-dna-hood-orb.png" alt="" />
-        <div>
-          <p class="eyebrow">Instruction Manual</p>
+      <section class="section hero" id="top">
+        <div class="hero-copy">
+          <h1>Understand your numbers before you play.</h1>
           <p>
-            Start with a sound, shape it like a performance, then turn the session into finished exports,
-            AI prompts, video briefs, and entertainment-only Beat2Lotto+&trade; signals.
+            LottoMind is like a smart lottery notebook, AI helper, dream journal, and
+            saved-number wallet in one app.
           </p>
-          <div class="manual-actions">
-            <a class="primary-action" href="./lottomind-stem-studio/index.html">Launch Full Studio</a>
-            <a class="secondary-action" href="./prompt-lab.html">Open Prompt Lab</a>
-            <a class="secondary-action" href="./#top">Back to Website</a>
+          <div class="hero-actions">
+            <a class="primary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Launch App</a>
+            <a class="secondary-action" href="./LottoMind_Simple_User_Manual.pdf" download>Download Manual</a>
           </div>
+        </div>
+
+        <aside class="hero-card" aria-label="LottoMind app preview">
+          <div class="orb-stage">
+            <img src="./assets/brand/lm-orb-mark.webp" alt="Gold LottoMind brand orb" />
+          </div>
+          <div class="signal-panel">
+            <div class="signal-row"><span>Dream Oracle</span><span>Creative seed</span></div>
+            <div class="signal-row"><span>Saved Wallet</span><span>Organized picks</span></div>
+            <div class="signal-row"><span>AI Chat</span><span>Plain-English help</span></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="what">
+        <div class="plain-copy">
+          <p class="eyebrow">Plain-English Promise</p>
+          <h2>One clean place for number ideas, dreams, notes, and checks.</h2>
+          <p>
+            LottoMind is built for regular people who want to stay organized. Use it to
+            generate number ideas, save favorites, write dream notes, compare history,
+            check results, and keep your lottery thoughts in one smart dashboard.
+          </p>
+          <p>
+            <strong>It is not magic and it is not a guarantee.</strong> It is an
+            entertainment assistant that helps you play more organized.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="how">
+        <div class="section-head">
+          <p class="eyebrow">How To Use</p>
+          <h2>Start simple.</h2>
+          <p>Follow these six beginner steps when you open LottoMind for the first time.</p>
+        </div>
+        <div class="steps" aria-label="How to use LottoMind">
+          <article class="step-card">
+            <span class="step-number">1</span>
+            <h3>Choose your game.</h3>
+            <p>Pick the game or state-style lane you want to think about first.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">2</span>
+            <h3>Generate smart ideas.</h3>
+            <p>Use hot, cold, balanced, dream, frequency, or random styles.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">3</span>
+            <h3>Ask AI Chat.</h3>
+            <p>Ask for simple explanations, balance checks, or help comparing sets.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">4</span>
+            <h3>Use Dream Oracle.</h3>
+            <p>Turn dreams, symbols, feelings, colors, or places into creative ideas.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">5</span>
+            <h3>Save your picks.</h3>
+            <p>Keep favorites in the Saved Numbers Wallet so they do not get lost.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">6</span>
+            <h3>Check history and results.</h3>
+            <p>Review patterns and always confirm final results with official sources.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-head">
+          <p class="eyebrow">Features</p>
+          <h2>Built like a premium number dashboard.</h2>
+          <p>LottoMind keeps the app experience clear: creative, organized, and honest.</p>
+        </div>
+        <div class="features" aria-label="LottoMind feature cards">
+          <article class="feature-card">
+            <span class="feature-icon">DO</span>
+            <h3>Dream Oracle</h3>
+            <p>Write a dream in normal words and turn symbols into entertainment number ideas.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">SW</span>
+            <h3>Saved Wallet</h3>
+            <p>Save favorite number sets by game, date, note, dream, or strategy.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">34</span>
+            <h3>Daily 3/4 Tools</h3>
+            <p>Use simple lanes for Pick 3, Pick 4, Daily 3, Daily 4, and state-style games.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">RC</span>
+            <h3>Rewards + Credits</h3>
+            <p>Track credits, trial uses, reward ideas, and premium unlock states.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">FV</span>
+            <h3>Frequency Vault</h3>
+            <p>Explore relaxation tones, mood seeds, quotes, and creative frequency-style ideas.</p>
+          </article>
+          <article class="feature-card">
+            <span class="feature-icon">SE</span>
+            <h3>Studio + Events</h3>
+            <p>Connect music tools, live events, dream video prompts, and community engagement lanes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="manual">
+        <div class="manual-band">
+          <article class="manual-card">
+            <p class="eyebrow">Manual Download</p>
+            <h2>Simple User Manual + Quick Start Guide.</h2>
+            <p>
+              Download the attached beginner manual for the full walkthrough: what
+              LottoMind is, what it is not, the main buttons, Dream Oracle, generator,
+              saved wallet, results checks, credits, studio tools, and safety notes.
+            </p>
+            <div class="manual-actions">
+              <a class="primary-action" href="./LottoMind_Simple_User_Manual.pdf" download>Download Manual</a>
+              <a class="secondary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Open LottoMind</a>
+            </div>
+          </article>
+          <article class="manual-card manual-preview" aria-label="Manual preview">
+            <div class="page">
+              <span class="eyebrow">LottoMind Manual</span>
+              <span class="page-title">Simple User Manual + Quick Start Guide</span>
+              <span class="page-line"></span>
+              <span class="page-line"></span>
+              <p>AI number ideas. Dream Oracle. Saved numbers. Draw tools. Entertainment-first guidance.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <article class="warning">
+          <p class="eyebrow">Responsible Play</p>
+          <h2>Entertainment only.</h2>
+          <p>
+            LottoMind does not guarantee winning numbers. It is for entertainment,
+            organization, education, and creative number generation. Always verify
+            official game rules, draw times, prizes, eligibility, and winning numbers
+            with official lottery sources.
+          </p>
+          <p>
+            Do not spend money you need for bills, food, rent, family, or savings.
+            Never chase losses, and use official lottery websites for final verification.
+          </p>
+        </article>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="section-head">
+          <p class="eyebrow">FAQ</p>
+          <h2>Simple answers.</h2>
+        </div>
+        <div class="faq" aria-label="LottoMind frequently asked questions">
+          <details open>
+            <summary>Can LottoMind guarantee winning numbers?</summary>
+            <p>No. It creates organized number ideas and entertainment guidance. It cannot guarantee wins.</p>
+          </details>
+          <details>
+            <summary>What is the best way to start?</summary>
+            <p>Pick one game, generate a balanced set, save it, check history, then set a reminder.</p>
+          </details>
+          <details>
+            <summary>Why use the Dream Oracle?</summary>
+            <p>It uses dreams, symbols, moods, and personal notes as creative seeds for number ideas.</p>
+          </details>
+          <details>
+            <summary>What are Lotto Credits?</summary>
+            <p>Lotto Credits are display-state app credits for unlocking extra tools, passes, or premium uses when that system is enabled.</p>
+          </details>
         </div>
       </section>
     </main>
 
     <footer>
-      <span>LOTTOMINDED ULTRA</span>
-      <span>How to drive the local-first browser music workstation.</span>
-      <span id="site-year"></span>
+      <span>&copy; 2026 LottoMind</span>
+      <a href="https://robjasper2084.github.io/lottominded-ultra.io/how-to-use.html">Original Page</a>
+      <a href="#top">Back to top</a>
     </footer>
-
-    <script src="./site.js?v=comment-polish-1" defer></script>
   </body>
 </html>

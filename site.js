@@ -27,9 +27,11 @@ const compactHeaderLabels =
   document.body.classList.contains("home-page") ||
   document.body.classList.contains("merch-store-page") ||
   document.body.classList.contains("feature-console-page") ||
+  document.body.classList.contains("live-events-page") ||
   document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
+const STARTUP_VIDEO_SEEN_KEY = "lottominded.ultra.startupVideoSeen.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const SUPPORT_EMAIL = "robjasper2084@gmail.com";
 let soundtrackStartedFromPage = false;
@@ -190,19 +192,34 @@ function initPageTransitions() {
 initPageTransitions();
 
 function setupManualPianoHeader() {
-  if (!document.body.classList.contains("manual-page") || !siteHeader) return;
+  const canUsePianoHeader =
+    document.body.classList.contains("manual-page") ||
+    document.body.classList.contains("merch-store-page") ||
+    document.body.classList.contains("home-page") ||
+    document.body.classList.contains("live-events-page") ||
+    document.body.classList.contains("feature-console-page") ||
+    document.body.classList.contains("prompt-lab-page");
+  if (!canUsePianoHeader || !siteHeader) return;
   const pianoHeader = document.querySelector(".ultra-piano-header");
   const headerMain = siteHeader.querySelector(".site-header-main");
-  if (!pianoHeader || pianoHeader.closest("header") === siteHeader) return;
+  if (!pianoHeader) return;
 
   document.body.classList.add("has-manual-instrument-header");
   siteHeader.classList.add("manual-instrument-header");
   pianoHeader.classList.add("ultra-piano-header-compact");
   pianoHeader.setAttribute("aria-label", "Compact interactive piano navigation header");
-  siteHeader.insertBefore(pianoHeader, headerMain?.nextSibling || siteHeader.firstChild);
+  if (pianoHeader.closest("header") !== siteHeader) {
+    siteHeader.insertBefore(pianoHeader, headerMain?.nextSibling || siteHeader.firstChild);
+  } else if (headerMain && pianoHeader.previousElementSibling !== headerMain) {
+    siteHeader.insertBefore(pianoHeader, headerMain.nextSibling);
+  }
+
+  if (document.body.classList.contains("home-page")) {
+    setupHomePianoHoverToggle(pianoHeader);
+  }
 
   const canHoverReveal = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (!canHoverReveal.matches) return;
+  if (!canHoverReveal.matches || document.body.classList.contains("home-page") || document.body.classList.contains("merch-store-page")) return;
 
   let hideRevealTimer = 0;
   const showReveal = () => {
@@ -222,15 +239,61 @@ function setupManualPianoHeader() {
   siteHeader.addEventListener("mouseleave", hideReveal);
   siteHeader.addEventListener("focusin", showReveal);
   siteHeader.addEventListener("focusout", hideReveal);
+  document.addEventListener(
+    "pointermove",
+    (event) => {
+      if (event.clientY <= 84) {
+        showReveal();
+        return;
+      }
+
+      if (event.clientY > 270 && !siteHeader.matches(":hover")) {
+        hideReveal();
+      }
+    },
+    { passive: true },
+  );
 }
 
 setupManualPianoHeader();
+
+function setupHomePianoHoverToggle(pianoHeader) {
+  const canHoverToggle = window.matchMedia("(hover: hover) and (pointer: fine)");
+  if (!canHoverToggle.matches || !siteHeader || !pianoHeader) return;
+
+  let revealTimer = 0;
+  const setHidden = (hidden) => {
+    siteHeader.classList.toggle("is-piano-hover-hidden", hidden);
+    document.body.classList.toggle("is-home-piano-hidden", hidden);
+  };
+
+  pianoHeader.addEventListener("pointerenter", () => {
+    window.clearTimeout(revealTimer);
+    setHidden(true);
+  });
+
+  siteHeader.addEventListener("pointerenter", () => {
+    if (!siteHeader.classList.contains("is-piano-hover-hidden")) return;
+    window.clearTimeout(revealTimer);
+    revealTimer = window.setTimeout(() => setHidden(false), 80);
+  });
+
+  document.addEventListener("pointermove", (event) => {
+    if (!siteHeader.classList.contains("is-piano-hover-hidden")) return;
+    const headerMain = siteHeader.querySelector(".site-header-main");
+    const comebackLine = (headerMain?.getBoundingClientRect().bottom || 58) + 16;
+    if (event.clientY <= comebackLine) setHidden(false);
+  }, { passive: true });
+
+  siteHeader.addEventListener("focusin", () => setHidden(false));
+}
 
 function setupHomeHeaderHoverReveal() {
   const canUseHoverReveal =
     document.body.classList.contains("home-page") ||
     document.body.classList.contains("prompt-lab-page");
   if (!canUseHoverReveal || !siteHeader) return;
+  if (document.body.classList.contains("has-manual-instrument-header")) return;
   if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
   document.body.classList.add("has-home-header-hover-reveal");
@@ -696,6 +759,39 @@ function closeStartupVideo() {
   playSiteSoundtrack({ fromPage: true });
 }
 
+function hasSeenStartupVideo() {
+  try {
+    return localStorage.getItem(STARTUP_VIDEO_SEEN_KEY) === "true";
+  } catch {
+    return true;
+  }
+}
+
+function markStartupVideoSeen() {
+  try {
+    localStorage.setItem(STARTUP_VIDEO_SEEN_KEY, "true");
+  } catch {
+    // Ignore storage failures in private or restricted browser modes.
+  }
+}
+
+function showStartupVideoOnce() {
+  if (!startupVideoModal) return;
+  if (hasSeenStartupVideo()) {
+    startupVideoModal.classList.add("is-hidden");
+    startupVideoPlayer?.pause();
+    return;
+  }
+
+  startupVideoModal.classList.remove("is-hidden");
+  markStartupVideoSeen();
+  if (!reducedMotionQuery.matches) {
+    startupVideoPlayer?.play().catch(() => {
+      // Browsers may block autoplay until the first user gesture.
+    });
+  }
+}
+
 function getGamePipOffset() {
   if (!gamePip) return { x: 0, y: 0 };
   const styles = getComputedStyle(gamePip);
@@ -1154,6 +1250,37 @@ function setupPromptBallpassGame() {
 
 setupPromptBallpassGame();
 
+function setupNegativeCursorLens() {
+  if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
+
+  const lens = document.createElement("div");
+  lens.className = "negative-cursor-lens";
+  lens.setAttribute("aria-hidden", "true");
+  document.body.classList.add("has-negative-cursor-lens");
+  document.body.append(lens);
+
+  function moveLens(event) {
+    if (isEditableTarget(event.target)) {
+      lens.classList.remove("is-visible");
+      return;
+    }
+
+    lens.style.setProperty("--negative-cursor-x", `${event.clientX}px`);
+    lens.style.setProperty("--negative-cursor-y", `${event.clientY}px`);
+    lens.classList.add("is-visible");
+  }
+
+  document.addEventListener("pointermove", moveLens, { passive: true });
+  document.addEventListener("pointerleave", () => {
+    lens.classList.remove("is-visible");
+  }, { passive: true });
+  window.addEventListener("blur", () => {
+    lens.classList.remove("is-visible");
+  });
+}
+
+setupNegativeCursorLens();
+
 function setupMascotMotionCursor() {
   if (document.body.dataset.cursorMode !== "mascot") return;
   if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
@@ -1352,6 +1479,8 @@ function endGamePipDrag(event) {
   gamePipHead?.releasePointerCapture?.(event.pointerId);
 }
 
+showStartupVideoOnce();
+
 startupVideoClose?.addEventListener("click", closeStartupVideo);
 startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo();
@@ -1444,13 +1573,20 @@ window.addEventListener("resize", () => {
 
 function setMemberDownloadUnlocked(unlocked, profile = null) {
   if (!memberDownload) return;
+  const memberName = profile?.name || "member";
+  const lockedLabel = memberDownload.dataset.lockedLabel || "Sign up to download";
+  const unlockedLabel = memberDownload.dataset.unlockedLabel || "Download Test Build";
+  const lockedMessage = memberDownload.dataset.lockedMessage || "Members get the download link after signup.";
+  const unlockedMessage =
+    memberDownload.dataset.unlockedMessage ||
+    "Unlocked for {name}. Download the test ZIP or share the live GitHub Pages preview.";
   memberDownload.classList.toggle("is-locked", !unlocked);
   memberDownload.setAttribute("aria-disabled", String(!unlocked));
-  memberDownload.textContent = unlocked ? "Download Test Build" : "Sign up to download";
+  memberDownload.textContent = unlocked ? unlockedLabel : lockedLabel;
   if (memberMessage) {
     memberMessage.textContent = unlocked
-      ? `Unlocked for ${profile?.name || "member"}. Download the test ZIP or share the live GitHub Pages preview.`
-      : "Members get the download link after signup.";
+      ? unlockedMessage.replace("{name}", memberName)
+      : lockedMessage;
   }
 }
 
@@ -1492,7 +1628,7 @@ memberForm?.addEventListener("submit", (event) => {
   if (memberMessage) {
     memberMessage.textContent = "Download unlocked. An email draft to robjasper2084@gmail.com is opening so the signup can be sent.";
   }
-  openSupportMailDraft("LOTTOMINDED ULTRA Member Signup", {
+  openSupportMailDraft(memberForm.dataset.signupSubject || "LOTTOMINDED ULTRA Member Signup", {
     Name: profile.name,
     Email: profile.email,
     "Testing focus": profile.focus,

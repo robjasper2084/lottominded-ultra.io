@@ -10,11 +10,11 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=prompt-header-hover-1" />
-    <link rel="stylesheet" href="./beat2lotto-plus.css?v=cinematic-motion-1" />
+  <link rel="stylesheet" href="./styles.css?v=prompt-guide-header-1" />
+    <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
   </head>
-  <body class="prompt-lab-page">
-    <header class="site-header home-like-header" data-site-header>
+  <body class="prompt-lab-page has-manual-instrument-header">
+    <header class="site-header home-like-header manual-instrument-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
@@ -22,7 +22,7 @@
         </a>
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="Prompt Lab navigation">
+      <nav aria-label="Prompt Lab navigation" hidden style="display: none;">
         <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
@@ -33,36 +33,65 @@
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action beat2lotto-tab-copy" href="#beat2lotto"><span aria-hidden="true">O</span> Beat2Lotto+</a>
       </div>
-    </header>
 
-    <main>
-      <section class="prompt-video-showcase video-only-showcase marketing-section reveal-section" aria-label="AI video prompt examples" data-reveal>
-        <div class="prompt-explosion-fx" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="prompt-video-grid">
-          <article class="prompt-video-panel">
-            <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.84">
-              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
-            </video>
-            <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
-            <div>
-              <h3>Beat2Lotto Signal Blend</h3>
-              <p>Orb movement, waveform overlays, number-light pulses, and bass-drop camera energy.</p>
+      <section class="ultra-piano-header reveal-section prompt-piano-header ultra-piano-header-compact motion-rise is-visible" data-reveal aria-label="Compact interactive piano navigation header">
+        <div class="ultra-piano-bg" aria-hidden="true"></div>
+        <div class="ultra-instrument-shell">
+          <div class="ultra-keyboard-wrap" aria-label="Piano navigation keys" data-instrument-keyboard>
+            <div class="ultra-black-keys" aria-label="Sharp key navigation">
+              <button class="piano-key black" type="button" data-note="C#4" data-brand="LM" data-action="back" aria-label="Back key C sharp"><strong>C#</strong><small>Back</small></button>
+              <button class="piano-key black" type="button" data-note="D#4" data-brand="STEM" data-href="./lottomind-stem-studio/index.html" aria-label="Open studio key D sharp"><strong>D#</strong><small>Direct</small></button>
+              <button class="piano-key black" type="button" data-note="F#4" data-brand="SUNO" data-href="./prompt-lab.html#beat-suno" aria-label="Suno prompt key F sharp"><strong>F#</strong><small>Suno</small></button>
+              <button class="piano-key black" type="button" data-note="G#4" data-brand="VID" data-href="./prompt-lab.html#beat-video" aria-label="Video prompt key G sharp"><strong>G#</strong><small>Video</small></button>
+              <button class="piano-key black" type="button" data-note="A#4" data-brand="C" data-action="toggle-scale" aria-label="Play C scale key A sharp"><strong>A#</strong><small>C Scale</small></button>
+              <button class="piano-key black" type="button" data-note="C#5" data-brand="SP" data-href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key C sharp five"><strong>C#'</strong><small>Spheres</small></button>
+              <button class="piano-key black" type="button" data-note="D#5" data-brand="DR" data-href="./merch-store.html" aria-label="Merch key D sharp five"><strong>D#'</strong><small>Merch</small></button>
+              <button class="piano-key black" type="button" data-note="F#5" data-brand="B2+" data-href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key F sharp five"><strong>F#'</strong><small>Beat2</small></button>
+              <button class="piano-key black" type="button" data-note="G#5" data-brand="GO" data-href="./how-to-use.html" aria-label="Guide key G sharp five"><strong>G#'</strong><small>Guide</small></button>
+              <button class="piano-key black" type="button" data-note="A#5" data-brand="TOP" data-href="./index.html#top" aria-label="Website top key A sharp five"><strong>A#'</strong><small>Top</small></button>
             </div>
-          </article>
+            <div class="ultra-white-keys" aria-label="C scale page navigation">
+              <a class="piano-key white" data-note="C4" data-brand="LM" href="./index.html" aria-label="Home key C"><strong>C</strong><small>Website</small></a>
+              <a class="piano-key white" data-note="D4" data-brand="LOTTO" href="https://lottomind.one/" aria-label="Lottomind key D"><strong>D</strong><small>Lottomind</small></a>
+              <a class="piano-key white is-accent-gold" data-note="E4" data-brand="STUDIO" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key E"><strong>E</strong><small>Studio</small></a>
+              <a class="piano-key white" data-note="F4" data-brand="FX" href="./features-app.html" aria-label="Features key F"><strong>F</strong><small>Features</small></a>
+              <a class="piano-key white is-active-guide" data-note="G4" data-brand="PR" href="./prompt-lab.html" aria-label="Prompt lab key G"><strong>G</strong><small>Prompts</small></a>
+              <a class="piano-key white is-accent-pink" data-note="A4" data-brand="MERCH" href="./merch-store.html" aria-label="Merch and gallery key A"><strong>A</strong><small>Merch</small></a>
+              <a class="piano-key white" data-note="B4" data-brand="GUIDE" href="./how-to-use.html" aria-label="Guide key B"><strong>B</strong><small>Guide</small></a>
+              <a class="piano-key white" data-note="C5" data-brand="B2+" href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key C five"><strong>C'</strong><small>Beat2Lotto+</small></a>
+              <a class="piano-key white" data-note="D5" data-brand="SP" href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key D five"><strong>D'</strong><small>Spheres</small></a>
+              <a class="piano-key white is-accent-gold" data-note="E5" data-brand="SONG" href="./prompt-lab.html#beat-suno" aria-label="Music prompt key E five"><strong>E'</strong><small>Music</small></a>
+              <a class="piano-key white" data-note="F5" data-brand="VID" href="./prompt-lab.html#beat-video" aria-label="Video prompt key F five"><strong>F'</strong><small>Video</small></a>
+              <a class="piano-key white" data-note="G5" data-brand="HELP" href="./features-app.html#support" aria-label="Feature support key G five"><strong>G'</strong><small>Support</small></a>
+              <a class="piano-key white is-accent-pink" data-note="A5" data-brand="DROP" href="./merch-store.html#drop" aria-label="Merch drop key A five"><strong>A'</strong><small>Drop</small></a>
+              <a class="piano-key white" data-note="B5" data-brand="LAB" href="./prompt-lab.html" aria-label="Prompt lab key B five"><strong>B'</strong><small>Lab</small></a>
+              <a class="piano-key white is-accent-gold" data-note="C6" data-brand="ULTRA" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key C six"><strong>C''</strong><small>Studio+</small></a>
+            </div>
+            <div class="ultra-keyboard-footer" aria-hidden="true">
+              <span>Prompt</span><i></i><span>Beat</span><i></i><span>Route</span>
+            </div>
+          </div>
         </div>
       </section>
+    </header>
 
+    <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+&trade;</span>
+      </a>
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto" aria-hidden="true" tabindex="-1">
+        <span>Beat-seeded signals.</span>
+        <span>Creative sets only.</span>
+        <span>Not a prediction.</span>
+        <span>Open Beat2Lotto+&trade;</span>
+      </a>
+    </section>
+
+    <main>
       <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ copied console" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg">
         <canvas class="prompt-lab-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
         <div class="prompt-lab-sphere-scanline" aria-hidden="true"></div>
@@ -79,12 +108,11 @@
               Beat2Lotto+&trade; is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
               draw times, prizes, and eligibility with official lottery sources before playing.
             </p>
-          </div>
-          <div class="beat2lotto-orb beat2lotto-coin-orb" aria-hidden="true">
-            <img src="./assets/brand/jazz-network-gold-coin.jpeg" alt="" />
-            <span>+</span>
-          </div>
-        </section>
+        </div>
+        <div class="beat2lotto-orb beat2lotto-coin-orb" aria-hidden="true">
+          <img src="./assets/brand/jazz-network-gold-coin.jpeg" alt="" />
+        </div>
+      </section>
 
         <section class="beat2lotto-console" aria-label="Beat2Lotto+ generator">
           <div class="lotto-controls">
@@ -94,7 +122,7 @@
               <small>Local analysis only. Audio never uploads.</small>
             </label>
             <div class="beat-playback-card" id="beatPlayback" hidden>
-              <audio id="lottoAudioPlayer" preload="metadata"></audio>
+              <audio id="lottoAudioPlayer" preload="metadata" controls></audio>
               <button type="button" id="playBeatAudio" disabled>Play uploaded beat</button>
               <div class="beat-playback-meter" aria-hidden="true">
                 <span id="beatPlaybackEnergy"></span>
@@ -165,6 +193,11 @@
         </article>
 
         <article class="prompt-mini-app" id="beat-video" data-mini-app="video">
+          <div class="prompt-mini-video-bg" aria-hidden="true">
+            <video autoplay muted loop playsinline preload="metadata">
+              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
+            </video>
+          </div>
           <h2>Beat -> Video Prompt</h2>
           <p>Create a cinematic video prompt for Higgsfield, Kling, Runway-style, or any text-to-video tool.</p>
           <label><span>Scene subject</span><input id="miniVideoSubject" type="text" value="futuristic producer activating a glowing Beat DNA orb from a stem console" /></label>
@@ -212,8 +245,8 @@
       <span>Local prompt generation. No uploads, no auto-submit, no prediction claims.</span>
     </footer>
 
-    <script src="./beat2lotto-plus.js?v=cinematic-motion-1" defer></script>
-    <script src="./site.js?v=prompt-header-hover-1" defer></script>
+    <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
+  <script src="./site.js?v=prompt-guide-header-1" defer></script>
     <script src="./lottery-spheres.js?v=audio-spheres-1" defer></script>
   </body>
 </html>

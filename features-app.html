@@ -10,15 +10,15 @@
     <title>LOTTOMINDED ULTRA | Feature Console</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=cinematic-motion-1" />
-    <link rel="stylesheet" href="./features-app.css?v=cinematic-motion-1" />
+  <link rel="stylesheet" href="./styles.css?v=guide-piano-pages-2" />
+    <link rel="stylesheet" href="./features-app.css?v=features-grid-top-2" />
   </head>
-  <body class="feature-console-page">
+  <body class="feature-console-page has-manual-instrument-header">
     <video class="feature-page-video-bg" autoplay muted loop playsinline aria-hidden="true">
       <source src="./assets/video/home-feature-motion.mp4" type="video/mp4" />
     </video>
     <div class="branded-puck-field feature-puck-field" data-feature-puck-field data-puck-src="./assets/brand/lottomind-branded-puck.png" aria-hidden="true"></div>
-    <header class="site-header home-like-header" data-site-header>
+    <header class="site-header home-like-header manual-instrument-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
@@ -26,7 +26,7 @@
         </a>
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="Primary">
+      <nav aria-label="Primary" hidden style="display: none;">
         <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
@@ -37,55 +37,51 @@
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">O</span> Beat2Lotto+</a>
       </div>
-    </header>
 
-    <main class="feature-console-shell">
-      <section class="feature-console-hero" aria-label="Premium editing tool landing page">
-        <div class="feature-console-copy">
-          <p class="feature-console-eyebrow">Premium browser editing tool</p>
-          <h1 class="kinetic-word" data-kinetic="CINEMATIC EDITING COMMAND DECK" tabindex="0">Cinematic Editing Command Deck</h1>
-          <p>
-            Build, trim, arrange, master, and generate creative signal ideas from one polished
-            local-first workspace. Every module is organized for fast scanning, direct launch,
-            and studio-ready movement.
-          </p>
-          <div class="feature-console-actions">
-            <a class="primary-action" href="./lottomind-stem-studio/index.html">Launch Editing Studio</a>
-            <a class="secondary-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
-            <a class="secondary-action" href="./lottery-spheres.html#spheres">Lottery Spheres</a>
-            <a class="secondary-action" href="#feature-grid">Browse Tools</a>
-            <button
-              class="secondary-action soundtrack-toggle"
-              type="button"
-              data-soundtrack-toggle
-              data-soundtrack-play-label="Play Startup Song"
-              data-soundtrack-pause-label="Pause Startup Song"
-              aria-pressed="false"
-            >
-              Play Startup Song
-            </button>
+      <section class="ultra-piano-header reveal-section feature-piano-header ultra-piano-header-compact motion-rise is-visible" data-reveal aria-label="Compact interactive piano navigation header">
+        <div class="ultra-piano-bg" aria-hidden="true"></div>
+        <div class="ultra-instrument-shell">
+          <div class="ultra-keyboard-wrap" aria-label="Piano navigation keys" data-instrument-keyboard>
+            <div class="ultra-black-keys" aria-label="Sharp key navigation">
+              <button class="piano-key black" type="button" data-note="C#4" data-brand="LM" data-action="back" aria-label="Back key C sharp"><strong>C#</strong><small>Back</small></button>
+              <button class="piano-key black" type="button" data-note="D#4" data-brand="STEM" data-href="./lottomind-stem-studio/index.html" aria-label="Open studio key D sharp"><strong>D#</strong><small>Direct</small></button>
+              <button class="piano-key black" type="button" data-note="F#4" data-brand="SUNO" data-href="./prompt-lab.html#beat-suno" aria-label="Suno prompt key F sharp"><strong>F#</strong><small>Suno</small></button>
+              <button class="piano-key black" type="button" data-note="G#4" data-brand="VID" data-href="./prompt-lab.html#beat-video" aria-label="Video prompt key G sharp"><strong>G#</strong><small>Video</small></button>
+              <button class="piano-key black" type="button" data-note="A#4" data-brand="C" data-action="toggle-scale" aria-label="Play C scale key A sharp"><strong>A#</strong><small>C Scale</small></button>
+              <button class="piano-key black" type="button" data-note="C#5" data-brand="SP" data-href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key C sharp five"><strong>C#'</strong><small>Spheres</small></button>
+              <button class="piano-key black" type="button" data-note="D#5" data-brand="DR" data-href="./merch-store.html" aria-label="Merch key D sharp five"><strong>D#'</strong><small>Merch</small></button>
+              <button class="piano-key black" type="button" data-note="F#5" data-brand="B2+" data-href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key F sharp five"><strong>F#'</strong><small>Beat2</small></button>
+              <button class="piano-key black" type="button" data-note="G#5" data-brand="GO" data-href="./how-to-use.html" aria-label="Guide key G sharp five"><strong>G#'</strong><small>Guide</small></button>
+              <button class="piano-key black" type="button" data-note="A#5" data-brand="TOP" data-href="./index.html#top" aria-label="Website top key A sharp five"><strong>A#'</strong><small>Top</small></button>
+            </div>
+            <div class="ultra-white-keys" aria-label="C scale page navigation">
+              <a class="piano-key white" data-note="C4" data-brand="LM" href="./index.html" aria-label="Home key C"><strong>C</strong><small>Website</small></a>
+              <a class="piano-key white" data-note="D4" data-brand="LOTTO" href="https://lottomind.one/" aria-label="Lottomind key D"><strong>D</strong><small>Lottomind</small></a>
+              <a class="piano-key white is-accent-gold" data-note="E4" data-brand="STUDIO" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key E"><strong>E</strong><small>Studio</small></a>
+              <a class="piano-key white is-active-guide" data-note="F4" data-brand="FX" href="./features-app.html" aria-label="Features key F"><strong>F</strong><small>Features</small></a>
+              <a class="piano-key white" data-note="G4" data-brand="PR" href="./prompt-lab.html" aria-label="Prompt lab key G"><strong>G</strong><small>Prompts</small></a>
+              <a class="piano-key white is-accent-pink" data-note="A4" data-brand="MERCH" href="./merch-store.html" aria-label="Merch and gallery key A"><strong>A</strong><small>Merch</small></a>
+              <a class="piano-key white" data-note="B4" data-brand="GUIDE" href="./how-to-use.html" aria-label="Guide key B"><strong>B</strong><small>Guide</small></a>
+              <a class="piano-key white" data-note="C5" data-brand="B2+" href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key C five"><strong>C'</strong><small>Beat2Lotto+</small></a>
+              <a class="piano-key white" data-note="D5" data-brand="SP" href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key D five"><strong>D'</strong><small>Spheres</small></a>
+              <a class="piano-key white is-accent-gold" data-note="E5" data-brand="SONG" href="./prompt-lab.html#beat-suno" aria-label="Music prompt key E five"><strong>E'</strong><small>Music</small></a>
+              <a class="piano-key white" data-note="F5" data-brand="VID" href="./prompt-lab.html#beat-video" aria-label="Video prompt key F five"><strong>F'</strong><small>Video</small></a>
+              <a class="piano-key white" data-note="G5" data-brand="HELP" href="./features-app.html#support" aria-label="Feature support key G five"><strong>G'</strong><small>Support</small></a>
+              <a class="piano-key white is-accent-pink" data-note="A5" data-brand="DROP" href="./merch-store.html#drop" aria-label="Merch drop key A five"><strong>A'</strong><small>Drop</small></a>
+              <a class="piano-key white" data-note="B5" data-brand="LAB" href="./prompt-lab.html" aria-label="Prompt lab key B five"><strong>B'</strong><small>Lab</small></a>
+              <a class="piano-key white is-accent-gold" data-note="C6" data-brand="ULTRA" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key C six"><strong>C''</strong><small>Studio+</small></a>
+            </div>
+            <div class="ultra-keyboard-footer" aria-hidden="true">
+              <span>Feature</span><i></i><span>Signal</span><i></i><span>Route</span>
+            </div>
           </div>
         </div>
       </section>
+    </header>
 
-      <div class="feature-command-panel" aria-label="Studio feature command panel">
-        <img class="command-panel-asset" src="./assets/brand/studio-mode-console.png" alt="" />
-        <div class="command-panel-interface">
-          <div class="command-orb" aria-hidden="true">
-            <span>LM</span>
-          </div>
-          <div class="command-readout">
-            <span class="section-kicker">Signal Path</span>
-            <strong>Local-first creative routing</strong>
-            <p>Audio, prompts, stems, pads, decks, mastering, video ideas, and beat signals stay organized in one launch deck.</p>
-          </div>
-          <div class="command-module-list" id="featuredModuleList" aria-label="Featured feature modules"></div>
-        </div>
-      </div>
-
-      <section class="feature-launch-grid" id="feature-grid" aria-label="All LOTTOMINDED ULTRA features">
+    <main class="feature-console-shell">
+      <section class="feature-launch-grid feature-launch-grid-priority" id="feature-grid" aria-label="All LOTTOMINDED ULTRA features">
         <div class="section-kicker">All Tools</div>
         <div class="feature-tool-grid" id="featureToolGrid"></div>
       </section>
@@ -164,7 +160,7 @@
     <audio id="siteSoundtrack" preload="auto">
       <source src="./assets/audio/home-screen-song.mp3?v=feature-startup-song-1" type="audio/mpeg" />
     </audio>
-    <script src="./site.js?v=cinematic-motion-1" defer></script>
-    <script src="./features-app.js?v=cinematic-motion-1" defer></script>
+  <script src="./site.js?v=guide-piano-pages-2" defer></script>
+    <script src="./features-app.js?v=features-grid-top-2" defer></script>
   </body>
 </html>

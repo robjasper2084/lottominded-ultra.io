@@ -55,13 +55,6 @@
   box-shadow: 0 0 70px rgba(41, 247, 255, 0.18), inset 0 0 40px rgba(94, 255, 157, 0.18);
 }
 
-.beat2lotto-orb span {
-  font-family: var(--display-font);
-  font-size: clamp(5rem, 16vw, 10rem);
-  color: var(--gold);
-  text-shadow: 0 0 28px rgba(255, 224, 113, 0.42);
-}
-
 .beat2lotto-console {
   display: grid;
   grid-template-columns: minmax(280px, 0.42fr) minmax(320px, 1fr);
@@ -135,6 +128,15 @@
 
 .beat-playback-card[hidden] {
   display: none;
+}
+
+.beat-playback-card audio {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid rgba(255, 224, 113, 0.2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+  accent-color: #ffe071;
 }
 
 .beat-playback-card button {

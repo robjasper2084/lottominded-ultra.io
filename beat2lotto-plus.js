@@ -101,10 +101,21 @@ function setBeatPlaybackEnergy(energy) {
   if (playback) playback.style.setProperty("--beat-live-energy", clamp01(energy).toFixed(3));
 }
 
+function setBeatPlaybackButtonState(isPlaying) {
+  const button = document.querySelector("#playBeatAudio");
+  if (!button) return;
+  button.textContent = isPlaying ? "Pause uploaded beat" : "Play uploaded beat";
+}
+
 function stopLiveBeatEnergy() {
   if (beatEnergyRaf) window.cancelAnimationFrame(beatEnergyRaf);
   beatEnergyRaf = 0;
   setBeatPlaybackEnergy(0);
+}
+
+function startLiveBeatEnergy() {
+  stopLiveBeatEnergy();
+  renderLiveBeatEnergy();
 }
 
 function prepareBeatPlayback(file) {
@@ -121,9 +132,10 @@ function prepareBeatPlayback(file) {
   audio.src = beatAudioUrl;
   audio.load();
   playback.hidden = false;
+  audio.controls = true;
   button.disabled = false;
-  button.textContent = "Play uploaded beat";
-  setBeatPlaybackStatus("Ready for local playback. Balls react while the beat plays.");
+  setBeatPlaybackButtonState(false);
+  setBeatPlaybackStatus(`Ready to play ${file.name}. Local analysis is running in the browser.`);
 }
 
 function resetBeatPlayback() {
@@ -135,7 +147,7 @@ function resetBeatPlayback() {
   if (audio) audio.removeAttribute("src");
   if (button) {
     button.disabled = true;
-    button.textContent = "Play uploaded beat";
+    setBeatPlaybackButtonState(false);
   }
   if (playback) playback.hidden = true;
   if (beatAudioUrl) URL.revokeObjectURL(beatAudioUrl);
@@ -203,18 +215,36 @@ async function toggleBeatPlayback() {
 
   if (!audio.paused) {
     audio.pause();
-    button.textContent = "Play uploaded beat";
+    setBeatPlaybackButtonState(false);
     setBeatPlaybackStatus("Playback paused. Press play to wake the spheres again.");
     return;
   }
 
   window.clearInterval(beatPulseTimer);
-  const setup = await ensureBeatAnalyser();
-  if (!setup) return;
-  await audio.play();
-  button.textContent = "Pause uploaded beat";
-  setBeatPlaybackStatus("Playing locally. Golden balls are reacting to the beat.");
-  renderLiveBeatEnergy();
+  try {
+    await audio.play();
+    const setup = await ensureBeatAnalyser();
+    setBeatPlaybackButtonState(true);
+    setBeatPlaybackStatus(setup ? "Playing locally. Golden balls are reacting to the beat." : "Playing locally with browser audio controls.");
+    if (setup) startLiveBeatEnergy();
+  } catch {
+    setBeatPlaybackButtonState(false);
+    setBeatPlaybackStatus("This audio file could not be played by the browser.");
+  }
+}
+
+async function handleNativeBeatPlay() {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  if (!audio?.src) return;
+  window.clearInterval(beatPulseTimer);
+  setBeatPlaybackButtonState(true);
+  try {
+    const setup = await ensureBeatAnalyser();
+    setBeatPlaybackStatus(setup ? "Playing locally. Golden balls are reacting to the beat." : "Playing locally with browser audio controls.");
+    if (setup) startLiveBeatEnergy();
+  } catch {
+    setBeatPlaybackStatus("Playing locally. Visual beat energy is unavailable for this file.");
+  }
 }
 
 function hashString(input) {
@@ -318,7 +348,12 @@ async function copyResults() {
 
 async function analyzeBeatFile(file) {
   const status = document.querySelector("#beatAnalysis");
-  if (!file || !status) return;
+  if (!file || !status) {
+    importedBeatAnalysis = null;
+    resetBeatPlayback();
+    return;
+  }
+  prepareBeatPlayback(file);
   status.innerHTML = `<strong>Analyzing ${escapeHtml(file.name)}</strong><span>Decoding local audio in the browser...</span>`;
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -361,7 +396,6 @@ async function analyzeBeatFile(file) {
       energySignature,
       energySeries
     };
-    prepareBeatPlayback(file);
     status.innerHTML = `
       <strong>${escapeHtml(file.name)}</strong>
       <span>${buffer.duration.toFixed(1)}s - ${buffer.sampleRate} Hz - ${buffer.numberOfChannels} channel${buffer.numberOfChannels === 1 ? "" : "s"}</span>
@@ -374,8 +408,8 @@ async function analyzeBeatFile(file) {
   } catch (error) {
     importedBeatAnalysis = null;
     window.clearInterval(beatPulseTimer);
-    resetBeatPlayback();
-    status.innerHTML = `<strong>Audio could not be decoded</strong><span>Try a browser-supported WAV, MP3, M4A, or OGG file.</span>`;
+    setBeatPlaybackStatus("Playback is still available if your browser supports this file. Analysis could not decode it.");
+    status.innerHTML = `<strong>Audio ready for playback</strong><span>Waveform analysis could not decode this file, but the local player can still try to play it.</span>`;
   }
 }
 
@@ -496,14 +530,17 @@ document.querySelector("#generateLotto")?.addEventListener("click", renderResult
 document.querySelector("#copyLotto")?.addEventListener("click", copyResults);
 document.querySelector("#lottoAudioFile")?.addEventListener("change", (event) => analyzeBeatFile(event.target.files?.[0]));
 document.querySelector("#playBeatAudio")?.addEventListener("click", toggleBeatPlayback);
+document.querySelector("#lottoAudioPlayer")?.addEventListener("play", handleNativeBeatPlay);
 document.querySelector("#lottoAudioPlayer")?.addEventListener("ended", () => {
-  const button = document.querySelector("#playBeatAudio");
-  if (button) button.textContent = "Play uploaded beat";
+  setBeatPlaybackButtonState(false);
   setBeatPlaybackStatus("Playback ended. Press play to run it again from the top.");
   stopLiveBeatEnergy();
 });
 document.querySelector("#lottoAudioPlayer")?.addEventListener("pause", () => {
-  if (!document.querySelector("#lottoAudioPlayer")?.ended) stopLiveBeatEnergy();
+  if (!document.querySelector("#lottoAudioPlayer")?.ended) {
+    setBeatPlaybackButtonState(false);
+    stopLiveBeatEnergy();
+  }
 });
 document.querySelector("#sheetMusicFile")?.addEventListener("change", (event) => handleSheetFile(event.target.files?.[0]));
 document.querySelector("#scanSheet")?.addEventListener("click", scanSheetToNotes);

@@ -10,11 +10,11 @@
     <title>LOTTOMINDED ULTRA | Merch + Gallery Store</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=cinematic-motion-1" />
-    <link rel="stylesheet" href="./merch-store.css?v=cinematic-motion-1" />
+    <link rel="stylesheet" href="./styles.css?v=city-lights-video-1" />
+    <link rel="stylesheet" href="./merch-store.css?v=drop-video-bg-1" />
   </head>
-  <body class="merch-store-page">
-    <header class="site-header home-like-header" data-site-header>
+  <body class="merch-store-page has-manual-instrument-header">
+    <header class="site-header home-like-header manual-instrument-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
@@ -22,7 +22,7 @@
         </a>
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="Primary">
+      <nav aria-label="Primary" hidden style="display: none;">
         <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
@@ -33,9 +33,48 @@
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch and cart">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">O</span> Beat2Lotto+</a>
         <button class="direct-action cart-toggle" type="button" data-bag-toggle>Cart <span data-bag-count>0</span></button>
       </div>
+
+      <section class="ultra-piano-header reveal-section merch-piano-header ultra-piano-header-compact motion-rise is-visible" data-reveal aria-label="Compact interactive piano navigation header">
+      <div class="ultra-piano-bg" aria-hidden="true"></div>
+      <div class="ultra-instrument-shell">
+        <div class="ultra-keyboard-wrap" aria-label="Piano navigation keys" data-instrument-keyboard>
+          <div class="ultra-black-keys" aria-label="Sharp key navigation">
+            <button class="piano-key black" type="button" data-note="C#4" data-brand="LM" data-action="back" aria-label="Back key C sharp"><strong>C#</strong><small>Back</small></button>
+            <button class="piano-key black" type="button" data-note="D#4" data-brand="STEM" data-href="./lottomind-stem-studio/index.html" aria-label="Open studio key D sharp"><strong>D#</strong><small>Direct</small></button>
+            <button class="piano-key black" type="button" data-note="F#4" data-brand="SUNO" data-href="./prompt-lab.html#beat-suno" aria-label="Suno prompt key F sharp"><strong>F#</strong><small>Suno</small></button>
+            <button class="piano-key black" type="button" data-note="G#4" data-brand="VID" data-href="./prompt-lab.html#beat-video" aria-label="Video prompt key G sharp"><strong>G#</strong><small>Video</small></button>
+            <button class="piano-key black" type="button" data-note="A#4" data-brand="C" data-action="toggle-scale" aria-label="Play C scale key A sharp"><strong>A#</strong><small>C Scale</small></button>
+            <button class="piano-key black" type="button" data-note="C#5" data-brand="SP" data-href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key C sharp five"><strong>C#'</strong><small>Spheres</small></button>
+            <button class="piano-key black" type="button" data-note="D#5" data-brand="DR" data-href="./merch-store.html" aria-label="Merch key D sharp five"><strong>D#'</strong><small>Merch</small></button>
+            <button class="piano-key black" type="button" data-note="F#5" data-brand="B2+" data-href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key F sharp five"><strong>F#'</strong><small>Beat2</small></button>
+            <button class="piano-key black" type="button" data-note="G#5" data-brand="GO" data-href="./how-to-use.html" aria-label="Guide key G sharp five"><strong>G#'</strong><small>Guide</small></button>
+            <button class="piano-key black" type="button" data-note="A#5" data-brand="TOP" data-href="./index.html#top" aria-label="Website top key A sharp five"><strong>A#'</strong><small>Top</small></button>
+          </div>
+          <div class="ultra-white-keys" aria-label="C scale page navigation">
+            <a class="piano-key white" data-note="C4" data-brand="LM" href="./index.html" aria-label="Home key C"><strong>C</strong><small>Website</small></a>
+            <a class="piano-key white" data-note="D4" data-brand="LOTTO" href="https://lottomind.one/" aria-label="Lottomind key D"><strong>D</strong><small>Lottomind</small></a>
+            <a class="piano-key white is-accent-gold" data-note="E4" data-brand="STUDIO" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key E"><strong>E</strong><small>Studio</small></a>
+            <a class="piano-key white" data-note="F4" data-brand="FX" href="./features-app.html" aria-label="Features key F"><strong>F</strong><small>Features</small></a>
+            <a class="piano-key white" data-note="G4" data-brand="PR" href="./prompt-lab.html" aria-label="Prompt lab key G"><strong>G</strong><small>Prompts</small></a>
+            <a class="piano-key white is-accent-pink is-active-guide" data-note="A4" data-brand="MERCH" href="./merch-store.html" aria-label="Merch and gallery key A"><strong>A</strong><small>Merch</small></a>
+            <a class="piano-key white" data-note="B4" data-brand="GUIDE" href="./how-to-use.html" aria-label="Guide key B"><strong>B</strong><small>Guide</small></a>
+            <a class="piano-key white" data-note="C5" data-brand="B2+" href="./prompt-lab.html#beat2lotto" aria-label="Beat2Lotto key C five"><strong>C'</strong><small>Beat2Lotto+</small></a>
+            <a class="piano-key white" data-note="D5" data-brand="SP" href="./lottery-spheres.html#spheres" aria-label="SELCIRM spheres key D five"><strong>D'</strong><small>Spheres</small></a>
+            <a class="piano-key white is-accent-gold" data-note="E5" data-brand="SONG" href="./prompt-lab.html#beat-suno" aria-label="Music prompt key E five"><strong>E'</strong><small>Music</small></a>
+            <a class="piano-key white" data-note="F5" data-brand="VID" href="./prompt-lab.html#beat-video" aria-label="Video prompt key F five"><strong>F'</strong><small>Video</small></a>
+            <a class="piano-key white" data-note="G5" data-brand="HELP" href="./features-app.html#support" aria-label="Feature support key G five"><strong>G'</strong><small>Support</small></a>
+            <a class="piano-key white is-accent-pink" data-note="A5" data-brand="DROP" href="./merch-store.html#drop" aria-label="Merch drop key A five"><strong>A'</strong><small>Drop</small></a>
+            <a class="piano-key white" data-note="B5" data-brand="LAB" href="./prompt-lab.html" aria-label="Prompt lab key B five"><strong>B'</strong><small>Lab</small></a>
+            <a class="piano-key white is-accent-gold" data-note="C6" data-brand="ULTRA" href="./lottomind-stem-studio/index.html" aria-label="Launch studio key C six"><strong>C''</strong><small>Studio+</small></a>
+          </div>
+          <div class="ultra-keyboard-footer" aria-hidden="true">
+            <span>Shop</span><i></i><span>Signal</span><i></i><span>Route</span>
+          </div>
+        </div>
+      </div>
+      </section>
     </header>
 
     <main class="merch-main">
@@ -99,11 +138,10 @@
         </div>
         <div class="merch-section-copy">
           <h2>Drop-ready apparel with a studio signal.</h2>
-          <div class="merch-drop-video" aria-label="Merch drop motion video">
-            <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.82">
+          <div class="merch-drop-video" aria-hidden="true">
+            <video autoplay muted loop playsinline preload="metadata">
               <source src="./assets/merch/merch-drop-user-video.mp4" type="video/mp4" />
             </video>
-            <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
           </div>
           <p>
             Product cards are wired for a local drop list now, with clean routing for Shopify, Stripe Checkout,
@@ -195,18 +233,12 @@
         </div>
       </section>
 
-      <section class="motion-gallery" id="motion-drops" aria-label="Animated motion graphic merch gallery" data-reveal>
-        <div class="motion-frame">
-          <video autoplay muted loop playsinline preload="metadata">
-            <source src="./assets/merch/merch-motion-02.mp4" type="video/mp4" />
-          </video>
-        </div>
-        <div class="motion-gallery-copy">
-          <h2 class="explosive-zoom-heading" tabindex="0">Motion graphics for every drop.</h2>
-          <p>
-            Use the moving assets as launch reels, product page loops, video wall graphics, and email hero clips.
-          </p>
-        </div>
+      <section class="stream-events-band merch-stream-events marketing-section reveal-section" id="live-events" data-reveal>
+        <div
+          data-live-events-rail
+          data-title="Featured Stream Events"
+          data-subtitle="Watch live concerts, comedy, festivals, conferences, and special events."
+        ></div>
       </section>
 
       <section class="merch-section gallery-section" id="gallery" data-reveal data-merch-akari>
@@ -248,6 +280,20 @@
         </div>
       </section>
 
+      <section class="motion-gallery" id="motion-drops" aria-label="Animated motion graphic merch gallery" data-reveal>
+        <div class="motion-frame">
+          <video autoplay muted loop playsinline preload="metadata">
+            <source src="./assets/merch/merch-motion-02.mp4" type="video/mp4" />
+          </video>
+        </div>
+        <div class="motion-gallery-copy">
+          <h2 class="explosive-zoom-heading" tabindex="0">Motion graphics for every drop.</h2>
+          <p>
+            Use the moving assets as launch reels, product page loops, video wall graphics, and email hero clips.
+          </p>
+        </div>
+      </section>
+
       <aside class="bag-drawer cart-drawer" data-bag-drawer aria-label="Shopping cart drawer">
         <button class="cart-close" type="button" data-bag-close aria-label="Close shopping cart">X</button>
         <p class="cart-eyebrow">Lottomind&trade; Merch</p>
@@ -272,7 +318,8 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=cinematic-motion-1" defer></script>
+    <script src="./site.js?v=piano-hover-static-1" defer></script>
+    <script src="./live-events.js?v=city-lights-video-1" defer></script>
     <script src="./merch-store.js?v=cinematic-motion-1" defer></script>
   </body>
 </html>

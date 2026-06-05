@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=cinematic-motion-1" />
-    <link rel="stylesheet" href="./beat2lotto-plus.css?v=cinematic-motion-1" />
+    <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
   </head>
   <body class="beat2lotto-page">
     <header class="site-header beat2lotto-header">
@@ -45,7 +45,6 @@
           </p>
         </div>
         <div class="beat2lotto-orb" aria-hidden="true">
-          <span>+</span>
         </div>
       </section>
 
@@ -57,7 +56,7 @@
             <small>Local analysis only. Audio never uploads.</small>
           </label>
           <div class="beat-playback-card" id="beatPlayback" hidden>
-            <audio id="lottoAudioPlayer" preload="metadata"></audio>
+            <audio id="lottoAudioPlayer" preload="metadata" controls></audio>
             <button type="button" id="playBeatAudio" disabled>Play uploaded beat</button>
             <div class="beat-playback-meter" aria-hidden="true">
               <span id="beatPlaybackEnergy"></span>
@@ -172,6 +171,6 @@
       <span>Entertainment-only creative number signals. No wagers, no ticket sales, no outcome claims.</span>
     </footer>
 
-    <script src="./beat2lotto-plus.js?v=cinematic-motion-1" defer></script>
+    <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
   </body>
 </html>
