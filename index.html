@@ -10,10 +10,10 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=negative-cursor-lens-1" />
+    <link rel="stylesheet" href="./styles.css?v=startup-music-gate-1" />
   </head>
-  <body class="home-page">
-    <header class="site-header" data-site-header>
+  <body class="home-page has-startup-modal has-sphere-header">
+    <header class="site-header home-like-header home-sphere-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
@@ -21,11 +21,11 @@
         </a>
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="Primary" hidden style="display: none;">
-        <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
+      <nav aria-label="Home sphere navigation">
+        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="./live-events.html" data-icon="EV">Events</a>
         <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
-        <a href="./lottery-spheres.html#spheres" data-icon="SP">SELCIRM</a>
         <a href="./merch-store.html" data-icon="DR">Merch</a>
         <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
         <a href="./how-to-use.html" data-icon="GO">Guide</a>
@@ -36,7 +36,7 @@
       </div>
     </header>
 
-    <section class="ultra-piano-header reveal-section home-piano-header" data-reveal aria-label="Interactive piano navigation header">
+    <section class="ultra-piano-header reveal-section home-piano-header" data-reveal aria-label="Interactive piano navigation header" hidden>
       <div class="ultra-piano-bg" aria-hidden="true"></div>
       <div class="ultra-instrument-shell">
         <div class="ultra-keyboard-wrap" aria-label="Piano navigation keys" data-instrument-keyboard>
@@ -91,16 +91,20 @@
       </a>
     </section>
 
-    <aside class="startup-video-modal is-hidden" data-startup-video aria-label="Lottominded Ultra intro video">
+    <aside class="startup-video-modal" data-startup-video aria-label="Lottominded Ultra startup music">
       <div class="startup-video-panel" role="dialog" aria-modal="true" aria-labelledby="startupVideoTitle">
-        <button class="startup-video-close" type="button" data-startup-video-close aria-label="Close intro video">X</button>
+        <button class="startup-video-close" type="button" data-startup-video-close aria-label="Enter site and start music">X</button>
         <p class="eyebrow">Lottominded Ultra Signal</p>
-        <h2 id="startupVideoTitle">Enter the frequency vault.</h2>
+        <h2 id="startupVideoTitle">Start the home frequency.</h2>
         <video class="startup-video-player" autoplay muted loop playsinline controls preload="metadata">
           <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
         </video>
+        <div class="startup-video-actions">
+          <button class="primary-action" type="button" data-startup-music-start>Start Music</button>
+          <button class="secondary-action" type="button" data-startup-video-close>Enter Site</button>
+        </div>
         <p class="startup-video-copy">
-          Local-first music tools, Beat DNA prompts, cinematic video ideas, and entertainment-only creative signals.
+          Tap Start Music to load the home page with the LOTTOMINDED ULTRA soundtrack from the top.
         </p>
         <p class="startup-video-credit">
           Produced by LOTTOMINDED&trade;. Recording artist: Bloom Through Gloom.
@@ -196,6 +200,20 @@
         </article>
       </section>
 
+      <section class="access-band marketing-section reveal-section" data-reveal>
+        <h2 class="kinetic-word" data-kinetic="READY FOR A SESSION?" tabindex="0">Ready for a session?</h2>
+        <p>
+          Use the browser studio for full production. Everything remains local-first with no backend service required.
+        </p>
+        <div class="access-actions">
+          <a class="primary-action" href="./lottomind-stem-studio/index.html">Launch Full Studio</a>
+        </div>
+        <p class="safety-note">
+          Load or record audio you own or have permission to use. Generated music prompts should describe original work
+          and avoid artist imitation or copyrighted lyrics. Creative number signals are entertainment-only and not predictions.
+        </p>
+      </section>
+
       <section class="feature-band marketing-section reveal-section" id="features" data-reveal>
         <video class="feature-motion-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
           <source src="./assets/video/home-feature-motion.mp4" type="video/mp4" />
@@ -239,20 +257,6 @@
         </div>
       </section>
 
-      <section class="access-band marketing-section reveal-section" data-reveal>
-        <h2 class="kinetic-word" data-kinetic="READY FOR A SESSION?" tabindex="0">Ready for a session?</h2>
-        <p>
-          Use the browser studio for full production. Everything remains local-first with no backend service required.
-        </p>
-        <div class="access-actions">
-          <a class="primary-action" href="./lottomind-stem-studio/index.html">Launch Full Studio</a>
-        </div>
-        <p class="safety-note">
-          Load or record audio you own or have permission to use. Generated music prompts should describe original work
-          and avoid artist imitation or copyrighted lyrics. Creative number signals are entertainment-only and not predictions.
-        </p>
-      </section>
-
     </main>
 
     <audio id="siteSoundtrack" preload="auto">
@@ -265,6 +269,6 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=startup-once-1" defer></script>
+    <script src="./site.js?v=startup-music-gate-1" defer></script>
   </body>
 </html>

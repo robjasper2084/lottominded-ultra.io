@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="LottoMind beginner guide, app launch page, and simple user manual download."
+      content="LottoMind™ beginner guide, app launch page, and simple user manual PDF download."
     />
-    <title>LottoMind | Simple User Guide</title>
+    <title>LottoMind™ | Simple User Guide</title>
     <meta name="theme-color" content="#070707" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <style>
@@ -24,8 +24,10 @@
         --text: #fffaf0;
         --muted: #d8cfb6;
         --green: #87ffb3;
+        --cyan: #29f7ff;
         --shadow: rgba(0, 0, 0, 0.66);
         --max: 1180px;
+        --guide-puck: url("./assets/brand/guide-jazz-network-puck.jpeg");
         --display: "Cinzel", "Trajan Pro", "Copperplate Gothic Bold", Georgia, serif;
         --body: Inter, Aptos, "Trebuchet MS", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
@@ -46,23 +48,99 @@
         color: var(--text);
         font-family: var(--body);
         background:
-          radial-gradient(circle at 18% 8%, rgba(255, 223, 117, 0.22), transparent 28rem),
-          radial-gradient(circle at 84% 16%, rgba(212, 175, 55, 0.18), transparent 28rem),
-          linear-gradient(rgba(255, 223, 117, 0.035) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255, 223, 117, 0.03) 1px, transparent 1px),
-          linear-gradient(145deg, #040404, #111006 44%, #070707 100%);
+          radial-gradient(circle at 18% 8%, rgba(41, 247, 255, 0.16), transparent 32rem),
+          radial-gradient(circle at 84% 16%, rgba(212, 175, 55, 0.2), transparent 30rem),
+          linear-gradient(rgba(41, 247, 255, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 223, 117, 0.035) 1px, transparent 1px),
+          linear-gradient(145deg, #010307, #061521 46%, #070707 100%);
         background-size: auto, auto, 72px 72px, 72px 72px, auto;
+        isolation: isolate;
       }
 
       body::before {
         position: fixed;
         inset: 0;
-        z-index: -1;
+        z-index: -3;
         content: "";
         pointer-events: none;
         background:
           radial-gradient(circle at 50% 0%, rgba(255, 223, 117, 0.12), transparent 34rem),
-          linear-gradient(120deg, transparent 0 24%, rgba(212, 175, 55, 0.08) 24.5% 25.2%, transparent 25.6% 100%);
+          linear-gradient(120deg, transparent 0 24%, rgba(41, 247, 255, 0.08) 24.5% 25.2%, transparent 25.6% 100%),
+          linear-gradient(150deg, rgba(255, 223, 117, 0.055), transparent 32%, rgba(41, 247, 255, 0.06) 58%, transparent 78%);
+      }
+
+      .guide-puck-field {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .guide-puck-field span {
+        position: absolute;
+        display: block;
+        width: clamp(8rem, 18vw, 18rem);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 31% 22%, rgba(255, 255, 255, 0.5), transparent 18%),
+          var(--guide-puck) center / cover no-repeat;
+        box-shadow:
+          inset -1.2rem -1.4rem 2.4rem rgba(0, 0, 0, 0.5),
+          inset 0.55rem 0.45rem 1.1rem rgba(255, 255, 255, 0.16),
+          0 0 2.2rem rgba(255, 223, 117, 0.22),
+          0 2.4rem 5rem rgba(0, 0, 0, 0.44);
+        opacity: 0.22;
+        filter: saturate(0.95) blur(0.1px);
+        animation: guidePuckDrift 16s ease-in-out infinite alternate;
+      }
+
+      .guide-puck-field span:nth-child(1) {
+        top: 16%;
+        left: -4%;
+        transform: rotate(-16deg);
+      }
+
+      .guide-puck-field span:nth-child(2) {
+        top: 10%;
+        right: 5%;
+        width: clamp(7rem, 15vw, 15rem);
+        animation-delay: -4s;
+      }
+
+      .guide-puck-field span:nth-child(3) {
+        top: 48%;
+        left: 12%;
+        width: clamp(10rem, 22vw, 22rem);
+        opacity: 0.16;
+        animation-delay: -8s;
+      }
+
+      .guide-puck-field span:nth-child(4) {
+        right: -6%;
+        bottom: 5%;
+        width: clamp(11rem, 24vw, 24rem);
+        opacity: 0.2;
+        animation-delay: -11s;
+      }
+
+      .guide-puck-field span:nth-child(5) {
+        right: 28%;
+        bottom: 28%;
+        width: clamp(6rem, 11vw, 12rem);
+        opacity: 0.14;
+        animation-delay: -6s;
+      }
+
+      @keyframes guidePuckDrift {
+        from {
+          transform: translate3d(-0.6rem, -0.7rem, 0) rotate(-10deg) scale(0.96);
+        }
+
+        to {
+          transform: translate3d(0.8rem, 1rem, 0) rotate(10deg) scale(1.04);
+        }
       }
 
       a {
@@ -88,6 +166,32 @@
           rgba(7, 7, 7, 0.94);
         box-shadow: 0 18px 42px rgba(0, 0, 0, 0.48);
         backdrop-filter: blur(14px);
+        transform: translateY(0);
+        transition:
+          transform 260ms cubic-bezier(0.18, 0.82, 0.24, 1),
+          box-shadow 220ms ease,
+          opacity 220ms ease;
+      }
+
+      .guide-header-hover-sensor {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 21;
+        height: 22px;
+        pointer-events: none;
+      }
+
+      body.is-guide-header-hidden .guide-header {
+        opacity: 0.2;
+        box-shadow: none;
+        transform: translateY(calc(-100% + 10px));
+      }
+
+      body.is-guide-header-hidden .guide-header-hover-sensor {
+        pointer-events: auto;
+        cursor: pointer;
       }
 
       .brand {
@@ -246,6 +350,8 @@
       }
 
       main {
+        position: relative;
+        z-index: 1;
         overflow: hidden;
       }
 
@@ -256,12 +362,24 @@
       }
 
       .hero {
+        position: relative;
         display: grid;
         min-height: calc(100vh - 76px);
         grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
         gap: clamp(28px, 5vw, 68px);
         align-items: center;
         padding-top: clamp(36px, 5vw, 72px);
+      }
+
+      .hero::before {
+        position: absolute;
+        inset: clamp(1rem, 3vw, 2rem) calc(50% - 50vw);
+        z-index: -1;
+        content: "";
+        background:
+          linear-gradient(90deg, rgba(41, 247, 255, 0.08), transparent 28%, rgba(255, 223, 117, 0.07)),
+          radial-gradient(circle at 78% 18%, rgba(255, 223, 117, 0.12), transparent 22rem);
+        opacity: 0.86;
       }
 
       .hero-copy {
@@ -332,6 +450,102 @@
         background: rgba(255, 223, 117, 0.07);
       }
 
+      .access-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.88rem;
+        font-weight: 800;
+      }
+
+      .password-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background:
+          radial-gradient(circle at 50% 35%, rgba(255, 223, 117, 0.16), transparent 22rem),
+          rgba(0, 0, 0, 0.76);
+        -webkit-backdrop-filter: blur(14px);
+        backdrop-filter: blur(14px);
+      }
+
+      .password-gate[hidden] {
+        display: none;
+      }
+
+      body.has-password-gate {
+        overflow: hidden;
+      }
+
+      .password-panel {
+        position: relative;
+        display: grid;
+        gap: 16px;
+        width: min(100%, 520px);
+        padding: clamp(22px, 4vw, 36px);
+        border: 1px solid rgba(255, 223, 117, 0.42);
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at 82% 10%, rgba(41, 247, 255, 0.12), transparent 16rem),
+          linear-gradient(145deg, rgba(18, 16, 10, 0.96), rgba(3, 5, 8, 0.96));
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+          0 28px 88px rgba(0, 0, 0, 0.64);
+      }
+
+      .password-panel h2 {
+        font-size: clamp(1.8rem, 5vw, 3.5rem);
+      }
+
+      .password-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        display: inline-grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border: 1px solid rgba(255, 223, 117, 0.42);
+        border-radius: 50%;
+        color: var(--soft-gold);
+        background: rgba(0, 0, 0, 0.46);
+        cursor: pointer;
+        font-weight: 950;
+      }
+
+      .password-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .password-form label {
+        display: grid;
+        gap: 8px;
+        color: var(--soft-gold);
+        font-size: 0.82rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .password-form input {
+        min-height: 48px;
+        padding: 0 14px;
+        border: 1px solid rgba(255, 223, 117, 0.34);
+        border-radius: 10px;
+        color: var(--text);
+        background: rgba(0, 0, 0, 0.62);
+        font: inherit;
+      }
+
+      .password-status {
+        min-height: 1.4em;
+        margin: 0;
+        color: var(--warm-gold);
+        font-weight: 850;
+      }
+
       .hero-card {
         position: relative;
         display: grid;
@@ -363,15 +577,18 @@
         min-height: 280px;
         border-radius: 22px;
         background:
-          radial-gradient(circle, rgba(255, 223, 117, 0.22), transparent 58%),
-          radial-gradient(circle at 72% 18%, rgba(135, 255, 179, 0.12), transparent 16rem);
+          radial-gradient(circle, rgba(255, 223, 117, 0.26), transparent 58%),
+          radial-gradient(circle at 72% 18%, rgba(41, 247, 255, 0.14), transparent 16rem),
+          linear-gradient(145deg, rgba(41, 247, 255, 0.1), rgba(255, 223, 117, 0.08));
       }
 
       .orb-stage img {
-        width: min(56%, 280px);
+        width: min(78%, 360px);
+        aspect-ratio: 1;
         border-radius: 50%;
+        object-fit: cover;
         filter:
-          drop-shadow(0 0 34px rgba(255, 223, 117, 0.34))
+          drop-shadow(0 0 42px rgba(255, 223, 117, 0.46))
           drop-shadow(0 30px 48px rgba(0, 0, 0, 0.62));
       }
 
@@ -416,10 +633,114 @@
       }
 
       h2 {
+        position: relative;
         margin: 0;
         color: #fff8de;
         font-size: clamp(2.4rem, 5.6vw, 5.4rem);
         line-height: 0.92;
+      }
+
+      .burst-heading {
+        display: inline-block;
+        cursor: pointer;
+        transform-origin: left center;
+        transition:
+          color 180ms ease,
+          filter 180ms ease,
+          transform 240ms cubic-bezier(0.18, 0.82, 0.24, 1),
+          text-shadow 220ms ease;
+      }
+
+      .burst-heading::before,
+      .burst-heading::after {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        content: attr(data-burst);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .burst-heading::before {
+        color: var(--cyan);
+      }
+
+      .burst-heading::after {
+        color: var(--warm-gold);
+        mix-blend-mode: screen;
+      }
+
+      .plain-copy:hover .burst-heading,
+      .burst-heading:hover,
+      .burst-heading:focus,
+      .burst-heading:focus-visible {
+        color: var(--warm-gold);
+        filter: saturate(1.22);
+        transform: scale(1.055);
+        text-shadow:
+          0 0 18px rgba(255, 223, 117, 0.72),
+          0 0 34px rgba(41, 247, 255, 0.42),
+          0 26px 70px rgba(0, 0, 0, 0.72);
+      }
+
+      .plain-copy:hover .burst-heading::before,
+      .burst-heading:hover::before,
+      .burst-heading:focus::before,
+      .burst-heading:focus-visible::before {
+        animation: guideTextBurstCyan 650ms cubic-bezier(0.18, 0.82, 0.24, 1) both;
+      }
+
+      .plain-copy:hover .burst-heading::after,
+      .burst-heading:hover::after,
+      .burst-heading:focus::after,
+      .burst-heading:focus-visible::after {
+        animation: guideTextBurstGold 720ms cubic-bezier(0.18, 0.82, 0.24, 1) both;
+      }
+
+      @keyframes guideTextBurstCyan {
+        0% {
+          opacity: 0;
+          filter: blur(0);
+          letter-spacing: 0;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        38% {
+          opacity: 0.7;
+          filter: blur(2px);
+          letter-spacing: 0.02em;
+          transform: translate3d(0.04em, -0.03em, 0) scale(1.08);
+        }
+
+        100% {
+          opacity: 0;
+          filter: blur(16px);
+          letter-spacing: 0.1em;
+          transform: translate3d(0.24em, -0.14em, 0) scale(1.32);
+        }
+      }
+
+      @keyframes guideTextBurstGold {
+        0% {
+          opacity: 0;
+          filter: blur(0);
+          letter-spacing: 0;
+          transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        42% {
+          opacity: 0.6;
+          filter: blur(3px);
+          letter-spacing: 0.015em;
+          transform: translate3d(-0.04em, 0.03em, 0) scale(1.1);
+        }
+
+        100% {
+          opacity: 0;
+          filter: blur(18px);
+          letter-spacing: 0.08em;
+          transform: translate3d(-0.2em, 0.16em, 0) scale(1.3);
+        }
       }
 
       .section-head p,
@@ -625,6 +946,8 @@
       }
 
       footer {
+        position: relative;
+        z-index: 1;
         display: flex;
         flex-wrap: wrap;
         gap: 14px;
@@ -639,6 +962,38 @@
 
       footer a {
         color: var(--warm-gold);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+        }
+
+        .guide-puck-field span,
+        .home-signal-marquee-track,
+        .plain-copy:hover .burst-heading::before,
+        .burst-heading:hover::before,
+        .burst-heading:focus::before,
+        .burst-heading:focus-visible::before,
+        .plain-copy:hover .burst-heading::after,
+        .burst-heading:hover::after,
+        .burst-heading:focus::after,
+        .burst-heading:focus-visible::after {
+          animation: none !important;
+        }
+
+        .guide-header,
+        .burst-heading {
+          transition: none !important;
+          transform: none !important;
+        }
+
+        body.is-guide-header-hidden .guide-header {
+          opacity: 1;
+          transform: none;
+        }
       }
 
       @media (max-width: 940px) {
@@ -701,10 +1056,19 @@
     </style>
   </head>
   <body>
-    <header class="guide-header">
-      <a class="brand" href="./how-to-use.html" aria-label="LottoMind guide home">
+    <div class="guide-puck-field" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="guide-header-hover-sensor" data-guide-header-sensor aria-hidden="true"></div>
+
+    <header class="guide-header" data-guide-header>
+      <a class="brand" href="./index.html" aria-label="LottoMind home">
         <img src="./assets/brand/lm-orb-mark.webp" alt="" />
-        <span>LottoMind</span>
+        <span>LottoMind&trade;</span>
       </a>
       <nav class="guide-nav" aria-label="LottoMind guide navigation">
         <a href="#what">What It Is</a>
@@ -713,7 +1077,13 @@
         <a href="#manual">Manual</a>
         <a href="#faq">FAQ</a>
       </nav>
-      <a class="guide-button" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Launch App</a>
+      <a
+        class="guide-button"
+        href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+        data-protected-action
+        data-protected-kind="launch"
+        data-protected-url="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+      >Launch App</a>
     </header>
 
     <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
@@ -736,22 +1106,37 @@
         <div class="hero-copy">
           <h1>Understand your numbers before you play.</h1>
           <p>
-            LottoMind is like a smart lottery notebook, AI helper, dream journal, and
+            LottoMind&trade; is like a smart lottery notebook, AI helper, dream journal, and
             saved-number wallet in one app.
           </p>
           <div class="hero-actions">
-            <a class="primary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Launch App</a>
-            <a class="secondary-action" href="./LottoMind_Simple_User_Manual.pdf" download>Download Manual</a>
+            <a
+              class="primary-action"
+              href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+              data-protected-action
+              data-protected-kind="launch"
+              data-protected-url="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+            >Launch App</a>
+            <a
+              class="secondary-action"
+              href="./LottoMind_Simple_User_Manual.pdf"
+              download
+              data-protected-action
+              data-protected-kind="download"
+              data-protected-url="./LottoMind_Simple_User_Manual.pdf"
+              data-protected-download="LottoMind_Simple_User_Manual.pdf"
+            >Download PDF Manual</a>
           </div>
+          <p class="access-note">Launch App and PDF Manual access require the LottoMind&trade; password.</p>
         </div>
 
         <aside class="hero-card" aria-label="LottoMind app preview">
           <div class="orb-stage">
-            <img src="./assets/brand/lm-orb-mark.webp" alt="Gold LottoMind brand orb" />
+            <img src="./assets/brand/guide-jazz-network-puck.jpeg" alt="Gold Jazz Network Foundation puck" />
           </div>
           <div class="signal-panel">
-            <div class="signal-row"><span>Dream Oracle</span><span>Creative seed</span></div>
-            <div class="signal-row"><span>Saved Wallet</span><span>Organized picks</span></div>
+            <div class="signal-row"><span>Dream Oracle&trade;</span><span>Creative seed</span></div>
+            <div class="signal-row"><span>Saved Wallet&trade;</span><span>Organized picks</span></div>
             <div class="signal-row"><span>AI Chat</span><span>Plain-English help</span></div>
           </div>
         </aside>
@@ -760,9 +1145,13 @@
       <section class="section" id="what">
         <div class="plain-copy">
           <p class="eyebrow">Plain-English Promise</p>
-          <h2>One clean place for number ideas, dreams, notes, and checks.</h2>
+          <h2
+            class="burst-heading"
+            tabindex="0"
+            data-burst="One clean place for number ideas, dreams, notes, and checks."
+          >One clean place for number ideas, dreams, notes, and checks.</h2>
           <p>
-            LottoMind is built for regular people who want to stay organized. Use it to
+            LottoMind&trade; is built for regular people who want to stay organized. Use it to
             generate number ideas, save favorites, write dream notes, compare history,
             check results, and keep your lottery thoughts in one smart dashboard.
           </p>
@@ -777,7 +1166,7 @@
         <div class="section-head">
           <p class="eyebrow">How To Use</p>
           <h2>Start simple.</h2>
-          <p>Follow these six beginner steps when you open LottoMind for the first time.</p>
+          <p>Follow these six beginner steps when you open LottoMind&trade; for the first time.</p>
         </div>
         <div class="steps" aria-label="How to use LottoMind">
           <article class="step-card">
@@ -797,13 +1186,13 @@
           </article>
           <article class="step-card">
             <span class="step-number">4</span>
-            <h3>Use Dream Oracle.</h3>
+            <h3>Use Dream Oracle&trade;.</h3>
             <p>Turn dreams, symbols, feelings, colors, or places into creative ideas.</p>
           </article>
           <article class="step-card">
             <span class="step-number">5</span>
             <h3>Save your picks.</h3>
-            <p>Keep favorites in the Saved Numbers Wallet so they do not get lost.</p>
+            <p>Keep favorites in the Saved Numbers Wallet&trade; so they do not get lost.</p>
           </article>
           <article class="step-card">
             <span class="step-number">6</span>
@@ -817,17 +1206,17 @@
         <div class="section-head">
           <p class="eyebrow">Features</p>
           <h2>Built like a premium number dashboard.</h2>
-          <p>LottoMind keeps the app experience clear: creative, organized, and honest.</p>
+          <p>LottoMind&trade; keeps the app experience clear: creative, organized, and honest.</p>
         </div>
         <div class="features" aria-label="LottoMind feature cards">
           <article class="feature-card">
             <span class="feature-icon">DO</span>
-            <h3>Dream Oracle</h3>
+            <h3>Dream Oracle&trade;</h3>
             <p>Write a dream in normal words and turn symbols into entertainment number ideas.</p>
           </article>
           <article class="feature-card">
             <span class="feature-icon">SW</span>
-            <h3>Saved Wallet</h3>
+            <h3>Saved Numbers Wallet&trade;</h3>
             <p>Save favorite number sets by game, date, note, dream, or strategy.</p>
           </article>
           <article class="feature-card">
@@ -837,7 +1226,7 @@
           </article>
           <article class="feature-card">
             <span class="feature-icon">RC</span>
-            <h3>Rewards + Credits</h3>
+            <h3>Rewards + Lotto Credits&trade;</h3>
             <p>Track credits, trial uses, reward ideas, and premium unlock states.</p>
           </article>
           <article class="feature-card">
@@ -860,21 +1249,35 @@
             <h2>Simple User Manual + Quick Start Guide.</h2>
             <p>
               Download the attached beginner manual for the full walkthrough: what
-              LottoMind is, what it is not, the main buttons, Dream Oracle, generator,
+              LottoMind&trade; is, what it is not, the main buttons, Dream Oracle&trade;, generator,
               saved wallet, results checks, credits, studio tools, and safety notes.
             </p>
             <div class="manual-actions">
-              <a class="primary-action" href="./LottoMind_Simple_User_Manual.pdf" download>Download Manual</a>
-              <a class="secondary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Open LottoMind</a>
+              <a
+                class="primary-action"
+                href="./LottoMind_Simple_User_Manual.pdf"
+                download
+                data-protected-action
+                data-protected-kind="download"
+                data-protected-url="./LottoMind_Simple_User_Manual.pdf"
+                data-protected-download="LottoMind_Simple_User_Manual.pdf"
+              >Download PDF Manual</a>
+              <a
+                class="secondary-action"
+                href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+                data-protected-action
+                data-protected-kind="launch"
+                data-protected-url="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+              >Open LottoMind&trade;</a>
             </div>
           </article>
           <article class="manual-card manual-preview" aria-label="Manual preview">
             <div class="page">
-              <span class="eyebrow">LottoMind Manual</span>
+              <span class="eyebrow">LottoMind&trade; Manual</span>
               <span class="page-title">Simple User Manual + Quick Start Guide</span>
               <span class="page-line"></span>
               <span class="page-line"></span>
-              <p>AI number ideas. Dream Oracle. Saved numbers. Draw tools. Entertainment-first guidance.</p>
+              <p>AI number ideas. Dream Oracle&trade;. Saved numbers. Draw tools. Entertainment-first guidance.</p>
             </div>
           </article>
         </div>
@@ -885,7 +1288,7 @@
           <p class="eyebrow">Responsible Play</p>
           <h2>Entertainment only.</h2>
           <p>
-            LottoMind does not guarantee winning numbers. It is for entertainment,
+            LottoMind&trade; does not guarantee winning numbers. It is for entertainment,
             organization, education, and creative number generation. Always verify
             official game rules, draw times, prizes, eligibility, and winning numbers
             with official lottery sources.
@@ -904,7 +1307,7 @@
         </div>
         <div class="faq" aria-label="LottoMind frequently asked questions">
           <details open>
-            <summary>Can LottoMind guarantee winning numbers?</summary>
+            <summary>Can LottoMind&trade; guarantee winning numbers?</summary>
             <p>No. It creates organized number ideas and entertainment guidance. It cannot guarantee wins.</p>
           </details>
           <details>
@@ -912,21 +1315,134 @@
             <p>Pick one game, generate a balanced set, save it, check history, then set a reminder.</p>
           </details>
           <details>
-            <summary>Why use the Dream Oracle?</summary>
+            <summary>Why use the Dream Oracle&trade;?</summary>
             <p>It uses dreams, symbols, moods, and personal notes as creative seeds for number ideas.</p>
           </details>
           <details>
-            <summary>What are Lotto Credits?</summary>
-            <p>Lotto Credits are display-state app credits for unlocking extra tools, passes, or premium uses when that system is enabled.</p>
+            <summary>What are Lotto Credits&trade;?</summary>
+            <p>Lotto Credits&trade; are display-state app credits for unlocking extra tools, passes, or premium uses when that system is enabled.</p>
           </details>
         </div>
       </section>
     </main>
 
+    <div class="password-gate" data-password-gate hidden>
+      <div class="password-panel" role="dialog" aria-modal="true" aria-labelledby="passwordGateTitle">
+        <button class="password-close" type="button" data-password-close aria-label="Close password gate">X</button>
+        <p class="eyebrow">LottoMind&trade; Access</p>
+        <h2 id="passwordGateTitle">Password required.</h2>
+        <p class="access-note">Enter the LottoMind&trade; access password to launch the app or download the PDF manual.</p>
+        <form class="password-form" data-password-form>
+          <label>
+            Access Password
+            <input type="password" data-password-input autocomplete="current-password" required />
+          </label>
+          <button class="primary-action" type="submit">Unlock</button>
+        </form>
+        <p class="password-status" data-password-status aria-live="polite"></p>
+      </div>
+    </div>
+
     <footer>
-      <span>&copy; 2026 LottoMind</span>
+      <span>&copy; 2026 LottoMind&trade;</span>
       <a href="https://robjasper2084.github.io/lottominded-ultra.io/how-to-use.html">Original Page</a>
       <a href="#top">Back to top</a>
     </footer>
+    <script>
+      (() => {
+        const accessPassword = "LottoMind2026";
+        const header = document.querySelector("[data-guide-header]");
+        const sensor = document.querySelector("[data-guide-header-sensor]");
+        const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+        let lastHeaderReveal = 0;
+
+        if (header && sensor && canHover) {
+          const hideHeader = () => {
+            if (Date.now() - lastHeaderReveal < 700) return;
+            document.body.classList.add("is-guide-header-hidden");
+          };
+          const showHeader = () => {
+            lastHeaderReveal = Date.now();
+            document.body.classList.remove("is-guide-header-hidden");
+          };
+
+          header.addEventListener("pointerenter", hideHeader);
+          sensor.addEventListener("pointerenter", showHeader);
+          header.addEventListener("focusin", showHeader);
+          document.addEventListener("pointermove", (event) => {
+            if (!document.body.classList.contains("is-guide-header-hidden")) return;
+            if (event.clientY <= 24) showHeader();
+          }, { passive: true });
+        }
+
+        const gate = document.querySelector("[data-password-gate]");
+        const form = document.querySelector("[data-password-form]");
+        const input = document.querySelector("[data-password-input]");
+        const status = document.querySelector("[data-password-status]");
+        const closeButton = document.querySelector("[data-password-close]");
+        let pendingAction = null;
+
+        const closeGate = () => {
+          gate.hidden = true;
+          document.body.classList.remove("has-password-gate");
+          pendingAction = null;
+          if (status) status.textContent = "";
+          if (input) input.value = "";
+        };
+
+        const openGate = (link) => {
+          pendingAction = {
+            url: link.dataset.protectedUrl || link.href,
+            download: link.dataset.protectedDownload || "",
+            kind: link.dataset.protectedKind || "open"
+          };
+          gate.hidden = false;
+          document.body.classList.add("has-password-gate");
+          if (status) status.textContent = "";
+          window.setTimeout(() => input?.focus(), 40);
+        };
+
+        const runPendingAction = () => {
+          if (!pendingAction?.url) return;
+          if (pendingAction.download) {
+            const downloadLink = document.createElement("a");
+            downloadLink.href = pendingAction.url;
+            downloadLink.download = pendingAction.download;
+            document.body.append(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+            closeGate();
+            return;
+          }
+          window.location.href = pendingAction.url;
+        };
+
+        document.querySelectorAll("[data-protected-action]").forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            openGate(link);
+          });
+        });
+
+        closeButton?.addEventListener("click", closeGate);
+        gate?.addEventListener("click", (event) => {
+          if (event.target === gate) closeGate();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && gate && !gate.hidden) closeGate();
+        });
+
+        form?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if ((input?.value || "").trim() !== accessPassword) {
+            if (status) status.textContent = "Incorrect password. Try again.";
+            input?.focus();
+            return;
+          }
+          if (status) status.textContent = "Access granted.";
+          runPendingAction();
+        });
+      })();
+    </script>
   </body>
 </html>

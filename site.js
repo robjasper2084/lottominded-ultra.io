@@ -11,7 +11,8 @@ const siteBackButton = document.querySelector("[data-site-back]");
 const siteSoundtrack = document.querySelector("#siteSoundtrack");
 const soundtrackButtons = document.querySelectorAll("[data-soundtrack-toggle]");
 const startupVideoModal = document.querySelector("[data-startup-video]");
-const startupVideoClose = document.querySelector("[data-startup-video-close]");
+const startupVideoCloseButtons = document.querySelectorAll("[data-startup-video-close]");
+const startupMusicStart = document.querySelector("[data-startup-music-start]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
 const domainStrip = document.querySelector(".domain-strip");
 const gamePip = document.querySelector("[data-game-pip]");
@@ -31,7 +32,6 @@ const compactHeaderLabels =
   document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
-const STARTUP_VIDEO_SEEN_KEY = "lottominded.ultra.startupVideoSeen.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const SUPPORT_EMAIL = "robjasper2084@gmail.com";
 let soundtrackStartedFromPage = false;
@@ -192,6 +192,7 @@ function initPageTransitions() {
 initPageTransitions();
 
 function setupManualPianoHeader() {
+  if (document.body.classList.contains("has-sphere-header")) return;
   const canUsePianoHeader =
     document.body.classList.contains("manual-page") ||
     document.body.classList.contains("merch-store-page") ||
@@ -293,6 +294,7 @@ function setupHomeHeaderHoverReveal() {
     document.body.classList.contains("home-page") ||
     document.body.classList.contains("prompt-lab-page");
   if (!canUseHoverReveal || !siteHeader) return;
+  if (document.body.classList.contains("has-sphere-header")) return;
   if (document.body.classList.contains("has-manual-instrument-header")) return;
   if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
@@ -753,39 +755,20 @@ function setupInlineSoundVideos() {
 
 setupInlineSoundVideos();
 
-function closeStartupVideo() {
+async function closeStartupVideo(options = {}) {
   startupVideoModal?.classList.add("is-hidden");
+  document.body.classList.remove("has-startup-modal");
   startupVideoPlayer?.pause();
-  playSiteSoundtrack({ fromPage: true });
+  if (options.playMusic === false) return;
+  await playSiteSoundtrack({ fromPage: true, restart: true, volume: 0.5 });
 }
 
-function hasSeenStartupVideo() {
-  try {
-    return localStorage.getItem(STARTUP_VIDEO_SEEN_KEY) === "true";
-  } catch {
-    return true;
-  }
-}
-
-function markStartupVideoSeen() {
-  try {
-    localStorage.setItem(STARTUP_VIDEO_SEEN_KEY, "true");
-  } catch {
-    // Ignore storage failures in private or restricted browser modes.
-  }
-}
-
-function showStartupVideoOnce() {
+function showStartupVideo() {
   if (!startupVideoModal) return;
-  if (hasSeenStartupVideo()) {
-    startupVideoModal.classList.add("is-hidden");
-    startupVideoPlayer?.pause();
-    return;
-  }
-
+  document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
-  markStartupVideoSeen();
   if (!reducedMotionQuery.matches) {
+    startupVideoPlayer.muted = true;
     startupVideoPlayer?.play().catch(() => {
       // Browsers may block autoplay until the first user gesture.
     });
@@ -1479,9 +1462,12 @@ function endGamePipDrag(event) {
   gamePipHead?.releasePointerCapture?.(event.pointerId);
 }
 
-showStartupVideoOnce();
+showStartupVideo();
 
-startupVideoClose?.addEventListener("click", closeStartupVideo);
+startupVideoCloseButtons.forEach((button) => {
+  button.addEventListener("click", () => closeStartupVideo());
+});
+startupMusicStart?.addEventListener("click", () => closeStartupVideo());
 startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo();
 });
@@ -1499,7 +1485,7 @@ document.addEventListener("keydown", (event) => {
     }
   }
   if (event.key === "Escape" && !startupVideoModal?.classList.contains("is-hidden")) {
-    closeStartupVideo();
+    closeStartupVideo({ playMusic: false });
   }
   if (event.key === "Escape" && gamePip?.classList.contains("is-open")) {
     hideGamePip({ resumeSoundtrack: true });
@@ -1521,6 +1507,7 @@ async function playSiteSoundtrack(options = {}) {
   if (!siteSoundtrack) return;
   try {
     siteSoundtrack.volume = options.volume ?? 0.42;
+    if (options.restart) siteSoundtrack.currentTime = 0;
     await siteSoundtrack.play();
     if (options.fromPage) soundtrackStartedFromPage = true;
     if (options.fromHover) soundtrackStartedFromHover = true;
