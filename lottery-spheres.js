@@ -32,7 +32,7 @@
   const accentImage = stage.dataset.spheresAccentSrc ? new Image() : null;
   if (accentImage) accentImage.src = stage.dataset.spheresAccentSrc;
 
-  const pointer = { x: 0, y: 0, active: false };
+  const pointer = { x: 0, y: 0, active: false, touchBoost: 0 };
   let width = 1;
   let height = 1;
   let dpr = 1;
@@ -276,9 +276,11 @@
       const dx = ball.x - pointer.x;
       const dy = ball.y - pointer.y;
       const distance = Math.hypot(dx, dy) || 1;
-      const force = Math.max(0, 210 - distance) / 210;
-      ball.vx += (dx / distance) * force * 0.72;
-      ball.vy += (dy / distance) * force * 0.72;
+      const touchRange = pointer.touchBoost > 0.04 ? 285 : 210;
+      const touchForce = 0.72 + pointer.touchBoost * 0.42;
+      const force = Math.max(0, touchRange - distance) / touchRange;
+      ball.vx += (dx / distance) * force * touchForce;
+      ball.vy += (dy / distance) * force * touchForce;
     }
 
     if (pulse > 0.02) {
@@ -306,8 +308,12 @@
     const pulse = reduceMotion.matches ? 0 : audioPulse;
     if (audioPulse > 0.004) audioPulse *= time < audioPulseUntil ? 0.94 : 0.82;
     if (audioPulse < 0.004) audioPulse = 0;
+    if (pointer.touchBoost > 0.004) pointer.touchBoost *= 0.9;
+    if (pointer.touchBoost < 0.004) pointer.touchBoost = 0;
     stage.style.setProperty("--audio-pulse", pulse.toFixed(3));
+    stage.style.setProperty("--touch-pulse", pointer.touchBoost.toFixed(3));
     stage.classList.toggle("is-audio-reactive", pulse > 0.05);
+    stage.classList.toggle("is-touch-reactive", pointer.touchBoost > 0.05);
 
     ctx.clearRect(0, 0, width, height);
     drawBackdrop(time, pulse);
@@ -327,13 +333,31 @@
     }
   }
 
-  function updatePointer(event) {
-    const rect = canvas.getBoundingClientRect();
-    pointer.x = event.clientX - rect.left;
-    pointer.y = event.clientY - rect.top;
-    pointer.active = true;
+  let lastPointerTouchAt = 0;
 
+  function getEventPoint(event) {
+    const source = event.touches?.[0] || event.changedTouches?.[0] || event;
+    if (typeof source?.clientX !== "number" || typeof source?.clientY !== "number") return null;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: source.clientX - rect.left,
+      y: source.clientY - rect.top,
+      isTouch: event.pointerType === "touch" || Boolean(event.touches || event.changedTouches)
+    };
+  }
+
+  function updatePointer(event) {
+    const point = getEventPoint(event);
+    if (!point) return;
     const now = performance.now();
+    if (point.isTouch && event.type?.startsWith("touch") && now - lastPointerTouchAt < 45) return;
+    if (event.pointerType === "touch") lastPointerTouchAt = now;
+
+    pointer.x = point.x;
+    pointer.y = point.y;
+    pointer.active = true;
+    if (point.isTouch) pointer.touchBoost = Math.max(pointer.touchBoost, 1);
+
     if (!lastMovePoint) {
       lastMovePoint = { x: pointer.x, y: pointer.y };
       moveTriggerCount = 1;
@@ -354,11 +378,30 @@
     }
   }
 
-  stage.addEventListener("pointermove", updatePointer);
-  stage.addEventListener("pointerdown", updatePointer);
-  stage.addEventListener("pointerleave", () => {
+  function releasePointer(event) {
+    if (!event || event.pointerType !== "mouse") pointer.touchBoost = Math.max(pointer.touchBoost, 0.35);
     pointer.active = false;
-  });
+  }
+
+  stage.addEventListener("pointermove", updatePointer, { passive: true });
+  stage.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType === "touch") {
+        stage.setPointerCapture?.(event.pointerId);
+      }
+      updatePointer(event);
+    },
+    { passive: true }
+  );
+  stage.addEventListener("pointerup", releasePointer, { passive: true });
+  stage.addEventListener("pointercancel", releasePointer, { passive: true });
+  stage.addEventListener("lostpointercapture", releasePointer, { passive: true });
+  stage.addEventListener("pointerleave", releasePointer, { passive: true });
+  stage.addEventListener("touchstart", updatePointer, { passive: true });
+  stage.addEventListener("touchmove", updatePointer, { passive: true });
+  stage.addEventListener("touchend", releasePointer, { passive: true });
+  stage.addEventListener("touchcancel", releasePointer, { passive: true });
 
   window.addEventListener("lottomind:beat-energy", (event) => {
     const nextPulse = clamp01(event.detail?.energy);

@@ -72,8 +72,9 @@
       category: "Conference",
       thumbnailUrl: "./assets/brand/lm-host-white.png",
       bannerUrl: "./assets/brand/lm-records-circuit-banner.png",
+      previewEmbedUrl: "https://www.youtube-nocookie.com/embed/4euNaGauB5k?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=4euNaGauB5k&modestbranding=1&rel=0",
       streamType: "external",
-      externalUrl: "https://example.com/creative-summit-keynote",
+      externalUrl: "https://www.youtube.com/watch?v=4euNaGauB5k",
       startsAt: isoFromNow(7 * DAY + 3 * HOUR),
       endsAt: isoFromNow(7 * DAY + 5 * HOUR),
       status: "upcoming",
@@ -90,8 +91,9 @@
       category: "Replay",
       thumbnailUrl: "./assets/brand/lm-records-studio-room.png",
       bannerUrl: "./assets/brand/generated-cinematic-hero.png",
+      previewVideoUrl: "./assets/video/replay-acoustic-after-hours-preview.mp4",
       streamType: "mp4",
-      replayUrl: "./assets/video/home-prompt-bloom-blend.mp4",
+      replayUrl: "./assets/video/replay-acoustic-after-hours-preview.mp4",
       startsAt: isoFromNow(-2 * DAY),
       endsAt: isoFromNow(-2 * DAY + 2 * HOUR),
       status: "ended",
@@ -202,6 +204,18 @@
 
   function renderEventCardMedia(event) {
     const status = getComputedEventStatus(event);
+    if (event.previewEmbedUrl) {
+      return `
+        <iframe
+          class="stream-event-preview-embed"
+          src="${event.previewEmbedUrl}"
+          title="${escapeText(event.title)} video preview"
+          loading="lazy"
+          allow="autoplay; encrypted-media; picture-in-picture; web-share"
+          aria-label="${escapeText(event.title)} event preview video"
+        ></iframe>
+      `;
+    }
     if (event.previewVideoUrl) {
       const loopSeconds = Number(event.previewLoopSeconds || 0);
       const loopAttr = loopSeconds > 0 ? ` data-preview-loop-seconds="${loopSeconds}"` : "";
@@ -336,6 +350,20 @@
 
   function renderDetailBanner(event) {
     const status = getComputedEventStatus(event);
+    if (event.previewEmbedUrl) {
+      return `
+        <div class="live-event-banner live-event-embed-banner">
+          <iframe
+            src="${event.previewEmbedUrl}"
+            title="${escapeText(event.title)} video background"
+            loading="lazy"
+            allow="autoplay; encrypted-media; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+          ${renderStatusBadge(event)}
+        </div>
+      `;
+    }
     if (status === "live" && event.streamType === "embed" && event.streamUrl) {
       return `
         <div class="live-event-banner live-event-embed-banner">

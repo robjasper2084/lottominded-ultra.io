@@ -1142,14 +1142,16 @@
   grid-row: 2;
   grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
-  width: min(100%, 32rem);
+  width: min(100%, 58rem);
   margin: 0;
-  justify-self: end;
+  justify-self: stretch;
+  align-self: center;
 }
 
 .gallery-motion-rail video {
   display: block;
   width: 100%;
+  min-height: clamp(13rem, 22vw, 20rem);
   aspect-ratio: 16 / 9;
   object-fit: cover;
   overflow: hidden;

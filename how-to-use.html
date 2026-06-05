@@ -964,6 +964,100 @@
         color: var(--warm-gold);
       }
 
+      :is(
+        .guide-header,
+        .guide-nav a,
+        .guide-button,
+        .brand,
+        .primary-action,
+        .secondary-action,
+        button,
+        summary,
+        footer a
+      ).is-interaction-reactive {
+        --reactive-hue: 46;
+        --reactive-x: 50%;
+        --reactive-y: 42%;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        transition:
+          transform 160ms ease,
+          filter 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease,
+          outline-color 180ms ease,
+          text-shadow 180ms ease;
+      }
+
+      :is(
+        .guide-nav a,
+        .guide-button,
+        .brand,
+        .primary-action,
+        .secondary-action,
+        button,
+        summary,
+        footer a
+      ).is-interaction-reactive {
+        outline: 1px solid transparent;
+        outline-offset: 0.12rem;
+      }
+
+      :is(
+        .guide-nav a,
+        .guide-button,
+        .brand,
+        .primary-action,
+        .secondary-action,
+        button,
+        summary,
+        footer a
+      ).is-interaction-reactive:is(.is-pointer-reactive, .is-touch-active, .is-focus-reactive) {
+        border-color: hsl(var(--reactive-hue) 96% 66% / 0.74);
+        outline-color: hsl(var(--reactive-hue) 96% 66% / 0.36);
+        filter: saturate(1.16) brightness(1.08);
+        text-shadow:
+          0 0 0.85rem hsl(var(--reactive-hue) 96% 72% / 0.4),
+          0 1px 4px rgba(0, 0, 0, 0.86);
+        box-shadow:
+          inset 0 0 0 1px hsl(var(--reactive-hue) 96% 70% / 0.18),
+          0 0 1.2rem hsl(var(--reactive-hue) 98% 60% / 0.34),
+          0 0.7rem 1.45rem rgba(0, 0, 0, 0.32);
+      }
+
+      :is(
+        .guide-nav a,
+        .guide-button,
+        .brand,
+        .primary-action,
+        .secondary-action,
+        button,
+        summary,
+        footer a
+      ).is-interaction-reactive.is-pointer-reactive:not(.is-pressed):not(.is-touch-active) {
+        transform: translateY(-1px) scale(1.008);
+      }
+
+      :is(
+        .guide-nav a,
+        .guide-button,
+        .brand,
+        .primary-action,
+        .secondary-action,
+        button,
+        summary,
+        footer a
+      ).is-interaction-reactive:is(.is-pressed, .is-touch-active) {
+        transform: translateY(2px) scale(0.985);
+      }
+
+      .guide-header.is-interaction-reactive:is(.is-pointer-reactive, .is-touch-active, .is-focus-reactive) {
+        filter: saturate(1.08) brightness(1.04);
+        box-shadow:
+          inset 0 -1px 0 hsl(var(--reactive-hue) 96% 66% / 0.38),
+          0 0 2rem hsl(var(--reactive-hue) 98% 58% / 0.2);
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -985,7 +1079,8 @@
         }
 
         .guide-header,
-        .burst-heading {
+        .burst-heading,
+        .is-interaction-reactive {
           transition: none !important;
           transform: none !important;
         }
@@ -1374,6 +1469,93 @@
             if (event.clientY <= 24) showHeader();
           }, { passive: true });
         }
+
+        const getReactivePoint = (event) => {
+          if (event?.touches?.length) return { x: event.touches[0].clientX, y: event.touches[0].clientY, touch: true };
+          if (event?.changedTouches?.length) return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY, touch: true };
+          if (Number.isFinite(event?.clientX) && Number.isFinite(event?.clientY)) {
+            return { x: event.clientX, y: event.clientY, touch: event.pointerType === "touch" };
+          }
+          return null;
+        };
+
+        document.querySelectorAll([
+          "[data-guide-header]",
+          ".guide-nav a",
+          ".guide-button",
+          ".brand",
+          ".primary-action",
+          ".secondary-action",
+          "button",
+          "summary",
+          "footer a"
+        ].join(",")).forEach((target, index) => {
+          if (target.dataset.interactionReactiveReady === "true") return;
+          target.dataset.interactionReactiveReady = "true";
+          target.classList.add("is-interaction-reactive");
+          target.style.setProperty("--reactive-hue", String((index * 31 + 42) % 360));
+
+          let releaseTimer = 0;
+          const isDisabled = () => target.matches?.(":disabled, [aria-disabled='true']");
+          const setPoint = (event, forceTouch = false) => {
+            if (isDisabled()) return;
+            const point = getReactivePoint(event);
+            if (!point) return;
+            const rect = target.getBoundingClientRect();
+            const x = rect.width ? Math.max(0, Math.min(1, (point.x - rect.left) / rect.width)) : 0.5;
+            const y = rect.height ? Math.max(0, Math.min(1, (point.y - rect.top) / rect.height)) : 0.5;
+            target.style.setProperty("--reactive-x", `${Math.round(x * 100)}%`);
+            target.style.setProperty("--reactive-y", `${Math.round(y * 100)}%`);
+            target.style.setProperty("--reactive-hue", String(Math.round((((index * 31 + 42) % 360) + x * 96 + y * 48) % 360)));
+            target.classList.add("is-pointer-reactive");
+            if (point.touch || forceTouch) target.classList.add("is-touch-reactive");
+          };
+          const press = (event, forceTouch = false) => {
+            if (isDisabled()) return;
+            if (event?.button && event.button > 0) return;
+            window.clearTimeout(releaseTimer);
+            setPoint(event, forceTouch);
+            target.classList.add("is-pressed");
+            if (forceTouch || event?.pointerType === "touch" || event?.touches?.length) target.classList.add("is-touch-active");
+          };
+          const release = () => {
+            target.classList.remove("is-pressed");
+            releaseTimer = window.setTimeout(() => target.classList.remove("is-touch-active", "is-touch-reactive"), 220);
+          };
+          const clear = () => {
+            target.classList.remove("is-pointer-reactive", "is-mouse-reactive");
+            release();
+          };
+
+          target.addEventListener("pointerenter", (event) => {
+            if (event.pointerType && event.pointerType !== "mouse") return;
+            setPoint(event);
+            target.classList.add("is-mouse-reactive");
+          });
+          target.addEventListener("pointermove", (event) => {
+            if (event.pointerType && event.pointerType !== "mouse") return;
+            setPoint(event);
+            target.classList.add("is-mouse-reactive");
+          }, { passive: true });
+          target.addEventListener("pointerdown", (event) => press(event));
+          target.addEventListener("pointerup", release);
+          target.addEventListener("pointercancel", clear);
+          target.addEventListener("pointerleave", clear);
+          target.addEventListener("touchstart", (event) => press(event, true), { passive: true });
+          target.addEventListener("touchmove", (event) => setPoint(event, true), { passive: true });
+          target.addEventListener("touchend", release, { passive: true });
+          target.addEventListener("touchcancel", clear, { passive: true });
+          target.addEventListener("focusin", () => target.classList.add("is-focus-reactive"));
+          target.addEventListener("focusout", () => target.classList.remove("is-focus-reactive", "is-pointer-reactive", "is-touch-reactive"));
+          target.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            press(event);
+          });
+          target.addEventListener("keyup", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            release();
+          });
+        });
 
         const gate = document.querySelector("[data-password-gate]");
         const form = document.querySelector("[data-password-form]");

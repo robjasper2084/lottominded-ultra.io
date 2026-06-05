@@ -33,6 +33,8 @@ const compactHeaderLabels =
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
+const PROMPT_ACCESS_KEY = "lottominded.ultra.promptAccess.v1";
+const PROMPT_ACCESS_PASSWORD = "lottomind";
 const SUPPORT_EMAIL = "robjasper2084@gmail.com";
 let soundtrackStartedFromPage = false;
 let soundtrackStartedFromHover = false;
@@ -142,6 +144,90 @@ function setupFeatureDropdown() {
 
 setupFeatureDropdown();
 
+function confirmPasswordGate(target) {
+  if (!target?.dataset?.passwordGate) return true;
+  if (sessionStorage.getItem(PROMPT_ACCESS_KEY) === target.dataset.passwordGate) return true;
+  if (target.dataset.membershipGate === "true" && hasMemberAccess()) return true;
+
+  const label = target.dataset.passwordLabel || "This section";
+  const password = window.prompt(`${label} requires membership or password. Enter password to continue.`);
+  if (password && password.trim().toLowerCase() === PROMPT_ACCESS_PASSWORD) {
+    sessionStorage.setItem(PROMPT_ACCESS_KEY, target.dataset.passwordGate);
+    return true;
+  }
+
+  if (password !== null) {
+    window.alert("Membership or password required to open this section.");
+  }
+  return false;
+}
+
+function hasMemberAccess() {
+  try {
+    const profile = JSON.parse(localStorage.getItem(MEMBER_SIGNUP_KEY) || "null");
+    return Boolean(profile?.email);
+  } catch {
+    return false;
+  }
+}
+
+function getGateUrl(target) {
+  return target?.dataset?.href || target?.getAttribute?.("href") || "";
+}
+
+function setGate(target, gate, label) {
+  if (!target || target.dataset.passwordGate) return;
+  target.dataset.passwordGate = gate;
+  target.dataset.passwordLabel = label;
+  target.dataset.membershipGate = "true";
+  const ariaLabel = target.getAttribute("aria-label") || target.textContent.trim() || label;
+  if (!/membership|password/i.test(ariaLabel)) {
+    target.setAttribute("aria-label", `${ariaLabel} membership or password required`);
+  }
+}
+
+function setupAccessGateTargets() {
+  document.querySelectorAll(".piano-key[href], .piano-key[data-href], .direct-action[href], .site-header nav a[href]").forEach((target) => {
+    const url = getGateUrl(target);
+    if (url.includes("lottomind-stem-studio")) {
+      setGate(target, "studio", "Studio");
+      return;
+    }
+
+    if (url.includes("prompt-lab.html#beat-suno")) {
+      setGate(target, "prompt-lab", "Music Prompt");
+      return;
+    }
+
+    if (url.includes("prompt-lab.html#beat-video")) {
+      setGate(target, "prompt-lab", "Video Prompt");
+      return;
+    }
+
+    if (url.includes("prompt-lab.html")) {
+      setGate(target, "prompt-lab", "Prompt Lab");
+    }
+  });
+}
+
+function setupPasswordGates() {
+  document.querySelectorAll("[data-password-gate]").forEach((target) => {
+    target.setAttribute("title", target.dataset.membershipGate === "true" ? "Membership or password required" : "Password required");
+    target.addEventListener(
+      "click",
+      (event) => {
+        if (confirmPasswordGate(target)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      },
+      true,
+    );
+  });
+}
+
+setupAccessGateTargets();
+setupPasswordGates();
+
 function initPageTransitions() {
   if (reducedMotionQuery.matches) return;
 
@@ -209,18 +295,28 @@ function setupManualPianoHeader() {
   siteHeader.classList.add("manual-instrument-header");
   pianoHeader.classList.add("ultra-piano-header-compact");
   pianoHeader.setAttribute("aria-label", "Compact interactive piano navigation header");
+  setupPianoMoodRing(pianoHeader);
   if (pianoHeader.closest("header") !== siteHeader) {
     siteHeader.insertBefore(pianoHeader, headerMain?.nextSibling || siteHeader.firstChild);
   } else if (headerMain && pianoHeader.previousElementSibling !== headerMain) {
     siteHeader.insertBefore(pianoHeader, headerMain.nextSibling);
   }
 
-  if (document.body.classList.contains("home-page")) {
+  if (
+    document.body.classList.contains("home-page") ||
+    document.body.classList.contains("merch-store-page") ||
+    document.body.classList.contains("prompt-lab-page")
+  ) {
     setupHomePianoHoverToggle(pianoHeader);
   }
 
   const canHoverReveal = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (!canHoverReveal.matches || document.body.classList.contains("home-page") || document.body.classList.contains("merch-store-page")) return;
+  if (
+    !canHoverReveal.matches ||
+    document.body.classList.contains("home-page") ||
+    document.body.classList.contains("merch-store-page") ||
+    document.body.classList.contains("prompt-lab-page")
+  ) return;
 
   let hideRevealTimer = 0;
   const showReveal = () => {
@@ -257,34 +353,257 @@ function setupManualPianoHeader() {
 }
 
 setupManualPianoHeader();
+setupHeaderPadMoodRing();
+
+function getReactivePoint(event) {
+  if (event?.touches?.length) return { x: event.touches[0].clientX, y: event.touches[0].clientY, touch: true };
+  if (event?.changedTouches?.length) return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY, touch: true };
+  if (Number.isFinite(event?.clientX) && Number.isFinite(event?.clientY)) {
+    return { x: event.clientX, y: event.clientY, touch: event.pointerType === "touch" };
+  }
+  return null;
+}
+
+function setupUniversalInteractionReactivity() {
+  const reactiveTargets = document.querySelectorAll([
+    "[data-site-header]",
+    ".guide-header",
+    ".site-header-main",
+    ".ultra-piano-header",
+    "nav",
+    "a[href]",
+    "button",
+    "summary",
+    "[role='button']",
+    "[role='tab']",
+    ".direct-action",
+    ".primary-action",
+    ".secondary-action",
+    ".piano-key",
+    ".stream-event-card",
+    ".product-card",
+    ".feature-tool-card",
+    ".magnetic-card",
+    ".sphere-info-grid article",
+    ".feature-nav-dropdown-grid a",
+    ".gallery-grid article",
+  ].join(","));
+
+  reactiveTargets.forEach((target, index) => {
+    if (target.dataset.interactionReactiveReady === "true") return;
+    target.dataset.interactionReactiveReady = "true";
+    target.classList.add("is-interaction-reactive");
+    target.style.setProperty("--reactive-hue", String((index * 29 + 176) % 360));
+
+    let touchReleaseTimer = 0;
+    const isDisabled = () => target.matches?.(":disabled, [aria-disabled='true']");
+
+    const setReactivePoint = (event, forceTouch = false) => {
+      if (isDisabled()) return;
+      const point = getReactivePoint(event);
+      if (!point) return;
+      const rect = target.getBoundingClientRect();
+      const x = rect.width ? Math.max(0, Math.min(1, (point.x - rect.left) / rect.width)) : 0.5;
+      const y = rect.height ? Math.max(0, Math.min(1, (point.y - rect.top) / rect.height)) : 0.5;
+      const hue = Math.round((((index * 29 + 176) % 360) + x * 104 + y * 46) % 360);
+      target.style.setProperty("--reactive-hue", String(hue));
+      target.style.setProperty("--reactive-x", `${Math.round(x * 100)}%`);
+      target.style.setProperty("--reactive-y", `${Math.round(y * 100)}%`);
+      target.classList.add("is-pointer-reactive");
+      if (point.touch || forceTouch) target.classList.add("is-touch-reactive");
+    };
+
+    const press = (event, forceTouch = false) => {
+      if (isDisabled()) return;
+      if (event?.button && event.button > 0) return;
+      window.clearTimeout(touchReleaseTimer);
+      setReactivePoint(event, forceTouch);
+      target.classList.add("is-pressed");
+      if (forceTouch || event?.pointerType === "touch" || event?.touches?.length) {
+        target.classList.add("is-touch-active");
+      }
+    };
+
+    const release = () => {
+      target.classList.remove("is-pressed");
+      touchReleaseTimer = window.setTimeout(() => {
+        target.classList.remove("is-touch-active", "is-touch-reactive");
+      }, 220);
+    };
+
+    const clearHover = () => {
+      target.classList.remove("is-pointer-reactive", "is-mouse-reactive");
+      release();
+    };
+
+    const mouseFallback = !window.PointerEvent;
+    target.addEventListener("pointerenter", (event) => {
+      if (event.pointerType && event.pointerType !== "mouse") return;
+      setReactivePoint(event);
+      target.classList.add("is-mouse-reactive");
+    });
+    target.addEventListener("pointermove", (event) => {
+      if (event.pointerType && event.pointerType !== "mouse") return;
+      setReactivePoint(event);
+      target.classList.add("is-mouse-reactive");
+    }, { passive: true });
+    target.addEventListener("pointerdown", (event) => press(event));
+    target.addEventListener("pointerup", release);
+    target.addEventListener("pointercancel", clearHover);
+    target.addEventListener("pointerleave", clearHover);
+    if (mouseFallback) {
+      target.addEventListener("mouseenter", (event) => {
+        setReactivePoint(event);
+        target.classList.add("is-mouse-reactive");
+      });
+      target.addEventListener("mousemove", (event) => {
+        setReactivePoint(event);
+        target.classList.add("is-mouse-reactive");
+      }, { passive: true });
+      target.addEventListener("mousedown", (event) => press(event));
+      target.addEventListener("mouseup", release);
+      target.addEventListener("mouseleave", clearHover);
+    }
+    target.addEventListener("touchstart", (event) => press(event, true), { passive: true });
+    target.addEventListener("touchmove", (event) => setReactivePoint(event, true), { passive: true });
+    target.addEventListener("touchend", release, { passive: true });
+    target.addEventListener("touchcancel", clearHover, { passive: true });
+    target.addEventListener("focusin", () => target.classList.add("is-focus-reactive"));
+    target.addEventListener("focusout", () => target.classList.remove("is-focus-reactive", "is-pointer-reactive", "is-touch-reactive"));
+    target.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      press(event);
+    });
+    target.addEventListener("keyup", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      release();
+    });
+  });
+}
+
+setupUniversalInteractionReactivity();
+
+function setupPianoMoodRing(pianoHeader) {
+  const keys = pianoHeader.querySelectorAll(".piano-key");
+  keys.forEach((key, index) => {
+    if (key.dataset.moodRingReady === "true") return;
+    key.dataset.moodRingReady = "true";
+    const baseHue = (index * 31 + 38) % 360;
+    key.style.setProperty("--mood-hue", String(baseHue));
+
+    const updateMood = (event) => {
+      const rect = key.getBoundingClientRect();
+      const x = rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0.5;
+      const y = rect.height ? Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height)) : 0.35;
+      const hue = Math.round((baseHue + x * 96 + y * 42) % 360);
+      key.style.setProperty("--mood-hue", String(hue));
+      key.style.setProperty("--mood-x", `${Math.round(x * 100)}%`);
+      key.style.setProperty("--mood-y", `${Math.round(y * 100)}%`);
+      key.classList.add("is-mood-ring");
+    };
+
+    key.addEventListener("pointerenter", updateMood);
+    key.addEventListener("pointermove", updateMood, { passive: true });
+    key.addEventListener("pointerleave", () => key.classList.remove("is-mood-ring"));
+  });
+}
+
+function setupHeaderPadMoodRing() {
+  if (!siteHeader) return;
+  const pads = siteHeader.querySelectorAll("nav a, .direct-action");
+  pads.forEach((pad, index) => {
+    if (pad.dataset.moodRingReady === "true") return;
+    pad.dataset.moodRingReady = "true";
+    const baseHue = (index * 37 + 112) % 360;
+    pad.style.setProperty("--mood-hue", String(baseHue));
+
+    const updateMood = (event) => {
+      const rect = pad.getBoundingClientRect();
+      const x = rect.width ? Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) : 0.5;
+      const y = rect.height ? Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height)) : 0.35;
+      const hue = Math.round((baseHue + x * 118 + y * 54) % 360);
+      pad.style.setProperty("--mood-hue", String(hue));
+      pad.style.setProperty("--mood-x", `${Math.round(x * 100)}%`);
+      pad.style.setProperty("--mood-y", `${Math.round(y * 100)}%`);
+      pad.classList.add("is-mood-ring");
+    };
+
+    pad.addEventListener("pointerenter", updateMood);
+    pad.addEventListener("pointermove", updateMood, { passive: true });
+    pad.addEventListener("pointerleave", () => pad.classList.remove("is-mood-ring"));
+  });
+}
 
 function setupHomePianoHoverToggle(pianoHeader) {
-  const canHoverToggle = window.matchMedia("(hover: hover) and (pointer: fine)");
-  if (!canHoverToggle.matches || !siteHeader || !pianoHeader) return;
+  if (!siteHeader || !pianoHeader) return;
 
   let revealTimer = 0;
+  const hiddenBodyClass = document.body.classList.contains("prompt-lab-page")
+    ? "is-prompt-piano-hidden"
+    : document.body.classList.contains("merch-store-page")
+      ? "is-merch-piano-hidden"
+      : "is-home-piano-hidden";
   const setHidden = (hidden) => {
     siteHeader.classList.toggle("is-piano-hover-hidden", hidden);
-    document.body.classList.toggle("is-home-piano-hidden", hidden);
+    document.body.classList.toggle(hiddenBodyClass, hidden);
   };
 
-  pianoHeader.addEventListener("pointerenter", () => {
+  const hideFromPiano = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
     window.clearTimeout(revealTimer);
     setHidden(true);
-  });
+  };
 
-  siteHeader.addEventListener("pointerenter", () => {
+  const revealFromHeaderHover = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
     if (!siteHeader.classList.contains("is-piano-hover-hidden")) return;
     window.clearTimeout(revealTimer);
     revealTimer = window.setTimeout(() => setHidden(false), 80);
-  });
+  };
 
-  document.addEventListener("pointermove", (event) => {
+  pianoHeader.addEventListener("pointerenter", hideFromPiano);
+  pianoHeader.addEventListener("mouseenter", hideFromPiano);
+  siteHeader.addEventListener("pointerenter", revealFromHeaderHover);
+  siteHeader.addEventListener("mouseenter", revealFromHeaderHover);
+
+  siteHeader.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      const isHidden = siteHeader.classList.contains("is-piano-hover-hidden");
+      const touchedPiano = pianoHeader.contains(event.target);
+      if (!isHidden && !touchedPiano) return;
+      event.preventDefault();
+      window.clearTimeout(revealTimer);
+      setHidden(!isHidden);
+    },
+    { passive: false },
+  );
+
+  const revealFromTop = (event) => {
     if (!siteHeader.classList.contains("is-piano-hover-hidden")) return;
     const headerMain = siteHeader.querySelector(".site-header-main");
     const comebackLine = (headerMain?.getBoundingClientRect().bottom || 58) + 16;
     if (event.clientY <= comebackLine) setHidden(false);
-  }, { passive: true });
+  };
+
+  const syncHoverFromPointer = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    const pianoRect = pianoHeader.getBoundingClientRect();
+    const isInsidePiano =
+      event.clientX >= pianoRect.left &&
+      event.clientX <= pianoRect.right &&
+      event.clientY >= pianoRect.top &&
+      event.clientY <= pianoRect.bottom;
+    if (isInsidePiano && !siteHeader.classList.contains("is-piano-hover-hidden")) {
+      hideFromPiano(event);
+      return;
+    }
+    revealFromTop(event);
+  };
+
+  document.addEventListener("pointermove", syncHoverFromPointer, { passive: true });
+  document.addEventListener("mousemove", syncHoverFromPointer, { passive: true });
 
   siteHeader.addEventListener("focusin", () => setHidden(false));
 }
@@ -1038,6 +1357,7 @@ function setupInstrumentKeyboard() {
   }
 
   function routeInstrumentKey(key) {
+    if (!confirmPasswordGate(key)) return;
     const action = key.dataset.action;
     if (action === "toggle-scale") {
       playScale(key);
