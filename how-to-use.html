@@ -179,7 +179,7 @@
         right: 0;
         left: 0;
         z-index: 21;
-        height: 22px;
+        height: 78px;
         pointer-events: none;
       }
 
@@ -252,6 +252,138 @@
       .guide-button {
         color: #100e05;
         background: linear-gradient(135deg, #fff2a8, #d4af37 55%, #87ffb3);
+      }
+
+      .guide-header {
+        grid-template-columns: minmax(190px, auto) minmax(0, 1fr) auto;
+        gap: clamp(10px, 2vw, 22px);
+        padding: 10px clamp(16px, 4vw, 44px);
+        border-bottom: 1px solid rgba(41, 247, 255, 0.28);
+        background:
+          radial-gradient(circle at 18% 26%, rgba(41, 247, 255, 0.16), transparent 18rem),
+          radial-gradient(circle at 78% 20%, rgba(255, 223, 117, 0.14), transparent 18rem),
+          linear-gradient(180deg, rgba(0, 2, 7, 0.98), rgba(4, 10, 14, 0.95) 52%, rgba(8, 30, 36, 0.86));
+        box-shadow:
+          inset 0 -1px 0 rgba(41, 247, 255, 0.2),
+          0 18px 46px rgba(0, 0, 0, 0.56);
+        isolation: isolate;
+        backdrop-filter: blur(16px) saturate(1.12);
+      }
+
+      .guide-nav {
+        position: relative;
+        justify-self: center;
+        width: min(100%, 760px);
+        align-items: center;
+        gap: 7px;
+        justify-content: center;
+        padding: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(41, 247, 255, 0.32);
+        border-radius: 22px;
+        background:
+          linear-gradient(90deg, rgba(10, 60, 73, 0.78), rgba(10, 22, 28, 0.92) 48%, rgba(79, 62, 18, 0.64)),
+          repeating-linear-gradient(0deg, rgba(41, 247, 255, 0.09) 0 1px, transparent 1px 7px);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+          inset 0 -20px 48px rgba(0, 0, 0, 0.34),
+          0 0 28px rgba(41, 247, 255, 0.2);
+      }
+
+      .guide-nav::before {
+        position: absolute;
+        inset: 8px 18px;
+        content: "";
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, transparent, rgba(41, 247, 255, 0.26), transparent),
+          linear-gradient(0deg, rgba(255, 223, 117, 0.14), transparent 62%);
+        opacity: 0.65;
+        transform: skewX(-16deg);
+      }
+
+      .guide-nav a {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        column-gap: 0.44rem;
+        row-gap: 0.03rem;
+        min-width: clamp(6.8rem, 10vw, 8.1rem);
+        min-height: 46px;
+        justify-content: start;
+        padding: 0.48rem 1.45rem 0.46rem 0.52rem;
+        border-color: rgba(255, 223, 117, 0.44);
+        border-radius: 13px;
+        color: #fff7bf;
+        background:
+          radial-gradient(circle at var(--reactive-x, 24%) var(--reactive-y, 20%), hsla(var(--reactive-hue, 47), 96%, 66%, 0.22), transparent 42%),
+          linear-gradient(180deg, rgba(58, 75, 73, 0.8), rgba(6, 18, 22, 0.94) 62%, rgba(0, 0, 0, 0.92));
+        font-size: 0.7rem;
+        line-height: 1.05;
+        letter-spacing: 0.03em;
+        text-align: left;
+        box-shadow:
+          inset 0.16rem 0.18rem 0.55rem rgba(255, 255, 255, 0.13),
+          inset -0.5rem -0.52rem 0.95rem rgba(0, 0, 0, 0.55),
+          0 0.18rem 0 rgba(0, 0, 0, 0.54),
+          0 0 1.1rem rgba(41, 247, 255, 0.16);
+      }
+
+      .guide-nav a::before {
+        display: inline-grid;
+        grid-row: 1 / 3;
+        width: 1.45rem;
+        height: 1.45rem;
+        place-items: center;
+        border: 1px solid rgba(255, 246, 184, 0.46);
+        border-radius: 50%;
+        content: attr(data-icon);
+        color: #04130f;
+        background:
+          radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.72), transparent 28%),
+          linear-gradient(135deg, #2bf7ff, #d4af37 58%, #fff2a8);
+        font-family: var(--display);
+        font-size: 0.46rem;
+        font-weight: 950;
+        letter-spacing: 0;
+        box-shadow: 0 0 0.9rem rgba(41, 247, 255, 0.28);
+      }
+
+      .guide-nav a::after {
+        position: absolute;
+        right: 0.48rem;
+        bottom: 0.18rem;
+        min-width: 1.05rem;
+        padding: 0.02rem 0.24rem;
+        border: 1px solid rgba(41, 247, 255, 0.24);
+        border-radius: 999px;
+        content: attr(data-note);
+        color: #dffcff;
+        background: rgba(0, 0, 0, 0.34);
+        font-size: 0.52rem;
+        line-height: 1.1;
+        text-align: center;
+        box-shadow: inset 0 0 0.6rem rgba(41, 247, 255, 0.12);
+      }
+
+      .guide-nav a:is(:hover, :focus-visible, .is-pointer-reactive, .is-touch-active) {
+        border-color: rgba(255, 240, 137, 0.86);
+        background:
+          radial-gradient(circle at var(--reactive-x, 50%) var(--reactive-y, 28%), hsla(var(--reactive-hue, 47), 98%, 68%, 0.34), transparent 48%),
+          linear-gradient(180deg, rgba(66, 92, 82, 0.86), rgba(8, 28, 32, 0.96) 56%, rgba(34, 24, 6, 0.94));
+        transform: translateY(-2px);
+      }
+
+      .guide-button {
+        min-height: 48px;
+        padding: 0 20px;
+        border-color: rgba(255, 246, 184, 0.58);
+        border-radius: 999px;
+        box-shadow:
+          inset 0.2rem 0.2rem 0.8rem rgba(255, 255, 255, 0.3),
+          0 0 1.3rem rgba(135, 255, 179, 0.22);
       }
 
       .home-signal-marquee {
@@ -671,6 +803,7 @@
       }
 
       .plain-copy:hover .burst-heading,
+      .manual-card:hover .manual-burst-heading,
       .burst-heading:hover,
       .burst-heading:focus,
       .burst-heading:focus-visible {
@@ -684,6 +817,7 @@
       }
 
       .plain-copy:hover .burst-heading::before,
+      .manual-card:hover .manual-burst-heading::before,
       .burst-heading:hover::before,
       .burst-heading:focus::before,
       .burst-heading:focus-visible::before {
@@ -691,6 +825,7 @@
       }
 
       .plain-copy:hover .burst-heading::after,
+      .manual-card:hover .manual-burst-heading::after,
       .burst-heading:hover::after,
       .burst-heading:focus::after,
       .burst-heading:focus-visible::after {
@@ -861,6 +996,11 @@
         display: grid;
         gap: 18px;
         padding: clamp(22px, 4vw, 38px);
+      }
+
+      .manual-burst-heading {
+        z-index: 1;
+        max-width: 10ch;
       }
 
       .manual-preview {
@@ -1068,10 +1208,12 @@
         .guide-puck-field span,
         .home-signal-marquee-track,
         .plain-copy:hover .burst-heading::before,
+        .manual-card:hover .manual-burst-heading::before,
         .burst-heading:hover::before,
         .burst-heading:focus::before,
         .burst-heading:focus-visible::before,
         .plain-copy:hover .burst-heading::after,
+        .manual-card:hover .manual-burst-heading::after,
         .burst-heading:hover::after,
         .burst-heading:focus::after,
         .burst-heading:focus-visible::after {
@@ -1098,7 +1240,12 @@
         }
 
         .guide-nav {
+          width: 100%;
           justify-content: flex-start;
+        }
+
+        .guide-nav a {
+          flex: 1 1 10rem;
         }
 
         .hero,
@@ -1118,7 +1265,17 @@
         }
 
         .guide-nav {
-          display: none;
+          display: flex;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          overflow-x: auto;
+          padding: 7px;
+          scrollbar-width: thin;
+        }
+
+        .guide-nav a {
+          flex: 0 0 8.4rem;
+          min-width: 8.4rem;
         }
 
         .section {
@@ -1166,11 +1323,11 @@
         <span>LottoMind&trade;</span>
       </a>
       <nav class="guide-nav" aria-label="LottoMind guide navigation">
-        <a href="#what">What It Is</a>
-        <a href="#how">How To Use</a>
-        <a href="#features">Features</a>
-        <a href="#manual">Manual</a>
-        <a href="#faq">FAQ</a>
+        <a href="#what" data-icon="LM" data-note="C">What It Is</a>
+        <a href="#how" data-icon="GO" data-note="D">How To Use</a>
+        <a href="#features" data-icon="FX" data-note="E">Features</a>
+        <a href="#manual" data-icon="MN" data-note="F">Manual</a>
+        <a href="#faq" data-icon="AQ" data-note="G">FAQ</a>
       </nav>
       <a
         class="guide-button"
@@ -1341,7 +1498,11 @@
         <div class="manual-band">
           <article class="manual-card">
             <p class="eyebrow">Manual Download</p>
-            <h2>Simple User Manual + Quick Start Guide.</h2>
+            <h2
+              class="burst-heading manual-burst-heading"
+              tabindex="0"
+              data-burst="Simple User Manual + Quick Start Guide."
+            >Simple User Manual + Quick Start Guide.</h2>
             <p>
               Download the attached beginner manual for the full walkthrough: what
               LottoMind&trade; is, what it is not, the main buttons, Dream Oracle&trade;, generator,
@@ -1448,25 +1609,57 @@
         const accessPassword = "LottoMind2026";
         const header = document.querySelector("[data-guide-header]");
         const sensor = document.querySelector("[data-guide-header-sensor]");
-        const canHover = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
         let lastHeaderReveal = 0;
+        let lastHeaderHide = 0;
 
-        if (header && sensor && canHover) {
-          const hideHeader = () => {
+        if (header && sensor) {
+          const hideHeader = (event) => {
+            if (event?.pointerType && event.pointerType !== "mouse") return;
             if (Date.now() - lastHeaderReveal < 700) return;
+            lastHeaderHide = Date.now();
             document.body.classList.add("is-guide-header-hidden");
           };
-          const showHeader = () => {
+          const showHeader = (event) => {
+            if (event?.pointerType && event.pointerType !== "mouse") return;
             lastHeaderReveal = Date.now();
             document.body.classList.remove("is-guide-header-hidden");
           };
 
-          header.addEventListener("pointerenter", hideHeader);
-          sensor.addEventListener("pointerenter", showHeader);
+          header.addEventListener("pointerenter", hideHeader, { passive: true });
+          header.addEventListener("pointermove", hideHeader, { passive: true });
+          header.addEventListener("mouseenter", hideHeader);
+          sensor.addEventListener("pointerenter", showHeader, { passive: true });
+          sensor.addEventListener("pointermove", showHeader, { passive: true });
+          sensor.addEventListener("pointerover", showHeader, { passive: true });
+          sensor.addEventListener("mouseenter", showHeader);
+          sensor.addEventListener("mousemove", showHeader);
+          sensor.addEventListener("mouseover", showHeader);
+
           header.addEventListener("focusin", showHeader);
+          header.addEventListener(
+            "pointerdown",
+            (event) => {
+              if (event.pointerType !== "touch") return;
+              if (event.target.closest("a, button")) return;
+              event.preventDefault();
+              document.body.classList.toggle("is-guide-header-hidden");
+            },
+            { passive: false },
+          );
+          sensor.addEventListener(
+            "pointerdown",
+            (event) => {
+              if (event.pointerType !== "touch") return;
+              event.preventDefault();
+              showHeader();
+            },
+            { passive: false },
+          );
           document.addEventListener("pointermove", (event) => {
+            if (event?.pointerType && event.pointerType !== "mouse") return;
             if (!document.body.classList.contains("is-guide-header-hidden")) return;
-            if (event.clientY <= 24) showHeader();
+            if (Date.now() - lastHeaderHide < 320) return;
+            if (event.clientY <= 78) showHeader();
           }, { passive: true });
         }
 

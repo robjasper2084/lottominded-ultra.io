@@ -302,19 +302,14 @@ function setupManualPianoHeader() {
     siteHeader.insertBefore(pianoHeader, headerMain.nextSibling);
   }
 
-  if (
-    document.body.classList.contains("home-page") ||
-    document.body.classList.contains("merch-store-page") ||
-    document.body.classList.contains("prompt-lab-page")
-  ) {
-    setupHomePianoHoverToggle(pianoHeader);
-  }
+  setupHomePianoHoverToggle(pianoHeader);
 
   const canHoverReveal = window.matchMedia("(hover: hover) and (pointer: fine)");
   if (
     !canHoverReveal.matches ||
     document.body.classList.contains("home-page") ||
     document.body.classList.contains("merch-store-page") ||
+    document.body.classList.contains("live-events-page") ||
     document.body.classList.contains("prompt-lab-page")
   ) return;
 
@@ -396,6 +391,8 @@ function setupUniversalInteractionReactivity() {
     target.style.setProperty("--reactive-hue", String((index * 29 + 176) % 360));
 
     let touchReleaseTimer = 0;
+    let sphereReleaseTimer = 0;
+    const isSphereNavButton = target.matches?.(".home-sphere-header nav a");
     const isDisabled = () => target.matches?.(":disabled, [aria-disabled='true']");
 
     const setReactivePoint = (event, forceTouch = false) => {
@@ -417,6 +414,11 @@ function setupUniversalInteractionReactivity() {
       if (isDisabled()) return;
       if (event?.button && event.button > 0) return;
       window.clearTimeout(touchReleaseTimer);
+      if (isSphereNavButton) {
+        window.clearTimeout(sphereReleaseTimer);
+        target.classList.remove("is-sphere-released");
+        target.classList.add("is-sphere-pressed");
+      }
       setReactivePoint(event, forceTouch);
       target.classList.add("is-pressed");
       if (forceTouch || event?.pointerType === "touch" || event?.touches?.length) {
@@ -425,7 +427,16 @@ function setupUniversalInteractionReactivity() {
     };
 
     const release = () => {
+      const wasSpherePressed = isSphereNavButton && target.classList.contains("is-sphere-pressed");
       target.classList.remove("is-pressed");
+      target.classList.remove("is-sphere-pressed");
+      if (wasSpherePressed) {
+        target.classList.add("is-sphere-released");
+        window.clearTimeout(sphereReleaseTimer);
+        sphereReleaseTimer = window.setTimeout(() => {
+          target.classList.remove("is-sphere-released");
+        }, 320);
+      }
       touchReleaseTimer = window.setTimeout(() => {
         target.classList.remove("is-touch-active", "is-touch-reactive");
       }, 220);
@@ -483,6 +494,60 @@ function setupUniversalInteractionReactivity() {
 
 setupUniversalInteractionReactivity();
 
+function setupPromptCardSpheres() {
+  const cards = document.querySelectorAll("[data-prompt-sphere-card]");
+  if (!cards.length) return;
+
+  cards.forEach((card) => {
+    if (card.dataset.promptSphereReady === "true") return;
+    const field = card.querySelector("[data-prompt-sphere-field]");
+    const balls = Array.from(card.querySelectorAll(".prompt-card-sphere-ball"));
+    if (!field || !balls.length) return;
+    card.dataset.promptSphereReady = "true";
+
+    const moveBalls = (event) => {
+      const point = getReactivePoint(event);
+      if (!point) return;
+      const rect = field.getBoundingClientRect();
+      const px = rect.width ? Math.max(0, Math.min(1, (point.x - rect.left) / rect.width)) : 0.5;
+      const py = rect.height ? Math.max(0, Math.min(1, (point.y - rect.top) / rect.height)) : 0.5;
+      card.classList.add("is-sphere-reactive");
+      field.style.setProperty("--sphere-pointer-x", `${Math.round(px * 100)}%`);
+      field.style.setProperty("--sphere-pointer-y", `${Math.round(py * 100)}%`);
+
+      balls.forEach((ball, index) => {
+        const bx = Number.parseFloat(ball.dataset.ballX || ball.style.getPropertyValue("--ball-x")) / 100 || 0.5;
+        const by = Number.parseFloat(ball.dataset.ballY || ball.style.getPropertyValue("--ball-y")) / 100 || 0.5;
+        const dx = (px - bx) * (index % 2 ? -34 : 42);
+        const dy = (py - by) * (index % 2 ? 30 : -26);
+        const energy = Math.max(0.2, 1 - Math.hypot(px - bx, py - by));
+        ball.style.setProperty("--ball-dx", `${dx.toFixed(1)}px`);
+        ball.style.setProperty("--ball-dy", `${dy.toFixed(1)}px`);
+        ball.style.setProperty("--ball-energy", energy.toFixed(2));
+      });
+    };
+
+    const resetBalls = () => {
+      card.classList.remove("is-sphere-reactive");
+      balls.forEach((ball) => {
+        ball.style.setProperty("--ball-dx", "0px");
+        ball.style.setProperty("--ball-dy", "0px");
+        ball.style.setProperty("--ball-energy", "0");
+      });
+    };
+
+    card.addEventListener("pointermove", moveBalls, { passive: true });
+    card.addEventListener("pointerenter", moveBalls, { passive: true });
+    card.addEventListener("pointerleave", resetBalls, { passive: true });
+    card.addEventListener("touchstart", moveBalls, { passive: true });
+    card.addEventListener("touchmove", moveBalls, { passive: true });
+    card.addEventListener("touchend", resetBalls, { passive: true });
+    card.addEventListener("touchcancel", resetBalls, { passive: true });
+  });
+}
+
+setupPromptCardSpheres();
+
 function setupPianoMoodRing(pianoHeader) {
   const keys = pianoHeader.querySelectorAll(".piano-key");
   keys.forEach((key, index) => {
@@ -536,13 +601,26 @@ function setupHeaderPadMoodRing() {
 
 function setupHomePianoHoverToggle(pianoHeader) {
   if (!siteHeader || !pianoHeader) return;
+  if (siteHeader.dataset.pianoHoverToggleReady === "true") return;
+  siteHeader.dataset.pianoHoverToggleReady = "true";
 
   let revealTimer = 0;
   const hiddenBodyClass = document.body.classList.contains("prompt-lab-page")
     ? "is-prompt-piano-hidden"
     : document.body.classList.contains("merch-store-page")
       ? "is-merch-piano-hidden"
-      : "is-home-piano-hidden";
+      : document.body.classList.contains("live-events-page")
+        ? "is-live-piano-hidden"
+        : document.body.classList.contains("feature-console-page")
+          ? "is-feature-piano-hidden"
+          : document.body.classList.contains("manual-page")
+            ? "is-manual-piano-hidden"
+            : "is-home-piano-hidden";
+  const sensor = document.createElement("div");
+  sensor.className = "manual-header-hover-sensor";
+  sensor.setAttribute("aria-hidden", "true");
+  document.body.append(sensor);
+
   const setHidden = (hidden) => {
     siteHeader.classList.toggle("is-piano-hover-hidden", hidden);
     document.body.classList.toggle(hiddenBodyClass, hidden);
@@ -565,6 +643,12 @@ function setupHomePianoHoverToggle(pianoHeader) {
   pianoHeader.addEventListener("mouseenter", hideFromPiano);
   siteHeader.addEventListener("pointerenter", revealFromHeaderHover);
   siteHeader.addEventListener("mouseenter", revealFromHeaderHover);
+  sensor.addEventListener("pointerenter", revealFromHeaderHover, { passive: true });
+  sensor.addEventListener("pointermove", revealFromHeaderHover, { passive: true });
+  sensor.addEventListener("pointerover", revealFromHeaderHover, { passive: true });
+  sensor.addEventListener("mouseenter", revealFromHeaderHover);
+  sensor.addEventListener("mousemove", revealFromHeaderHover);
+  sensor.addEventListener("mouseover", revealFromHeaderHover);
 
   siteHeader.addEventListener(
     "pointerdown",
@@ -580,10 +664,21 @@ function setupHomePianoHoverToggle(pianoHeader) {
     { passive: false },
   );
 
+  sensor.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      event.preventDefault();
+      window.clearTimeout(revealTimer);
+      setHidden(false);
+    },
+    { passive: false },
+  );
+
   const revealFromTop = (event) => {
     if (!siteHeader.classList.contains("is-piano-hover-hidden")) return;
     const headerMain = siteHeader.querySelector(".site-header-main");
-    const comebackLine = (headerMain?.getBoundingClientRect().bottom || 58) + 16;
+    const comebackLine = Math.max((headerMain?.getBoundingClientRect().bottom || 58) + 16, 78);
     if (event.clientY <= comebackLine) setHidden(false);
   };
 
@@ -661,6 +756,191 @@ function setupHomeHeaderHoverReveal() {
 }
 
 setupHomeHeaderHoverReveal();
+
+function setupHomeSphereHeaderToggle() {
+  if (!siteHeader) return;
+  if (!document.body.classList.contains("home-page") || !document.body.classList.contains("has-sphere-header")) return;
+  if (siteHeader.dataset.sphereHeaderToggleReady === "true") return;
+  siteHeader.dataset.sphereHeaderToggleReady = "true";
+
+  const sensor = document.createElement("div");
+  sensor.className = "home-sphere-header-hover-sensor";
+  sensor.setAttribute("aria-hidden", "true");
+  document.body.append(sensor);
+
+  let toggleTimer = 0;
+  let lastRevealAt = 0;
+  const setHidden = (hidden) => {
+    siteHeader.classList.toggle("is-sphere-hover-hidden", hidden);
+    document.body.classList.toggle("is-sphere-header-hidden", hidden);
+  };
+
+  const hideHeader = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    if (Date.now() - lastRevealAt < 700) return;
+    window.clearTimeout(toggleTimer);
+    toggleTimer = window.setTimeout(() => {
+      if (Date.now() - lastRevealAt < 700) return;
+      if (siteHeader.contains(document.activeElement)) return;
+      setHidden(true);
+    }, 220);
+  };
+
+  const revealHeader = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    lastRevealAt = Date.now();
+    window.clearTimeout(toggleTimer);
+    setHidden(false);
+  };
+
+  siteHeader.addEventListener("pointerenter", hideHeader, { passive: true });
+  siteHeader.addEventListener("pointermove", hideHeader, { passive: true });
+  siteHeader.addEventListener("mouseenter", hideHeader);
+  sensor.addEventListener("pointerenter", revealHeader, { passive: true });
+  sensor.addEventListener("pointermove", revealHeader, { passive: true });
+  sensor.addEventListener("pointerover", revealHeader, { passive: true });
+  sensor.addEventListener("mouseenter", revealHeader);
+  sensor.addEventListener("mousemove", revealHeader);
+  sensor.addEventListener("mouseover", revealHeader);
+
+  siteHeader.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      if (event.target.closest("a, button")) return;
+      event.preventDefault();
+      window.clearTimeout(toggleTimer);
+      setHidden(!siteHeader.classList.contains("is-sphere-hover-hidden"));
+    },
+    { passive: false },
+  );
+
+  sensor.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      event.preventDefault();
+      window.clearTimeout(toggleTimer);
+      setHidden(false);
+    },
+    { passive: false },
+  );
+
+  const syncFromPointer = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    if (siteHeader.classList.contains("is-sphere-hover-hidden")) {
+      if (event.clientY <= 78) revealHeader(event);
+      return;
+    }
+    const rect = siteHeader.getBoundingClientRect();
+    const isInside =
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom;
+    if (isInside) hideHeader(event);
+  };
+
+  document.addEventListener("pointermove", syncFromPointer, { passive: true });
+  document.addEventListener("mousemove", syncFromPointer, { passive: true });
+  siteHeader.addEventListener("focusin", () => setHidden(false));
+}
+
+setupHomeSphereHeaderToggle();
+
+function setupPlainSiteHeaderHoverToggle() {
+  if (!siteHeader) return;
+  if (document.body.classList.contains("has-manual-instrument-header")) return;
+  if (document.body.classList.contains("has-sphere-header")) return;
+  if (siteHeader.dataset.plainHeaderHoverToggleReady === "true") return;
+  siteHeader.dataset.plainHeaderHoverToggleReady = "true";
+
+  document.body.classList.add("has-universal-header-hover-reveal");
+  const sensor = document.createElement("div");
+  sensor.className = "universal-header-hover-sensor";
+  sensor.setAttribute("aria-hidden", "true");
+  document.body.append(sensor);
+
+  let toggleTimer = 0;
+  let lastRevealAt = 0;
+  const setHidden = (hidden) => {
+    siteHeader.classList.toggle("is-universal-header-hidden", hidden);
+    document.body.classList.toggle("is-universal-header-hidden", hidden);
+  };
+
+  const hideHeader = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    if (Date.now() - lastRevealAt < 700) return;
+    window.clearTimeout(toggleTimer);
+    toggleTimer = window.setTimeout(() => {
+      if (Date.now() - lastRevealAt < 700) return;
+      if (siteHeader.contains(document.activeElement)) return;
+      setHidden(true);
+    }, 220);
+  };
+
+  const revealHeader = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse") return;
+    lastRevealAt = Date.now();
+    window.clearTimeout(toggleTimer);
+    setHidden(false);
+  };
+
+  siteHeader.addEventListener("pointerenter", hideHeader, { passive: true });
+  siteHeader.addEventListener("pointermove", hideHeader, { passive: true });
+  siteHeader.addEventListener("mouseenter", hideHeader);
+  sensor.addEventListener("pointerenter", revealHeader, { passive: true });
+  sensor.addEventListener("pointermove", revealHeader, { passive: true });
+  sensor.addEventListener("pointerover", revealHeader, { passive: true });
+  sensor.addEventListener("mouseenter", revealHeader);
+  sensor.addEventListener("mousemove", revealHeader);
+  sensor.addEventListener("mouseover", revealHeader);
+
+  siteHeader.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      if (event.target.closest("a, button")) return;
+      event.preventDefault();
+      window.clearTimeout(toggleTimer);
+      setHidden(!siteHeader.classList.contains("is-universal-header-hidden"));
+    },
+    { passive: false },
+  );
+
+  sensor.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (event.pointerType !== "touch") return;
+      event.preventDefault();
+      window.clearTimeout(toggleTimer);
+      setHidden(false);
+    },
+    { passive: false },
+  );
+
+  document.addEventListener(
+    "pointermove",
+    (event) => {
+      if (event?.pointerType && event.pointerType !== "mouse") return;
+      if (siteHeader.classList.contains("is-universal-header-hidden")) {
+        if (event.clientY <= 78) revealHeader(event);
+        return;
+      }
+      const rect = siteHeader.getBoundingClientRect();
+      const isInside =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+      if (isInside) hideHeader(event);
+    },
+    { passive: true },
+  );
+  siteHeader.addEventListener("focusin", () => setHidden(false));
+}
+
+setupPlainSiteHeaderHoverToggle();
 
 if (siteSoundtrack) {
   siteSoundtrack.loop = false;
