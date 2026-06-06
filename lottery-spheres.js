@@ -12,6 +12,11 @@
   const pick6Output = document.querySelector("[data-sphere-pick6]");
   const pick3Output = document.querySelector("[data-sphere-pick3]");
   const pick4Output = document.querySelector("[data-sphere-pick4]");
+  const audioGate = document.querySelector("[data-sphere-audio-gate]");
+  const audioStartButton = document.querySelector("[data-sphere-audio-start]");
+  const audioSkipButton = document.querySelector("[data-sphere-audio-skip]");
+  const audioStatus = document.querySelector("[data-sphere-audio-status]");
+  const sphereSoundtrack = document.querySelector("[data-sphere-soundtrack]");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const sphereTheme = stage.dataset.spheresTheme || "default";
@@ -42,6 +47,11 @@
   let audioPulse = 0;
   let audioPulseUntil = 0;
   let audioPulseIndex = 0;
+  let audioContext = null;
+  let audioAnalyser = null;
+  let audioData = null;
+  let audioSource = null;
+  let lastBeatPulseAt = 0;
   let moveTriggerCount = 0;
   let lastMovePoint = null;
   let lastMoveTriggerAt = 0;
@@ -304,7 +314,87 @@
     }
   }
 
+  function setAudioGateOpen(open) {
+    if (!audioGate) return;
+    audioGate.hidden = !open;
+    audioGate.classList.toggle("is-hidden", !open);
+  }
+
+  function setupSphereAudioAnalyzer() {
+    if (!sphereSoundtrack || audioAnalyser) return Boolean(audioAnalyser);
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) {
+      if (audioStatus) audioStatus.textContent = "Audio reactivity is not available in this browser.";
+      return false;
+    }
+    audioContext = audioContext || new AudioContextCtor();
+    audioAnalyser = audioContext.createAnalyser();
+    audioAnalyser.fftSize = 256;
+    audioAnalyser.smoothingTimeConstant = 0.78;
+    audioData = new Uint8Array(audioAnalyser.frequencyBinCount);
+    if (!audioSource) {
+      audioSource = audioContext.createMediaElementSource(sphereSoundtrack);
+      audioSource.connect(audioAnalyser);
+      audioAnalyser.connect(audioContext.destination);
+    }
+    return true;
+  }
+
+  async function startSphereAudio() {
+    if (!sphereSoundtrack) return;
+    try {
+      setupSphereAudioAnalyzer();
+      if (audioContext?.state === "suspended") await audioContext.resume();
+      sphereSoundtrack.volume = 0.58;
+      await sphereSoundtrack.play();
+      setAudioGateOpen(false);
+      stage.classList.add("has-sphere-soundtrack");
+      if (audioStatus) audioStatus.textContent = "";
+    } catch (error) {
+      if (audioStatus) audioStatus.textContent = "Tap again to allow the sphere soundtrack.";
+    }
+  }
+
+  function updateSphereAudioPulse(time) {
+    if (!audioAnalyser || !audioData || sphereSoundtrack?.paused || reduceMotion.matches) return;
+    audioAnalyser.getByteFrequencyData(audioData);
+    let bassTotal = 0;
+    let bodyTotal = 0;
+    let bassCount = 0;
+    let bodyCount = 0;
+
+    audioData.forEach((value, index) => {
+      if (index >= 2 && index <= 12) {
+        bassTotal += value;
+        bassCount += 1;
+      }
+      if (index > 12 && index <= 32) {
+        bodyTotal += value;
+        bodyCount += 1;
+      }
+    });
+
+    const bass = bassTotal / Math.max(1, bassCount) / 255;
+    const body = bodyTotal / Math.max(1, bodyCount) / 255;
+    const nextPulse = clamp01(bass * 0.95 + body * 0.34);
+    if (nextPulse > 0.1) {
+      audioPulse = Math.max(audioPulse * 0.9, nextPulse);
+      audioPulseUntil = performance.now() + 260;
+    }
+
+    if (nextPulse > 0.34 && time - lastBeatPulseAt > 150) {
+      lastBeatPulseAt = time;
+      audioPulseIndex += 1;
+      balls.forEach((ball, index) => {
+        const angle = (index / Math.max(1, balls.length)) * Math.PI * 2 + audioPulseIndex * 0.19;
+        ball.vx += Math.cos(angle) * nextPulse * (ball.asset ? 0.95 : 0.42);
+        ball.vy += Math.sin(angle) * nextPulse * (ball.asset ? 0.82 : 0.36);
+      });
+    }
+  }
+
   function render(time) {
+    updateSphereAudioPulse(time);
     const pulse = reduceMotion.matches ? 0 : audioPulse;
     if (audioPulse > 0.004) audioPulse *= time < audioPulseUntil ? 0.94 : 0.82;
     if (audioPulse < 0.004) audioPulse = 0;
@@ -402,6 +492,17 @@
   stage.addEventListener("touchmove", updatePointer, { passive: true });
   stage.addEventListener("touchend", releasePointer, { passive: true });
   stage.addEventListener("touchcancel", releasePointer, { passive: true });
+
+  if (sphereSoundtrack && audioGate) setAudioGateOpen(true);
+  audioStartButton?.addEventListener("click", startSphereAudio);
+  audioSkipButton?.addEventListener("click", () => setAudioGateOpen(false));
+  sphereSoundtrack?.addEventListener("play", () => {
+    setAudioGateOpen(false);
+    stage.classList.add("has-sphere-soundtrack");
+  });
+  sphereSoundtrack?.addEventListener("pause", () => {
+    stage.classList.remove("has-sphere-soundtrack");
+  });
 
   window.addEventListener("lottomind:beat-energy", (event) => {
     const nextPulse = clamp01(event.detail?.energy);

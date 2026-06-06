@@ -10,9 +10,22 @@
     <title>LOTTOMINDED ULTRA | Featured Stream Events</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=unified-header-hover-3" />
+    <link rel="stylesheet" href="./styles.css?v=audio-artlines-2" />
   </head>
-  <body class="live-events-page">
+  <body class="live-events-page has-stream-startup-audio">
+    <aside class="stream-startup-audio" data-stream-startup-audio aria-label="Featured Stream Events startup music">
+      <div class="stream-startup-audio-panel" role="dialog" aria-modal="true" aria-labelledby="streamStartupTitle">
+        <button class="stream-startup-close" type="button" data-stream-startup-close aria-label="Enter events without music">X</button>
+        <p class="eyebrow">Featured Stream Events</p>
+        <h2 id="streamStartupTitle">Start the event room music.</h2>
+        <p>Play the featured stream soundtrack while browsing live shows, comedy, festivals, and replays.</p>
+        <div class="stream-startup-actions">
+          <button class="primary-action" type="button" data-stream-startup-play>Start Music</button>
+          <button class="secondary-action" type="button" data-stream-startup-close>Enter Events</button>
+        </div>
+        <p class="stream-startup-status" data-stream-startup-status aria-live="polite"></p>
+      </div>
+    </aside>
     <header class="site-header home-like-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
@@ -90,7 +103,10 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=unified-header-hover-3" defer></script>
-    <script src="./live-events.js?v=replay-video-gallery-hover-1" defer></script>
+    <audio id="streamEventsSoundtrack" preload="auto" data-stream-events-soundtrack>
+      <source src="./assets/audio/featured-stream-events-start.mp3?v=stream-events-startup-1" type="audio/mpeg" />
+    </audio>
+    <script src="./site.js?v=audio-artlines-2" defer></script>
+    <script src="./live-events.js?v=audio-artlines-2" defer></script>
   </body>
 </html>

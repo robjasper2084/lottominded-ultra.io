@@ -44,6 +44,7 @@ let gamePipShouldResumeSoundtrack = false;
 let gamePipResumeFromPage = false;
 let gamePipResumeFromHover = false;
 let gamePipDragState = null;
+let activePasswordGatePanel = null;
 
 function setupNavKineticLabels() {
   document.querySelectorAll(".site-header nav a").forEach((link) => {
@@ -144,20 +145,91 @@ function setupFeatureDropdown() {
 
 setupFeatureDropdown();
 
-function confirmPasswordGate(target) {
-  if (!target?.dataset?.passwordGate) return true;
-  if (sessionStorage.getItem(PROMPT_ACCESS_KEY) === target.dataset.passwordGate) return true;
-  if (target.dataset.membershipGate === "true" && hasMemberAccess()) return true;
+function openPasswordGatePanel(target, onAllowed) {
+  if (!target?.dataset?.passwordGate) return;
+  activePasswordGatePanel?.remove();
 
   const label = target.dataset.passwordLabel || "This section";
-  const password = window.prompt(`${label} requires membership or password. Enter password to continue.`);
+  const panel = document.createElement("div");
+  panel.className = "password-gate-modal";
+  panel.setAttribute("role", "dialog");
+  panel.setAttribute("aria-modal", "true");
+  panel.setAttribute("aria-label", `${label} membership or password required`);
+  panel.innerHTML = `
+    <form class="password-gate-panel">
+      <button class="password-gate-close" type="button" aria-label="Close password panel">X</button>
+      <p class="eyebrow">Members Only</p>
+      <h2>${label} needs access.</h2>
+      <p>Enter the member password or sign up before opening this section.</p>
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" />
+      </label>
+      <div class="password-gate-actions">
+        <button class="primary-action" type="submit">Unlock</button>
+        <a class="secondary-action" href="./how-to-use.html#manual">Sign Up</a>
+      </div>
+      <p class="password-gate-status" aria-live="polite"></p>
+    </form>
+  `;
+
+  const close = () => {
+    panel.remove();
+    if (activePasswordGatePanel === panel) activePasswordGatePanel = null;
+  };
+  const status = panel.querySelector(".password-gate-status");
+  const input = panel.querySelector("input");
+
+  panel.addEventListener("click", (event) => {
+    if (event.target === panel) close();
+  });
+  panel.querySelector(".password-gate-close")?.addEventListener("click", close);
+  panel.querySelector("form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const password = String(input?.value || "").trim().toLowerCase();
+    if (password === PROMPT_ACCESS_PASSWORD) {
+      sessionStorage.setItem(PROMPT_ACCESS_KEY, target.dataset.passwordGate);
+      unlockMatchingPasswordGate(target.dataset.passwordGate);
+      close();
+      window.setTimeout(() => onAllowed?.(), 20);
+      return;
+    }
+    if (status) status.textContent = "Membership or password required to open this section.";
+  });
+
+  document.body.appendChild(panel);
+  activePasswordGatePanel = panel;
+  window.setTimeout(() => input?.focus(), 30);
+}
+
+function confirmPasswordGate(target, onAllowed) {
+  if (!target?.dataset?.passwordGate) return true;
+  if (isPasswordGateUnlocked(target)) {
+    syncPasswordGateState(target);
+    return true;
+  }
+
+  const label = target.dataset.passwordLabel || "This section";
+  let password = null;
+  try {
+    password = window.prompt(`${label} requires membership or password. Enter password to continue.`);
+  } catch {
+    openPasswordGatePanel(target, onAllowed);
+    return false;
+  }
+
   if (password && password.trim().toLowerCase() === PROMPT_ACCESS_PASSWORD) {
     sessionStorage.setItem(PROMPT_ACCESS_KEY, target.dataset.passwordGate);
+    unlockMatchingPasswordGate(target.dataset.passwordGate);
     return true;
   }
 
   if (password !== null) {
-    window.alert("Membership or password required to open this section.");
+    try {
+      window.alert("Membership or password required to open this section.");
+    } catch {
+      openPasswordGatePanel(target, onAllowed);
+    }
   }
   return false;
 }
@@ -169,6 +241,67 @@ function hasMemberAccess() {
   } catch {
     return false;
   }
+}
+
+function isPasswordGateUnlocked(target) {
+  if (!target?.dataset?.passwordGate) return true;
+  if (sessionStorage.getItem(PROMPT_ACCESS_KEY) === target.dataset.passwordGate) return true;
+  return target.dataset.membershipGate === "true" && hasMemberAccess();
+}
+
+  function syncPasswordGateState(target) {
+    if (!target?.dataset?.passwordGate) return;
+    const unlocked = isPasswordGateUnlocked(target);
+    target.classList.toggle("is-password-locked", !unlocked);
+    target.classList.toggle("is-password-unlocked", unlocked);
+    target.setAttribute("aria-locked", String(!unlocked));
+    setPasswordGateDescendants(target, unlocked);
+  }
+
+  function setPasswordGateDescendants(target, unlocked) {
+    if (!target?.matches?.(".prompt-mini-app")) return;
+
+    target.querySelectorAll("input, button, textarea, select").forEach((control) => {
+      if (!unlocked) {
+        if (!control.disabled) control.dataset.gateLockedDisabled = "true";
+        control.disabled = true;
+        control.setAttribute("aria-hidden", "true");
+        return;
+      }
+
+      if (control.dataset.gateLockedDisabled === "true") control.disabled = false;
+      delete control.dataset.gateLockedDisabled;
+      control.removeAttribute("aria-hidden");
+    });
+
+    target.querySelectorAll("a[href]").forEach((link) => {
+      if (!unlocked) {
+        if (link.dataset.gateLockedTabindex === undefined) {
+          link.dataset.gateLockedTabindex = link.getAttribute("tabindex") || "";
+        }
+        link.tabIndex = -1;
+        link.setAttribute("aria-hidden", "true");
+        return;
+      }
+
+      if (link.dataset.gateLockedTabindex !== undefined) {
+        const previousTabIndex = link.dataset.gateLockedTabindex;
+        if (previousTabIndex) {
+          link.setAttribute("tabindex", previousTabIndex);
+        } else {
+          link.removeAttribute("tabindex");
+        }
+        delete link.dataset.gateLockedTabindex;
+      }
+      link.removeAttribute("aria-hidden");
+    });
+  }
+
+function unlockMatchingPasswordGate(gate) {
+  if (!gate) return;
+  document.querySelectorAll("[data-password-gate]").forEach((target) => {
+    if (target.dataset.passwordGate === gate) syncPasswordGateState(target);
+  });
 }
 
 function getGateUrl(target) {
@@ -213,15 +346,51 @@ function setupAccessGateTargets() {
 function setupPasswordGates() {
   document.querySelectorAll("[data-password-gate]").forEach((target) => {
     target.setAttribute("title", target.dataset.membershipGate === "true" ? "Membership or password required" : "Password required");
-    target.addEventListener(
-      "click",
-      (event) => {
-        if (confirmPasswordGate(target)) return;
+    if (target.matches(".prompt-mini-app")) {
+      target.classList.add("is-members-only-panel");
+      if (!target.hasAttribute("tabindex")) target.tabIndex = 0;
+    }
+    syncPasswordGateState(target);
+      target.addEventListener(
+        "click",
+        (event) => {
+          if (target.matches(".prompt-mini-app") && !isPasswordGateUnlocked(target)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            openPasswordGatePanel(target, () => {
+              syncPasswordGateState(target);
+              target.querySelector("input, button, textarea, select, a")?.focus();
+            });
+            return;
+          }
+
+          if (
+            confirmPasswordGate(target, () => {
+              const href = getGateUrl(target);
+            if (href) {
+              window.location.href = href;
+              return;
+            }
+            target.querySelector("input, button, textarea, select, a")?.focus();
+          })
+        ) {
+          return;
+        }
         event.preventDefault();
         event.stopImmediatePropagation();
       },
       true,
     );
+    if (target.matches(".prompt-mini-app")) {
+      target.addEventListener("keydown", (event) => {
+        if ((event.key !== "Enter" && event.key !== " ") || isPasswordGateUnlocked(target)) return;
+        event.preventDefault();
+        openPasswordGatePanel(target, () => {
+          syncPasswordGateState(target);
+          target.querySelector("input, button, textarea, select, a")?.focus();
+        });
+      });
+    }
   });
 }
 
@@ -302,12 +471,30 @@ function setupManualPianoHeader() {
     siteHeader.insertBefore(pianoHeader, headerMain.nextSibling);
   }
 
-  setupHomePianoHoverToggle(pianoHeader);
+  const keepsPianoHeaderVisible =
+    document.body.classList.contains("feature-console-page") ||
+    document.body.classList.contains("live-events-page") ||
+    document.body.classList.contains("prompt-lab-page") ||
+    document.body.classList.contains("merch-store-page");
+  if (keepsPianoHeaderVisible) {
+    siteHeader.classList.remove("is-piano-hover-hidden");
+    document.body.classList.remove(
+      "is-feature-piano-hidden",
+      "is-live-piano-hidden",
+      "is-prompt-piano-hidden",
+      "is-merch-piano-hidden",
+      "is-home-piano-hidden",
+      "is-manual-piano-hidden",
+    );
+  } else {
+    setupHomePianoHoverToggle(pianoHeader);
+  }
 
   const canHoverReveal = window.matchMedia("(hover: hover) and (pointer: fine)");
   if (
     !canHoverReveal.matches ||
     document.body.classList.contains("home-page") ||
+    document.body.classList.contains("feature-console-page") ||
     document.body.classList.contains("merch-store-page") ||
     document.body.classList.contains("live-events-page") ||
     document.body.classList.contains("prompt-lab-page")
@@ -1637,7 +1824,7 @@ function setupInstrumentKeyboard() {
   }
 
   function routeInstrumentKey(key) {
-    if (!confirmPasswordGate(key)) return;
+    if (!confirmPasswordGate(key, () => routeInstrumentKey(key))) return;
     const action = key.dataset.action;
     if (action === "toggle-scale") {
       playScale(key);

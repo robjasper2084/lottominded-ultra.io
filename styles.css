@@ -5203,14 +5203,14 @@ p {
 .prompt-lab-beat2lotto-top {
   position: relative;
   isolation: isolate;
-  order: 2;
+  order: 1;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr;
   gap: clamp(1rem, 2.4vw, 1.6rem);
   align-items: start;
   width: min(calc(100% - 32px), 1180px);
-  margin: clamp(2rem, 4vw, 3.2rem) auto clamp(2.6rem, 6vw, 4.4rem);
+  margin: clamp(0.8rem, 2vw, 1.4rem) auto clamp(2rem, 5vw, 3.4rem);
   padding: clamp(1rem, 2.6vw, 1.5rem);
   border: 1px solid rgba(41, 247, 255, 0.18);
   border-radius: 18px;
@@ -5593,7 +5593,7 @@ p {
 }
 
 .prompt-lab-suite {
-  order: 1;
+  order: 2;
   margin-top: clamp(4.8rem, 7vw, 6.4rem);
   border-top: 1px solid rgba(41, 247, 255, 0.18);
 }
@@ -7181,7 +7181,7 @@ button.is-copy-pulsed,
   100% { transform: translateY(0) scale(1); }
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header {
   grid-template-columns: minmax(220px, auto) minmax(0, 1fr) auto;
   grid-template-areas:
     "brand . actions"
@@ -7206,20 +7206,21 @@ button.is-copy-pulsed,
 
 .home-page.has-manual-instrument-header .manual-instrument-header > nav,
 .merch-store-page.has-manual-instrument-header .manual-instrument-header > nav,
-.live-events-page.has-manual-instrument-header .manual-instrument-header > nav {
+.live-events-page.has-manual-instrument-header .manual-instrument-header > nav,
+.feature-console-page.has-manual-instrument-header .manual-instrument-header > nav {
   display: none !important;
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .site-header-main {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .site-header-main {
   grid-area: brand;
   min-height: 42px;
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .site-header-toggle {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .site-header-toggle {
   display: none;
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
   grid-area: actions;
   justify-self: end;
   pointer-events: auto;
@@ -7227,7 +7228,7 @@ button.is-copy-pulsed,
   transform: none;
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .cart-toggle span {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .cart-toggle span {
   display: inline-grid;
   place-items: center;
   min-width: 1.42rem;
@@ -7240,7 +7241,7 @@ button.is-copy-pulsed,
   font-weight: 1000;
 }
 
-:is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .ultra-piano-header-compact {
+:is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .ultra-piano-header-compact {
   grid-area: piano;
   max-height: 154px;
   width: min(calc(100% - clamp(16px, 4vw, 52px)), 1180px);
@@ -7284,7 +7285,7 @@ button.is-copy-pulsed,
   transform: translateY(-18px) scaleY(0.86);
 }
 
-:is(.feature-console-page, .prompt-lab-page).has-manual-instrument-header .manual-instrument-header {
+.prompt-lab-page.has-manual-instrument-header .manual-instrument-header {
   transition:
     min-height 260ms cubic-bezier(0.18, 0.82, 0.24, 1),
     max-height 260ms cubic-bezier(0.18, 0.82, 0.24, 1),
@@ -7292,7 +7293,7 @@ button.is-copy-pulsed,
     box-shadow 220ms ease;
 }
 
-:is(.merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header {
+:is(.merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header {
   transition:
     min-height 260ms cubic-bezier(0.18, 0.82, 0.24, 1),
     max-height 260ms cubic-bezier(0.18, 0.82, 0.24, 1),
@@ -7300,14 +7301,14 @@ button.is-copy-pulsed,
     box-shadow 220ms ease;
 }
 
-:is(.merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden {
+.merch-store-page.has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden {
   min-height: 64px;
   max-height: 64px;
   padding-block: 10px;
   overflow: hidden;
 }
 
-:is(.merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .ultra-piano-header-compact {
+.merch-store-page.has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .ultra-piano-header-compact {
   max-height: 0;
   margin-top: 0;
   padding-block: 0;
@@ -7316,14 +7317,14 @@ button.is-copy-pulsed,
   transform: translateY(-18px) scaleY(0.86);
 }
 
-:is(.feature-console-page, .prompt-lab-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden {
+.prompt-lab-page.has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden {
   min-height: 58px;
   max-height: 58px;
   overflow: hidden;
 }
 
-:is(.feature-console-page, .prompt-lab-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .direct-launch,
-:is(.feature-console-page, .prompt-lab-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .ultra-piano-header-compact {
+.prompt-lab-page.has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .direct-launch,
+.prompt-lab-page.has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .ultra-piano-header-compact {
   max-height: 0;
   margin-top: 0;
   padding-block: 0;
@@ -7540,7 +7541,7 @@ body.home-page.has-manual-instrument-header .home-piano-header .piano-key.black:
     0 0 30px rgba(255, 224, 113, 0.34);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .ultra-keyboard-wrap {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .ultra-keyboard-wrap {
   border-color: rgba(142, 236, 255, 0.44);
   background:
     linear-gradient(90deg, rgba(41, 247, 255, 0.12) 1px, transparent 1px),
@@ -7554,8 +7555,8 @@ body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano
     0 0 30px rgba(41, 247, 255, 0.16);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.white,
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.black {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.white,
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.black {
   border-color: rgba(142, 236, 255, 0.54);
   color: #f8fcff;
   background:
@@ -7572,8 +7573,8 @@ body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano
     0 0 12px rgba(41, 247, 255, 0.32);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.white[data-brand]::before,
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.black[data-brand]::before {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.white[data-brand]::before,
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.black[data-brand]::before {
   border-color: rgba(255, 224, 113, 0.62);
   color: #06120f;
   background:
@@ -7584,13 +7585,13 @@ body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano
     inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.white::after {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.white::after {
   background: linear-gradient(90deg, rgba(41, 247, 255, 0.08), #29f7ff, #ffe071, rgba(41, 247, 255, 0.08));
   box-shadow: 0 0 18px rgba(41, 247, 255, 0.72);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.white strong,
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key.black strong {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.white strong,
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key.black strong {
   color: #f8fcff;
   font-weight: 950;
   text-shadow:
@@ -7599,7 +7600,7 @@ body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano
     0 0 10px rgba(255, 224, 113, 0.24);
 }
 
-body:is(.home-page, .live-events-page).has-manual-instrument-header .ultra-piano-header .piano-key small {
+body:is(.home-page, .live-events-page, .feature-console-page).has-manual-instrument-header .ultra-piano-header .piano-key small {
   border-color: rgba(142, 236, 255, 0.36);
   color: #dffcff;
   background: rgba(0, 11, 18, 0.72);
@@ -7771,20 +7772,20 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
 }
 
 @media (max-width: 980px) {
-  :is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header {
+  :is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "brand actions"
       "piano piano";
   }
 
-  :is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
+  :is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
     justify-self: end;
   }
 }
 
 @media (max-width: 560px) {
-  :is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header {
+  :is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header {
     grid-template-columns: 1fr;
     grid-template-areas:
       "brand"
@@ -7792,7 +7793,7 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
       "piano";
   }
 
-  :is(.home-page, .merch-store-page, .live-events-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
+  :is(.home-page, .merch-store-page, .live-events-page, .feature-console-page).has-manual-instrument-header .manual-instrument-header .direct-launch {
     justify-self: stretch;
   }
 
@@ -7821,8 +7822,7 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   border-radius: 24px;
 }
 
-.stream-events-band::before,
-.live-events-page::before {
+.stream-events-band::before {
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -8026,6 +8026,61 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   padding-top: 86px;
 }
 
+.home-page.has-sphere-header .home-sphere-main {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(41, 247, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 18% 22%, rgba(255, 224, 113, 0.09), transparent 28rem),
+    radial-gradient(circle at 78% 12%, rgba(41, 247, 255, 0.12), transparent 34rem),
+    #030913;
+  background-size: 72px 72px, 72px 72px, auto, auto, auto;
+}
+
+.home-page.has-sphere-header .home-sphere-canvas,
+.home-page.has-sphere-header .home-sphere-grid,
+.home-page.has-sphere-header .home-sphere-scanline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.home-page.has-sphere-header .home-sphere-canvas {
+  z-index: 0;
+  opacity: 0.42;
+  filter: saturate(1.08) brightness(0.9);
+  mix-blend-mode: screen;
+}
+
+.home-page.has-sphere-header .home-sphere-grid {
+  z-index: 0;
+  opacity: 0.36;
+  background:
+    linear-gradient(rgba(41, 247, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 86%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 86%);
+}
+
+.home-page.has-sphere-header .home-sphere-scanline {
+  z-index: 0;
+  opacity: 0.45;
+  background: linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.2), rgba(41, 247, 255, 0.16), transparent);
+  mix-blend-mode: screen;
+  transform: translateX(-120%);
+  animation: sphereSweep 8s ease-in-out infinite;
+}
+
+.home-page.has-sphere-header .home-sphere-main > :not(.home-sphere-canvas):not(.home-sphere-grid):not(.home-sphere-scanline) {
+  position: relative;
+  z-index: 1;
+}
+
 .home-page.has-sphere-header .home-sphere-header.is-sphere-hover-hidden {
   opacity: 0.24;
   filter: saturate(0.82) brightness(0.72);
@@ -8122,10 +8177,14 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   border: 1px solid rgba(255, 224, 113, 0.34);
   border-radius: 999px;
   background:
+    radial-gradient(circle at 12% 52%, rgba(255, 224, 113, 0.2) 0 3.2rem, transparent 3.35rem),
+    radial-gradient(circle at 48% 48%, rgba(41, 247, 255, 0.12) 0 3.6rem, transparent 3.85rem),
+    radial-gradient(circle at 82% 52%, rgba(255, 79, 216, 0.14) 0 3.15rem, transparent 3.35rem),
     radial-gradient(circle at 18% 0%, rgba(255, 224, 113, 0.18), transparent 11rem),
     radial-gradient(circle at 82% 12%, rgba(41, 247, 255, 0.16), transparent 13rem),
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 52%),
     rgba(2, 5, 12, 0.92);
+  background-blend-mode: screen, screen, screen, normal, normal, normal, normal;
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.065),
     inset 0 -1.2rem 1.9rem rgba(0, 0, 0, 0.46),
@@ -8154,6 +8213,7 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   --sphere-nav-note: "07";
   --sphere-nav-accent: #29f7ff;
   --sphere-nav-core: rgba(245, 251, 255, 0.86);
+  --sphere-nav-image: url("./assets/brand/jazz-network-gold-coin.jpeg");
   position: relative;
   z-index: 1;
   display: inline-grid;
@@ -8164,21 +8224,32 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   place-items: center;
   padding: 1.34rem 0.52rem 0.78rem;
   overflow: visible;
-  border: 1px solid color-mix(in srgb, var(--sphere-nav-accent) 34%, rgba(255, 224, 113, 0.42));
+  border: 1px solid color-mix(in srgb, var(--sphere-nav-accent) 48%, rgba(255, 224, 113, 0.58));
   border-radius: 50%;
   background:
     radial-gradient(circle at 31% 23%, rgba(255, 255, 255, 0.78) 0 9%, rgba(255, 255, 255, 0.18) 10% 18%, transparent 28%),
-    radial-gradient(circle at 54% 45%, var(--sphere-nav-core) 0 17%, transparent 18%),
-    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sphere-nav-accent) 42%, rgba(255, 224, 113, 0.28)) 0 44%, rgba(4, 12, 20, 0.72) 58%, rgba(0, 0, 0, 0.9) 79%),
+    radial-gradient(circle at 46% 38%, rgba(255, 255, 255, 0.12) 0 15%, transparent 31%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.08)),
+    var(--sphere-nav-image),
+    radial-gradient(circle at 54% 45%, var(--sphere-nav-core) 0 12%, transparent 24%),
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sphere-nav-accent) 38%, rgba(255, 224, 113, 0.28)) 0 44%, rgba(4, 12, 20, 0.66) 58%, rgba(0, 0, 0, 0.88) 79%),
     radial-gradient(circle at 68% 74%, rgba(0, 0, 0, 0.58), transparent 42%),
     rgba(3, 7, 16, 0.88);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 158% 158%, 100% 100%, 100% 100%, 100% 100%, auto;
+  background-blend-mode: screen, screen, overlay, normal, screen, multiply, multiply, normal;
   color: #fffbe6;
-  font-size: clamp(0.47rem, 0.6vw, 0.58rem);
-  line-height: 0.96;
+  max-width: clamp(4rem, 5.7vw, 5.12rem);
+  font-size: clamp(0.52rem, 0.66vw, 0.66rem);
+  font-weight: 950;
+  line-height: 0.9;
   text-align: center;
   text-decoration: none;
+  text-transform: uppercase;
   touch-action: manipulation;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
   box-shadow:
     inset -0.72rem -0.9rem 1.1rem rgba(0, 0, 0, 0.68),
     inset 0.36rem 0.46rem 0.7rem rgba(255, 255, 255, 0.18),
@@ -8187,8 +8258,9 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
     0 0 1.15rem color-mix(in srgb, var(--sphere-nav-accent) 36%, transparent),
     0 0 2.2rem color-mix(in srgb, var(--sphere-nav-accent) 14%, transparent);
   text-shadow:
-    0 1px 4px rgba(0, 0, 0, 0.94),
-    0 0 0.7rem rgba(255, 255, 255, 0.18);
+    0 1px 2px #000,
+    0 0 0.35rem #000,
+    0 0 0.82rem color-mix(in srgb, var(--sphere-nav-accent) 42%, transparent);
   transform: none;
   transition:
     border-color 180ms ease,
@@ -8258,13 +8330,13 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   opacity: 0.96;
 }
 
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(1) { --sphere-nav-note: "07"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(157, 255, 247, 0.82); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(2) { --sphere-nav-note: "55"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(3) { --sphere-nav-note: "51"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(4) { --sphere-nav-note: "62"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(5) { --sphere-nav-note: "68"; --sphere-nav-accent: #ff4fd8; --sphere-nav-core: rgba(255, 164, 235, 0.82); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(6) { --sphere-nav-note: "54"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(174, 244, 255, 0.86); }
-.home-page.has-sphere-header .home-sphere-header nav a:nth-child(7) { --sphere-nav-note: "03"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(1) { --sphere-nav-note: "07"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(157, 255, 247, 0.82); --sphere-nav-image: url("./assets/brand/guide-puck-cyan-city.png"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(2) { --sphere-nav-note: "55"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); --sphere-nav-image: url("./assets/brand/guide-puck-gold-mascot-close.png"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(3) { --sphere-nav-note: "51"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); --sphere-nav-image: url("./assets/brand/lottomind-branded-puck.png"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(4) { --sphere-nav-note: "62"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); --sphere-nav-image: url("./assets/brand/guide-puck-gold-mascot-wide.png"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(5) { --sphere-nav-note: "68"; --sphere-nav-accent: #ff4fd8; --sphere-nav-core: rgba(255, 164, 235, 0.82); --sphere-nav-image: url("./assets/brand/guide-jazz-network-puck.jpeg"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(6) { --sphere-nav-note: "54"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(174, 244, 255, 0.86); --sphere-nav-image: url("./assets/brand/guide-puck-cyan-city.png"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(7) { --sphere-nav-note: "03"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); --sphere-nav-image: url("./assets/brand/jazz-network-gold-coin.jpeg"); }
 
 .home-page.has-sphere-header .home-sphere-header nav a.is-mood-ring {
   --sphere-nav-accent: hsl(var(--mood-hue) 96% 63%);
@@ -8276,12 +8348,21 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   border-color: rgba(255, 240, 137, 0.82);
   background:
     radial-gradient(circle at 31% 23%, rgba(255, 255, 255, 0.88) 0 10%, rgba(255, 255, 255, 0.22) 11% 20%, transparent 30%),
-    radial-gradient(circle at 54% 45%, var(--sphere-nav-core) 0 18%, transparent 19%),
-    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sphere-nav-accent) 54%, rgba(255, 224, 113, 0.34)) 0 46%, rgba(8, 22, 31, 0.72) 60%, rgba(0, 0, 0, 0.86) 80%),
+    radial-gradient(circle at 46% 38%, rgba(255, 255, 255, 0.14) 0 17%, transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.08)),
+    var(--sphere-nav-image),
+    radial-gradient(circle at 54% 45%, var(--sphere-nav-core) 0 13%, transparent 25%),
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sphere-nav-accent) 52%, rgba(255, 224, 113, 0.34)) 0 46%, rgba(8, 22, 31, 0.66) 60%, rgba(0, 0, 0, 0.86) 80%),
     radial-gradient(circle at 68% 74%, rgba(0, 0, 0, 0.5), transparent 42%),
     rgba(9, 22, 35, 0.88);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 164% 164%, 100% 100%, 100% 100%, 100% 100%, auto;
+  background-blend-mode: screen, screen, overlay, normal, screen, multiply, multiply, normal;
   color: #f5fbff;
-  text-shadow: 0 0 0.55rem rgba(41, 247, 255, 0.28);
+  text-shadow:
+    0 1px 2px #000,
+    0 0 0.6rem color-mix(in srgb, var(--sphere-nav-accent) 62%, transparent);
   box-shadow:
     inset -0.62rem -0.8rem 1rem rgba(0, 0, 0, 0.62),
     inset 0.34rem 0.44rem 0.72rem rgba(255, 255, 255, 0.24),
@@ -8302,10 +8383,17 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
   border-color: color-mix(in srgb, var(--sphere-nav-accent) 76%, #fff3a1);
   background:
     radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.56) 0 8%, rgba(255, 255, 255, 0.12) 9% 18%, transparent 28%),
-    radial-gradient(circle at 54% 48%, color-mix(in srgb, var(--sphere-nav-core) 72%, #08131d) 0 15%, transparent 16%),
-    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--sphere-nav-accent) 44%, rgba(255, 224, 113, 0.24)) 0 39%, rgba(5, 15, 24, 0.9) 57%, rgba(0, 0, 0, 0.96) 82%),
+    radial-gradient(circle at 48% 42%, rgba(255, 255, 255, 0.08) 0 16%, transparent 31%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(255, 255, 255, 0.06)),
+    var(--sphere-nav-image),
+    radial-gradient(circle at 54% 48%, color-mix(in srgb, var(--sphere-nav-core) 68%, #08131d) 0 10%, transparent 21%),
+    radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--sphere-nav-accent) 42%, rgba(255, 224, 113, 0.24)) 0 39%, rgba(5, 15, 24, 0.84) 57%, rgba(0, 0, 0, 0.96) 82%),
     radial-gradient(circle at 70% 78%, rgba(0, 0, 0, 0.72), transparent 43%),
     rgba(2, 7, 14, 0.96);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 148% 148%, 100% 100%, 100% 100%, 100% 100%, auto;
+  background-blend-mode: screen, multiply, overlay, normal, screen, normal, multiply, normal;
   filter: saturate(1.28) brightness(0.96);
   box-shadow:
     inset 0.56rem 0.62rem 1rem rgba(0, 0, 0, 0.72),
@@ -8364,36 +8452,89 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
 }
 
 .home-page.has-sphere-header .home-sphere-header .direct-action {
-  min-height: 2.75rem;
-  padding: 0.58rem 0.86rem;
-  border-color: rgba(94, 255, 157, 0.38);
-  border-radius: 999px;
+  --sphere-action-image: url("./assets/brand/guide-puck-cyan-city.png");
+  --sphere-action-accent: #5eff9d;
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 clamp(3.65rem, 5.35vw, 4.85rem);
+  width: clamp(3.65rem, 5.35vw, 4.85rem);
+  min-height: 0;
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 0.6rem 0.44rem;
+  overflow: visible;
+  border-color: color-mix(in srgb, var(--sphere-action-accent) 48%, rgba(255, 224, 113, 0.44));
+  border-radius: 50%;
   color: #eafff6;
   background:
-    linear-gradient(180deg, rgba(94, 255, 157, 0.14), rgba(41, 247, 255, 0.07)),
-    rgba(255, 255, 255, 0.025);
+    radial-gradient(circle at 31% 22%, rgba(255, 255, 255, 0.76) 0 9%, rgba(255, 255, 255, 0.2) 10% 19%, transparent 29%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.18)),
+    var(--sphere-action-image),
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--sphere-action-accent) 36%, rgba(255, 224, 113, 0.34)) 0 46%, rgba(5, 13, 20, 0.72) 60%, rgba(0, 0, 0, 0.92) 82%),
+    rgba(3, 8, 15, 0.9);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%, 100% 100%, 160% 160%, 100% 100%, auto;
+  background-blend-mode: screen, overlay, normal, multiply, normal;
+  font-size: clamp(0.48rem, 0.6vw, 0.6rem);
+  font-weight: 950;
+  line-height: 0.98;
+  text-align: center;
+  white-space: normal;
   box-shadow:
-    inset 0 -1px 0 rgba(94, 255, 157, 0.18),
-    0 0 1.2rem rgba(41, 247, 255, 0.1);
+    inset -0.58rem -0.72rem 0.92rem rgba(0, 0, 0, 0.7),
+    inset 0.3rem 0.36rem 0.6rem rgba(255, 255, 255, 0.2),
+    0 0.48rem 0.16rem rgba(0, 0, 0, 0.36),
+    0 0 1.2rem color-mix(in srgb, var(--sphere-action-accent) 34%, transparent);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.84);
+}
+
+.home-page.has-sphere-header .home-sphere-header .direct-action::before {
+  position: absolute;
+  top: 0.58rem;
+  left: 50%;
+  width: 0.78rem;
+  height: 0.78rem;
+  content: "";
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 0 0.85rem color-mix(in srgb, var(--sphere-action-accent) 56%, transparent);
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .home-page.has-sphere-header .home-sphere-header .direct-action.direct-primary {
-  border-color: rgba(94, 255, 157, 0.58);
-  color: #06120f;
-  background: linear-gradient(135deg, #e9ff82, #29f7ff);
+  --sphere-action-image: url("./assets/brand/guide-puck-gold-mascot-close.png");
+  --sphere-action-accent: #ffe071;
+  border-color: rgba(255, 224, 113, 0.62);
+  color: #fff7c4;
+}
+
+.home-page.has-sphere-header .home-sphere-header .direct-action:is(:hover, :focus-visible, .is-mood-ring, .is-touch-active) {
+  filter: saturate(1.18) brightness(1.08);
+  transform: translateY(0.1rem) scale(0.97);
 }
 
 .home-page.has-sphere-header .home-sphere-header .cart-toggle span {
   display: inline-grid;
-  min-width: 1.42rem;
-  min-height: 1.42rem;
+  position: absolute;
+  right: 0.16rem;
+  bottom: 0.18rem;
+  min-width: 1.28rem;
+  min-height: 1.28rem;
   place-items: center;
-  margin-left: 0.42rem;
-  border-radius: 999px;
+  margin-left: 0;
+  border: 1px solid rgba(255, 240, 137, 0.48);
+  border-radius: 50%;
   color: #06120f;
-  background: linear-gradient(135deg, #fff36b, #00f5ff);
-  font-size: 0.68rem;
+  background:
+    radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.8), transparent 28%),
+    radial-gradient(circle at 50% 52%, #fff6c7 0 30%, #d4af37 70%, #6c4e09 100%);
+  font-size: 0.6rem;
   font-weight: 1000;
+  box-shadow:
+    inset -0.16rem -0.2rem 0.26rem rgba(0, 0, 0, 0.32),
+    0 0 0.65rem rgba(255, 224, 113, 0.28);
 }
 
 .home-page.has-sphere-header .home-signal-marquee {
@@ -8679,14 +8820,392 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
 }
 
 .live-events-page {
+  --artline-x: 68vw;
+  --artline-y: 38vh;
+  --artline-xp: 68%;
+  --artline-yp: 38%;
   position: relative;
   isolation: isolate;
   min-height: 100vh;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 18% 16%, rgba(255, 224, 113, 0.16), transparent 24rem),
+    radial-gradient(circle at var(--artline-xp) var(--artline-yp), rgba(41, 247, 255, 0.22), transparent 19rem),
+    radial-gradient(circle at 18% 16%, rgba(255, 224, 113, 0.13), transparent 24rem),
     radial-gradient(circle at 78% 12%, rgba(41, 247, 255, 0.18), transparent 28rem),
     linear-gradient(145deg, #010207, #061225 56%, #080510);
+}
+
+.live-events-page::before,
+.live-events-page::after {
+  position: fixed;
+  inset: -18vmax;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.live-events-page::before {
+  background:
+    linear-gradient(115deg, transparent 0 17%, rgba(41, 247, 255, 0.34) 17.2%, transparent 17.9% 34%, rgba(255, 224, 113, 0.22) 34.2%, transparent 35% 57%, rgba(122, 255, 213, 0.2) 57.2%, transparent 58%),
+    repeating-linear-gradient(90deg, rgba(41, 247, 255, 0.045) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(255, 224, 113, 0.035) 0 1px, transparent 1px 72px);
+  opacity: 0.72;
+  filter: drop-shadow(0 0 24px rgba(41, 247, 255, 0.18));
+  transform: rotate(-5deg);
+  animation: liveArtlineSweep 14s linear infinite;
+}
+
+.live-events-page::after {
+  background:
+    radial-gradient(circle at var(--artline-x) var(--artline-y), rgba(245, 251, 255, 0.34), rgba(41, 247, 255, 0.18) 8rem, transparent 22rem),
+    conic-gradient(from 128deg at var(--artline-x) var(--artline-y), transparent 0deg, rgba(41, 247, 255, 0.2) 16deg, transparent 28deg, rgba(255, 224, 113, 0.18) 52deg, transparent 74deg);
+  mix-blend-mode: screen;
+  opacity: 0.62;
+  animation: liveArtlinePulse 7s ease-in-out infinite;
+}
+
+.live-events-page .ultra-piano-header,
+.live-events-page .live-events-shell,
+.live-events-page footer {
+  position: relative;
+  z-index: 1;
+}
+
+.live-events-page .site-header {
+  position: sticky;
+  z-index: 40;
+}
+
+@keyframes liveArtlineSweep {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 420px -260px, 144px 0, 0 144px;
+  }
+}
+
+@keyframes liveArtlinePulse {
+  0%, 100% {
+    opacity: 0.5;
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  50% {
+    opacity: 0.72;
+    filter: hue-rotate(18deg) saturate(1.25);
+  }
+}
+
+body.has-stream-startup-audio {
+  overflow: hidden;
+}
+
+.stream-startup-audio {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 5vw, 48px);
+  background:
+    radial-gradient(circle at 52% 42%, rgba(41, 247, 255, 0.28), transparent 24rem),
+    radial-gradient(circle at 20% 20%, rgba(255, 224, 113, 0.18), transparent 22rem),
+    rgba(1, 2, 7, 0.84);
+  backdrop-filter: blur(18px) saturate(1.25);
+  transition:
+    opacity 220ms ease,
+    visibility 220ms ease;
+}
+
+.stream-startup-audio.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stream-startup-audio-panel {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  width: min(100%, 520px);
+  padding: clamp(24px, 5vw, 42px);
+  border: 1px solid rgba(41, 247, 255, 0.36);
+  border-radius: 24px;
+  color: #f4fbff;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 224, 113, 0.18), transparent 16rem),
+    linear-gradient(145deg, rgba(9, 24, 39, 0.94), rgba(3, 5, 10, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 34px 90px rgba(0, 0, 0, 0.58),
+    0 0 38px rgba(41, 247, 255, 0.18);
+}
+
+.stream-startup-audio-panel h2,
+.stream-startup-audio-panel p {
+  margin: 0;
+}
+
+.stream-startup-audio-panel h2 {
+  color: #f6fcff;
+  font-family: var(--display-font);
+  font-size: clamp(2.2rem, 7vw, 4.6rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.stream-startup-audio-panel p:not(.eyebrow):not(.stream-startup-status) {
+  color: #d9e8f5;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.stream-startup-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  border-radius: 999px;
+  color: #f6fcff;
+  background: rgba(2, 7, 13, 0.78);
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.stream-startup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stream-startup-actions :is(.primary-action, .secondary-action) {
+  min-height: 46px;
+}
+
+.stream-startup-status {
+  min-height: 1.2rem;
+  color: #fff1a0;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.password-gate-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(41, 247, 255, 0.2), transparent 34rem),
+    rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(18px);
+}
+
+.password-gate-panel {
+  position: relative;
+  width: min(30rem, 100%);
+  padding: clamp(1.3rem, 4vw, 2.4rem);
+  border: 1px solid rgba(255, 224, 113, 0.48);
+  border-radius: 1.25rem;
+  color: #f5fbff;
+  background:
+    linear-gradient(145deg, rgba(5, 9, 15, 0.96), rgba(9, 54, 66, 0.92)),
+    radial-gradient(circle at 78% 18%, rgba(255, 224, 113, 0.22), transparent 16rem);
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.7), inset 0 0 2rem rgba(41, 247, 255, 0.14);
+}
+
+.password-gate-panel h2 {
+  margin: 0.35rem 0 0.7rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 0.86;
+}
+
+.password-gate-panel p {
+  color: rgba(245, 251, 255, 0.78);
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.password-gate-panel label {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.password-gate-panel input {
+  min-height: 3rem;
+  border: 1px solid rgba(41, 247, 255, 0.36);
+  border-radius: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  color: #f5fbff;
+  background: rgba(0, 0, 0, 0.55);
+  font: 800 1rem/1.2 var(--font-body);
+}
+
+.password-gate-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid rgba(41, 247, 255, 0.4);
+  border-radius: 999px;
+  color: #f5fbff;
+  background: rgba(0, 0, 0, 0.52);
+  cursor: pointer;
+}
+
+.password-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+}
+
+.password-gate-actions :is(.primary-action, .secondary-action) {
+  min-height: 3rem;
+}
+
+.password-gate-status {
+  min-height: 1.25rem;
+  margin-bottom: 0;
+  color: var(--gold);
+}
+
+.prompt-mini-app.is-members-only-panel {
+  position: relative;
+  isolation: isolate;
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-locked {
+  cursor: pointer;
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-locked::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 26% 16%, rgba(255, 230, 130, 0.2), transparent 28%),
+    linear-gradient(145deg, rgba(4, 6, 10, 0.68), rgba(3, 38, 48, 0.86));
+  box-shadow: inset 0 0 0 1px rgba(255, 220, 97, 0.3);
+  backdrop-filter: blur(7px) saturate(1.15);
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-locked::after {
+  content: "Members Only\A Password Required";
+  position: absolute;
+  left: clamp(1rem, 4vw, 2rem);
+  right: clamp(1rem, 4vw, 2rem);
+  top: 50%;
+  z-index: 5;
+  pointer-events: none;
+  transform: translateY(-50%);
+  white-space: pre-line;
+  color: #fff4bd;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 0 18px rgba(255, 214, 90, 0.5), 0 2px 0 rgba(0, 0, 0, 0.75);
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-locked > *:not(.prompt-mini-video-bg) {
+  opacity: 0.28;
+  filter: blur(1.4px) saturate(0.75);
+  pointer-events: none;
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-locked > .prompt-mini-video-bg {
+  opacity: 0.2;
+  filter: blur(3px) saturate(0.7);
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-unlocked::before,
+.prompt-mini-app.is-members-only-panel.is-password-unlocked::after {
+  content: none;
+}
+
+.prompt-mini-app.is-members-only-panel.is-password-unlocked > * {
+  opacity: 1;
+  filter: none;
+}
+
+.feature-console-page.has-manual-instrument-header {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(255, 211, 76, 0.16), transparent 24rem),
+    radial-gradient(circle at 86% 8%, rgba(46, 255, 220, 0.12), transparent 26rem),
+    linear-gradient(135deg, rgba(2, 6, 9, 0.98), rgba(4, 35, 45, 0.96) 46%, rgba(10, 8, 18, 0.98));
+}
+
+.feature-console-page.has-manual-instrument-header::before {
+  opacity: 0.32;
+  filter: saturate(1.12) contrast(1.05);
+}
+
+.feature-console-page.has-manual-instrument-header .feature-console-shell,
+.feature-console-page.has-manual-instrument-header .feature-command-panel,
+.feature-console-page.has-manual-instrument-header .feature-console-hero,
+.feature-console-page.has-manual-instrument-header .feature-tools-section,
+.feature-console-page.has-manual-instrument-header .feature-contact-section {
+  position: relative;
+  z-index: 1;
+}
+
+.feature-console-page.has-manual-instrument-header .feature-console-hero,
+.feature-console-page.has-manual-instrument-header .command-panel-interface,
+.feature-console-page.has-manual-instrument-header .feature-tool-card,
+.feature-console-page.has-manual-instrument-header .support-card,
+.feature-console-page.has-manual-instrument-header .mailing-card {
+  border-color: rgba(255, 226, 118, 0.3);
+  background:
+    linear-gradient(145deg, rgba(8, 13, 14, 0.78), rgba(10, 50, 58, 0.58)),
+    linear-gradient(90deg, rgba(255, 217, 92, 0.08), rgba(46, 255, 220, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(62, 255, 224, 0.1), 0 22px 54px rgba(0, 0, 0, 0.34);
+}
+
+.feature-console-page.has-manual-instrument-header .feature-tool-card h2,
+.feature-console-page.has-manual-instrument-header .feature-tool-card h3,
+.feature-console-page.has-manual-instrument-header .feature-command-panel h1,
+.feature-console-page.has-manual-instrument-header .feature-command-panel h2,
+.feature-console-page.has-manual-instrument-header .support-card h2,
+.feature-console-page.has-manual-instrument-header .mailing-card h2 {
+  color: #fff4bd;
+  text-shadow: 0 0 16px rgba(255, 220, 91, 0.28), 0 2px 0 rgba(0, 0, 0, 0.76);
+}
+
+:is(.feature-console-page, .live-events-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden {
+  min-height: 184px !important;
+  max-height: none !important;
+  padding-block: 10px 0 !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+:is(.feature-console-page, .live-events-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .direct-launch,
+:is(.feature-console-page, .live-events-page).has-manual-instrument-header .manual-instrument-header.is-piano-hover-hidden .ultra-piano-header-compact {
+  max-height: 154px !important;
+  margin-top: 4px !important;
+  padding-block: 8px !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .live-events-shell {

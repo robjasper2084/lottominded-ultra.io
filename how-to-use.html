@@ -133,6 +133,107 @@
         animation-delay: -6s;
       }
 
+      body.has-guide-startup-audio {
+        overflow: hidden;
+      }
+
+      .guide-startup-audio {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: grid;
+        place-items: center;
+        padding: clamp(18px, 5vw, 56px);
+        background:
+          radial-gradient(circle at 50% 30%, rgba(255, 223, 117, 0.18), transparent 24rem),
+          radial-gradient(circle at 72% 62%, rgba(41, 247, 255, 0.16), transparent 26rem),
+          rgba(0, 0, 0, 0.76);
+        backdrop-filter: blur(18px) saturate(1.1);
+      }
+
+      .guide-startup-audio.is-hidden {
+        display: none;
+      }
+
+      .guide-startup-panel {
+        position: relative;
+        width: min(100%, 620px);
+        padding: clamp(26px, 5vw, 46px);
+        overflow: hidden;
+        border: 1px solid rgba(255, 223, 117, 0.44);
+        border-radius: 28px;
+        background:
+          linear-gradient(150deg, rgba(255, 223, 117, 0.16), transparent 30%),
+          linear-gradient(135deg, rgba(41, 247, 255, 0.13), transparent 58%),
+          rgba(7, 7, 7, 0.92);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 0 0 1px rgba(41, 247, 255, 0.12),
+          0 30px 90px rgba(0, 0, 0, 0.62);
+      }
+
+      .guide-startup-panel::before {
+        position: absolute;
+        inset: auto -9rem -10rem auto;
+        width: 22rem;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        content: "";
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.38), transparent 18%),
+          var(--guide-puck) center / cover no-repeat;
+        opacity: 0.2;
+        filter: blur(0.2px) saturate(1.12);
+      }
+
+      .guide-startup-panel h2 {
+        max-width: 9ch;
+        margin: 0 0 16px;
+        color: var(--soft-gold);
+        font-family: var(--display);
+        font-size: clamp(3rem, 10vw, 5.6rem);
+        line-height: 0.9;
+        text-transform: uppercase;
+        text-shadow: 0 0 24px rgba(255, 223, 117, 0.24);
+      }
+
+      .guide-startup-panel p {
+        position: relative;
+        max-width: 38rem;
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-weight: 800;
+        line-height: 1.7;
+      }
+
+      .guide-startup-actions {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .guide-startup-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 1;
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(255, 223, 117, 0.38);
+        border-radius: 50%;
+        color: var(--soft-gold);
+        background: rgba(7, 7, 7, 0.78);
+        cursor: pointer;
+      }
+
+      .guide-startup-status {
+        min-height: 1.3em;
+        color: var(--green);
+      }
+
       @keyframes guidePuckDrift {
         from {
           transform: translate3d(-0.6rem, -0.7rem, 0) rotate(-10deg) scale(0.96);
@@ -1305,15 +1406,122 @@
           min-height: 220px;
         }
       }
+
+      .guide-header {
+        border-bottom-color: rgba(41, 247, 255, 0.36);
+        background:
+          radial-gradient(circle at 7% 48%, rgba(41, 247, 255, 0.18), transparent 12rem),
+          radial-gradient(circle at 78% 32%, rgba(255, 226, 118, 0.14), transparent 18rem),
+          linear-gradient(90deg, rgba(0, 4, 8, 0.98), rgba(5, 32, 39, 0.94), rgba(0, 4, 8, 0.98));
+        box-shadow:
+          inset 0 -1px 0 rgba(41, 247, 255, 0.2),
+          0 1rem 2.4rem rgba(0, 0, 0, 0.42);
+      }
+
+      .guide-nav {
+        width: min(100%, 760px);
+        border-color: rgba(41, 247, 255, 0.58);
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 12% 44%, rgba(255, 246, 184, 0.18), transparent 7rem),
+          radial-gradient(circle at 82% 58%, rgba(255, 105, 214, 0.12), transparent 8rem),
+          linear-gradient(90deg, rgba(6, 54, 66, 0.84), rgba(7, 20, 29, 0.82));
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 246, 184, 0.11),
+          inset 0 -1rem 2rem rgba(0, 0, 0, 0.34),
+          0 0 1.4rem rgba(41, 247, 255, 0.2);
+      }
+
+      .guide-nav a {
+        min-width: clamp(7rem, 10vw, 8.4rem);
+        min-height: 2.8rem;
+        border-radius: 999px;
+        border-color: rgba(255, 226, 118, 0.38);
+        color: #fff8c6;
+        background:
+          radial-gradient(circle at var(--reactive-x, 28%) var(--reactive-y, 26%), hsla(var(--reactive-hue, 48), 96%, 66%, 0.28), transparent 50%),
+          radial-gradient(circle at 24% 30%, rgba(255, 255, 255, 0.16), transparent 1.3rem),
+          linear-gradient(145deg, rgba(12, 74, 82, 0.86), rgba(4, 16, 22, 0.94) 58%, rgba(37, 27, 8, 0.88));
+        text-shadow: 0 0 0.6rem rgba(0, 0, 0, 0.9);
+        box-shadow:
+          inset 0.16rem 0.18rem 0.5rem rgba(255, 255, 255, 0.18),
+          inset -0.48rem -0.5rem 0.9rem rgba(0, 0, 0, 0.58),
+          0 0.28rem 0 rgba(0, 0, 0, 0.46),
+          0 0 1rem rgba(41, 247, 255, 0.16);
+      }
+
+      .guide-nav a::before {
+        color: #04110f;
+        background:
+          radial-gradient(circle at 30% 24%, #fffef0 0 12%, transparent 13% 100%),
+          linear-gradient(145deg, #32fff2, #d4af37 54%, #fff4a8);
+        box-shadow:
+          inset 0.08rem 0.08rem 0.26rem rgba(255, 255, 255, 0.52),
+          inset -0.16rem -0.16rem 0.38rem rgba(36, 17, 0, 0.48),
+          0 0 0.86rem rgba(41, 247, 255, 0.26);
+      }
+
+      .guide-nav a:is(:hover, :focus-visible, .is-pointer-reactive, .is-touch-active) {
+        border-color: rgba(255, 246, 184, 0.9);
+        filter: saturate(1.25) brightness(1.1);
+        transform: translateY(2px) scale(0.98);
+        box-shadow:
+          inset 0.2rem 0.24rem 0.7rem rgba(0, 0, 0, 0.58),
+          inset -0.16rem -0.18rem 0.52rem rgba(255, 255, 255, 0.12),
+          0 0 1.35rem hsla(var(--reactive-hue, 48), 98%, 64%, 0.35);
+      }
+
+      .guide-button {
+        min-height: 3rem;
+        border-color: rgba(255, 246, 184, 0.72);
+        background:
+          radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.5), transparent 1.2rem),
+          linear-gradient(145deg, #fff2a8, #d4af37 54%, #87ffb3);
+        box-shadow:
+          inset 0.18rem 0.18rem 0.68rem rgba(255, 255, 255, 0.3),
+          inset -0.38rem -0.42rem 0.82rem rgba(67, 31, 0, 0.28),
+          0 0 1.2rem rgba(135, 255, 179, 0.24);
+      }
+
+      .guide-button:is(:hover, :focus-visible, .is-pointer-reactive, .is-touch-active) {
+        transform: translateY(2px) scale(0.98);
+        filter: saturate(1.18) brightness(1.06);
+      }
+
+      @media (max-width: 940px) {
+        .guide-nav {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .guide-nav a {
+          flex-basis: 8.6rem;
+          min-width: 8.6rem;
+        }
+      }
     </style>
   </head>
-  <body>
+  <body class="has-guide-startup-audio">
     <div class="guide-puck-field" aria-hidden="true">
       <span></span>
       <span></span>
       <span></span>
       <span></span>
       <span></span>
+    </div>
+    <div class="guide-startup-audio" data-guide-startup-audio aria-label="LottoMind guide startup music">
+      <div class="guide-startup-panel" role="dialog" aria-modal="true" aria-labelledby="guideStartupTitle">
+        <button class="guide-startup-close" type="button" data-guide-startup-close aria-label="Enter guide without music">X</button>
+        <p class="eyebrow">LottoMind&trade; Guide</p>
+        <h2 id="guideStartupTitle">Start the guide music.</h2>
+        <p>Play the guide soundtrack while reading the quick start and manual download.</p>
+        <div class="guide-startup-actions">
+          <button class="primary-action" type="button" data-guide-startup-play>Start Music</button>
+          <button class="secondary-action" type="button" data-guide-startup-close>Enter Guide</button>
+        </div>
+        <p class="guide-startup-status" data-guide-startup-status aria-live="polite"></p>
+      </div>
     </div>
     <div class="guide-header-hover-sensor" data-guide-header-sensor aria-hidden="true"></div>
 
@@ -1454,6 +1662,67 @@
         </div>
       </section>
 
+      <section class="section" id="lottomind-app-guide">
+        <div class="section-head">
+          <p class="eyebrow">LottoMind App Beta</p>
+          <h2>How to use LottoMind.</h2>
+          <p>
+            LottoMind is a smart lottery notebook for regular people. It helps you organize number ideas,
+            dream symbols, saved sets, and daily tools. It does not predict the lottery.
+          </p>
+        </div>
+        <div class="steps" aria-label="How to use LottoMind app">
+          <article class="step-card">
+            <span class="step-number">1</span>
+            <h3>Open the App.</h3>
+            <p>Use the beta preview link and start from the dashboard. No download is ready yet.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">2</span>
+            <h3>Pick Your Game.</h3>
+            <p>Choose the game style you want to organize: Pick 3, Pick 4, Cash 5, Powerball-style, or Mega Millions-style.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">3</span>
+            <h3>Use Number Radar.</h3>
+            <p>Check hot, cold, active, and balanced signals. Think of it as a number weather map, not a guarantee.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">4</span>
+            <h3>Use Dream Oracle.</h3>
+            <p>Type the dream you remember. LottoMind looks for symbols like gold, water, key, car, house, moon, angel, and bridge.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">5</span>
+            <h3>Generate a Set.</h3>
+            <p>Create organized number sets from radar, dream, hot, cold, balanced, or daily tools.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">6</span>
+            <h3>Save to Wallet.</h3>
+            <p>Save the ideas you like so you can compare them later instead of losing them.</p>
+          </article>
+        </div>
+        <div class="manual-actions">
+          <a
+            class="primary-action"
+            href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+            data-protected-action
+            data-protected-kind="launch"
+            data-protected-url="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"
+          >Open Beta Preview</a>
+          <a class="secondary-action" href="mailto:robjasper2084@gmail.com?subject=LottoMind%20App%20Beta%20Download%20List&body=Please%20add%20me%20to%20the%20LottoMind%20App%20Beta%20download%20list.">Download Beta - Coming Soon</a>
+        </div>
+        <p class="access-note">Opening the LottoMind&trade; beta preview requires the LottoMind&trade; password.</p>
+        <article class="warning">
+          <p class="eyebrow">Entertainment Only</p>
+          <p>
+            LottoMind is entertainment only. Lottery results are random. Use official lottery sources for rules,
+            draw times, prizes, odds, and eligibility.
+          </p>
+        </article>
+      </section>
+
       <section class="section" id="features">
         <div class="section-head">
           <p class="eyebrow">Features</p>
@@ -1567,6 +1836,16 @@
             <p>No. It creates organized number ideas and entertainment guidance. It cannot guarantee wins.</p>
           </details>
           <details>
+            <summary>LottoMind App Manual - Number Radar + Dream Oracle</summary>
+            <p>
+              Open LottoMind from the beta preview link, choose a game format, then use Number Radar to compare
+              hot, active, cooling, and cold numbers. Use Dream Oracle when you remember a dream: type clear symbols
+              like water, gold, door, key, car, house, baby, moon, angel, or bridge. Generate a set, read the note,
+              and save only the ideas you want to review later. Never treat the app as a promise or prediction.
+              Lottery outcomes are random.
+            </p>
+          </details>
+          <details>
             <summary>What is the best way to start?</summary>
             <p>Pick one game, generate a balanced set, save it, check history, then set a reminder.</p>
           </details>
@@ -1604,13 +1883,51 @@
       <a href="https://robjasper2084.github.io/lottominded-ultra.io/how-to-use.html">Original Page</a>
       <a href="#top">Back to top</a>
     </footer>
+    <audio id="guideStartupSoundtrack" preload="auto" data-guide-startup-soundtrack>
+      <source src="./assets/audio/guide-startup-music.mp3?v=guide-startup-1" type="audio/mpeg" />
+    </audio>
     <script>
       (() => {
         const accessPassword = "LottoMind2026";
+        const guideStartup = document.querySelector("[data-guide-startup-audio]");
+        const guideStartupAudio = document.querySelector("[data-guide-startup-soundtrack]");
+        const guideStartupStatus = document.querySelector("[data-guide-startup-status]");
         const header = document.querySelector("[data-guide-header]");
         const sensor = document.querySelector("[data-guide-header-sensor]");
         let lastHeaderReveal = 0;
         let lastHeaderHide = 0;
+
+        const closeGuideStartup = () => {
+          guideStartup?.classList.add("is-hidden");
+          document.body.classList.remove("has-guide-startup-audio");
+        };
+
+        const playGuideStartup = async () => {
+          if (!guideStartupAudio) {
+            closeGuideStartup();
+            return;
+          }
+          try {
+            guideStartupAudio.volume = 0.46;
+            guideStartupAudio.loop = true;
+            guideStartupAudio.currentTime = 0;
+            await guideStartupAudio.play();
+            closeGuideStartup();
+          } catch (error) {
+            if (guideStartupStatus) {
+              guideStartupStatus.textContent = "Tap Start Music again if your browser needs another gesture.";
+            }
+            guideStartup?.classList.add("is-audio-blocked");
+          }
+        };
+
+        guideStartup?.querySelector("[data-guide-startup-play]")?.addEventListener("click", playGuideStartup);
+        guideStartup?.querySelectorAll("[data-guide-startup-close]").forEach((button) => {
+          button.addEventListener("click", closeGuideStartup);
+        });
+        guideStartup?.addEventListener("click", (event) => {
+          if (event.target === guideStartup) closeGuideStartup();
+        });
 
         if (header && sensor) {
           const hideHeader = (event) => {
@@ -1804,6 +2121,7 @@
           if (event.target === gate) closeGate();
         });
         document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && guideStartup && !guideStartup.classList.contains("is-hidden")) closeGuideStartup();
           if (event.key === "Escape" && gate && !gate.hidden) closeGate();
         });
 

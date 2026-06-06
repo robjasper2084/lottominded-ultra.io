@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=unified-header-hover-3" />
+    <link rel="stylesheet" href="./styles.css?v=home-sphere-tabs-2" />
   </head>
   <body class="home-page has-startup-modal has-sphere-header">
     <header class="site-header home-like-header home-sphere-header" data-site-header>
@@ -30,9 +30,8 @@
         <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
         <a href="./how-to-use.html" data-icon="GO">Guide</a>
       </nav>
-      <div class="direct-launch" aria-label="Direct studio launch and cart">
+      <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        <a class="direct-action cart-toggle" href="./merch-store.html#drop">Cart <span>0</span></a>
       </div>
     </header>
 
@@ -112,7 +111,10 @@
       </div>
     </aside>
 
-    <main>
+    <main class="home-sphere-main" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg">
+      <canvas class="home-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
+      <div class="home-sphere-grid" aria-hidden="true"></div>
+      <div class="home-sphere-scanline" aria-hidden="true"></div>
       <section class="hero kinetic-hero" id="top" data-kinetic-hero>
         <video class="hero-motion" autoplay muted loop playsinline preload="auto" aria-hidden="true">
           <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
@@ -137,7 +139,8 @@
           </p>
           <div class="hero-actions">
             <a class="secondary-action" href="https://lottomind.one/">Lottomind.one</a>
-            <a class="secondary-action" href="#features">Explore Features</a>
+            <a class="secondary-action" href="./features-app.html">Explore Features</a>
+            <a class="secondary-action" href="#lottomind-app">LottoMind App Beta</a>
           </div>
         </div>
         <figure class="hero-brand-art" aria-hidden="true">
@@ -195,16 +198,6 @@
           <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
           <span>Produced by LOTTOMINDED&trade; Recording artist Bloom Through Gloom</span>
         </div>
-        <article class="prompt-launch-card">
-          <h3>Beat -> Suno Prompt</h3>
-          <p>Generate song briefs, style language, arrangement notes, hooks, and exclusions from a beat idea or loaded session.</p>
-          <a class="primary-action" href="./prompt-lab.html#beat-suno">Open Suno Lab</a>
-        </article>
-        <article class="prompt-launch-card">
-          <h3>Beat -> Video Prompt</h3>
-          <p>Build cinematic prompts with subject, camera movement, beat-synced edits, negative prompts, and social-ready pacing.</p>
-          <a class="primary-action" href="./prompt-lab.html#beat-video">Open Video Lab</a>
-        </article>
       </section>
 
       <section class="access-band marketing-section reveal-section" data-reveal>
@@ -221,7 +214,53 @@
         </p>
       </section>
 
-      <section class="feature-band marketing-section reveal-section" id="features" data-reveal>
+      <section class="feature-band marketing-section reveal-section" id="lottomind-app" data-reveal>
+        <h2 class="kinetic-word" data-kinetic="LOTTOMIND APP BETA" tabindex="0">LottoMind App Beta</h2>
+        <p class="feature-lede">
+          LottoMind is like a smart lottery notebook. You can write down dreams, scan number patterns,
+          generate organized number sets, save picks you like, and review your history. It does not promise wins
+          and it does not predict lottery results. Lottery outcomes are random.
+        </p>
+        <div class="feature-grid">
+          <article class="feature-spotlight">
+            <p class="eyebrow">Product Beta</p>
+            <h3 class="kinetic-word" data-kinetic="NUMBER RADAR, DREAM ORACLE, SAVED WALLET." tabindex="0">
+              Number Radar, Dream Oracle, and a simple saved-number wallet.
+            </h3>
+            <p>
+              Built for people who want a cleaner way to organize number ideas, dream symbols, game formats,
+              saved sets, daily tools, and personal notes in one LottoMind flow.
+            </p>
+            <div class="feature-actions feature-actions-side">
+              <a class="primary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">Open Beta Preview</a>
+              <a class="secondary-action" href="./how-to-use.html#lottomind-app-guide">How To Use LottoMind</a>
+              <a class="secondary-action" href="mailto:robjasper2084@gmail.com?subject=LottoMind%20App%20Beta%20Download%20List&body=Please%20add%20me%20to%20the%20LottoMind%20App%20Beta%20download%20list.">Download Beta - Coming Soon</a>
+            </div>
+          </article>
+          <article>
+            <h3>Number Radar</h3>
+            <p>Compares hot, cold, active, and balanced number signals so a regular person can see patterns without reading a complicated chart.</p>
+          </article>
+          <article>
+            <h3>Dream Oracle</h3>
+            <p>Turn dream words like water, gold, door, key, baby, car, moon, or angel into symbolic number ideas and plain meanings.</p>
+          </article>
+          <article>
+            <h3>Saved Wallet</h3>
+            <p>Save number sets, dream readings, favorite ideas, and history in one place so you do not lose what you liked.</p>
+          </article>
+          <article>
+            <h3>Daily Tools</h3>
+            <p>Use Pick 3, Pick 4, Cash 5, Powerball-style, Mega Millions-style, and daily number tools for organized entertainment picks.</p>
+          </article>
+        </div>
+        <p class="safety-note">
+          LottoMind is for entertainment, journaling, and organization only. It is not a prediction system.
+          Lottery outcomes are random. Always verify official rules, draw times, prizes, and eligibility before playing.
+        </p>
+      </section>
+
+      <section class="feature-band marketing-section reveal-section" id="features" data-reveal hidden aria-hidden="true">
         <video class="feature-motion-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
           <source src="./assets/video/home-feature-motion.mp4" type="video/mp4" />
         </video>
@@ -230,20 +269,6 @@
           waveform editing, AI-assisted mastering, Beat DNA prompts, and creative signal tools ready for every session.
         </p>
         <div class="feature-grid">
-          <article class="feature-spotlight">
-            <p class="eyebrow">ULTRA Studio Cockpit</p>
-            <h3 class="kinetic-word" data-kinetic="BEAT DNA, STEM MIXING, AI PROMPTS, AND CREATIVE NUMBER SIGNALS." tabindex="0">Beat DNA, stem mixing, AI prompts, and creative number signals.</h3>
-            <p>
-              Load stems, trim waveforms, perform pads, sequence drums, mix decks, master locally,
-              and generate creative outputs from the same Beat DNA.
-            </p>
-            <div class="feature-actions feature-actions-side">
-              <a class="primary-action" href="./features-app.html">Open Feature Console</a>
-              <a class="secondary-action beat2lotto-tab-copy" href="./prompt-lab.html#beat2lotto"><span aria-hidden="true">◎</span> Beat2Lotto+</a>
-              <a class="secondary-action" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-            </div>
-            <a class="secondary-action" href="./lottomind-stem-studio/index.html">Open Studio Tools</a>
-          </article>
           <article>
             <h3>Touch Pads</h3>
             <p>Real pressure where supported, simulated velocity on regular touch screens, banks, note repeat, samples, and keyboard shortcuts.</p>
@@ -275,6 +300,7 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./site.js?v=unified-header-hover-3" defer></script>
+    <script src="./site.js?v=audio-artlines-2" defer></script>
+    <script src="./lottery-spheres.js?v=home-gold-balls-feature-hide-1" defer></script>
   </body>
 </html>

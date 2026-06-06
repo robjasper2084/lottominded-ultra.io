@@ -447,6 +447,72 @@
     });
   }
 
+  function setupStreamStartupAudio() {
+    const audio = document.querySelector("[data-stream-events-soundtrack]");
+    const startup = document.querySelector("[data-stream-startup-audio]");
+    const status = document.querySelector("[data-stream-startup-status]");
+    if (!audio || !startup) return;
+
+    const close = () => {
+      startup.classList.add("is-hidden");
+      document.body.classList.remove("has-stream-startup-audio");
+    };
+
+    const start = async () => {
+      try {
+        audio.volume = 0.42;
+        audio.loop = true;
+        audio.currentTime = 0;
+        await audio.play();
+        close();
+      } catch (error) {
+        startup.classList.add("is-audio-blocked");
+        if (status) {
+          status.textContent = "Tap Start Music again if your browser needs another gesture.";
+        }
+      }
+    };
+
+    startup.querySelector("[data-stream-startup-play]")?.addEventListener("click", start);
+    startup.querySelectorAll("[data-stream-startup-close]").forEach((button) => {
+      button.addEventListener("click", close);
+    });
+    startup.addEventListener("click", (event) => {
+      if (event.target === startup) close();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !startup.classList.contains("is-hidden")) close();
+    });
+    document.querySelectorAll("video").forEach((video) => {
+      video.addEventListener("play", () => {
+        if (!audio.paused) audio.pause();
+      });
+    });
+  }
+
+  function setupLiveEventArtlines() {
+    if (!document.body.classList.contains("live-events-page")) return;
+    const update = (x, y) => {
+      const width = Math.max(window.innerWidth, 1);
+      const height = Math.max(window.innerHeight, 1);
+      document.body.style.setProperty("--artline-x", `${Math.round(x)}px`);
+      document.body.style.setProperty("--artline-y", `${Math.round(y)}px`);
+      document.body.style.setProperty("--artline-xp", `${Math.round((x / width) * 100)}%`);
+      document.body.style.setProperty("--artline-yp", `${Math.round((y / height) * 100)}%`);
+    };
+
+    update(window.innerWidth * 0.68, window.innerHeight * 0.38);
+    window.addEventListener("pointermove", (event) => update(event.clientX, event.clientY), { passive: true });
+    window.addEventListener(
+      "touchmove",
+      (event) => {
+        const touch = event.touches?.[0] || event.changedTouches?.[0];
+        if (touch) update(touch.clientX, touch.clientY);
+      },
+      { passive: true },
+    );
+  }
+
   function renderLiveEventsPage(root) {
     const events = getFeaturedLiveEvents(LOTTO_MIND_STREAM_EVENTS);
     const grid = root.querySelector("[data-live-events-grid]");
@@ -457,6 +523,8 @@
     setupPreviewLoops(root);
   }
 
+  setupStreamStartupAudio();
+  setupLiveEventArtlines();
   document.querySelectorAll("[data-live-events-rail]").forEach(renderLiveEventsRail);
   document.querySelectorAll("[data-live-events-page]").forEach(renderLiveEventsPage);
   setupPreviewLoops(document);

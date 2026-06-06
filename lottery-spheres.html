@@ -10,8 +10,8 @@
     <title>LOTTOMINDED ULTRA | Lottery Spheres</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=unified-header-hover-3" />
-    <link rel="stylesheet" href="./lottery-spheres.css?v=sphere-nav-balls-1" />
+    <link rel="stylesheet" href="./styles.css?v=sphere-audio-members-1" />
+    <link rel="stylesheet" href="./lottery-spheres.css?v=sphere-audio-members-1" />
   </head>
   <body class="lottery-spheres-page">
     <header class="site-header home-like-header lottery-spheres-header" data-site-header>
@@ -30,6 +30,20 @@
         <a href="./lottomind-stem-studio/index.html" data-icon="ST">Studio</a>
       </nav>
     </header>
+
+    <div class="sphere-audio-gate" data-sphere-audio-gate role="dialog" aria-modal="true" aria-label="Sphere background music">
+      <div class="sphere-audio-panel">
+        <p class="section-kicker">Vault Frequency</p>
+        <h2>LottoMind Vault 174 Hz</h2>
+        <p>Start the sphere room soundtrack so the golden balls throb with the beat.</p>
+        <div class="sphere-audio-actions">
+          <button class="primary-action" type="button" data-sphere-audio-start>Start Music</button>
+          <button class="secondary-action" type="button" data-sphere-audio-skip>Enter Quiet</button>
+        </div>
+        <p class="sphere-audio-status" data-sphere-audio-status aria-live="polite"></p>
+      </div>
+    </div>
+    <audio data-sphere-soundtrack src="./assets/audio/lottomind-vault-174-hz.mp3" loop preload="auto"></audio>
 
     <main>
       <section class="sphere-stage" id="spheres" data-spheres-stage data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg" aria-label="Interactive LOTTOMINDED lottery spheres">
@@ -104,7 +118,7 @@
       <span>2026</span>
     </footer>
 
-    <script src="./site.js?v=unified-header-hover-3" defer></script>
-    <script src="./lottery-spheres.js?v=touch-spheres-1" defer></script>
+    <script src="./site.js?v=sphere-audio-members-1" defer></script>
+    <script src="./lottery-spheres.js?v=sphere-audio-members-1" defer></script>
   </body>
 </html>
