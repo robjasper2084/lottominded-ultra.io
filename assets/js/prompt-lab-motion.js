@@ -76,6 +76,27 @@
     const signalsBtn = $('[data-generate="signals"]');
     const out = $('#prompt-output');
     const get = id => ($(id)?.value || '').trim();
+    const signalMaxes = () => {
+      const format = get('#signal-game-format') || 'pick4';
+      if(format === 'pick3') return [9, 9, 9];
+      if(format === 'cash5') return [39, 39, 39, 39, 39];
+      if(format === 'powerball-style') return [69, 69, 69, 69, 69, 26];
+      return [9, 9, 9, 9];
+    };
+    const buildSignals = () => {
+      const seed = (get('#creative-seed') || 'LottoMind prompt lab').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      let rng = seed % 9973;
+      const next = max => { rng = (rng * 9301 + 49297) % 233280; return 1 + (rng % max); };
+      const set = signalMaxes().map(next).join(' - ');
+      return `CREATIVE SIGNAL SET\n${set}\nEntertainment-only ritual seed. Not a prediction. Lottery outcomes are random. Verify all rules with official sources.`;
+    };
+    document.addEventListener('click', event => {
+      const trigger = event.target.closest('[data-generate="signals"]');
+      if(!trigger || !out) return;
+      out.textContent = buildSignals();
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
     sunoBtn && sunoBtn.addEventListener('click', () => {
       if(!out) return;
       const idea=get('#beat-idea')||'mystical LottoMind signal beat';
@@ -137,5 +158,20 @@
     sections.forEach(s=>io.observe(s));
   }
 
-  document.addEventListener('DOMContentLoaded', () => { revealOnScroll(); parallaxHero(); magneticButtons(); overlayMenu(); copyButtons(); promptGenerators(); activeNav(); });
+  function hashScrollOffset(){
+    const align = () => {
+      if(!location.hash || location.hash.length < 2) return;
+      const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if(!target) return;
+      const header = $('.site-header') || $('.manual-instrument-header');
+      const offset = (header?.getBoundingClientRect().height || 0) + 28;
+      const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - offset);
+      window.scrollTo({ top, behavior: 'auto' });
+    };
+    window.addEventListener('hashchange', () => setTimeout(align, 40));
+    window.addEventListener('load', () => { setTimeout(align, 80); setTimeout(align, 420); });
+    align();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => { revealOnScroll(); parallaxHero(); magneticButtons(); overlayMenu(); copyButtons(); promptGenerators(); activeNav(); hashScrollOffset(); });
 })();

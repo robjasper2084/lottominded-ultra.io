@@ -12,8 +12,8 @@
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=home-readable-nav-1" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
-    <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-1" />
-    <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-1" />
+    <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-3" />
+    <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-3" />
   </head>
   <body class="prompt-lab-page has-manual-instrument-header pl-page">
     <header class="site-header home-like-header manual-instrument-header" data-site-header>
@@ -195,6 +195,13 @@
             <input id="motion-style" placeholder="slow push-in, smooth orbit, beat-synced light pulses" />
             <label for="creative-seed">Creative seed</label>
             <input id="creative-seed" placeholder="Enter phrase to seed entertainment-only signals" />
+            <label for="signal-game-format">Game format</label>
+            <select id="signal-game-format" aria-label="Creative signal format">
+              <option value="pick4">Pick 4 style</option>
+              <option value="pick3">Pick 3 style</option>
+              <option value="cash5">Cash 5 style</option>
+              <option value="powerball-style">Powerball-style creative set</option>
+            </select>
             <div class="pl-copy-row">
               <button class="pl-cta magnetic" type="button" data-generate="suno">Generate Suno Prompt</button>
               <button class="pl-cta violet magnetic" type="button" data-generate="video">Generate Video Prompt</button>
@@ -429,6 +436,6 @@
     <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
     <script src="./site.js?v=home-readable-nav-1" defer></script>
     <script src="./lottery-spheres.js?v=touch-spheres-1" defer></script>
-    <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-1" defer></script>
+    <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-3" defer></script>
   </body>
 </html>

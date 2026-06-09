@@ -24,6 +24,10 @@
   padding-top: clamp(4rem, 8vw, 7rem);
 }
 
+.prompt-lab-page.pl-page :is(.pl-shell[id], .pl-section[id], .prompt-mini-app[id], #beat2lotto) {
+  scroll-margin-top: clamp(9rem, 16vw, 14rem);
+}
+
 .pl-members-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
