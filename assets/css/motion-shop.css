@@ -57,6 +57,22 @@ body.motion-shop-page::after {
   backdrop-filter: blur(18px);
 }
 
+.live-events-page .site-header.lottery-spheres-header {
+  position: fixed;
+}
+
+.live-events-page .motion-main {
+  padding-top: clamp(5.5rem, 9vw, 8.5rem);
+}
+
+.live-events-page [id] {
+  scroll-margin-top: clamp(8.25rem, 15vw, 10rem);
+}
+
+.motion-features-page [id] {
+  scroll-margin-top: clamp(13.5rem, 18vw, 16rem);
+}
+
 .motion-main {
   position: relative;
   z-index: 1;
