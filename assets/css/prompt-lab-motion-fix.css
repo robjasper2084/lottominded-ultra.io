@@ -1,0 +1,54 @@
+/* LOTTOMINDED ULTRA Prompt Lab site-fit overrides. */
+.pl-title,
+.pl-stack-panel strong,
+.pl-section h2 {
+  letter-spacing: 0;
+}
+
+.pl-nav,
+.pl-hero-art,
+.pl-card,
+.pl-console,
+.pl-stack-panel,
+.pl-safety,
+.pl-overlay-card,
+.pl-cta,
+.pl-menu-toggle,
+.pl-console input,
+.pl-console textarea,
+.pl-console select {
+  border-radius: 8px;
+}
+
+.prompt-lab-page.pl-page .manual-instrument-header + .pl-shell.pl-hero {
+  padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.pl-members-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pl-members-grid .pl-card {
+  min-height: 230px;
+}
+
+.pl-local-note {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid rgba(0, 255, 154, 0.38);
+  border-radius: 999px;
+  padding: 0.48rem 0.68rem;
+  color: var(--lm-green);
+  background: rgba(0, 255, 154, 0.08);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@media (max-width: 880px) {
+  .pl-members-grid {
+    grid-template-columns: 1fr;
+  }
+}

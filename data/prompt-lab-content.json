@@ -1,0 +1,41 @@
+{
+  "page": "prompt-lab.html",
+  "theme": "Prompt Lab Signal Console",
+  "navigationNotes": [
+    "Preserve existing LOTTOMINDED ULTRA nav",
+    "Keep C-scale route bar",
+    "Keep Launch Studio CTA"
+  ],
+  "modules": [
+    {
+      "title": "Beat DNA",
+      "status": "Free Preview",
+      "description": "Typed rhythm, BPM, mood, and stem texture become creative prompt inputs."
+    },
+    {
+      "title": "Beat \u2192 Suno Prompt",
+      "status": "Members",
+      "description": "Build polished song prompts with arrangement, hooks, vocals, and style notes."
+    },
+    {
+      "title": "Beat \u2192 Video Prompt",
+      "status": "Credit Unlock",
+      "description": "Create cinematic video prompts for dream clips, trailers, event drops, and visualizers."
+    },
+    {
+      "title": "Prompt Vault",
+      "status": "Coming Soon",
+      "description": "Saved prompt recipes, one-click blocks, remix history, and campaign language."
+    },
+    {
+      "title": "Creative Signal Sets",
+      "status": "Entertainment Only",
+      "description": "Local creative seed generator. Never frame as a lottery prediction."
+    }
+  ],
+  "marquees": [
+    "PROMPT BEAT ROUTE \u2022 LOCAL GENERATION \u2022 NO UPLOADS \u2022 NO AUTO SUBMIT \u2022 CREATIVE SETS ONLY \u2022",
+    "DREAM \u2022 GENERATE \u2022 SCAN \u2022 STREAM \u2022 CREATE \u2022 PROMPT \u2022 COPY \u2022 BUILD \u2022"
+  ],
+  "legal": "LottoMind Prompt Lab is for entertainment, organization, music/video prompting, and creative exploration. It does not predict or guarantee lottery results."
+}

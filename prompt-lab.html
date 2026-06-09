@@ -10,10 +10,12 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=audio-artlines-2" />
+    <link rel="stylesheet" href="./styles.css?v=home-readable-nav-1" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
+    <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-1" />
+    <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-1" />
   </head>
-  <body class="prompt-lab-page has-manual-instrument-header">
+  <body class="prompt-lab-page has-manual-instrument-header pl-page">
     <header class="site-header home-like-header manual-instrument-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
@@ -91,7 +93,172 @@
       </a>
     </section>
 
-    <main>
+    <main id="top">
+      <section class="pl-shell pl-hero" id="hero">
+        <div data-reveal>
+          <span class="pl-kicker">Prompt Lab Signal Console</span>
+          <h1 class="pl-title" aria-label="Write Route Generate Copy">
+            <span>Write</span>
+            <span class="gold">Route</span>
+            <span>Generate</span>
+            <span>Copy</span>
+          </h1>
+          <p class="pl-lede">
+            Turn Beat DNA, mood, BPM, scene notes, and creative intent into LottoMind-ready prompts for music, video,
+            studio campaigns, and entertainment-only signal rituals.
+          </p>
+          <span class="pl-local-note">Local prompt generation. No uploads. No auto-submit.</span>
+          <div class="pl-actions">
+            <a class="pl-cta magnetic" href="#generators">Generate Prompt</a>
+            <a class="pl-cta violet magnetic" href="#vault">Open Prompt Vault</a>
+            <a class="pl-cta secondary magnetic" href="#safety">Safety Notes</a>
+          </div>
+        </div>
+        <div class="pl-hero-art" aria-label="Animated Prompt Lab signal console" data-reveal>
+          <div class="pl-orb" aria-hidden="true"></div>
+          <div class="pl-route" aria-label="C scale route navigation">
+            <div class="pl-note"><b>C</b><span>Create</span></div>
+            <div class="pl-note"><b>D</b><span>Dream</span></div>
+            <div class="pl-note"><b>E</b><span>Energize</span></div>
+            <div class="pl-note"><b>F</b><span>Focus</span></div>
+            <div class="pl-note"><b>G</b><span>Generate</span></div>
+            <div class="pl-note"><b>A</b><span>Analyze</span></div>
+            <div class="pl-note"><b>B</b><span>Build</span></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="pl-marquee" aria-label="Prompt Lab privacy marquee">
+        <div class="pl-marquee-track">
+          <span>PROMPT BEAT ROUTE &bull; LOCAL GENERATION &bull; NO UPLOADS &bull; NO AUTO SUBMIT &bull; CREATIVE SETS ONLY &bull;</span>
+          <span>PROMPT BEAT ROUTE &bull; LOCAL GENERATION &bull; NO UPLOADS &bull; NO AUTO SUBMIT &bull; CREATIVE SETS ONLY &bull;</span>
+        </div>
+      </div>
+
+      <section class="pl-shell pl-section" id="prompt-rail">
+        <div class="pl-section-head" data-reveal>
+          <h2>Prompt Modules</h2>
+          <p class="pl-muted">Swipe through the creative console.</p>
+        </div>
+        <div class="pl-rail" aria-label="Prompt module rail">
+          <article class="pl-card" data-reveal>
+            <img class="icon" src="./assets/icons/beat-dna.svg" alt="" />
+            <span class="pl-badge">Free Preview</span>
+            <h3>Beat DNA</h3>
+            <p>Rhythm, BPM, mood, drum pattern, and stem texture become creative prompt inputs.</p>
+          </article>
+          <article class="pl-card" data-reveal>
+            <img class="icon" src="./assets/icons/suno.svg" alt="" />
+            <span class="pl-badge">Members</span>
+            <h3>Beat to Suno</h3>
+            <p>Generate polished music prompts with style, hook, arrangement, and vocal direction.</p>
+          </article>
+          <article class="pl-card" data-reveal>
+            <img class="icon" src="./assets/icons/video.svg" alt="" />
+            <span class="pl-badge">Credit Unlock</span>
+            <h3>Beat to Video</h3>
+            <p>Build cinematic text-to-video prompts for trailers, dream clips, drops, and visualizers.</p>
+          </article>
+          <article class="pl-card" data-reveal>
+            <img class="icon" src="./assets/icons/vault.svg" alt="" />
+            <span class="pl-badge">Coming Soon</span>
+            <h3>Prompt Vault</h3>
+            <p>Saved prompt recipes, one-click blocks, remix history, and campaign language.</p>
+          </article>
+          <article class="pl-card" data-reveal>
+            <img class="icon" src="./assets/icons/dice.svg" alt="" />
+            <span class="pl-badge">Entertainment Only</span>
+            <h3>Creative Signal Sets</h3>
+            <p>Local creative seed generator for journaling and rituals. Never prediction language.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="pl-shell pl-section" id="generators">
+        <div class="pl-section-head" data-reveal>
+          <h2>Generator Console</h2>
+          <p class="pl-muted">Local prompt tools. No paid APIs. No upload. No auto-submit.</p>
+        </div>
+        <div class="pl-prompt-grid">
+          <form class="pl-console" data-reveal onsubmit="return false;">
+            <label for="beat-idea">Beat idea</label>
+            <input id="beat-idea" placeholder="Verse 1 drums, bass pocket, neon synth hook" />
+            <label for="mood">Mood / genre</label>
+            <input id="mood" placeholder="cinematic cyber R&B with trap drums" />
+            <label for="bpm">BPM</label>
+            <input id="bpm" placeholder="120" />
+            <label for="scene-subject">Scene subject</label>
+            <input id="scene-subject" placeholder="producer activating a glowing Beat DNA orb" />
+            <label for="scene-location">Location</label>
+            <input id="scene-location" placeholder="neon glass music studio with floating waveform meters" />
+            <label for="motion-style">Motion style</label>
+            <input id="motion-style" placeholder="slow push-in, smooth orbit, beat-synced light pulses" />
+            <label for="creative-seed">Creative seed</label>
+            <input id="creative-seed" placeholder="Enter phrase to seed entertainment-only signals" />
+            <div class="pl-copy-row">
+              <button class="pl-cta magnetic" type="button" data-generate="suno">Generate Suno Prompt</button>
+              <button class="pl-cta violet magnetic" type="button" data-generate="video">Generate Video Prompt</button>
+              <button class="pl-cta secondary magnetic" type="button" data-generate="signals">Generate Number Signals</button>
+            </div>
+          </form>
+          <div class="pl-console" data-reveal>
+            <span class="pl-chip">Output Console</span>
+            <div id="prompt-output" class="pl-output">Generated prompt output will appear here.</div>
+            <div class="pl-copy-row">
+              <button class="pl-cta secondary magnetic" type="button" data-copy-target="#prompt-output" data-label="Copy Output">Copy Output</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="pl-marquee reverse" aria-label="Prompt Lab route marquee">
+        <div class="pl-marquee-track">
+          <span>DREAM &bull; GENERATE &bull; SCAN &bull; STREAM &bull; CREATE &bull; PROMPT &bull; COPY &bull; BUILD &bull;</span>
+          <span>DREAM &bull; GENERATE &bull; SCAN &bull; STREAM &bull; CREATE &bull; PROMPT &bull; COPY &bull; BUILD &bull;</span>
+        </div>
+      </div>
+
+      <section class="pl-shell pl-section" id="vault">
+        <div class="pl-section-head" data-reveal>
+          <h2>Prompt Vault Stack</h2>
+          <p class="pl-muted">Big reusable blocks for creative prompting, studio campaigns, and safe signal rituals.</p>
+        </div>
+        <div class="pl-stack">
+          <article class="pl-stack-panel" data-reveal><strong>Dream</strong><p>Convert dream journal language into cinematic video prompt blocks and mystical music direction.</p></article>
+          <article class="pl-stack-panel" data-reveal><strong>Prompt</strong><p>Package reusable copy blocks for Suno-style music, video tools, studio pages, merch drops, and event promos.</p></article>
+          <article class="pl-stack-panel" data-reveal><strong>Build</strong><p>Send Codex structured instructions with assets, content JSON, implementation notes, and local privacy rules.</p></article>
+          <article class="pl-stack-panel" data-reveal><strong>Remix</strong><p>Turn one prompt recipe into alternate moods, hooks, scenes, and campaign angles.</p></article>
+          <article class="pl-stack-panel" data-reveal><strong>Copy</strong><p>Keep one-click copy flows for music prompts, video prompts, and signal output.</p></article>
+          <article class="pl-stack-panel" data-reveal><strong>Unlock</strong><p>Keep free previews useful while members and credits unlock deeper prompt packs.</p></article>
+        </div>
+      </section>
+
+      <section class="pl-shell pl-section" id="membership">
+        <div class="pl-section-head" data-reveal>
+          <h2>Prompt Power For Members</h2>
+          <p class="pl-muted">Do not block the whole page. Keep free preview useful.</p>
+        </div>
+        <div class="pl-members-grid">
+          <article class="pl-card" data-reveal><span class="pl-badge">Free Preview</span><h3>Prompt Starter</h3><p>Generate and copy core music, video, and creative signal prompts.</p></article>
+          <article class="pl-card" data-reveal><span class="pl-badge">$9.99/month</span><h3>Membership</h3><p>Unlock deeper recipes, saved prompt flows, and members-only prompt packs.</p></article>
+          <article class="pl-card" data-reveal><span class="pl-badge">Credit Unlock</span><h3>Select Tools</h3><p>Use Lotto Credits for 24 hour access to select advanced prompt modules.</p></article>
+          <article class="pl-card" data-reveal><span class="pl-badge">Studio Pro</span><h3>Prompt Pack</h3><p>Studio campaign copy, arrangement notes, and Codex-ready build prompts.</p></article>
+          <article class="pl-card" data-reveal><span class="pl-badge">Video</span><h3>Prompt Pack</h3><p>Trailer, visualizer, dream clip, merch drop, and event-room video blocks.</p></article>
+          <article class="pl-card" data-reveal><span class="pl-badge">Dream Oracle</span><h3>Prompt Pack</h3><p>Dream-language routes for creative interpretation and organized notes.</p></article>
+        </div>
+      </section>
+
+      <section class="pl-shell pl-section" id="safety">
+        <div class="pl-safety" data-reveal>
+          <strong>Creative use only.</strong>
+          LottoMind Prompt Lab is for entertainment, organization, music/video prompting, and creative exploration.
+          It does not predict or guarantee lottery results. Lottery outcomes are random. Verify official game rules
+          and eligibility before playing.
+          <br />
+          Local prompt generation. No uploads. No auto-submit.
+        </div>
+      </section>
+
       <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ copied console" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg">
         <canvas class="prompt-lab-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
         <div class="prompt-lab-sphere-scanline" aria-hidden="true"></div>
@@ -240,13 +407,28 @@
       </section>
     </main>
 
+    <button class="pl-floating" type="button" aria-label="Open Prompt Lab menu">+</button>
+    <div class="pl-overlay" role="dialog" aria-modal="true" aria-label="Prompt Lab menu">
+      <div class="pl-overlay-card">
+        <button class="pl-close" type="button" aria-label="Close menu">X</button>
+        <a href="./index.html">Home</a>
+        <a href="./features-app.html">Features</a>
+        <a href="./live-events.html">Live Events</a>
+        <a href="./prompt-lab.html">Prompts</a>
+        <a href="./merch-store.html">Merch</a>
+        <a href="./how-to-use.html">Guide</a>
+        <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
+      </div>
+    </div>
+
     <footer>
       <span>LOTTOMINDED ULTRA Prompt Lab</span>
       <span>Local prompt generation. No uploads, no auto-submit, no prediction claims.</span>
     </footer>
 
     <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
-    <script src="./site.js?v=audio-artlines-2" defer></script>
+    <script src="./site.js?v=home-readable-nav-1" defer></script>
     <script src="./lottery-spheres.js?v=touch-spheres-1" defer></script>
+    <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-1" defer></script>
   </body>
 </html>

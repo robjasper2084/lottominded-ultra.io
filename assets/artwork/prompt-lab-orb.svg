@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-label="LottoMind prompt lab gold and violet signal orb">
+<defs><radialGradient id="g" cx="55%" cy="45%"><stop offset="0" stop-color="#FFC240" stop-opacity="1"/><stop offset=".34" stop-color="#7B3CFF" stop-opacity=".55"/><stop offset="1" stop-color="#050505" stop-opacity="0"/></radialGradient><filter id="blur"><feGaussianBlur stdDeviation="3"/></filter></defs>
+<rect width="1200" height="700" fill="#050505"/><circle cx="650" cy="330" r="310" fill="url(#g)" opacity=".72"/>
+<g fill="none" stroke="#FFC240" stroke-width="3" opacity=".72"><circle cx="650" cy="330" r="95"/><circle cx="650" cy="330" r="165"/><circle cx="650" cy="330" r="245"/><path d="M150 330h260M890 330h160"/><path d="M650 70v100M650 490v110"/></g>
+<g fill="none" stroke="#00FF9A" stroke-width="2" opacity=".45"><path d="M260 430 C420 250 585 540 760 290 S1030 350 1110 210"/></g>
+<g fill="#FFC240" opacity=".8"><circle cx="650" cy="330" r="6"/><circle cx="410" cy="330" r="4"/><circle cx="890" cy="330" r="4"/><circle cx="650" cy="170" r="4"/><circle cx="650" cy="490" r="4"/></g>
+</svg>
