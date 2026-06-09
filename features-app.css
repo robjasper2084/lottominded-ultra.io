@@ -16,29 +16,87 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.22;
-  filter: saturate(1.18) contrast(1.08) brightness(0.58);
-  mix-blend-mode: screen;
+  opacity: 0.09;
+  filter: saturate(0.85) contrast(1.12) brightness(0.48) blur(1px);
+  mix-blend-mode: luminosity;
   pointer-events: none;
+}
+
+.feature-sphere-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 52% 44%, rgba(41, 247, 255, 0.16), transparent 28rem),
+    radial-gradient(circle at 18% 72%, rgba(255, 224, 113, 0.18), transparent 24rem),
+    radial-gradient(circle at 82% 18%, rgba(138, 92, 255, 0.18), transparent 24rem),
+    linear-gradient(145deg, #01030a 0%, #031322 48%, #05020a 100%);
+}
+
+.feature-sphere-canvas,
+.feature-sphere-grid,
+.feature-sphere-scanline {
+  position: absolute;
+  inset: 0;
+}
+
+.feature-sphere-canvas {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.78;
+  mix-blend-mode: screen;
+}
+
+.feature-sphere-grid {
+  z-index: 1;
+  opacity: 0.46;
+  background:
+    linear-gradient(rgba(41, 247, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 88%, transparent);
+}
+
+.feature-sphere-scanline {
+  z-index: 2;
+  opacity: 0.78;
+  background:
+    radial-gradient(circle at var(--puck-pointer-x, 54%) var(--puck-pointer-y, 38%), rgba(94, 255, 157, 0.17), transparent 19rem),
+    linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.12), transparent);
+  mix-blend-mode: screen;
+  animation: sphereSweep 7s ease-in-out infinite alternate;
+}
+
+.feature-sphere-backdrop.is-pointer-reactive .feature-sphere-scanline,
+.feature-sphere-backdrop.is-touch-reactive .feature-sphere-scanline,
+.feature-sphere-backdrop.is-audio-reactive .feature-sphere-scanline {
+  opacity: 0.95;
+  filter: saturate(1.2);
+}
+
+.feature-sphere-backdrop.is-pointer-reactive .feature-sphere-grid {
+  opacity: 0.58;
 }
 
 .feature-console-page::before {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(90deg, rgba(41, 247, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(rgba(255, 224, 113, 0.045) 1px, transparent 1px),
-    linear-gradient(145deg, rgba(1, 2, 7, 0.86), rgba(6, 18, 37, 0.76) 56%, rgba(8, 5, 16, 0.88));
-  background-size: 64px 64px, 64px 64px, cover;
-  opacity: 0.94;
+    radial-gradient(circle at 50% 28%, rgba(41, 247, 255, 0.08), transparent 34rem),
+    linear-gradient(145deg, rgba(1, 2, 7, 0.58), rgba(6, 18, 37, 0.36) 54%, rgba(8, 5, 16, 0.76));
+  opacity: 0.82;
 }
 
 .feature-puck-field {
-  z-index: 0;
-  opacity: 0.72;
+  z-index: 1;
+  opacity: 0.24;
   mix-blend-mode: screen;
 }
 
@@ -84,7 +142,36 @@
 .feature-console-shell,
 .feature-console-page footer {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+.feature-motion-main,
+.feature-console-page .site-header,
+.feature-console-page .motion-menu,
+.feature-console-page .motion-menu-toggle {
+  position: relative;
+  z-index: 3;
+}
+
+.motion-features-page .motion-hero {
+  min-height: min(880px, calc(100vh - 72px));
+}
+
+.motion-features-page .motion-hero::before {
+  top: 8%;
+  right: 2%;
+  width: min(58vw, 760px);
+  border-color: rgba(255, 224, 113, 0.34);
+  box-shadow:
+    0 0 5rem rgba(41, 247, 255, 0.13),
+    inset 0 0 4rem rgba(255, 224, 113, 0.08);
+  opacity: 0.62;
+}
+
+.motion-features-page .motion-hero::after {
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(41, 247, 255, 0.28), rgba(255, 224, 113, 0.5), transparent);
 }
 
 .compact-feature-header {

@@ -11,13 +11,18 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=global-tabs-menu-2" />
-    <link rel="stylesheet" href="./features-app.css?v=features-grid-top-2" />
+    <link rel="stylesheet" href="./features-app.css?v=feature-spheres-bg-1" />
     <link rel="stylesheet" href="./assets/css/motion-shop.css?v=motion-shop-2" />
   </head>
   <body class="feature-console-page has-manual-instrument-header motion-shop-page motion-features-page">
     <video class="feature-page-video-bg" autoplay muted loop playsinline aria-hidden="true">
       <source src="./assets/video/home-feature-motion.mp4" type="video/mp4" />
     </video>
+    <div class="feature-sphere-backdrop" data-spheres-stage data-spheres-global-pointer data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg" aria-hidden="true">
+      <canvas class="sphere-canvas feature-sphere-canvas" data-spheres-canvas></canvas>
+      <div class="sphere-grid feature-sphere-grid"></div>
+      <div class="sphere-scanline feature-sphere-scanline"></div>
+    </div>
     <div class="branded-puck-field feature-puck-field" data-feature-puck-field data-puck-src="./assets/brand/lottomind-branded-puck.png" aria-hidden="true"></div>
     <header class="site-header home-like-header manual-instrument-header" data-site-header>
       <div class="site-header-main">
@@ -342,6 +347,7 @@
       <source src="./assets/audio/home-screen-song.mp3?v=feature-startup-song-1" type="audio/mpeg" />
     </audio>
     <script src="./site.js?v=global-tabs-menu-2" defer></script>
+    <script src="./lottery-spheres.js?v=feature-spheres-bg-1" defer></script>
     <script src="./features-app.js?v=motion-shop-1" defer></script>
     <script src="./assets/js/motion-shop.js?v=motion-shop-1" defer></script>
   </body>

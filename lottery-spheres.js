@@ -402,6 +402,7 @@
     if (pointer.touchBoost < 0.004) pointer.touchBoost = 0;
     stage.style.setProperty("--audio-pulse", pulse.toFixed(3));
     stage.style.setProperty("--touch-pulse", pointer.touchBoost.toFixed(3));
+    stage.classList.toggle("is-pointer-reactive", pointer.active);
     stage.classList.toggle("is-audio-reactive", pulse > 0.05);
     stage.classList.toggle("is-touch-reactive", pointer.touchBoost > 0.05);
 
@@ -473,25 +474,38 @@
     pointer.active = false;
   }
 
-  stage.addEventListener("pointermove", updatePointer, { passive: true });
-  stage.addEventListener(
-    "pointerdown",
-    (event) => {
-      if (event.pointerType === "touch") {
-        stage.setPointerCapture?.(event.pointerId);
-      }
-      updatePointer(event);
-    },
-    { passive: true }
-  );
-  stage.addEventListener("pointerup", releasePointer, { passive: true });
-  stage.addEventListener("pointercancel", releasePointer, { passive: true });
-  stage.addEventListener("lostpointercapture", releasePointer, { passive: true });
-  stage.addEventListener("pointerleave", releasePointer, { passive: true });
-  stage.addEventListener("touchstart", updatePointer, { passive: true });
-  stage.addEventListener("touchmove", updatePointer, { passive: true });
-  stage.addEventListener("touchend", releasePointer, { passive: true });
-  stage.addEventListener("touchcancel", releasePointer, { passive: true });
+  const useGlobalPointer = stage.hasAttribute("data-spheres-global-pointer");
+  const pointerTarget = useGlobalPointer ? window : stage;
+  const handlePointerDown = (event) => {
+    if (!useGlobalPointer && event.pointerType === "touch") {
+      stage.setPointerCapture?.(event.pointerId);
+    }
+    updatePointer(event);
+  };
+
+  pointerTarget.addEventListener("pointermove", updatePointer, { passive: true });
+  pointerTarget.addEventListener("pointerdown", handlePointerDown, { passive: true });
+  pointerTarget.addEventListener("pointerup", releasePointer, { passive: true });
+  pointerTarget.addEventListener("pointercancel", releasePointer, { passive: true });
+
+  if (useGlobalPointer) {
+    window.addEventListener("touchstart", updatePointer, { passive: true });
+    window.addEventListener("touchmove", updatePointer, { passive: true });
+    window.addEventListener("touchend", releasePointer, { passive: true });
+    window.addEventListener("touchcancel", releasePointer, { passive: true });
+    window.addEventListener("blur", releasePointer);
+    document.addEventListener("mouseleave", releasePointer, { passive: true });
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) releasePointer();
+    });
+  } else {
+    stage.addEventListener("lostpointercapture", releasePointer, { passive: true });
+    stage.addEventListener("pointerleave", releasePointer, { passive: true });
+    stage.addEventListener("touchstart", updatePointer, { passive: true });
+    stage.addEventListener("touchmove", updatePointer, { passive: true });
+    stage.addEventListener("touchend", releasePointer, { passive: true });
+    stage.addEventListener("touchcancel", releasePointer, { passive: true });
+  }
 
   if (sphereSoundtrack && audioGate) setAudioGateOpen(true);
   audioStartButton?.addEventListener("click", startSphereAudio);
