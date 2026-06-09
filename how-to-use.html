@@ -1500,6 +1500,107 @@
           min-width: 8.6rem;
         }
       }
+
+      .guide-page-menu-toggle {
+        position: fixed;
+        right: clamp(0.9rem, 2vw, 1.4rem);
+        bottom: clamp(0.9rem, 2vw, 1.4rem);
+        z-index: 82;
+        display: inline-grid;
+        width: clamp(3.5rem, 5.2vw, 4.2rem);
+        height: clamp(3.5rem, 5.2vw, 4.2rem);
+        place-items: center;
+        padding: 0;
+        border: 1px solid rgba(255, 223, 117, 0.76);
+        border-radius: 50%;
+        color: #fff8c6;
+        background:
+          radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.45), transparent 26%),
+          radial-gradient(circle at 50% 56%, rgba(41, 247, 255, 0.22), transparent 58%),
+          rgba(4, 10, 17, 0.92);
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+          0 18px 42px rgba(0, 0, 0, 0.42),
+          0 0 30px rgba(212, 175, 55, 0.2);
+        font-family: var(--display);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .guide-page-menu {
+        position: fixed;
+        inset: 0;
+        z-index: 92;
+        display: grid;
+        place-items: center;
+        padding: 1rem;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 22% 18%, rgba(255, 223, 117, 0.18), transparent 28rem),
+          radial-gradient(circle at 78% 72%, rgba(41, 247, 255, 0.16), transparent 24rem),
+          rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(24px);
+        transition: opacity 220ms ease, visibility 220ms ease;
+      }
+
+      .guide-page-menu.is-open {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .guide-page-menu-panel {
+        position: relative;
+        display: grid;
+        gap: 1rem;
+        width: min(100%, 880px);
+        padding: clamp(1.4rem, 4vw, 3rem);
+        border: 1px solid rgba(255, 223, 117, 0.34);
+        border-radius: 8px;
+        background:
+          linear-gradient(145deg, rgba(9, 24, 39, 0.92), rgba(3, 5, 10, 0.98)),
+          rgba(5, 5, 5, 0.78);
+        box-shadow: 0 34px 90px rgba(0, 0, 0, 0.58);
+      }
+
+      .guide-page-menu-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 50%;
+      }
+
+      .guide-page-menu-links {
+        display: grid;
+        gap: 0.35rem;
+        margin-top: 1rem;
+      }
+
+      .guide-page-menu-links a {
+        color: #f4fbff;
+        font-family: var(--display);
+        font-size: clamp(2rem, 7vw, 5.6rem);
+        font-weight: 900;
+        line-height: 0.95;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .guide-page-menu-links a:is(:hover, :focus-visible) {
+        color: transparent;
+        background: linear-gradient(90deg, var(--warm-gold), var(--green), var(--cyan));
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+
+      body.guide-menu-open {
+        overflow: hidden;
+      }
     </style>
   </head>
   <body class="has-guide-startup-audio">
@@ -1878,6 +1979,24 @@
       </div>
     </div>
 
+    <button class="guide-page-menu-toggle" type="button" data-guide-menu-toggle aria-controls="guidePageMenu" aria-expanded="false" aria-label="Open page menu">Menu</button>
+    <div class="guide-page-menu" id="guidePageMenu" data-guide-menu aria-hidden="true" role="dialog" aria-modal="true" aria-label="Page menu">
+      <div class="guide-page-menu-panel">
+        <button class="guide-page-menu-close" type="button" data-guide-menu-close aria-label="Close page menu">X</button>
+        <strong>LOTTOMINDED ULTRA</strong>
+        <nav class="guide-page-menu-links" aria-label="Page menu links">
+          <a href="./index.html#top">Home</a>
+          <a href="./features-app.html">Features</a>
+          <a href="./live-events.html">Events</a>
+          <a href="./lottery-spheres.html#spheres">Spheres</a>
+          <a href="./prompt-lab.html#beat2lotto">Beat2Lotto+</a>
+          <a href="./merch-store.html">Merch</a>
+          <a href="./prompt-lab.html">Prompts</a>
+          <a href="./how-to-use.html">Guide</a>
+        </nav>
+      </div>
+    </div>
+
     <footer>
       <span>&copy; 2026 LottoMind&trade;</span>
       <a href="https://robjasper2084.github.io/lottominded-ultra.io/how-to-use.html">Original Page</a>
@@ -1894,8 +2013,26 @@
         const guideStartupStatus = document.querySelector("[data-guide-startup-status]");
         const header = document.querySelector("[data-guide-header]");
         const sensor = document.querySelector("[data-guide-header-sensor]");
+        const guideMenu = document.querySelector("[data-guide-menu]");
+        const guideMenuToggle = document.querySelector("[data-guide-menu-toggle]");
+        const guideMenuClose = document.querySelector("[data-guide-menu-close]");
         let lastHeaderReveal = 0;
         let lastHeaderHide = 0;
+        let guideMenuLastFocus = null;
+
+        const setGuideMenuOpen = (open) => {
+          if (!guideMenu || !guideMenuToggle) return;
+          guideMenu.classList.toggle("is-open", open);
+          guideMenu.setAttribute("aria-hidden", String(!open));
+          guideMenuToggle.setAttribute("aria-expanded", String(open));
+          document.body.classList.toggle("guide-menu-open", open);
+          if (open) {
+            guideMenuLastFocus = document.activeElement;
+            window.setTimeout(() => guideMenu.querySelector("a, button")?.focus(), 20);
+            return;
+          }
+          guideMenuLastFocus?.focus?.();
+        };
 
         const closeGuideStartup = () => {
           guideStartup?.classList.add("is-hidden");
@@ -1927,6 +2064,14 @@
         });
         guideStartup?.addEventListener("click", (event) => {
           if (event.target === guideStartup) closeGuideStartup();
+        });
+        guideMenuToggle?.addEventListener("click", () => setGuideMenuOpen(true));
+        guideMenuClose?.addEventListener("click", () => setGuideMenuOpen(false));
+        guideMenu?.addEventListener("click", (event) => {
+          if (event.target === guideMenu) setGuideMenuOpen(false);
+        });
+        guideMenu?.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", () => setGuideMenuOpen(false));
         });
 
         if (header && sensor) {
@@ -2123,6 +2268,7 @@
         document.addEventListener("keydown", (event) => {
           if (event.key === "Escape" && guideStartup && !guideStartup.classList.contains("is-hidden")) closeGuideStartup();
           if (event.key === "Escape" && gate && !gate.hidden) closeGate();
+          if (event.key === "Escape" && guideMenu?.classList.contains("is-open")) setGuideMenuOpen(false);
         });
 
         form?.addEventListener("submit", (event) => {

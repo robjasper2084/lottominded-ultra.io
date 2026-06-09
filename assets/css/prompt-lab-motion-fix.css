@@ -28,6 +28,10 @@
   scroll-margin-top: clamp(9rem, 16vw, 14rem);
 }
 
+.prompt-lab-page.pl-page .prompt-lab-beat2lotto-top {
+  order: 0;
+}
+
 .pl-members-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

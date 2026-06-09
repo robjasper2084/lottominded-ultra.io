@@ -8337,6 +8337,7 @@ body.merch-store-page.has-manual-instrument-header .merch-piano-header .ultra-ke
 .home-page.has-sphere-header .home-sphere-header nav a:nth-child(5) { --sphere-nav-note: "68"; --sphere-nav-accent: #ff4fd8; --sphere-nav-core: rgba(255, 164, 235, 0.82); --sphere-nav-image: url("./assets/brand/guide-jazz-network-puck.jpeg"); }
 .home-page.has-sphere-header .home-sphere-header nav a:nth-child(6) { --sphere-nav-note: "54"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(174, 244, 255, 0.86); --sphere-nav-image: url("./assets/brand/guide-puck-cyan-city.png"); }
 .home-page.has-sphere-header .home-sphere-header nav a:nth-child(7) { --sphere-nav-note: "03"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); --sphere-nav-image: url("./assets/brand/jazz-network-gold-coin.jpeg"); }
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(8) { --sphere-nav-note: "11"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); --sphere-nav-image: url("./assets/brand/lottomind-branded-puck.png"); }
 
 .home-page.has-sphere-header .home-sphere-header nav a.is-mood-ring {
   --sphere-nav-accent: hsl(var(--mood-hue) 96% 63%);
@@ -9623,5 +9624,333 @@ body.has-stream-startup-audio {
     min-height: 2.42rem !important;
     padding: 0.66rem 0.78rem !important;
     font-size: 0.68rem !important;
+  }
+}
+
+/* Shared readable sphere tabs and page menu. */
+.site-header.sphere-tabs-header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: minmax(13rem, auto) minmax(0, 1fr) auto;
+  grid-template-areas: "brand nav actions";
+  align-items: center;
+  gap: clamp(0.8rem, 2vw, 1.35rem);
+  min-height: 86px;
+  padding: 0.62rem clamp(1rem, 3vw, 2rem);
+  border-bottom: 1px solid rgba(63, 244, 221, 0.22);
+  background:
+    linear-gradient(180deg, rgba(2, 6, 13, 0.97), rgba(4, 9, 17, 0.9)),
+    radial-gradient(circle at 58% 0%, rgba(255, 224, 113, 0.12), transparent 24rem),
+    rgba(1, 4, 10, 0.86);
+  box-shadow:
+    0 1.1rem 3rem rgba(0, 0, 0, 0.34),
+    0 0 2rem rgba(41, 247, 255, 0.08);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.site-header.sphere-tabs-header .site-header-main {
+  grid-area: brand;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.site-header.sphere-tabs-header .brand {
+  min-width: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.site-header.sphere-tabs-header .brand img {
+  width: 36px;
+  height: 36px;
+}
+
+.site-header.sphere-tabs-header .site-header-toggle {
+  display: none;
+}
+
+.site-header.sphere-tabs-header nav {
+  grid-area: nav;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  gap: clamp(0.5rem, 0.82vw, 0.75rem);
+  width: min(100%, 52rem);
+  max-width: 100%;
+  padding: 0.78rem 1rem;
+  overflow: visible;
+  border: 1px solid rgba(255, 224, 113, 0.42);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(4, 16, 24, 0.78), rgba(0, 215, 255, 0.18), rgba(4, 16, 24, 0.78)),
+    rgba(3, 11, 16, 0.92);
+  box-shadow:
+    inset 0 0 1.4rem rgba(41, 247, 255, 0.16),
+    0 0 1.7rem rgba(41, 247, 255, 0.18);
+}
+
+.site-header.sphere-tabs-header nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max-content;
+  min-height: 2.72rem;
+  padding: 0.72rem 0.92rem;
+  border: 1px solid rgba(41, 247, 255, 0.38);
+  border-radius: 999px;
+  color: #eaffff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(41, 247, 255, 0.04)),
+    rgba(5, 18, 26, 0.92);
+  box-shadow:
+    inset 0 0 0.9rem rgba(41, 247, 255, 0.1),
+    0 0 0.82rem rgba(0, 0, 0, 0.26);
+  font-family: var(--font-heading);
+  font-size: clamp(0.68rem, 0.78vw, 0.82rem);
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 0 0.68rem rgba(41, 247, 255, 0.28);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-header.sphere-tabs-header nav a:is(:hover, :focus-visible, .is-pressed, .is-touch-active, .is-focus-reactive) {
+  border-color: rgba(255, 224, 113, 0.72);
+  color: #fffbe8;
+  background:
+    linear-gradient(180deg, rgba(255, 224, 113, 0.18), rgba(94, 255, 157, 0.04)),
+    rgba(6, 16, 24, 0.96);
+  box-shadow:
+    inset 0 0 1rem rgba(255, 224, 113, 0.14),
+    0 0 1rem rgba(41, 247, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.site-header.sphere-tabs-header .direct-launch {
+  grid-area: actions;
+  justify-self: end;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0;
+}
+
+.site-header.sphere-tabs-header .direct-action {
+  min-height: 2.55rem;
+  padding: 0.72rem 0.9rem;
+  border-radius: 999px;
+  font-size: clamp(0.62rem, 0.7vw, 0.76rem);
+  white-space: nowrap;
+}
+
+.site-header.sphere-tabs-header .cart-toggle span {
+  display: inline-grid;
+  min-width: 1.4rem;
+  min-height: 1.4rem;
+  place-items: center;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  color: #06120f;
+  background: linear-gradient(135deg, #fff6c7, #d4af37);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.has-sphere-tabs main,
+.has-sphere-tabs .merch-main {
+  padding-top: 104px;
+}
+
+.has-sphere-tabs [id] {
+  scroll-margin-top: 128px;
+}
+
+.universal-menu-toggle,
+.universal-floating-trigger {
+  position: fixed;
+  right: clamp(0.9rem, 2vw, 1.4rem);
+  bottom: clamp(0.9rem, 2vw, 1.4rem);
+  z-index: 82;
+  display: inline-grid;
+  width: clamp(3.5rem, 5.2vw, 4.2rem);
+  min-width: 0;
+  height: clamp(3.5rem, 5.2vw, 4.2rem);
+  min-height: 0;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 224, 113, 0.7);
+  border-radius: 50%;
+  color: #fffbe8;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.45), transparent 26%),
+    radial-gradient(circle at 50% 56%, rgba(41, 247, 255, 0.22), transparent 58%),
+    rgba(4, 10, 17, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.42),
+    0 0 30px rgba(212, 175, 55, 0.2);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.universal-menu-toggle:is(:hover, :focus-visible),
+.universal-floating-trigger:is(:hover, :focus-visible) {
+  border-color: rgba(41, 247, 255, 0.8);
+  color: #eaffff;
+  transform: translateY(-2px) scale(1.02);
+}
+
+.universal-page-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 92;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(255, 224, 113, 0.18), transparent 28rem),
+    radial-gradient(circle at 78% 72%, rgba(41, 247, 255, 0.16), transparent 24rem),
+    rgba(0, 0, 0, 0.88);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.universal-page-menu.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.universal-page-menu-panel {
+  position: relative;
+  display: grid;
+  gap: 1.1rem;
+  width: min(100%, 880px);
+  padding: clamp(1.4rem, 4vw, 3rem);
+  border: 1px solid rgba(255, 224, 113, 0.34);
+  border-radius: 8px;
+  color: #f4fbff;
+  background:
+    linear-gradient(145deg, rgba(9, 24, 39, 0.92), rgba(3, 5, 10, 0.98)),
+    rgba(5, 5, 5, 0.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 34px 90px rgba(0, 0, 0, 0.58);
+}
+
+.universal-page-menu-panel strong {
+  color: var(--gold);
+  font-family: var(--font-heading);
+  font-size: clamp(1.4rem, 3vw, 2.4rem);
+  text-transform: uppercase;
+}
+
+.universal-page-menu-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+}
+
+.universal-page-menu-links {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.universal-page-menu-links a {
+  color: #f4fbff;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 7vw, 5.6rem);
+  font-weight: 900;
+  line-height: 0.95;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.universal-page-menu-links a:is(:hover, :focus-visible, .is-active) {
+  color: transparent;
+  background: linear-gradient(90deg, var(--gold), var(--green), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+body.universal-menu-open {
+  overflow: hidden;
+}
+
+@media (max-width: 1120px) {
+  .site-header.sphere-tabs-header {
+    grid-template-columns: minmax(12rem, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    min-height: 142px;
+  }
+
+  .site-header.sphere-tabs-header nav {
+    justify-self: stretch;
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .has-sphere-tabs main,
+  .has-sphere-tabs .merch-main {
+    padding-top: 154px;
+  }
+
+  .has-sphere-tabs [id] {
+    scroll-margin-top: 176px;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-header.sphere-tabs-header {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "actions"
+      "nav";
+    min-height: 202px;
+  }
+
+  .site-header.sphere-tabs-header .direct-launch {
+    justify-self: stretch;
+  }
+
+  .site-header.sphere-tabs-header nav {
+    padding-inline: 0.75rem;
+  }
+
+  .site-header.sphere-tabs-header nav a {
+    min-height: 2.42rem;
+    padding: 0.66rem 0.78rem;
+    font-size: 0.68rem;
+  }
+
+  .has-sphere-tabs main,
+  .has-sphere-tabs .merch-main {
+    padding-top: 218px;
   }
 }

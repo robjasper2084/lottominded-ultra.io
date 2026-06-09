@@ -199,6 +199,7 @@
 .lottery-spheres-header nav a:nth-child(3) { --sphere-nav-note: "62"; --sphere-nav-accent: #5eff9d; --sphere-nav-core: rgba(198, 255, 167, 0.86); }
 .lottery-spheres-header nav a:nth-child(4) { --sphere-nav-note: "68"; --sphere-nav-accent: #ff4fd8; --sphere-nav-core: rgba(255, 164, 235, 0.82); }
 .lottery-spheres-header nav a:nth-child(5) { --sphere-nav-note: "54"; --sphere-nav-accent: #29f7ff; --sphere-nav-core: rgba(174, 244, 255, 0.86); }
+.lottery-spheres-header nav a:nth-child(6) { --sphere-nav-note: "03"; --sphere-nav-accent: #ffe071; --sphere-nav-core: rgba(255, 244, 178, 0.9); }
 
 .lottery-spheres-header nav a:hover,
 .lottery-spheres-header nav a:focus-visible {

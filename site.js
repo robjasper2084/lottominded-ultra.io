@@ -537,6 +537,92 @@ function setupManualPianoHeader() {
 setupManualPianoHeader();
 setupHeaderPadMoodRing();
 
+function setupUniversalFloatingMenu() {
+  const existingToggle = document.querySelector(".pl-floating, .motion-menu-toggle, [data-universal-menu-toggle]");
+  if (existingToggle) {
+    existingToggle.classList.add("universal-floating-trigger");
+    return;
+  }
+
+  const links = [
+    ["Home", "./index.html#top"],
+    ["Features", "./features-app.html"],
+    ["Events", "./live-events.html"],
+    ["Spheres", "./lottery-spheres.html#spheres"],
+    ["Beat2Lotto+", "./prompt-lab.html#beat2lotto"],
+    ["Merch", "./merch-store.html"],
+    ["Prompts", "./prompt-lab.html"],
+    ["Guide", "./how-to-use.html"],
+    ["Studio", "./lottomind-stem-studio/index.html"]
+  ];
+
+  const toggle = document.createElement("button");
+  toggle.className = "universal-menu-toggle";
+  toggle.type = "button";
+  toggle.dataset.universalMenuToggle = "true";
+  toggle.setAttribute("aria-controls", "universalPageMenu");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-label", "Open page menu");
+  toggle.textContent = "Menu";
+
+  const menu = document.createElement("div");
+  menu.className = "universal-page-menu";
+  menu.id = "universalPageMenu";
+  menu.setAttribute("role", "dialog");
+  menu.setAttribute("aria-modal", "true");
+  menu.setAttribute("aria-label", "Page menu");
+  menu.setAttribute("aria-hidden", "true");
+  menu.innerHTML = `
+    <div class="universal-page-menu-panel">
+      <button class="universal-page-menu-close" type="button" aria-label="Close page menu">X</button>
+      <strong>LOTTOMINDED ULTRA</strong>
+      <nav class="universal-page-menu-links" aria-label="Page menu links">
+        ${links.map(([label, href]) => `<a href="${href}">${label}</a>`).join("")}
+      </nav>
+    </div>
+  `;
+
+  const setActiveLink = () => {
+    const current = new URL(window.location.href);
+    menu.querySelectorAll("a[href]").forEach((link) => {
+      const target = new URL(link.getAttribute("href"), window.location.href);
+      const samePath = target.pathname.replace(/\/index\.html$/, "/") === current.pathname.replace(/\/index\.html$/, "/");
+      link.classList.toggle("is-active", samePath);
+    });
+  };
+
+  let lastFocus = null;
+  const open = () => {
+    lastFocus = document.activeElement;
+    menu.classList.add("is-open");
+    menu.setAttribute("aria-hidden", "false");
+    toggle.setAttribute("aria-expanded", "true");
+    document.body.classList.add("universal-menu-open");
+    setActiveLink();
+    window.setTimeout(() => menu.querySelector("a, button")?.focus(), 20);
+  };
+
+  const close = () => {
+    menu.classList.remove("is-open");
+    menu.setAttribute("aria-hidden", "true");
+    toggle.setAttribute("aria-expanded", "false");
+    document.body.classList.remove("universal-menu-open");
+    lastFocus?.focus?.();
+  };
+
+  document.body.append(toggle, menu);
+  toggle.addEventListener("click", open);
+  menu.querySelector(".universal-page-menu-close")?.addEventListener("click", close);
+  menu.addEventListener("click", (event) => {
+    if (event.target === menu) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menu.classList.contains("is-open")) close();
+  });
+}
+
+setupUniversalFloatingMenu();
+
 function getReactivePoint(event) {
   if (event?.touches?.length) return { x: event.touches[0].clientX, y: event.touches[0].clientY, touch: true };
   if (event?.changedTouches?.length) return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY, touch: true };
