@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 240">
+<defs><linearGradient id="i" x1="0" x2="1"><stop stop-color="#29f7ff"/><stop offset=".55" stop-color="#ff4fd8"/><stop offset="1" stop-color="#ffe071"/></linearGradient></defs>
+<rect width="1000" height="240" fill="#05070d"/>
+<g fill="none" stroke="url(#i)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+<path d="M70 120a50 50 0 1 0 100 0a50 50 0 1 0-100 0M105 92l50 28-50 28z"/>
+<path d="M250 80h110v100H250zM278 58v44M332 58v44"/>
+<path d="M458 76l84 42-84 42zM428 62v116"/>
+<path d="M640 58h110l28 34v90H640zM728 58v42h50"/>
+<path d="M858 142c34 0 62-22 62-50s-28-50-62-50-62 22-62 50c0 15 8 29 22 38l-16 45z"/>
+</g>
+<text x="77" y="218" fill="#f5fbff" font-family="Arial" font-size="20">PLAY</text>
+<text x="268" y="218" fill="#f5fbff" font-family="Arial" font-size="20">CALENDAR</text>
+<text x="438" y="218" fill="#f5fbff" font-family="Arial" font-size="20">LIVE</text>
+<text x="650" y="218" fill="#f5fbff" font-family="Arial" font-size="20">PASS</text>
+<text x="825" y="218" fill="#f5fbff" font-family="Arial" font-size="20">CHAT</text>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" role="img" aria-labelledby="t">
+<title id="t">Lottominded Ultra Live logo</title>
+<defs>
+  <linearGradient id="g" x1="0" x2="1">
+    <stop offset="0" stop-color="#29f7ff"/>
+    <stop offset=".45" stop-color="#8a5cff"/>
+    <stop offset="1" stop-color="#ffe071"/>
+  </linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect x="8" y="10" width="504" height="100" rx="18" fill="#05070d" stroke="url(#g)" stroke-width="2"/>
+<path d="M36 68 C72 18,104 101,138 54 S209 47,246 60 320 86,371 42 456 35,490 62" fill="none" stroke="url(#g)" stroke-width="3" opacity=".72"/>
+<text x="42" y="52" font-family="Arial Black, Orbitron, sans-serif" font-size="34" fill="#f5fbff" filter="url(#glow)">LOTTOMINDED</text>
+<text x="158" y="91" font-family="Arial Black, Orbitron, sans-serif" font-size="44" fill="url(#g)" filter="url(#glow)">ULTRA LIVE</text>
+</svg>
