@@ -24,19 +24,38 @@
     feature.setAttribute("aria-label", "Serengeti Galleries Juneteenth Celebration feature");
     feature.innerHTML = `
       <div class="juneteenth-feature-card">
-        <div class="juneteenth-feature-art">
-          <img src="${bannerSrc}" alt="Serengeti Galleries Juneteenth Celebration event banner" loading="lazy" />
+        <div class="juneteenth-feature-panel">
+          <div class="juneteenth-feature-art">
+            <img src="${bannerSrc}" alt="Serengeti Galleries Juneteenth Celebration event banner" loading="lazy" />
+          </div>
+          <div class="juneteenth-feature-copy">
+            <p class="motion-overline">Featured Stream Event</p>
+            <h2>Serengeti Galleries Presents Juneteenth Celebration</h2>
+            <p>
+              A premium culture-room spotlight for art, music, community, and celebration inside the
+              LOTTOMINDED ULTRA live stream universe.
+            </p>
+            <div class="juneteenth-feature-actions">
+              <a class="juneteenth-button is-gold" href="${eventUrl}" target="_blank" rel="noopener noreferrer">Get Tickets</a>
+              <a class="juneteenth-button" href="./merch-store.html#live-events">Shop + Stream</a>
+            </div>
+          </div>
         </div>
-        <div class="juneteenth-feature-copy">
-          <p class="motion-overline">Featured Stream Event</p>
-          <h2>Serengeti Galleries Presents Juneteenth Celebration</h2>
-          <p>
-            A premium culture-room spotlight for art, music, community, and celebration inside the
-            LOTTOMINDED ULTRA live stream universe.
-          </p>
-          <div class="juneteenth-feature-actions">
-            <a class="juneteenth-button is-gold" href="${eventUrl}" target="_blank" rel="noopener noreferrer">Get Tickets</a>
-            <a class="juneteenth-button" href="./merch-store.html#live-events">Shop + Stream</a>
+        <div class="juneteenth-feature-panel" aria-hidden="true">
+          <div class="juneteenth-feature-art">
+            <img src="${bannerSrc}" alt="" loading="lazy" />
+          </div>
+          <div class="juneteenth-feature-copy">
+            <p class="motion-overline">Featured Stream Event</p>
+            <h2>Serengeti Galleries Presents Juneteenth Celebration</h2>
+            <p>
+              A premium culture-room spotlight for art, music, community, and celebration inside the
+              LOTTOMINDED ULTRA live stream universe.
+            </p>
+            <div class="juneteenth-feature-actions">
+              <a class="juneteenth-button is-gold" href="${eventUrl}" target="_blank" rel="noopener noreferrer" tabindex="-1">Get Tickets</a>
+              <a class="juneteenth-button" href="./merch-store.html#live-events" tabindex="-1">Shop + Stream</a>
+            </div>
           </div>
         </div>
       </div>
