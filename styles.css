@@ -9954,3 +9954,198 @@ body.universal-menu-open {
     padding-top: 218px;
   }
 }
+
+/* Home lotto-ball nav restore. */
+.home-page.has-sphere-header .home-sphere-header {
+  border-bottom: 1px solid rgba(41, 247, 255, 0.24) !important;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 13, 0.98), rgba(4, 10, 18, 0.92)),
+    radial-gradient(circle at 58% 0%, rgba(255, 224, 113, 0.12), transparent 24rem),
+    rgba(1, 4, 10, 0.88) !important;
+  box-shadow:
+    0 1.1rem 3rem rgba(0, 0, 0, 0.36),
+    0 0 2.2rem rgba(41, 247, 255, 0.12) !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav {
+  position: relative !important;
+  min-height: clamp(5.25rem, 7vw, 6rem) !important;
+  width: min(100%, 54rem) !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: clamp(0.38rem, 0.8vw, 0.74rem) !important;
+  padding: 0.5rem clamp(0.8rem, 1.45vw, 1.2rem) !important;
+  border: 2px solid rgba(41, 247, 255, 0.86) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(255, 224, 113, 0.22), transparent 0 28%),
+    linear-gradient(90deg, rgba(7, 24, 34, 0.86), rgba(10, 85, 116, 0.62) 48%, rgba(6, 23, 34, 0.9)),
+    rgba(2, 12, 20, 0.95) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(205, 255, 255, 0.12),
+    inset 0 -1.25rem 2rem rgba(0, 0, 0, 0.38),
+    0 0 1.2rem rgba(41, 247, 255, 0.32),
+    0 0 2.8rem rgba(41, 247, 255, 0.14) !important;
+  overflow: hidden !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav::after {
+  display: block !important;
+  position: absolute !important;
+  inset: 0.42rem 11% !important;
+  z-index: 0 !important;
+  content: "" !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 224, 113, 0.17), rgba(255, 96, 211, 0.14), transparent),
+    radial-gradient(circle at 50% 50%, rgba(41, 247, 255, 0.16), transparent 62%) !important;
+  opacity: 0.76 !important;
+  pointer-events: none !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a,
+.home-page.has-sphere-header .home-sphere-header nav a:is(:hover, :focus-visible, .is-pressed, .is-touch-active, .is-sphere-pressed, :active) {
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 0 0 clamp(4.2rem, 5.35vw, 5.28rem) !important;
+  display: grid !important;
+  place-items: center !important;
+  width: clamp(4.2rem, 5.35vw, 5.28rem) !important;
+  height: clamp(4.2rem, 5.35vw, 5.28rem) !important;
+  max-width: 5.28rem !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  aspect-ratio: 1 !important;
+  padding: 1.28rem 0.4rem 1.08rem !important;
+  border: 1px solid rgba(221, 255, 255, 0.48) !important;
+  border-radius: 50% !important;
+  color: #effcff !important;
+  background:
+    radial-gradient(circle at 28% 20%, rgba(255, 255, 255, 0.62), transparent 0 14%, transparent 30%),
+    radial-gradient(circle at 50% 50%, var(--sphere-nav-core, rgba(157, 255, 247, 0.82)) 0 16%, transparent 52%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.28), transparent 42%),
+    var(--sphere-nav-image, none) center / cover no-repeat,
+    radial-gradient(circle at 50% 50%, rgba(2, 36, 56, 0.92), rgba(3, 10, 17, 0.98) 72%) !important;
+  box-shadow:
+    inset -0.55rem -0.65rem 0.9rem rgba(0, 0, 0, 0.66),
+    inset 0.25rem 0.35rem 0.7rem rgba(255, 255, 255, 0.16),
+    0 0.42rem 0.18rem rgba(0, 0, 0, 0.45),
+    0 0 1.1rem color-mix(in srgb, var(--sphere-nav-accent, #29f7ff) 62%, transparent) !important;
+  filter: saturate(1.08) contrast(1.05) !important;
+  font-family: var(--font-heading) !important;
+  font-size: clamp(0.5rem, 0.62vw, 0.64rem) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  text-align: center !important;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.92),
+    0 0 0.5rem rgba(41, 247, 255, 0.5) !important;
+  text-transform: uppercase !important;
+  white-space: normal !important;
+  overflow: hidden !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition:
+    transform 180ms cubic-bezier(0.18, 0.82, 0.24, 1),
+    filter 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a::before {
+  display: grid !important;
+  place-items: center !important;
+  position: absolute !important;
+  top: 0.48rem !important;
+  left: 50% !important;
+  z-index: 2 !important;
+  width: 1.58rem !important;
+  height: 0.78rem !important;
+  content: attr(data-icon) !important;
+  border: 1px solid rgba(221, 255, 255, 0.62) !important;
+  border-radius: 999px !important;
+  color: #06303b !important;
+  background:
+    radial-gradient(circle at 30% 18%, #fff 0 10%, rgba(255, 255, 255, 0.28) 11% 28%, transparent 38%),
+    radial-gradient(circle at 50% 52%, #dfffff 0 26%, var(--sphere-nav-accent, #29f7ff) 66%, #073445 100%) !important;
+  box-shadow:
+    inset -0.12rem -0.14rem 0.22rem rgba(0, 0, 0, 0.24),
+    inset 0.08rem 0.1rem 0.18rem rgba(255, 255, 255, 0.34),
+    0 0 0.66rem rgba(41, 247, 255, 0.42) !important;
+  font-size: 0.38rem !important;
+  font-weight: 1000 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+  transform: translateX(-50%) !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a::after {
+  display: grid !important;
+  place-items: center !important;
+  position: absolute !important;
+  right: 0.35rem !important;
+  bottom: 0.34rem !important;
+  z-index: 2 !important;
+  width: 1.16rem !important;
+  height: 1.16rem !important;
+  content: var(--sphere-nav-note, "07") !important;
+  border: 1px solid rgba(255, 255, 255, 0.56) !important;
+  border-radius: 50% !important;
+  color: #17222b !important;
+  background:
+    radial-gradient(circle at 30% 22%, #fff 0 10%, rgba(255, 255, 255, 0.22) 11% 28%, transparent 40%),
+    radial-gradient(circle at 50% 56%, #fff8b0 0 28%, #cab453 58%, #31260b 100%) !important;
+  box-shadow:
+    inset -0.12rem -0.15rem 0.2rem rgba(0, 0, 0, 0.32),
+    inset 0.08rem 0.1rem 0.18rem rgba(255, 255, 255, 0.3),
+    0 0 0.7rem rgba(255, 224, 113, 0.46) !important;
+  font-family: var(--font-heading) !important;
+  font-size: 0.46rem !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a:is(:hover, :focus-visible) {
+  border-color: rgba(255, 244, 180, 0.84) !important;
+  filter: saturate(1.26) brightness(1.08) !important;
+  box-shadow:
+    inset -0.55rem -0.65rem 0.9rem rgba(0, 0, 0, 0.62),
+    inset 0.25rem 0.35rem 0.72rem rgba(255, 255, 255, 0.2),
+    0 0.44rem 0.18rem rgba(0, 0, 0, 0.42),
+    0 0 1.6rem rgba(255, 224, 113, 0.36),
+    0 0 2.2rem color-mix(in srgb, var(--sphere-nav-accent, #29f7ff) 58%, transparent) !important;
+  transform: translate3d(0, -0.32rem, 0) scale(1.05) !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a:is(.is-pressed, .is-touch-active, .is-sphere-pressed, :active) {
+  transform: translate3d(0, 0.12rem, 0) scale(0.96) !important;
+}
+
+@media (max-width: 980px) {
+  .home-page.has-sphere-header .home-sphere-header nav {
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+
+  .home-page.has-sphere-header .home-sphere-header nav::-webkit-scrollbar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-page.has-sphere-header .home-sphere-header nav {
+    min-height: 5rem !important;
+    padding-inline: 0.62rem !important;
+  }
+
+  .home-page.has-sphere-header .home-sphere-header nav a,
+  .home-page.has-sphere-header .home-sphere-header nav a:is(:hover, :focus-visible, .is-pressed, .is-touch-active, .is-sphere-pressed, :active) {
+    flex-basis: 4rem !important;
+    width: 4rem !important;
+    height: 4rem !important;
+    font-size: 0.48rem !important;
+  }
+}
+/* End home lotto-ball nav restore. */

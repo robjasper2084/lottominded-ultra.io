@@ -1616,7 +1616,7 @@
         <button class="guide-startup-close" type="button" data-guide-startup-close aria-label="Enter guide without music">X</button>
         <p class="eyebrow">LottoMind&trade; Guide</p>
         <h2 id="guideStartupTitle">Start the guide music.</h2>
-        <p>Play the guide soundtrack while reading the quick start and manual download.</p>
+        <p>Play LottoMind Heart 639Hz while reading the quick start and manual download.</p>
         <div class="guide-startup-actions">
           <button class="primary-action" type="button" data-guide-startup-play>Start Music</button>
           <button class="secondary-action" type="button" data-guide-startup-close>Enter Guide</button>
@@ -2003,7 +2003,7 @@
       <a href="#top">Back to top</a>
     </footer>
     <audio id="guideStartupSoundtrack" preload="auto" data-guide-startup-soundtrack>
-      <source src="./assets/audio/guide-startup-music.mp3?v=guide-startup-1" type="audio/mpeg" />
+      <source src="./assets/audio/lottomind-heart-639hz.mp3?v=guide-heart-639-1" type="audio/mpeg" />
     </audio>
     <script>
       (() => {
@@ -2045,7 +2045,7 @@
             return;
           }
           try {
-            guideStartupAudio.volume = 0.46;
+            guideStartupAudio.volume = 0.52;
             guideStartupAudio.loop = true;
             guideStartupAudio.currentTime = 0;
             await guideStartupAudio.play();
