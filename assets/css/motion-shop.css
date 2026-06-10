@@ -360,6 +360,11 @@ body.motion-shop-page::after {
   animation-delay: calc(var(--ring-index) * -0.8s);
 }
 
+
+.live-events-page .motion-main > .motion-marquee {
+  width: 140%;
+  margin-inline: -20%;
+}
 .motion-marquee {
   width: 100%;
   overflow: hidden;

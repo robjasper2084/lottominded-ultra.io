@@ -15,7 +15,7 @@
   function addStreamFeature() {
     if (!isStreamPage || document.querySelector("[data-juneteenth-stream-feature]")) return;
 
-    const anchor = document.querySelector("#upcoming-streams") || document.querySelector(".motion-marquee") || document.querySelector("main");
+    const anchor = document.querySelector(".motion-hero-events") || document.querySelector("#upcoming-streams") || document.querySelector(".motion-marquee") || document.querySelector("main");
     if (!anchor) return;
 
     const feature = document.createElement("section");
@@ -41,6 +41,11 @@
         </div>
       </div>
     `;
+
+    if (anchor.matches(".motion-hero-events")) {
+      anchor.insertAdjacentElement("afterend", feature);
+      return;
+    }
 
     if (anchor.id === "upcoming-streams") {
       anchor.insertAdjacentElement("beforebegin", feature);
