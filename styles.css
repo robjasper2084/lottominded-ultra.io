@@ -10149,3 +10149,323 @@ body.universal-menu-open {
   }
 }
 /* End home lotto-ball nav restore. */
+
+/* LottoMind Refined Vault bridge. */
+.home-page.has-sphere-header .home-sphere-header nav {
+  width: min(100%, 60rem) !important;
+}
+
+.home-page.has-sphere-header .home-sphere-header nav a:nth-child(9) {
+  --sphere-nav-note: "25";
+  --sphere-nav-accent: #ff4fd8;
+  --sphere-nav-core: rgba(255, 164, 235, 0.84);
+  --sphere-nav-image: url("./assets/brand/guide-puck-gold-mascot-close.png");
+}
+
+.home-page .prompt-band-top {
+  margin-top: clamp(-2.25rem, -3vw, -0.75rem);
+}
+
+.refined-app-band {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+  gap: clamp(22px, 4vw, 48px);
+  align-items: stretch;
+  width: min(calc(100% - 32px), 1120px);
+  margin: clamp(1.2rem, 3vw, 2.5rem) auto;
+  padding: clamp(38px, 5vw, 62px) clamp(18px, 3vw, 34px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 224, 113, 0.28);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 224, 113, 0.18), transparent 20rem),
+    radial-gradient(circle at 82% 22%, rgba(41, 247, 255, 0.16), transparent 22rem),
+    linear-gradient(135deg, rgba(5, 16, 26, 0.95), rgba(4, 6, 12, 0.86)),
+    rgba(3, 5, 10, 0.92);
+  box-shadow:
+    0 34px 120px rgba(0, 0, 0, 0.44),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.refined-app-band::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(255, 224, 113, 0.05) 1px, transparent 1px),
+    repeating-linear-gradient(118deg, transparent 0 4rem, rgba(255, 79, 216, 0.12) 4.05rem 4.12rem, transparent 4.2rem 8rem);
+  background-size: 5rem 5rem, 5rem 5rem, auto;
+  opacity: 0.7;
+}
+
+.refined-app-copy {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+}
+
+.refined-app-copy h2 {
+  font-family: var(--display-font);
+  font-size: clamp(2.6rem, 6vw, 5.7rem);
+  line-height: 0.88;
+}
+
+.refined-app-copy p {
+  max-width: 720px;
+}
+
+.refined-actions,
+.vault-gateway-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.refined-actions button.secondary-action {
+  cursor: pointer;
+}
+
+.vault-status-card {
+  max-width: 680px;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(94, 255, 157, 0.34);
+  border-radius: 999px;
+  color: #dfffee;
+  background: rgba(0, 255, 154, 0.08);
+  font-weight: 800;
+}
+
+.refined-bridge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.8vw, 18px);
+}
+
+.refined-bridge-grid article {
+  position: relative;
+  min-height: 250px;
+  padding: clamp(18px, 2.5vw, 26px);
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.25);
+  border-radius: 16px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(41, 247, 255, 0.05)),
+    rgba(4, 14, 24, 0.78);
+}
+
+.refined-bridge-grid article::after {
+  position: absolute;
+  right: -3rem;
+  bottom: -3rem;
+  width: 9rem;
+  height: 9rem;
+  content: "";
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.55), transparent 22%),
+    radial-gradient(circle at 50% 52%, rgba(255, 224, 113, 0.36), rgba(41, 247, 255, 0.16) 58%, transparent 70%);
+  opacity: 0.72;
+}
+
+.refined-bridge-grid span {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  color: #06120f;
+  background: linear-gradient(135deg, #fff6c7, #d4af37);
+  font-weight: 1000;
+}
+
+.refined-bridge-grid h3 {
+  color: #f7fbff;
+  font-family: var(--display-font);
+  font-size: clamp(1.45rem, 2.5vw, 2.4rem);
+  line-height: 0.96;
+  text-transform: uppercase;
+}
+
+.vault-disclaimer,
+.vault-gateway-disclaimer {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+  color: rgba(255, 244, 205, 0.86);
+  font-size: 0.9rem;
+}
+
+.vault-credit-badge {
+  position: fixed;
+  left: clamp(0.9rem, 2vw, 1.3rem);
+  bottom: clamp(0.9rem, 2vw, 1.3rem);
+  z-index: 82;
+  display: inline-flex;
+  gap: 0.55rem;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0.48rem 0.78rem;
+  border: 1px solid rgba(255, 224, 113, 0.72);
+  border-radius: 999px;
+  color: #fffbe8;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.42), transparent 26%),
+    linear-gradient(135deg, rgba(8, 28, 36, 0.94), rgba(3, 6, 12, 0.94));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 42px rgba(0, 0, 0, 0.42),
+    0 0 30px rgba(212, 175, 55, 0.2);
+  cursor: pointer;
+}
+
+.vault-credit-badge strong {
+  display: grid;
+  place-items: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 50%;
+  color: #06120f;
+  background: linear-gradient(135deg, #fff6c7, #d4af37);
+  font-family: var(--font-heading);
+}
+
+.vault-credit-badge span {
+  font-family: var(--font-heading);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.vault-gateway-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 224, 113, 0.2), transparent 28rem),
+    radial-gradient(circle at 80% 72%, rgba(41, 247, 255, 0.16), transparent 24rem),
+    rgba(0, 0, 0, 0.9);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  transition: opacity 220ms ease, visibility 220ms ease;
+}
+
+.vault-gateway-modal.is-open {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vault-gateway-panel {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 860px);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: clamp(1.4rem, 4vw, 3rem);
+  border: 1px solid rgba(255, 224, 113, 0.36);
+  border-radius: 16px;
+  color: #f4fbff;
+  background:
+    linear-gradient(145deg, rgba(9, 24, 39, 0.94), rgba(3, 5, 10, 0.98)),
+    rgba(5, 5, 5, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 34px 90px rgba(0, 0, 0, 0.58);
+}
+
+.vault-gateway-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+}
+
+.vault-gateway-panel h2 {
+  max-width: 720px;
+  font-family: var(--display-font);
+  font-size: clamp(2.6rem, 7vw, 6rem);
+  line-height: 0.86;
+}
+
+.vault-gateway-copy {
+  max-width: 780px;
+}
+
+.vault-gateway-status {
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(94, 255, 157, 0.32);
+  border-radius: 14px;
+  color: #dfffee;
+  background: rgba(0, 255, 154, 0.08);
+  font-weight: 800;
+}
+
+.vault-gateway-actions button {
+  min-height: 2.9rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  border-radius: 999px;
+  color: #f4fbff;
+  background: rgba(7, 20, 31, 0.9);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.vault-gateway-actions button:is(:hover, :focus-visible) {
+  border-color: rgba(255, 224, 113, 0.72);
+  color: #fffbe8;
+}
+
+body.vault-gateway-open {
+  overflow: hidden;
+}
+
+.live-events-stream-events {
+  width: min(calc(100% - 32px), 1240px);
+  margin: clamp(2rem, 5vw, 4rem) auto 0;
+  border: 1px solid rgba(255, 224, 113, 0.16);
+  border-radius: 24px;
+}
+
+@media (max-width: 900px) {
+  .refined-app-band,
+  .refined-bridge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vault-status-card {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .vault-credit-badge {
+    left: 0.75rem;
+    right: auto;
+    bottom: 5rem;
+  }
+
+  .refined-actions > *,
+  .vault-gateway-actions button {
+    width: 100%;
+  }
+}
+/* End LottoMind Refined Vault bridge. */

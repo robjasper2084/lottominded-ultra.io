@@ -548,6 +548,7 @@ function setupUniversalFloatingMenu() {
     ["Home", "./index.html#top"],
     ["Features", "./features-app.html"],
     ["Events", "./live-events.html"],
+    ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"],
     ["Spheres", "./lottery-spheres.html#spheres"],
     ["Beat2Lotto+", "./prompt-lab.html#beat2lotto"],
     ["Merch", "./merch-store.html"],
@@ -623,6 +624,213 @@ function setupUniversalFloatingMenu() {
 
 setupUniversalFloatingMenu();
 
+
+const REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
+const VAULT_KEYS = {
+  plan: "lottomind_plan",
+  credits: "lottomind_credits",
+  ledger: "lottomind_credit_ledger",
+  unlockedUntil: "lottomind_unlocked_until",
+  dailyUsage: "lottomind_daily_usage",
+  betaAccess: "lottomind_beta_access"
+};
+const VAULT_DISCLAIMER = "LottoMind and LottoCredits are for entertainment, organization, music creation, and creative number journaling only. LottoCredits have no cash value and cannot be redeemed for money, prizes, lottery tickets, or gambling. LottoMind does not predict winning lottery numbers.";
+
+function readVaultNumber(key, fallback = 0) {
+  const value = Number(localStorage.getItem(key));
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function readVaultLedger() {
+  try {
+    return JSON.parse(localStorage.getItem(VAULT_KEYS.ledger) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function writeVaultLedger(entry) {
+  const ledger = [entry, ...readVaultLedger()].slice(0, 25);
+  localStorage.setItem(VAULT_KEYS.ledger, JSON.stringify(ledger));
+}
+
+function getVaultState() {
+  const now = Date.now();
+  const plan = localStorage.getItem(VAULT_KEYS.plan) || "free";
+  const unlockedUntil = readVaultNumber(VAULT_KEYS.unlockedUntil);
+  const passActive = unlockedUntil > now;
+  const vaultActive = ["gold", "ultra"].includes(plan) || passActive;
+  return {
+    plan,
+    credits: readVaultNumber(VAULT_KEYS.credits),
+    unlockedUntil,
+    passActive,
+    vaultActive,
+    betaAccess: localStorage.getItem(VAULT_KEYS.betaAccess) === "true"
+  };
+}
+
+function setVaultState(next = {}) {
+  const current = getVaultState();
+  const plan = next.plan || current.plan || "free";
+  const credits = Number.isFinite(Number(next.credits)) ? Number(next.credits) : current.credits;
+  localStorage.setItem(VAULT_KEYS.plan, plan);
+  localStorage.setItem(VAULT_KEYS.credits, String(Math.max(0, Math.round(credits))));
+  if (Number.isFinite(Number(next.unlockedUntil))) {
+    localStorage.setItem(VAULT_KEYS.unlockedUntil, String(Number(next.unlockedUntil)));
+  }
+  if (typeof next.betaAccess === "boolean") {
+    localStorage.setItem(VAULT_KEYS.betaAccess, String(next.betaAccess));
+  }
+  window.dispatchEvent(new CustomEvent("lottomind:vault-updated", { detail: getVaultState() }));
+}
+
+function addVaultCredits(amount, reason) {
+  const state = getVaultState();
+  const nextCredits = state.credits + amount;
+  setVaultState({ credits: nextCredits });
+  writeVaultLedger({ amount, reason, createdAt: new Date().toISOString(), balance: nextCredits });
+}
+
+function buildRefinedLaunchUrl(state = getVaultState(), override = {}) {
+  const plan = override.plan || state.plan || "free";
+  const params = new URLSearchParams();
+  params.set("plan", plan);
+  params.set("credits", String(state.credits || 0));
+  if (plan === "gold" || plan === "ultra" || state.vaultActive || override.vault === "active") params.set("vault", "active");
+  if (override.pass === "24hr" || state.passActive) params.set("pass", "24hr");
+  if (state.betaAccess) params.set("beta", "active");
+  return `${REFINED_APP_URL}?${params.toString()}`;
+}
+
+function setupLottoMindVaultGateway() {
+  const hasGatewayTargets = document.querySelector("[data-vault-launch], [data-vault-open], [data-beta-waitlist]") || document.body.classList.contains("home-page");
+  if (!hasGatewayTargets) return;
+
+  const badge = document.createElement("button");
+  badge.className = "vault-credit-badge";
+  badge.type = "button";
+  badge.dataset.vaultOpen = "true";
+  badge.setAttribute("aria-label", "Open LottoMind Vault Gateway");
+  document.body.appendChild(badge);
+
+  const modal = document.createElement("div");
+  modal.className = "vault-gateway-modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-hidden", "true");
+  modal.setAttribute("aria-label", "LottoMind Vault Gateway");
+  modal.innerHTML = `
+    <div class="vault-gateway-panel">
+      <button class="vault-gateway-close" type="button" aria-label="Close LottoMind Vault Gateway">X</button>
+      <p class="eyebrow">LottoMind Vault Gateway</p>
+      <h2>LottoMind Vault Gateway</h2>
+      <p class="vault-gateway-copy">Choose a demo access lane before entering LottoMind Refined. Free users can still enter the app; premium tools stay locked unless Gold, Ultra, credits, or a 24-hour pass are active.</p>
+      <div class="vault-gateway-status" data-vault-gateway-status aria-live="polite"></div>
+      <div class="vault-gateway-actions">
+        <button type="button" data-vault-choice="free">Free Demo</button>
+        <button type="button" data-vault-choice="gold">Unlock Gold Vault</button>
+        <button type="button" data-vault-choice="pass">Use 24-Hour Pass</button>
+        <button type="button" data-vault-choice="credits">Buy Credits</button>
+        <button type="button" class="primary-action" data-vault-continue>Continue to App</button>
+      </div>
+      <p class="vault-gateway-disclaimer">${VAULT_DISCLAIMER}</p>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const statusTargets = document.querySelectorAll("[data-vault-status], [data-vault-gateway-status]");
+  const update = (message = "") => {
+    const state = getVaultState();
+    const planLabel = state.plan === "ultra" ? "Ultra" : state.plan === "gold" ? "Gold" : state.passActive ? "24-hour pass" : "Free";
+    const activeText = state.vaultActive
+      ? "Vault Access Active. Premium LottoMind Refined tools unlocked."
+      : "Free demo active. Premium tools stay locked inside LottoMind Refined.";
+    const text = message || `${activeText} ${state.credits} LottoCredits available.`;
+    badge.innerHTML = `<strong>${state.credits}</strong><span>${planLabel} credits</span>`;
+    statusTargets.forEach((target) => {
+      target.textContent = text;
+    });
+  };
+
+  const open = (message = "") => {
+    update(message);
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("vault-gateway-open");
+    window.setTimeout(() => modal.querySelector("button")?.focus(), 20);
+  };
+
+  const close = () => {
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("vault-gateway-open");
+  };
+
+  const launch = (override = {}) => {
+    window.location.href = buildRefinedLaunchUrl(getVaultState(), override);
+  };
+
+  modal.querySelector(".vault-gateway-close")?.addEventListener("click", close);
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && modal.classList.contains("is-open")) close();
+  });
+
+  document.querySelectorAll("[data-vault-launch]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const requestedPlan = link.dataset.plan || "free";
+      open(requestedPlan === "free" ? "Free demo selected. Continue to App when ready." : "Vault lane selected. Choose access or continue.");
+    });
+  });
+
+  document.querySelectorAll("[data-vault-open]").forEach((button) => {
+    button.addEventListener("click", () => open());
+  });
+
+  document.querySelectorAll("[data-beta-waitlist]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (localStorage.getItem(VAULT_KEYS.betaAccess) !== "true") {
+        addVaultCredits(25, "Beta waitlist demo award");
+      }
+      setVaultState({ betaAccess: true });
+      open("Beta access saved. You earned 25 LottoCredits.");
+    });
+  });
+
+  modal.querySelectorAll("[data-vault-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const choice = button.dataset.vaultChoice;
+      if (choice === "free") {
+        setVaultState({ plan: "free" });
+        update("Free demo selected. Continue to App to enter with premium tools locked.");
+      }
+      if (choice === "gold") {
+        const credits = Math.max(getVaultState().credits, 500);
+        setVaultState({ plan: "gold", credits });
+        update("Vault Access Active. Premium LottoMind Refined tools unlocked.");
+      }
+      if (choice === "pass") {
+        setVaultState({ plan: "free", unlockedUntil: Date.now() + 24 * 60 * 60 * 1000 });
+        update("24-hour pass active. Premium LottoMind Refined tools unlocked for this demo window.");
+      }
+      if (choice === "credits") {
+        addVaultCredits(250, "Demo credit pack");
+        update("250 LottoCredits added in demo mode.");
+      }
+    });
+  });
+
+  modal.querySelector("[data-vault-continue]")?.addEventListener("click", () => launch());
+  badge.addEventListener("click", () => open());
+  window.addEventListener("lottomind:vault-updated", () => update());
+  update();
+}
+
+setupLottoMindVaultGateway();
 function getReactivePoint(event) {
   if (event?.touches?.length) return { x: event.touches[0].clientX, y: event.touches[0].clientY, touch: true };
   if (event?.changedTouches?.length) return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY, touch: true };
