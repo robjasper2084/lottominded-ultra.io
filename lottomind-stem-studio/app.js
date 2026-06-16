@@ -17,6 +17,7 @@ const STORAGE = {
   customLotteryGames: "lottomind.stemStudio.customLotteryGames.v1",
   beatCreativeBundles: "lottomind.stemStudio.beatCreativeBundles.v1",
   keyboardMappings: "lottominded.ultra.keyboardMappings.v1",
+  floatingModesPosition: "lottominded.ultra.floatingModesPosition.v1",
   floatingTransportPosition: "lottominded.ultra.floatingTransportPosition.v1",
   floatingStemMixerPosition: "lottominded.ultra.floatingStemMixerPosition.v1",
   floatingSequencerPosition: "lottominded.ultra.floatingSequencerPosition.v1",
@@ -1471,6 +1472,7 @@ function render() {
   const app = document.getElementById("app");
   const topShell = state.ui.topShell;
   app.innerHTML = `
+    <div class="studio-cinematic-backdrop" aria-hidden="true"></div>
     <div class="top-shell ultra-cockpit-shell ${state.settings.stickyTransport ? "" : "not-sticky"} top-shell-${topShell.mode}" style="--top-shell-height:${topShell.height}px">
       ${renderTopShellControls()}
       <div class="top-shell-body" id="studio-top-shell-body">
@@ -1485,6 +1487,7 @@ function render() {
     <main class="view" data-view="${state.view}">
       ${renderCurrentView()}
     </main>
+    ${renderStudioBottomStatus()}
     <p class="footer-note">Load or record audio you own or have permission to use. Browser recording and capture features depend on permissions and platform support.</p>
     ${renderFirstRunGuide()}
     ${renderHelpDialog()}
@@ -1493,6 +1496,7 @@ function render() {
   `;
   drawAllCanvases();
   initUltraCockpit();
+  initFloatingModes();
   initFloatingTransport();
   initFloatingStemMixer();
   initFloatingSequencer();
@@ -1567,8 +1571,8 @@ function renderHeader() {
         <div class="brand ultra-brand-copy">
           <img class="ultra-brand-orb" src="${getAsset("logo")}" alt="" />
           <div>
-            <h1>Lottominded ULTRA</h1>
-            <p>Make Beats. Build Prompts. Generate Creative Signals.</p>
+            <h1>Stem Studio</h1>
+            <p>Hardware-style workstation for stems, pads, decks, prompts, and local-only audio.</p>
           </div>
         </div>
       </div>
@@ -1687,18 +1691,119 @@ function renderWorkflowShortcuts() {
 }
 
 function renderTabs() {
-  const tabs = ["studio", "song", "waveform studio", "open tools", "patterns", "piano roll", "stems", "dj decks", "pads", "sampler", "sequencer", "mixer", "ai master", "automation", "plugins", "midi", "recorder", "files", "suno prompt", "video prompt", "beat lottery", "beat dna", "settings", "help"];
-  const workflowTabs = new Set(["pads", "patterns", "sequencer", "mixer", "song", "waveform studio", "beat dna"]);
+  const tabs = [
+    { view: "studio", icon: "HM", label: "Home", hint: "Dashboard" },
+    { view: "mixer", icon: "MX", label: "Mixer", hint: "Console" },
+    { view: "pads", icon: "PD", label: "Pads", hint: "Drums" },
+    { view: "keyboard", icon: "KY", label: "Keyboard", hint: "Synth" },
+    { view: "sequencer", icon: "SQ", label: "Sequencer", hint: "Steps" },
+    { view: "sampler", icon: "SP", label: "Sampler", hint: "Slices" },
+    { view: "dj decks", icon: "DJ", label: "DJ Decks", hint: "Blend" },
+    { view: "recorder", icon: "RC", label: "Recorder", hint: "Capture" },
+    { view: "song", icon: "AR", label: "Song Editor", hint: "Arrange" },
+    { view: "piano roll", icon: "PR", label: "Piano Roll", hint: "MIDI" },
+    { view: "waveform studio", icon: "WF", label: "Waveform", hint: "Edit" },
+    { view: "plugins", icon: "FX", label: "Plugins", hint: "Rack" },
+    { view: "ai master", icon: "AI", label: "AI Tools", hint: "Master" },
+    { view: "files", icon: "EX", label: "Export", hint: "Files" },
+    { view: "settings", icon: "ST", label: "Settings", hint: "System" },
+  ];
+  const workflowTabs = new Set(["pads", "sequencer", "mixer", "song", "waveform studio", "ai master"]);
   return `
-    <nav class="tabs ultra-left-dock" aria-label="Modes">
-      <span class="tabs-label">Modes</span>
-      ${tabs.map((tab) => `<button type="button" class="tab ${state.view === tab ? "is-active" : ""} ${workflowTabs.has(tab) ? "is-workflow-tab" : ""}" data-action="set-view" data-view="${tab}" aria-current="${state.view === tab ? "page" : "false"}">${titleCase(tab)}</button>`).join("")}
+    <nav class="tabs ultra-left-dock is-floating-modes" data-floating-modes aria-label="Modes">
+      <span class="tabs-label floating-modes-grip" data-floating-modes-handle role="button" tabindex="0" aria-label="Drag modes rail" title="Drag modes rail">
+        <span>Modes</span>
+        <small>Drag</small>
+      </span>
+      ${tabs.map((tab) => `<button type="button" class="tab ${state.view === tab.view ? "is-active" : ""} ${workflowTabs.has(tab.view) ? "is-workflow-tab" : ""}" data-action="set-view" data-view="${tab.view}" aria-current="${state.view === tab.view ? "page" : "false"}"><span class="tab-icon">${tab.icon}</span><span class="tab-copy"><strong>${escapeHtml(tab.label)}</strong><small>${escapeHtml(tab.hint)}</small></span></button>`).join("")}
     </nav>
   `;
 }
 
+function renderStudioHardwareDashboard() {
+  const loadedStems = state.stems.filter((stem) => stem.buffer).length;
+  const playingStems = state.stems.filter((stem) => stem.playing).length;
+  const armedTracks = state.daw.tracks.filter((track) => track.armed).length;
+  const activePads = state.pads.filter((pad) => pad.active).length;
+  const projectStatus = state.savedAt ? "Saved locally" : "Unsaved local session";
+  const quickStarts = [
+    { action: "demo-project", icon: "NB", title: "New Beat", copy: "Load the demo stems and start shaping a session." },
+    { action: "load-project", icon: "OP", title: "Open Project", copy: "Restore a saved browser project snapshot." },
+    { view: "stems", icon: "LS", title: "Load Stems", copy: "Bring in local audio you own or have permission to use." },
+    { view: "recorder", icon: "RC", title: "Start Recording", copy: "Capture mic or line input where your browser allows it." },
+    { view: "mixer", icon: "MX", title: "Open Mixer", copy: "Balance channels, sends, inserts, and master output." },
+    { view: "pads", icon: "PD", title: "Open Pads", copy: "Play the 16-pad grid with pressure-style feedback." },
+  ];
+  return `
+    <section class="studio-hardware-dashboard" aria-label="Stem Studio dashboard">
+      <article class="studio-hero-instrument">
+        <div class="studio-hero-copy">
+          <span class="studio-console-label">LOTTOMINDED ULTRA STEM STUDIO</span>
+          <h2>Build the beat from one hardware-style control room.</h2>
+          <p>Stems, pads, sequencer, decks, waveform editing, prompt tools, and mastering stay local in the browser. Start simple, then open deeper modules when you need them.</p>
+          <div class="studio-hero-actions">
+            <button type="button" data-action="play-all">Play All</button>
+            <button type="button" data-action="demo-project">Load Demo</button>
+            <button type="button" data-action="set-view" data-view="mixer">Open Mixer</button>
+            <button type="button" data-action="set-view" data-view="ai master">AI Tools</button>
+          </div>
+        </div>
+        <div class="studio-hero-screen" aria-label="Session signal screen">
+          <img src="${getAsset("hero")}" alt="" />
+          <div class="studio-spectrum" aria-hidden="true">${Array.from({ length: 28 }, (_, index) => `<span style="--i:${index}"></span>`).join("")}</div>
+          <div class="studio-session-readout">
+            <span>${projectStatus}</span>
+            <strong>${state.bpm} BPM</strong>
+            <span>${escapeHtml(state.daw?.song?.key || "C minor")}</span>
+          </div>
+        </div>
+      </article>
+      <aside class="studio-session-panel" aria-label="Current session status">
+        <div><span>Audio Engine</span><strong>${audioCtx ? "Ready" : "Standby"}</strong></div>
+        <div><span>Loaded Stems</span><strong>${loadedStems}/8</strong></div>
+        <div><span>Playing</span><strong>${playingStems}</strong></div>
+        <div><span>Armed Tracks</span><strong>${armedTracks}</strong></div>
+        <div><span>Active Pads</span><strong>${activePads}</strong></div>
+        <div><span>Master</span><strong>${Math.round(state.master.volume * 100)}%</strong></div>
+      </aside>
+      <nav class="studio-quick-starts" aria-label="Quick start actions">
+        ${quickStarts.map((item) => `<button type="button" class="studio-quick-card" ${item.action ? `data-action="${item.action}"` : `data-action="set-view" data-view="${item.view}"`}>
+          <span>${item.icon}</span>
+          <strong>${escapeHtml(item.title)}</strong>
+          <small>${escapeHtml(item.copy)}</small>
+        </button>`).join("")}
+      </nav>
+    </section>
+  `;
+}
+
+function renderStudioBottomStatus() {
+  const currentTrack = state.daw.tracks.find((track) => track.id === state.daw.selectedTrackId) || state.daw.tracks[0];
+  const projectStatus = state.savedAt ? "Saved" : "Unsaved";
+  return `
+    <footer class="studio-bottom-status" aria-label="Studio transport and status">
+      <div class="studio-bottom-brand"><span>LM</span><strong>Stem Studio</strong></div>
+      <div class="studio-bottom-transport">
+        <button type="button" data-action="play-all" aria-pressed="${state.playing && !state.transport.paused}">Play</button>
+        <button type="button" data-action="pause-all" aria-pressed="${state.transport.paused}">Pause</button>
+        <button type="button" data-action="stop-all">Stop</button>
+        <button type="button" data-action="record-mix" aria-pressed="${state.recording}">Record</button>
+        <button type="button" data-action="toggle-metronome" aria-pressed="${state.metronome}">Metro</button>
+      </div>
+      <div class="studio-bottom-readout">
+        <span>${state.bpm} BPM</span>
+        <span>${escapeHtml(state.daw?.song?.timeSignature || "4/4")}</span>
+        <span>${escapeHtml(state.daw?.song?.key || "C minor")}</span>
+        <span>${projectStatus}</span>
+        <span>${escapeHtml(currentTrack?.name || "Track 1")}</span>
+      </div>
+      <div class="studio-master-meter" aria-label="Master output meter"><span style="--vu:${Math.round(state.master.meter * 100)}%"></span></div>
+    </footer>
+  `;
+}
+
 function renderCurrentView() {
-  if (state.view === "studio") return `${renderStemMixer()}<div class="studio-song-editor">${renderSongEditor()}</div>${renderPads()}`;
+  if (state.view === "studio") return `${renderStudioHardwareDashboard()}${renderStemMixer()}<div class="studio-song-editor">${renderSongEditor()}</div>${renderPads()}`;
   if (state.view === "song") return renderSongEditor();
   if (state.view === "waveform studio") return `${renderWaveformStudio()}${renderSongEditorContextMenu()}`;
   if (state.view === "open tools") return renderOpenMusicToolLab();
@@ -11677,6 +11782,98 @@ function initUltraCockpit() {
   syncTransportButtonStates();
   updateUltraMeters();
   animateUltraWaveform();
+}
+
+function initFloatingModes() {
+  const rail = document.querySelector("[data-floating-modes]");
+  const handle = rail?.querySelector("[data-floating-modes-handle]");
+  if (!rail || !handle) return;
+
+  let position = { x: 18, y: 86 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE.floatingModesPosition) || "{}");
+    if (Number.isFinite(saved.x) && Number.isFinite(saved.y)) {
+      position = { x: saved.x, y: saved.y };
+    }
+  } catch (error) {
+    position = { x: 18, y: 86 };
+  }
+
+  const applyPosition = () => {
+    const maxX = Math.max(12, window.innerWidth - Math.min(rail.offsetWidth, window.innerWidth - 24) - 12);
+    const maxY = Math.max(12, window.innerHeight - Math.min(rail.offsetHeight, window.innerHeight - 24) - 12);
+    position.x = clamp(position.x, 12, maxX);
+    position.y = clamp(position.y, 12, maxY);
+    rail.style.setProperty("--modes-left", `${Math.round(position.x)}px`);
+    rail.style.setProperty("--modes-top", `${Math.round(position.y)}px`);
+  };
+
+  applyPosition();
+  requestAnimationFrame(applyPosition);
+
+  let dragState = null;
+  const finishDrag = () => {
+    if (!dragState) return;
+    dragState = null;
+    rail.classList.remove("is-dragging");
+    localStorage.setItem(STORAGE.floatingModesPosition, JSON.stringify(position));
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", finishDrag);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+  };
+
+  const startDrag = (clientX, clientY) => {
+    dragState = {
+      startX: clientX,
+      startY: clientY,
+      originX: position.x,
+      originY: position.y
+    };
+    rail.classList.add("is-dragging");
+  };
+
+  const moveDrag = (clientX, clientY) => {
+    if (!dragState) return;
+    position.x = dragState.originX + clientX - dragState.startX;
+    position.y = dragState.originY + clientY - dragState.startY;
+    applyPosition();
+  };
+
+  function onPointerMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onPointerUp() {
+    finishDrag();
+  }
+
+  function onMouseMove(event) {
+    moveDrag(event.clientX, event.clientY);
+  }
+
+  function onMouseUp() {
+    finishDrag();
+  }
+
+  handle.addEventListener("pointerdown", (event) => {
+    if (event.button && event.button !== 0) return;
+    startDrag(event.clientX, event.clientY);
+    handle.setPointerCapture?.(event.pointerId);
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", finishDrag);
+    event.preventDefault();
+  });
+
+  handle.addEventListener("mousedown", (event) => {
+    if (event.button !== 0) return;
+    startDrag(event.clientX, event.clientY);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    event.preventDefault();
+  });
 }
 
 function initFloatingTransport() {

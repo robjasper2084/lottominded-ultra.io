@@ -10,7 +10,12 @@
     <title>LOTTOMINDED ULTRA | Prompt Lab</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=vault-refined-1" />
+    <script>
+      if (window.location.hash.toLowerCase() === "#beat2lotto") {
+        window.location.replace(`./beat2lotto-plus.html${window.location.search}#beat2lotto`);
+      }
+    </script>
+    <link rel="stylesheet" href="./styles.css?v=guide-b2l-game-1" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-4" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-4" />
@@ -324,7 +329,7 @@
     </footer>
 
     <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
-    <script src="./site.js?v=vault-refined-1" defer></script>
+    <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
     <script src="./lottery-spheres.js?v=touch-spheres-1" defer></script>
     <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-4" defer></script>
   </body>

@@ -13,15 +13,23 @@
   --lm-live-muted: #a8b7ca;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
+  padding: 0;
   overflow: hidden;
   clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
 }
 
 body.lm-live-page {
+  overflow-x: hidden;
   color: var(--lm-live-text);
   background:
     radial-gradient(circle at 50% 0%, rgba(138, 92, 255, 0.22), transparent 28rem),
@@ -68,6 +76,10 @@ body.lm-live-page::before {
   backdrop-filter: blur(18px);
 }
 
+.lm-live-topbar > * {
+  min-width: 0;
+}
+
 .lm-live-logo img {
   display: block;
   width: 100%;
@@ -76,14 +88,23 @@ body.lm-live-page::before {
 
 .lm-live-nav {
   display: flex;
-  gap: 10px;
+  flex-wrap: nowrap;
+  gap: 8px;
   justify-content: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.lm-live-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .lm-live-nav a,
 .live-btn,
 .lm-passes button,
 .stream-list button,
+.stream-list .twitch-link,
 .lm-interactions button,
 .lm-category-grid button {
   position: relative;
@@ -100,8 +121,16 @@ body.lm-live-page::before {
 }
 
 .lm-live-nav a {
-  padding: 14px 18px;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content !important;
+  flex-basis: auto !important;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 14px !important;
   font-size: .78rem;
+  white-space: nowrap;
 }
 
 .lm-live-nav a.is-active,
@@ -120,6 +149,10 @@ body.lm-live-page::before {
   border-radius: 14px;
   background: rgba(0,0,0,.4);
   color: var(--lm-live-text);
+}
+
+.lm-live-search {
+  min-width: 0;
 }
 
 .lm-live-bell,
@@ -465,12 +498,19 @@ body.lm-live-page::before {
   border-bottom: 1px solid rgba(41,247,255,.12);
 }
 
-.chat-tabs button {
+.chat-tabs button,
+.chat-tabs a {
+  display: inline-grid;
+  place-items: center;
   min-height: 44px;
   border: 0;
   border-radius: 0;
   background: transparent;
   color: var(--lm-live-muted);
+  text-decoration: none;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .chat-tabs .is-active {
@@ -479,18 +519,96 @@ body.lm-live-page::before {
   box-shadow: inset 0 -2px 0 var(--lm-live-violet);
 }
 
+.twitch-chat-frame {
+  position: relative;
+  flex: 1;
+  min-height: 330px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 24% 0%, rgba(138, 92, 255, 0.18), transparent 13rem),
+    rgba(0, 0, 0, 0.38);
+}
+
+.twitch-chat-frame iframe {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  border: 0;
+}
+
+.twitch-chat-fallback {
+  position: absolute;
+  inset: 18px;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+  color: var(--lm-live-muted);
+  pointer-events: none;
+}
+
+.twitch-chat-fallback strong {
+  color: #fff;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.twitch-chat-fallback .live-btn {
+  pointer-events: auto;
+}
+
 .chat-feed {
   flex: 1;
   padding: 14px 18px;
+  overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .chat-feed p {
+  max-width: 96%;
   margin: 0 0 12px;
   color: var(--lm-live-muted);
+  line-height: 1.45;
+}
+
+.chat-feed p.is-user,
+.chat-feed p.is-bot {
+  padding: 9px 10px;
+  border: 1px solid rgba(41,247,255,.14);
+  border-radius: 12px;
+  background: rgba(5,14,28,.38);
+}
+
+.chat-feed p.is-user {
+  margin-left: auto;
+  border-color: rgba(94,255,157,.22);
+  color: #f0fff8;
+  background: rgba(0,255,154,.08);
+}
+
+.chat-feed p.is-bot {
+  box-shadow: inset 3px 0 0 var(--bot-accent, var(--lm-live-cyan));
+}
+
+.chat-feed p.is-typing {
+  width: max-content;
+  color: rgba(220,234,253,.68);
+  font-style: italic;
 }
 
 .chat-feed b {
   color: var(--lm-live-magenta);
+}
+
+.chat-feed p.is-user b {
+  color: var(--lm-live-green);
+}
+
+.chat-feed p.is-bot b {
+  color: var(--bot-accent, var(--lm-live-magenta));
 }
 
 .chat-input {
@@ -532,8 +650,8 @@ body.lm-live-page::before {
 
 .event-card {
   position: relative;
-  min-height: 230px;
-  padding: 130px 14px 14px;
+  min-height: 258px;
+  padding: 148px 14px 14px;
   overflow: hidden;
   border: 1px solid rgba(41,247,255,.22);
   border-radius: 14px;
@@ -566,6 +684,35 @@ body.lm-live-page::before {
   height: 126px;
 }
 
+.event-card .video-thumb {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(41,247,255,.16), transparent 9rem),
+    #020713;
+}
+
+.event-card .video-thumb iframe {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 150%;
+  height: 190%;
+  border: 0;
+  opacity: .82;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  filter: saturate(1.22) contrast(1.08) brightness(.88);
+}
+
+.event-card .video-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3,5,10,.05), rgba(3,5,10,.72)),
+    linear-gradient(90deg, rgba(41,247,255,.18), transparent 40%, rgba(255,79,216,.14));
+  pointer-events: none;
+}
+
 .thumb.comedy,
 .mini-thumb.comedy {
   background-position: 45% 33%;
@@ -577,11 +724,15 @@ body.lm-live-page::before {
 }
 
 .event-card h3 {
+  position: relative;
+  z-index: 1;
   margin: 0 0 8px;
   text-transform: uppercase;
 }
 
 .event-card p {
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: var(--lm-live-muted);
   line-height: 1.45;
@@ -616,6 +767,76 @@ body.lm-live-page::before {
   padding: 12px;
 }
 
+.twitch-live-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 12px;
+  padding: 10px;
+  border: 1px solid rgba(138, 92, 255, 0.34);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(138, 92, 255, 0.3), transparent 12rem),
+    linear-gradient(145deg, rgba(41, 247, 255, 0.08), rgba(255, 79, 216, 0.08)),
+    rgba(0, 0, 0, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.twitch-live-copy {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.twitch-live-copy h3 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.05rem, 2vw, 1.75rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.twitch-live-copy p {
+  margin: 0;
+  color: var(--lm-live-muted);
+  line-height: 1.45;
+}
+
+.twitch-player-frame {
+  position: relative;
+  min-height: 205px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at center, rgba(41, 247, 255, 0.14), transparent 60%),
+    #050711;
+}
+
+.twitch-player-frame::before {
+  content: "LOTTOMINDED TWITCH LIVE";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(245, 251, 255, 0.28);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.twitch-player-frame iframe {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  border: 0;
+}
+
 .stream-list article,
 .lm-replay article {
   display: grid;
@@ -626,6 +847,85 @@ body.lm-live-page::before {
   border: 1px solid rgba(130,200,255,.14);
   border-radius: 12px;
   background: rgba(0,0,0,.26);
+}
+
+.lm-replay article {
+  grid-template-columns: 1fr;
+}
+
+.replay-video-link {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.video-replay-card {
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.video-replay-card:hover,
+.video-replay-card:focus-within {
+  border-color: rgba(255, 79, 216, 0.58);
+  box-shadow: 0 0 26px rgba(255, 79, 216, 0.18);
+  transform: translateY(-2px);
+}
+
+.mini-thumb.youtube-thumb {
+  position: relative;
+  overflow: hidden;
+  background: #020713;
+}
+
+.mini-thumb.youtube-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.1) contrast(1.05) brightness(0.86);
+}
+
+.mini-thumb.youtube-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.42)),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.26), transparent 22px);
+}
+
+.mini-thumb.youtube-thumb::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 15px solid #fff;
+  transform: translate(-38%, -50%);
+  filter: drop-shadow(0 0 8px rgba(41, 247, 255, 0.65));
+}
+
+.stream-list .twitch-link {
+  display: inline-grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 9px 10px;
+  text-align: center;
+  font-size: 0.72rem;
+}
+
+.stream-list .twitch-link:hover,
+.stream-list .twitch-link:focus-visible {
+  border-color: rgba(138, 92, 255, 0.78);
+  background: linear-gradient(135deg, rgba(138, 92, 255, 0.74), rgba(41, 247, 255, 0.5));
+  box-shadow: 0 0 22px rgba(138, 92, 255, 0.22);
+  transform: translateY(-1px);
 }
 
 .stream-list time {
@@ -705,6 +1005,40 @@ body.lm-live-page::before {
   min-height: 210px;
   border-radius: 12px;
   background-position: 32% 52%;
+}
+
+.video-spotlight-link {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(38, 235, 255, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 18px 38px rgba(0, 0, 0, 0.28);
+}
+
+.video-spotlight-link img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  display: block;
+  object-fit: cover;
+  filter: saturate(1.12) contrast(1.08) brightness(0.82);
+  transition: transform 220ms ease, filter 220ms ease;
+}
+
+.video-spotlight-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(38, 235, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(3, 5, 10, 0.04), rgba(3, 5, 10, 0.34));
+  pointer-events: none;
+}
+
+.video-spotlight-link:hover img,
+.video-spotlight-link:focus-visible img {
+  transform: scale(1.04);
+  filter: saturate(1.22) contrast(1.12) brightness(0.94);
 }
 
 .lm-spotlight p:first-child,
@@ -802,11 +1136,12 @@ body.lm-live-page::before {
 }
 
 .lm-live-player {
-  position: fixed;
+  position: fixed !important;
   left: 10px;
-  right: 10px;
+  right: 6.2rem;
   bottom: 10px;
-  z-index: 60;
+  top: auto !important;
+  z-index: 60 !important;
   display: grid;
   grid-template-columns: 86px minmax(220px, 340px) minmax(200px, 1fr) 52px 64px 52px 150px 280px;
   gap: 12px;
@@ -940,15 +1275,23 @@ body.lm-live-page::before {
     grid-template-columns: 64px minmax(0, 1fr);
   }
   .stream-list .mini-thumb,
-  .stream-list button {
+  .stream-list button,
+  .stream-list .twitch-link {
     grid-column: span 2;
     width: 100%;
+  }
+  .twitch-live-card {
+    grid-template-columns: 1fr;
+  }
+  .twitch-player-frame {
+    min-height: 190px;
   }
   .lm-spotlight {
     grid-template-columns: 1fr;
   }
   .lm-live-player {
-    position: static;
+    position: static !important;
+    inset: auto !important;
     grid-template-columns: 60px 1fr 48px 56px 48px;
     margin: 12px;
   }

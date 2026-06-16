@@ -5,244 +5,265 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Featured Stream Events for concerts, comedy, festivals, creator showcases, private premieres, premium replay rooms, and live entertainment inside the LottoMind universe."
+      content="Featured live concerts, comedy, festivals, conferences, premium streams, and replay events for LOTTOMINDED ULTRA."
     />
-    <title>LOTTOMINDED ULTRA | Featured Stream Events</title>
+    <title>LOTTOMINDED ULTRA | Live Events</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=vault-refined-1" />
-    <link rel="stylesheet" href="./assets/css/motion-shop.css?v=motion-shop-3" />
-    <link rel="stylesheet" href="./lottery-spheres.css?v=global-tabs-menu-2" />
-    <link rel="stylesheet" href="./assets/css/juneteenth-event-popup.css?v=juneteenth-event-3" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=kit-assets-1" />
+    <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=youtube-media-3" />
   </head>
-  <body class="live-events-page motion-shop-page">
-    <header class="site-header home-like-header lottery-spheres-header" data-site-header>
-      <div class="site-header-main">
-        <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
-          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
-          <span>LOTTOMINDED ULTRA</span>
-        </a>
-        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
-      </div>
-      <nav aria-label="Featured Stream Events navigation">
-        <a href="./" data-icon="HM">Home</a>
-        <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
-        <a href="./live-events.html" data-icon="EV">Events</a>
-        <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
-        <a href="./prompt-lab.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
-        <a href="./merch-store.html" data-icon="MC">Merch</a>
-        <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
-        <a href="./how-to-use.html" data-icon="GO">Guide</a>
-        <a href="./lottomind-stem-studio/index.html" data-icon="ST">Studio</a>
+  <body class="live-events-page lm-live-page">
+    <header class="lm-live-topbar" data-live-shell>
+      <a class="lm-live-logo" href="./how-to-use.html" aria-label="LOTTOMINDED ULTRA home">
+        <img src="./assets/live-events/svg/lm-live-logo.svg" alt="" />
+      </a>
+
+      <nav class="lm-live-nav" aria-label="Live events primary navigation">
+        <a href="./how-to-use.html">Home</a>
+        <a href="./features-app.html">Music</a>
+        <a class="is-active" href="./live-events.html">Events</a>
+        <a href="#upcoming">Shows</a>
+        <a href="#community">Community</a>
+        <a href="./merch-store.html">Store</a>
+        <a href="./how-to-use.html">About</a>
       </nav>
+
+      <form class="lm-live-search" role="search">
+        <label>
+          <span class="sr-only">Search events</span>
+          <input type="search" placeholder="Search events, artists..." />
+        </label>
+      </form>
+
+      <button class="lm-live-bell" type="button" aria-label="Notifications">!</button>
+      <button class="lm-live-profile" type="button">
+        <span class="crown">VIP</span>
+        <span><small>Ultra Member</small><strong>LOTTOMINDED</strong></span>
+      </button>
     </header>
 
-    <button class="motion-menu-toggle" type="button" data-motion-menu-toggle aria-controls="motionMenu" aria-expanded="false" aria-label="Open motion menu">MENU</button>
-    <aside class="motion-menu" id="motionMenu" data-motion-menu aria-hidden="true" aria-label="Motion page menu">
-      <div class="motion-menu-panel" role="dialog" aria-modal="true" aria-labelledby="motionMenuTitle">
-        <button class="motion-menu-close" type="button" data-motion-menu-close aria-label="Close menu">X</button>
-        <p class="motion-overline">LOTTOMINDED ULTRA</p>
-        <h2 class="motion-section-title" id="motionMenuTitle">Signal Menu</h2>
-        <nav class="motion-menu-links" aria-label="Overlay navigation">
-          <a href="./index.html">Home</a>
-          <a href="./features-app.html">Features</a>
-          <a href="./live-events.html">Events</a>
-          <a href="./merch-store.html">Merch</a>
-          <a href="./prompt-lab.html">Prompts</a>
-          <a href="./how-to-use.html">Guide</a>
-          <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
-        </nav>
+    <section class="lm-synth-rail" aria-label="Instrument navigation">
+      <div class="lm-synth-left">
+        <span>Master Volume</span>
+        <i></i>
       </div>
-    </aside>
+      <div class="lm-synth-tabs">
+        <button type="button">Synth</button>
+        <button type="button" class="is-active">Piano</button>
+        <button type="button">Drums</button>
+        <button type="button">Bass</button>
+        <button type="button">FX</button>
+        <button type="button">Vocals</button>
+        <button type="button">Live</button>
+      </div>
+      <div class="lm-mini-piano" aria-hidden="true">
+        <span></span><b></b><span></span><b></b><span></span><span></span><b></b><span></span><b></b><span></span><b></b><span></span>
+      </div>
+      <div class="lm-synth-knobs" aria-hidden="true">
+        <span>Reverb<i></i></span>
+        <span>Delay<i></i></span>
+        <span>Filter<i></i></span>
+        <span>Drive<i></i></span>
+      </div>
+      <div class="lm-output-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    </section>
 
-    <main class="motion-main">
-      <section class="motion-hero motion-hero-events" id="live-lobby" data-reveal data-parallax-hero>
-        <div class="motion-hero-copy">
-          <p class="motion-overline">LOTTOMINDED ULTRA LIVE</p>
-          <h1 class="motion-display" aria-label="Featured Stream Events">
-            <span>Featured</span>
-            <span>Stream</span>
-            <span>Events</span>
-          </h1>
-          <p class="motion-copy">
-            Concerts, comedy, festivals, creator showcases, private premieres, and premium replay rooms built into the LottoMind universe.
-          </p>
-          <div class="motion-actions">
-            <a class="motion-button magnetic" href="#live-lobby">Enter Live Lobby</a>
-            <a class="motion-button is-ghost magnetic" href="#upcoming-streams">View Upcoming Streams</a>
-            <a class="motion-button is-violet magnetic" href="#live-locker">Members Only Replays</a>
+    <main class="lm-live-grid">
+      <section class="lm-live-hero panel-glow">
+        <div class="lm-live-hero-copy">
+          <p class="status-live"><span></span>Live Now</p>
+          <p class="started"><span></span>Started 00:12:45 ago</p>
+          <h1>Featured Stream Events</h1>
+          <p>Watch live concerts, comedy, festivals, conferences, and special events inside a futuristic music-instrument event hub.</p>
+          <div class="hero-actions">
+            <a class="live-btn primary" href="#twitch-live">Watch Live</a>
+            <a class="live-btn" href="#upcoming">Upcoming</a>
+            <a class="live-btn" href="#replays">Replays</a>
+            <a class="live-btn" href="./beat2lotto-plus.html#beat2lotto">Beat2Lotto+</a>
+            <a class="live-btn" href="./lottomind-stem-studio/index.html">Launch Studio</a>
           </div>
         </div>
-        <div class="motion-hero-media" aria-label="Layered event room preview" data-parallax-layer="1.2">
-          <div class="motion-media-frame">
-            <video autoplay muted loop playsinline preload="metadata" poster="./assets/brand/generated-cinematic-hero.png" aria-label="Cinematic live event preview">
-              <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            </video>
-          </div>
-          <div class="signal-rings" aria-hidden="true" data-parallax-layer="1.6">
-            <span style="--ring-index:0"></span>
-            <span style="--ring-index:1"></span>
-            <span style="--ring-index:2"></span>
-            <span style="--ring-index:3"></span>
-          </div>
-          <div class="motion-poster-stack" aria-hidden="true" data-parallax-layer="2.4">
-            <div class="motion-poster"><strong>Detroit Soul Live</strong><span>Free Preview</span></div>
-            <div class="motion-poster"><strong>Dream Oracle Night</strong><span>Members Room</span></div>
-            <div class="motion-poster"><strong>Beat2Lotto Stream</strong><span>Credit Unlock</span></div>
-          </div>
-        </div>
+        <article class="lm-stage-card">
+          <p>Main Stage</p>
+          <h2>Neon Horizons Festival 2025</h2>
+          <ul>
+            <li>Electronic - Festival - 3 days</li>
+            <li>May 24 - May 26, 2025</li>
+            <li>7:00 PM - 2:00 AM</li>
+            <li>Cyber Dome Arena, Virtual</li>
+          </ul>
+          <strong>128K watching</strong>
+        </article>
       </section>
 
-      <section class="motion-marquee" aria-label="Live event marquee">
-        <div class="motion-marquee-track">
-          <span>Live Concerts &bull; Comedy Nights &bull; Festivals &bull; VIP Replays &bull; Creator Premieres &bull; Members Only Streams &bull;</span>
-        </div>
-      </section>
-
-
-      <section class="stream-events-band live-events-stream-events marketing-section reveal-section" id="featured-stream-events" data-reveal>
-        <div
-          data-live-events-rail
-          data-title="Featured Stream Events"
-          data-subtitle="Watch live concerts, comedy, festivals, conferences, and special events."
-        ></div>
-      </section>
-
-      <section class="motion-section" id="upcoming-streams" data-reveal>
-        <div class="motion-section-head">
-          <div>
-            <p class="motion-overline">Featured Event Wall</p>
-            <h2 class="motion-section-title">Streams, Replays, Drops</h2>
+      <aside class="lm-community panel-glow" id="community">
+        <header><strong>Ultra Community</strong><span>2,846 online</span></header>
+        <div class="chat-tabs"><a class="is-active" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Twitch Chat</a><a href="#twitch-live">Live Video</a><a href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Channel</a></div>
+        <div class="twitch-chat-frame" aria-label="LottoMinded Twitch live chat">
+          <iframe
+            src="https://www.twitch.tv/embed/lottominded/chat?parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&darkpopout"
+            title="LottoMinded Twitch live chat"
+            loading="lazy"
+          ></iframe>
+          <div class="twitch-chat-fallback">
+            <strong>Twitch chat connected</strong>
+            <span>If chat does not load, open the LottoMinded Twitch page.</span>
+            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch Chat</a>
           </div>
-          <p class="motion-section-copy">
-            A scrolling event wall for live culture inside the LottoMind universe. Posters are original CSS art and placeholders for the premium event room.
-          </p>
         </div>
-        <div class="motion-event-wall" aria-label="Featured event cards">
-          <article class="motion-event-card" style="--card-a:rgba(212,175,55,0.28);--card-b:rgba(41,247,255,0.16);--hover-tilt:-1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Concert</span><span>Jun 28</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Free Preview</p>
-              <h3>Detroit Soul Live</h3>
-              <p>Warm keys, live vocals, and late-night camera moves from the LM Records stage.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Free Preview</span><a class="motion-text-link" href="#live-lobby">Preview</a></div>
+      </aside>
+
+      <section class="lm-section panel-glow" id="featured">
+        <header class="section-head"><h2>Featured Live Events</h2><a href="#featured">View All</a></header>
+        <div class="event-card-row">
+          <article class="event-card live">
+            <div class="thumb video-thumb">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/lZco4lHgIoY?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=lZco4lHgIoY&modestbranding=1&rel=0"
+                title="Jazz-Off Detroit M Rabinowitz at Orchestra Hall video thumbnail"
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
             </div>
+            <span class="badge live">Live</span><span class="watchers">9.3K</span>
+            <h3>Orchestra Hall Signal</h3><p>Jazz-Off Detroit<br />M Rabinowitz performance</p>
           </article>
-          <article class="motion-event-card" style="--card-a:rgba(139,92,246,0.26);--card-b:rgba(255,51,85,0.16);--hover-tilt:1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Visual</span><span>Jul 03</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Members Only</p>
-              <h3>Dream Oracle Visual Night</h3>
-              <p>Symbol stories, number art, and cinematic dream prompts staged like a signal ritual.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Members Only</span><a class="motion-text-link" href="#live-locker">Preview</a></div>
+          <article class="event-card live">
+            <div class="thumb video-thumb">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/6GHATpTBBHc?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=6GHATpTBBHc&modestbranding=1&rel=0"
+                title="Jazz-Off Detroit Alex Harding Band video thumbnail"
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
             </div>
+            <span class="badge live">Live</span><span class="watchers">3.2K</span>
+            <h3>Alex Harding Band</h3><p>Jazz-Off Detroit<br />Live band feature</p>
           </article>
-          <article class="motion-event-card" style="--card-a:rgba(76,255,154,0.22);--card-b:rgba(212,175,55,0.2);--hover-tilt:-1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Studio</span><span>Jul 08</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Credit Unlock</p>
-              <h3>Beat2Lotto Producer Stream</h3>
-              <p>Beat DNA, studio prompts, creative signals, and live producer workflow inside one room.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Credit Unlock</span><a class="motion-text-link" href="./prompt-lab.html#beat2lotto">Preview</a></div>
+          <article class="event-card live">
+            <div class="thumb video-thumb">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/eHU6tov9O3s?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=eHU6tov9O3s&modestbranding=1&rel=0"
+                title="Jazz-Off Detroit Bill Foster Interview video thumbnail"
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
             </div>
-          </article>
-          <article class="motion-event-card" style="--card-a:rgba(255,51,85,0.24);--card-b:rgba(255,224,138,0.14);--hover-tilt:1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Comedy</span><span>Jul 12</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Free Preview</p>
-              <h3>Comedy &amp; Numbers After Dark</h3>
-              <p>Clean-room comedy energy, music stings, and game-night culture without prediction claims.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Free Preview</span><a class="motion-text-link" href="#featured-stream-events">Preview</a></div>
-            </div>
-          </article>
-          <article class="motion-event-card" style="--card-a:rgba(41,247,255,0.2);--card-b:rgba(139,92,246,0.18);--hover-tilt:-1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Film</span><span>Jul 18</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Members Only</p>
-              <h3>Indie Film Watch Party</h3>
-              <p>Private screening-room energy with chat moments, hosted intros, and replay access.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Members Only</span><a class="motion-text-link" href="#live-locker">Preview</a></div>
-            </div>
-          </article>
-          <article class="motion-event-card" style="--card-a:rgba(212,175,55,0.24);--card-b:rgba(76,255,154,0.16);--hover-tilt:1deg" data-cursor-card>
-            <div class="motion-event-poster"><span>Vault</span><span>Replay</span></div>
-            <div class="motion-card-body">
-              <p class="motion-card-kicker">Credit Unlock</p>
-              <h3>Festival Replay Vault</h3>
-              <p>Replay rooms for culture drops, creator premieres, and weekend festival archives.</p>
-              <div class="motion-card-footer"><span class="motion-status-badge">Credit Unlock</span><a class="motion-text-link" href="#live-locker">Preview</a></div>
-            </div>
+            <span class="badge live">Live</span><span class="watchers">5.7K</span>
+            <h3>Jazz Everywhere</h3><p>Bill Foster Interview<br />Jazz-Off Detroit archive</p>
           </article>
         </div>
       </section>
 
-      <section class="motion-section" id="live-locker" data-reveal>
-        <div class="motion-section-head">
-          <div>
-            <p class="motion-overline">Membership Stream Locker</p>
-            <h2 class="motion-section-title">Unlock The Live Room</h2>
+      <section class="lm-section panel-glow" id="upcoming">
+        <header class="section-head"><h2>Upcoming Streams</h2><a href="#upcoming">View All</a></header>
+        <article class="twitch-live-card" id="twitch-live" aria-label="LottoMinded Twitch live stream">
+          <div class="twitch-live-copy">
+            <p class="status-live"><span></span>Twitch Live</p>
+            <h3>LottoMinded Channel</h3>
+            <p>Live stream video is connected to the LottoMinded Twitch page. If the player is blocked by Twitch or browser settings, open the channel directly.</p>
+            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch</a>
           </div>
-          <p class="motion-section-copy">
-            Use Lotto Credits or membership access to unlock premium streams, replays, backstage drops, and special event rooms.
-          </p>
+          <div class="twitch-player-frame">
+            <iframe
+              src="https://player.twitch.tv/?channel=lottominded&parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&muted=true"
+              title="LottoMinded Twitch live stream"
+              loading="lazy"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </article>
+        <div class="stream-list">
+          <article><time>May<br /><b>25</b><small>6:00 PM</small></time><span class="mini-thumb"></span><div><h3>Retro Waves Live</h3><p>Synthwave - Live Set</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
+          <article><time>May<br /><b>25</b><small>8:30 PM</small></time><span class="mini-thumb alt"></span><div><h3>The Cosmic Collective</h3><p>Jam Band - Live</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
+          <article><time>May<br /><b>26</b><small>11:00 AM</small></time><span class="mini-thumb gold"></span><div><h3>Creator Economy 2025</h3><p>Conference - Panel</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
         </div>
-        <div class="motion-unlock-grid">
-          <article class="motion-unlock-card" data-cursor-card>
-            <p class="motion-card-kicker">Free Preview</p>
-            <h3>Open Lobby</h3>
-            <p>Short previews, public announcements, and featured room teasers.</p>
-          </article>
-          <article class="motion-unlock-card" data-cursor-card>
-            <p class="motion-card-kicker">100 Credits</p>
-            <h3>24 Hour Replay</h3>
-            <p>Unlock select streams for a single-day replay room.</p>
-          </article>
-          <article class="motion-unlock-card" data-cursor-card>
-            <p class="motion-card-kicker">Members Only</p>
-            <h3>Live Room</h3>
-            <p>Private premieres, members streams, and studio drops.</p>
-          </article>
-          <article class="motion-unlock-card" data-cursor-card>
-            <p class="motion-card-kicker">VIP Archive</p>
-            <h3>Deep Vault</h3>
-            <p>Premium replay shelves, backstage files, and culture capsules.</p>
-          </article>
-        </div>
-        <p class="motion-disclaimer">Entertainment platform access only. No lottery outcome guarantees.</p>
       </section>
 
-      <section class="motion-lobby-strip" aria-label="Live lobby motion strip">
-        <div class="motion-marquee">
-          <div class="motion-marquee-track"><span>Enter The Signal &bull; Enter The Signal &bull; Enter The Signal &bull;</span></div>
+      <section class="lm-category-grid panel-glow">
+        <header class="section-head"><h2>Event Categories</h2><a href="#featured">View All</a></header>
+        <button type="button">Music<span>Concerts</span></button>
+        <button type="button">VIP<span>Festivals</span></button>
+        <button type="button">Laugh<span>Comedy</span></button>
+        <button type="button">Talk<span>Conference</span></button>
+        <button type="button">Decks<span>DJ Sets</span></button>
+        <button type="button">Art<span>Culture</span></button>
+        <button type="button">Calm<span>Wellness</span></button>
+        <button type="button">Star<span>Specials</span></button>
+      </section>
+
+      <section class="lm-spotlight panel-glow">
+        <a class="artist-art video-spotlight-link" href="https://www.youtube.com/watch?v=Aif6MOKqDZE" target="_blank" rel="noopener noreferrer" aria-label="Watch Luna Vex spotlight on YouTube">
+          <img src="https://img.youtube.com/vi/Aif6MOKqDZE/hqdefault.jpg" alt="" loading="lazy" />
+        </a>
+        <div>
+          <p>Performer Spotlight</p>
+          <h2>Luna Vex</h2>
+          <p>Electronic artist, producer, and DJ pushing sonic boundaries and building futures with sound.</p>
+          <a class="live-btn" href="https://www.youtube.com/watch?v=Aif6MOKqDZE" target="_blank" rel="noopener noreferrer">Watch Interview</a>
+          <small>Upcoming Set - May 25 - 12:30 AM - Galaxy Stage</small>
         </div>
-        <div class="motion-marquee is-reverse">
-          <div class="motion-marquee-track"><span>Streams &bull; Music &bull; Comedy &bull; Film &bull; Festivals &bull; Culture &bull;</span></div>
-        </div>
+      </section>
+
+      <section class="lm-passes panel-glow">
+        <article><p>All Access Pass</p><h2>$19.99</h2><span>3-Day Pass</span><ul><li>All stage access</li><li>HD quality</li><li>Replay access</li></ul><button type="button">Get Pass</button></article>
+        <article class="vip"><p>Ultra VIP Pass</p><h2>$49.99</h2><span>3-Day Pass</span><ul><li>Backstage</li><li>VIP lounge</li><li>Merch discounts</li></ul><button type="button">Get Pass</button></article>
+      </section>
+
+      <section class="lm-replay panel-glow" id="replays">
+        <header class="section-head"><h2>Replay Library</h2><a href="#replays">View All</a></header>
+        <article class="video-replay-card">
+          <a class="replay-video-link" href="https://www.youtube.com/watch?v=vEh16ncnw9U" target="_blank" rel="noopener noreferrer" aria-label="Watch Neon Horizons 2025 replay on YouTube">
+            <span class="mini-thumb youtube-thumb">
+              <img src="https://img.youtube.com/vi/vEh16ncnw9U/hqdefault.jpg" alt="" loading="lazy" />
+            </span>
+            <span><h3>Neon Horizons 2025</h3><p>Day 1 - Main Stage - 2:45:30</p></span>
+          </a>
+        </article>
+        <article class="video-replay-card">
+          <a class="replay-video-link" href="https://www.youtube.com/watch?v=dGnqHj6w5Z4" target="_blank" rel="noopener noreferrer" aria-label="Watch Comedy Ultra Live replay on YouTube">
+            <span class="mini-thumb youtube-thumb">
+              <img src="https://img.youtube.com/vi/dGnqHj6w5Z4/hqdefault.jpg" alt="" loading="lazy" />
+            </span>
+            <span><h3>Comedy Ultra Live</h3><p>May Special - 1:18:45</p></span>
+          </a>
+        </article>
+        <article class="video-replay-card">
+          <a class="replay-video-link" href="https://www.youtube.com/watch?v=zyKHjtVjoyw" target="_blank" rel="noopener noreferrer" aria-label="Watch Future Minds Summit replay on YouTube">
+            <span class="mini-thumb youtube-thumb">
+              <img src="https://img.youtube.com/vi/zyKHjtVjoyw/hqdefault.jpg" alt="" loading="lazy" />
+            </span>
+            <span><h3>Future Minds Summit</h3><p>Keynote Day 2 - 1:52:10</p></span>
+          </a>
+        </article>
+      </section>
+
+      <section class="lm-interactions panel-glow">
+        <button type="button">React<span>Reactions</span></button>
+        <button type="button">Signal<span>Predict</span></button>
+        <button type="button">Poll<span>Polls</span></button>
+        <button type="button">Mic<span>Shoutouts</span></button>
+        <div class="invite"><strong>Invite Friends</strong><p>Earn Ultra Points together.</p><button type="button">Invite</button></div>
       </section>
     </main>
 
-    <footer class="motion-footer">
-      <div class="motion-marquee">
-        <div class="motion-marquee-track"><span>LOTTOMINDED ULTRA LIVE &bull; Streams, Replays, Drops, And Private Rooms &bull;</span></div>
-      </div>
-      <div class="motion-footer-main">
-        <strong>LOTTOMINDED ULTRA</strong>
-        <span>Live shows, premium streams, and event replays.</span>
-        <div class="motion-footer-actions">
-          <a class="motion-text-link" href="./features-app.html">Features</a>
-          <a class="motion-text-link" href="./merch-store.html">Merch</a>
-          <a class="motion-text-link" href="mailto:robjasper2084@gmail.com">Contact</a>
-        </div>
-        <span id="site-year"></span>
-      </div>
+    <footer class="lm-live-player" id="player">
+      <div class="now-art"></div>
+      <div class="now-copy"><small>Now Playing</small><strong>Neon Horizons 2025 - Main Stage</strong><span>Mind of the Future Live Mix</span></div>
+      <div class="now-wave" aria-hidden="true"><i></i></div>
+      <button type="button" aria-label="Previous">&lt;&lt;</button>
+      <button type="button" class="big" aria-label="Pause">II</button>
+      <button type="button" aria-label="Next">&gt;&gt;</button>
+      <span class="time">08:45 / 1:23:45</span>
+      <div class="points"><b>Ultra Points</b><strong>12,450</strong><span>Rank Ultra Elite</span></div>
     </footer>
 
-    <script src="./site.js?v=vault-refined-1" defer></script>
-    <script src="./live-events.js?v=motion-shop-1" defer></script>
-    <script src="./assets/js/motion-shop.js?v=motion-shop-1" defer></script>
-    <script src="./assets/js/juneteenth-event-popup.js?v=juneteenth-event-3" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=kit-assets-1" defer></script>
+    <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=youtube-media-3" defer></script>
   </body>
 </html>

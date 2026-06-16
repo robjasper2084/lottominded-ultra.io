@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 132" role="img" aria-labelledby="title">
+<title id="title">Lottominded Ultra wordmark</title>
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#29f7ff"/><stop offset=".5" stop-color="#b04bff"/><stop offset="1" stop-color="#ffe071"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<rect x="4" y="8" width="712" height="116" rx="28" fill="#03050a" stroke="url(#g)" stroke-width="1.4" opacity=".95"/>
+<image href="lm-crown-mark.svg" x="18" y="26" width="80" height="80"/>
+<text x="118" y="58" font-family="Arial Black, Orbitron, sans-serif" font-size="40" fill="#f7fbff" filter="url(#glow)">LOTTOMINDED</text>
+<text x="118" y="99" font-family="Arial Black, Orbitron, sans-serif" font-size="32" fill="url(#g)" letter-spacing="5" filter="url(#glow)">ULTRA</text>
+<path d="M470 68h180" stroke="url(#g)" stroke-width="3" opacity=".72"/><circle cx="520" cy="68" r="5" fill="#29f7ff"/><circle cx="630" cy="68" r="5" fill="#b04bff"/>
+</svg>

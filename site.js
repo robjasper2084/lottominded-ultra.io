@@ -1,3 +1,59 @@
+(() => {
+  const header = document.querySelector("[data-site-header], .feature-topbar, .lm-live-topbar, [data-guide-header]");
+  if (!header) return;
+
+  const navItems = [
+    { label: "Home", href: "./index.html#top", icon: "HM" },
+    { label: "Features", href: "./features-app.html", icon: "FX" },
+    {
+      label: "LottoMind App",
+      href: "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/",
+      icon: "LM",
+      attrs: ' data-vault-launch data-plan="free"',
+    },
+    { label: "Streams", href: "./live-events.html", icon: "EV" },
+    { label: "Spheres", href: "./lottery-spheres.html#spheres", icon: "SP" },
+    { label: "Beat2Lotto+™", href: "./beat2lotto-plus.html#beat2lotto", icon: "B2" },
+    { label: "Merch", href: "./merch-store.html", icon: "MC" },
+    { label: "Guide", href: "./how-to-use.html", icon: "GD" },
+    { label: "Studio", href: "./lottomind-stem-studio/index.html", icon: "ST" },
+  ];
+
+  const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const isCurrent = (item) => {
+    const hrefPage = item.href.split("#")[0].split("?")[0].split("/").pop().toLowerCase();
+    if (item.label === "Home") return currentPage === "index.html";
+    return hrefPage && currentPage === hrefPage;
+  };
+
+  const navMarkup = navItems
+    .map((item) => {
+      const current = isCurrent(item) ? ' aria-current="page"' : "";
+      return `<a href="${item.href}" data-icon="${item.icon}"${item.attrs || ""}${current}>${item.label}</a>`;
+    })
+    .join("");
+
+  document.body.classList.add("home-page", "has-sphere-header", "has-global-sphere-header");
+
+  header.outerHTML = `
+    <header class="site-header home-like-header home-sphere-header global-sphere-header" data-site-header>
+      <div class="site-header-main">
+        <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
+          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+          <span>LOTTOMINDED ULTRA</span>
+        </a>
+        <button class="site-header-toggle" type="button" data-header-toggle aria-expanded="true">Menu</button>
+      </div>
+      <nav aria-label="LOTTOMINDED ULTRA sphere navigation">
+        ${navMarkup}
+      </nav>
+      <div class="direct-launch" aria-label="Direct studio launch">
+        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+      </div>
+    </header>
+  `;
+})();
+
 const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
 
@@ -545,14 +601,13 @@ function setupUniversalFloatingMenu() {
   }
 
   const links = [
-    ["Home", "./index.html#top"],
+    ["Home", "./how-to-use.html"],
     ["Features", "./features-app.html"],
     ["Events", "./live-events.html"],
     ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"],
     ["Spheres", "./lottery-spheres.html#spheres"],
-    ["Beat2Lotto+", "./prompt-lab.html#beat2lotto"],
+    ["Beat2Lotto+", "./beat2lotto-plus.html#beat2lotto"],
     ["Merch", "./merch-store.html"],
-    ["Prompts", "./prompt-lab.html"],
     ["Guide", "./how-to-use.html"],
     ["Studio", "./lottomind-stem-studio/index.html"]
   ];

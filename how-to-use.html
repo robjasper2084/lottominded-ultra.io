@@ -10,6 +10,7 @@
     <title>LottoMind™ | Simple User Guide</title>
     <meta name="theme-color" content="#070707" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
     <style>
       :root {
         color-scheme: dark;
@@ -632,12 +633,25 @@
         max-width: 100%;
         margin: 0;
         color: #fff8de;
-        font-size: clamp(2.9rem, 6.2vw, 5.7rem);
-        line-height: 0.9;
+        font-size: clamp(2.2rem, 3.55vw, 3.55rem);
+        line-height: 0.86;
+        overflow-wrap: normal;
         text-shadow:
           0 1px 0 #fff7d0,
           0 8px 0 rgba(0, 0, 0, 0.62),
           0 0 34px rgba(255, 223, 117, 0.46);
+      }
+
+      .hero .hero-copy {
+        min-width: 0;
+        max-width: min(100%, 660px);
+        overflow: hidden;
+      }
+
+      .hero .hero-copy h1 {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
       }
 
       .hero-copy p {
@@ -1601,9 +1615,49 @@
       body.guide-menu-open {
         overflow: hidden;
       }
+
+      #featureRaytraceGame.guide-pong-background {
+        position: fixed;
+        inset: 0;
+        z-index: -5;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: 0.42;
+        filter: saturate(1.08) contrast(1.08);
+      }
+
+      .guide-game-vignette {
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 50% 32%, rgba(5, 224, 255, 0.13), transparent 34rem),
+          linear-gradient(180deg, rgba(4, 7, 13, 0.3), rgba(4, 7, 13, 0.82));
+      }
+
+      body.has-guide-game-bg .guide-puck-field {
+        opacity: 0.52;
+      }
+
+      @media (max-width: 760px) {
+        .hero .hero-copy h1 {
+          max-width: 9.5ch;
+          font-size: clamp(2.35rem, 10.5vw, 4rem);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #featureRaytraceGame.guide-pong-background {
+          opacity: 0.22;
+        }
+      }
     </style>
   </head>
-  <body class="has-guide-startup-audio">
+  <body class="has-guide-startup-audio home-page has-sphere-header has-global-sphere-header has-guide-game-bg">
+    <canvas id="featureRaytraceGame" class="guide-pong-background" aria-hidden="true"></canvas>
+    <div class="guide-game-vignette" aria-hidden="true"></div>
     <div class="guide-puck-field" aria-hidden="true">
       <span></span>
       <span></span>
@@ -1627,7 +1681,7 @@
     <div class="guide-header-hover-sensor" data-guide-header-sensor aria-hidden="true"></div>
 
     <header class="guide-header" data-guide-header>
-      <a class="brand" href="./index.html" aria-label="LottoMind home">
+      <a class="brand" href="./how-to-use.html" aria-label="LottoMind home">
         <img src="./assets/brand/lm-orb-mark.webp" alt="" />
         <span>LottoMind&trade;</span>
       </a>
@@ -1649,13 +1703,13 @@
     </header>
 
     <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
-      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto">
+      <a class="home-signal-marquee-track" href="./beat2lotto-plus.html#beat2lotto">
         <span>Beat-seeded signals.</span>
         <span>Creative sets only.</span>
         <span>Not a prediction.</span>
         <span>Open Beat2Lotto+&trade;</span>
       </a>
-      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto" aria-hidden="true" tabindex="-1">
+      <a class="home-signal-marquee-track" href="./beat2lotto-plus.html#beat2lotto" aria-hidden="true" tabindex="-1">
         <span>Beat-seeded signals.</span>
         <span>Creative sets only.</span>
         <span>Not a prediction.</span>
@@ -1991,14 +2045,13 @@
         <button class="guide-page-menu-close" type="button" data-guide-menu-close aria-label="Close page menu">X</button>
         <strong>LOTTOMINDED ULTRA</strong>
         <nav class="guide-page-menu-links" aria-label="Page menu links">
-          <a href="./index.html#top">Home</a>
+          <a href="./how-to-use.html">Home</a>
           <a href="./features-app.html">Features</a>
           <a href="./live-events.html">Events</a>
           <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-protected-action data-protected-kind="launch" data-protected-url="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/">LottoMind App</a>
           <a href="./lottery-spheres.html#spheres">Spheres</a>
-          <a href="./prompt-lab.html#beat2lotto">Beat2Lotto+</a>
+          <a href="./beat2lotto-plus.html#beat2lotto">Beat2Lotto+</a>
           <a href="./merch-store.html">Merch</a>
-          <a href="./prompt-lab.html">Prompts</a>
           <a href="./how-to-use.html">Guide</a>
         </nav>
       </div>
@@ -2012,9 +2065,11 @@
     <audio id="guideStartupSoundtrack" preload="auto" data-guide-startup-soundtrack>
       <source src="./assets/audio/lottomind-heart-639hz.mp3?v=guide-heart-639-1" type="audio/mpeg" />
     </audio>
+    <script src="./assets/features-app/js/features-raytrace-game.js?v=guide-pong-bg-1" defer></script>
+    <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
     <script>
       (() => {
-        const accessPassword = "LottoMind2026";
+        const accessPassword = "lottomind";
         const guideStartup = document.querySelector("[data-guide-startup-audio]");
         const guideStartupAudio = document.querySelector("[data-guide-startup-soundtrack]");
         const guideStartupStatus = document.querySelector("[data-guide-startup-status]");
@@ -2280,7 +2335,7 @@
 
         form?.addEventListener("submit", (event) => {
           event.preventDefault();
-          if ((input?.value || "").trim() !== accessPassword) {
+          if ((input?.value || "").trim().toLowerCase() !== accessPassword) {
             if (status) status.textContent = "Incorrect password. Try again.";
             input?.focus();
             return;
