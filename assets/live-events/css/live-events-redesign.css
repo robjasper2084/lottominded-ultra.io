@@ -1254,11 +1254,100 @@ body.lm-live-page::before {
 }
 
 .now-wave {
+  --live-energy: 0;
+  --live-bass: 0;
+  --live-mid: 0;
+  --live-treble: 0;
+  --live-bass-x: 18%;
+  --live-treble-x: 70%;
+  --live-bass-alpha: .12;
+  --live-mid-alpha: .12;
+  --live-treble-alpha: .12;
+  --live-wave-width: 100%;
+  --live-wave-height: 100%;
+  --live-wave-y: 0px;
+  --live-wave-scale: 1;
+  --live-saturate: 1;
+  --live-brightness: .95;
+  --live-bar-opacity: .24;
+  --live-bar-scale: .82;
+  --live-sweep-opacity: .32;
+  --live-sweep-x: -44%;
+  --live-glint-width: 22%;
+  --live-glint-opacity: .2;
+  --live-glow-size: 14px;
+  --live-glow-alpha: .18;
+  --live-inner-glow-size: 12px;
+  --live-inner-glow-alpha: .15;
+  --live-pulse-speed: 1.15s;
+  --wave-shift: 0px;
+  --wave-back-shift: 0px;
+  --wave-glint-shift: 0px;
+  position: relative;
+  overflow: hidden;
   height: 42px;
   border-radius: 8px;
   background:
+    radial-gradient(circle at var(--live-bass-x) 50%, rgba(94, 255, 157, var(--live-bass-alpha)), transparent 34%),
+    radial-gradient(circle at var(--live-treble-x) 42%, rgba(255, 79, 216, var(--live-treble-alpha)), transparent 36%),
     linear-gradient(90deg, rgba(41,247,255,.16), rgba(255,79,216,.18)),
-    url("../svg/waveform-strip.svg") center / cover;
+    url("../svg/waveform-strip.svg") calc(50% + var(--wave-shift)) center / var(--live-wave-width) var(--live-wave-height);
+  transform: translateY(var(--live-wave-y)) scaleY(var(--live-wave-scale));
+  filter:
+    saturate(var(--live-saturate))
+    brightness(var(--live-brightness));
+  transition: transform 80ms linear, filter 80ms linear, box-shadow 80ms linear;
+}
+
+.now-wave::before,
+.now-wave::after,
+.now-wave i {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.now-wave::before {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(41,247,255,.12) 0 5px,
+      rgba(94,255,157,var(--live-bass-alpha)) 5px 9px,
+      transparent 9px 15px
+    );
+  opacity: var(--live-bar-opacity);
+  transform: translateX(var(--wave-back-shift)) scaleY(var(--live-bar-scale));
+  transform-origin: center bottom;
+}
+
+.now-wave::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(41,247,255,var(--live-treble-alpha)),
+    rgba(255,79,216,var(--live-mid-alpha)),
+    transparent
+  );
+  mix-blend-mode: screen;
+  opacity: var(--live-sweep-opacity);
+  transform: translateX(var(--live-sweep-x));
+}
+
+.now-wave i {
+  display: block;
+  width: var(--live-glint-width);
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255,224,113,.55), rgba(41,247,255,.38), transparent);
+  opacity: var(--live-glint-opacity);
+  transform: translateX(var(--wave-glint-shift)) skewX(-14deg);
+}
+
+.lm-live-player.is-playing .now-wave {
+  box-shadow:
+    0 0 var(--live-glow-size) rgba(41, 247, 255, var(--live-glow-alpha)),
+    inset 0 0 var(--live-inner-glow-size) rgba(255, 79, 216, var(--live-inner-glow-alpha));
+  animation: livePlayerPulse var(--live-pulse-speed) ease-in-out infinite alternate;
 }
 
 .lm-live-player button {
@@ -1299,6 +1388,16 @@ body.lm-live-page::before {
 
 @keyframes liveGrid {
   to { background-position: 64px 64px; }
+}
+
+@keyframes livePlayerPulse {
+  from {
+    filter: saturate(1) brightness(0.95);
+  }
+
+  to {
+    filter: saturate(1.35) brightness(1.24);
+  }
 }
 
 @keyframes meterBounce {

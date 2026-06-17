@@ -12,7 +12,7 @@
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-console-video-1" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-audio-reactive-1" />
   </head>
   <body class="live-events-page lm-live-page">
     <header class="lm-live-topbar" data-live-shell>
@@ -266,20 +266,21 @@
       </section>
     </main>
 
-    <footer class="lm-live-player" id="player">
+    <footer class="lm-live-player" id="player" data-live-player>
+      <audio data-live-player-audio preload="metadata" src="./assets/audio/digital-static-live-mix.mp3"></audio>
       <div class="now-art"></div>
       <div class="now-copy"><small>Now Playing</small><strong>Neon Horizons 2025 - Main Stage</strong><span>Mind of the Future Live Mix</span></div>
       <div class="now-wave" aria-hidden="true"><i></i></div>
-      <button type="button" aria-label="Previous">&lt;&lt;</button>
-      <button type="button" class="big" aria-label="Pause">II</button>
-      <button type="button" aria-label="Next">&gt;&gt;</button>
-      <span class="time">08:45 / 1:23:45</span>
+      <button type="button" aria-label="Back 15 seconds" data-live-player-prev>&lt;&lt;</button>
+      <button type="button" class="big" aria-label="Play live mix" aria-pressed="false" data-live-player-toggle>&#9654;</button>
+      <button type="button" aria-label="Forward 15 seconds" data-live-player-next>&gt;&gt;</button>
+      <span class="time" data-live-player-time>00:00 / --:--</span>
       <div class="points"><b>Ultra Points</b><strong>12,450</strong><span>Rank Ultra Elite</span></div>
     </footer>
 
     <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
     <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=youtube-media-3" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=live-audio-reactive-1" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
   </body>
 </html>

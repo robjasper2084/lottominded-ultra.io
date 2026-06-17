@@ -8,6 +8,18 @@
   const chatFeed = document.querySelector("[data-live-chat-feed]");
   const chatForm = document.querySelector("[data-live-chat-form]");
   const chatInput = document.querySelector("[data-live-chat-input]");
+  const livePlayer = document.querySelector("[data-live-player]");
+  const livePlayerAudio = livePlayer?.querySelector("[data-live-player-audio]");
+  const livePlayerToggle = livePlayer?.querySelector("[data-live-player-toggle]");
+  const livePlayerPrev = livePlayer?.querySelector("[data-live-player-prev]");
+  const livePlayerNext = livePlayer?.querySelector("[data-live-player-next]");
+  const livePlayerTime = livePlayer?.querySelector("[data-live-player-time]");
+  const livePlayerWave = livePlayer?.querySelector(".now-wave");
+  let liveAudioContext = null;
+  let liveAudioAnalyser = null;
+  let liveAudioData = null;
+  let liveAudioSource = null;
+  let liveWaveFrame = null;
   const chatBots = [
     {
       name: "DetroitPulse",
@@ -104,6 +116,173 @@
   padButtons.forEach((button, index) => {
     button.addEventListener("click", () => playUiTone(index));
   });
+
+  function formatTrackTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "--:--";
+    const safeSeconds = Math.floor(seconds);
+    const hours = Math.floor(safeSeconds / 3600);
+    const minutes = Math.floor((safeSeconds % 3600) / 60);
+    const secs = safeSeconds % 60;
+    if (hours > 0) return `${hours}:${two(minutes)}:${two(secs)}`;
+    return `${minutes}:${two(secs)}`;
+  }
+
+  function updateLivePlayer() {
+    if (!livePlayer || !livePlayerAudio || !livePlayerToggle) return;
+    const isPlaying = !livePlayerAudio.paused && !livePlayerAudio.ended;
+    livePlayer.classList.toggle("is-playing", isPlaying);
+    livePlayerToggle.textContent = isPlaying ? "II" : "\u25b6";
+    livePlayerToggle.setAttribute("aria-label", isPlaying ? "Pause live mix" : "Play live mix");
+    livePlayerToggle.setAttribute("aria-pressed", isPlaying ? "true" : "false");
+    if (livePlayerTime) {
+      livePlayerTime.textContent = `${formatTrackTime(livePlayerAudio.currentTime)} / ${formatTrackTime(livePlayerAudio.duration)}`;
+    }
+  }
+
+  function resetLiveWave() {
+    if (!livePlayerWave) return;
+    livePlayerWave.style.setProperty("--live-energy", "0");
+    livePlayerWave.style.setProperty("--live-bass", "0");
+    livePlayerWave.style.setProperty("--live-mid", "0");
+    livePlayerWave.style.setProperty("--live-treble", "0");
+    livePlayerWave.style.setProperty("--live-bass-x", "18%");
+    livePlayerWave.style.setProperty("--live-treble-x", "70%");
+    livePlayerWave.style.setProperty("--live-bass-alpha", ".12");
+    livePlayerWave.style.setProperty("--live-mid-alpha", ".12");
+    livePlayerWave.style.setProperty("--live-treble-alpha", ".12");
+    livePlayerWave.style.setProperty("--live-wave-width", "100%");
+    livePlayerWave.style.setProperty("--live-wave-height", "100%");
+    livePlayerWave.style.setProperty("--live-wave-y", "0px");
+    livePlayerWave.style.setProperty("--live-wave-scale", "1");
+    livePlayerWave.style.setProperty("--live-saturate", "1");
+    livePlayerWave.style.setProperty("--live-brightness", ".95");
+    livePlayerWave.style.setProperty("--live-bar-opacity", ".24");
+    livePlayerWave.style.setProperty("--live-bar-scale", ".82");
+    livePlayerWave.style.setProperty("--live-sweep-opacity", ".32");
+    livePlayerWave.style.setProperty("--live-sweep-x", "-44%");
+    livePlayerWave.style.setProperty("--live-glint-width", "22%");
+    livePlayerWave.style.setProperty("--live-glint-opacity", ".2");
+    livePlayerWave.style.setProperty("--live-glow-size", "14px");
+    livePlayerWave.style.setProperty("--live-glow-alpha", ".18");
+    livePlayerWave.style.setProperty("--live-inner-glow-size", "12px");
+    livePlayerWave.style.setProperty("--live-inner-glow-alpha", ".15");
+    livePlayerWave.style.setProperty("--live-pulse-speed", "1.15s");
+    livePlayerWave.style.setProperty("--wave-back-shift", "0px");
+    livePlayerWave.style.setProperty("--wave-glint-shift", "0px");
+  }
+
+  function averageBand(data, start, end) {
+    let total = 0;
+    const safeEnd = Math.min(end, data.length);
+    for (let index = start; index < safeEnd; index += 1) total += data[index];
+    return safeEnd > start ? total / ((safeEnd - start) * 255) : 0;
+  }
+
+  function renderLiveWave() {
+    if (!liveAudioAnalyser || !liveAudioData || !livePlayerWave) return;
+    liveAudioAnalyser.getByteFrequencyData(liveAudioData);
+
+    const bass = averageBand(liveAudioData, 1, 8);
+    const mid = averageBand(liveAudioData, 8, 36);
+    const treble = averageBand(liveAudioData, 36, 96);
+    const energy = Math.min(1, bass * 0.48 + mid * 0.34 + treble * 0.24);
+
+    livePlayerWave.style.setProperty("--live-energy", energy.toFixed(3));
+    livePlayerWave.style.setProperty("--live-bass", bass.toFixed(3));
+    livePlayerWave.style.setProperty("--live-mid", mid.toFixed(3));
+    livePlayerWave.style.setProperty("--live-treble", treble.toFixed(3));
+    const waveShift = Math.round((performance.now() / 18) % 160);
+    livePlayerWave.style.setProperty("--wave-shift", `${waveShift}px`);
+    livePlayerWave.style.setProperty("--wave-back-shift", `${waveShift * -1}px`);
+    livePlayerWave.style.setProperty("--wave-glint-shift", `${Math.round(waveShift * 0.75)}px`);
+    livePlayerWave.style.setProperty("--live-bass-x", `${Math.round(18 + bass * 38)}%`);
+    livePlayerWave.style.setProperty("--live-treble-x", `${Math.round(70 - treble * 24)}%`);
+    livePlayerWave.style.setProperty("--live-bass-alpha", (0.12 + bass * 0.32).toFixed(3));
+    livePlayerWave.style.setProperty("--live-mid-alpha", (0.12 + mid * 0.38).toFixed(3));
+    livePlayerWave.style.setProperty("--live-treble-alpha", (0.12 + treble * 0.5).toFixed(3));
+    livePlayerWave.style.setProperty("--live-wave-width", `${Math.round(100 + energy * 90)}%`);
+    livePlayerWave.style.setProperty("--live-wave-height", `${Math.round(100 + mid * 80)}%`);
+    livePlayerWave.style.setProperty("--live-wave-y", `${(bass * -3).toFixed(2)}px`);
+    livePlayerWave.style.setProperty("--live-wave-scale", (1 + energy * 0.18).toFixed(3));
+    livePlayerWave.style.setProperty("--live-saturate", (1 + mid * 0.7).toFixed(3));
+    livePlayerWave.style.setProperty("--live-brightness", (0.95 + energy * 0.55).toFixed(3));
+    livePlayerWave.style.setProperty("--live-bar-opacity", (0.24 + energy * 0.62).toFixed(3));
+    livePlayerWave.style.setProperty("--live-bar-scale", (0.82 + bass * 0.7).toFixed(3));
+    livePlayerWave.style.setProperty("--live-sweep-opacity", (0.32 + energy * 0.48).toFixed(3));
+    livePlayerWave.style.setProperty("--live-sweep-x", `${Math.round(-44 + energy * 52)}%`);
+    livePlayerWave.style.setProperty("--live-glint-width", `${Math.round(22 + bass * 34)}%`);
+    livePlayerWave.style.setProperty("--live-glint-opacity", (0.2 + energy * 0.58).toFixed(3));
+    livePlayerWave.style.setProperty("--live-glow-size", `${Math.round(14 + energy * 28)}px`);
+    livePlayerWave.style.setProperty("--live-glow-alpha", (0.18 + energy * 0.24).toFixed(3));
+    livePlayerWave.style.setProperty("--live-inner-glow-size", `${Math.round(12 + mid * 22)}px`);
+    livePlayerWave.style.setProperty("--live-inner-glow-alpha", (0.15 + mid * 0.24).toFixed(3));
+    livePlayerWave.style.setProperty("--live-pulse-speed", `${(1.15 - energy * 0.45).toFixed(2)}s`);
+
+    if (!livePlayerAudio?.paused && !livePlayerAudio?.ended) {
+      liveWaveFrame = window.requestAnimationFrame(renderLiveWave);
+    } else {
+      liveWaveFrame = null;
+      resetLiveWave();
+    }
+  }
+
+  function startLiveWave() {
+    if (!liveAudioAnalyser || !liveAudioData || liveWaveFrame) return;
+    liveWaveFrame = window.requestAnimationFrame(renderLiveWave);
+  }
+
+  function setupLiveAnalyser() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx || !livePlayerAudio || liveAudioAnalyser) return;
+    liveAudioContext = liveAudioContext || new AudioCtx();
+    liveAudioAnalyser = liveAudioContext.createAnalyser();
+    liveAudioAnalyser.fftSize = 256;
+    liveAudioAnalyser.smoothingTimeConstant = 0.78;
+    liveAudioData = new Uint8Array(liveAudioAnalyser.frequencyBinCount);
+    liveAudioSource = liveAudioContext.createMediaElementSource(livePlayerAudio);
+    liveAudioSource.connect(liveAudioAnalyser);
+    liveAudioAnalyser.connect(liveAudioContext.destination);
+  }
+
+  async function toggleLivePlayer() {
+    if (!livePlayerAudio) return;
+    if (livePlayerAudio.paused || livePlayerAudio.ended) {
+      try {
+        setupLiveAnalyser();
+        await liveAudioContext?.resume?.();
+        livePlayerAudio.volume = 0.72;
+        await livePlayerAudio.play();
+        startLiveWave();
+      } catch {
+        livePlayer?.classList.add("needs-user-audio");
+      }
+    } else {
+      livePlayerAudio.pause();
+      resetLiveWave();
+    }
+    updateLivePlayer();
+  }
+
+  if (livePlayerAudio && livePlayerToggle) {
+    livePlayerToggle.addEventListener("click", toggleLivePlayer);
+    livePlayerPrev?.addEventListener("click", () => {
+      livePlayerAudio.currentTime = Math.max(0, livePlayerAudio.currentTime - 15);
+      updateLivePlayer();
+    });
+    livePlayerNext?.addEventListener("click", () => {
+      const duration = Number.isFinite(livePlayerAudio.duration) ? livePlayerAudio.duration : livePlayerAudio.currentTime + 15;
+      livePlayerAudio.currentTime = Math.min(duration, livePlayerAudio.currentTime + 15);
+      updateLivePlayer();
+    });
+    ["loadedmetadata", "timeupdate", "play", "pause", "ended", "durationchange"].forEach((eventName) => {
+      livePlayerAudio.addEventListener(eventName, updateLivePlayer);
+    });
+    livePlayerAudio.addEventListener("play", startLiveWave);
+    livePlayerAudio.addEventListener("pause", resetLiveWave);
+    livePlayerAudio.addEventListener("ended", resetLiveWave);
+    updateLivePlayer();
+    resetLiveWave();
+  }
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({
