@@ -275,7 +275,7 @@
 }
 
 .merch-drop-section .merch-section-copy h2 {
-  max-width: 11ch;
+  max-width: 13ch;
   font-size: clamp(2.1rem, 5.8vw, 4.45rem);
   line-height: 0.92;
   transform-origin: left center;
@@ -656,7 +656,7 @@
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: minmax(25rem, 0.95fr) minmax(0, 1.05fr);
   gap: clamp(1.2rem, 3vw, 2rem);
   align-items: stretch;
   border-block: 1px solid rgba(41, 247, 255, 0.18);
@@ -938,7 +938,7 @@
 .merch-drop-section .merch-section-copy > p {
   position: relative;
   z-index: 3;
-  max-width: 25rem;
+  max-width: 31rem;
   margin: 0;
   padding: 1rem 1.1rem;
   border-left: 3px solid rgba(255, 224, 113, 0.86);
