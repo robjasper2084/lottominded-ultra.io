@@ -1,0 +1,6 @@
+/*
+  LottoMind page transition support.
+  The current portal wipe visuals live in styles.css under .page-wipe.
+  This file is intentionally light so the sound upgrade does not redesign or
+  shift the existing blue/gold CRT portal transition.
+*/

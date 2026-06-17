@@ -11,7 +11,8 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=youtube-media-3" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-console-video-1" />
   </head>
   <body class="live-events-page lm-live-page">
     <header class="lm-live-topbar" data-live-shell>
@@ -43,22 +44,33 @@
       </button>
     </header>
 
-    <section class="lm-synth-rail" aria-label="Instrument navigation">
+    <section class="lm-synth-rail" aria-label="Playable live instrument navigation" data-live-console>
       <div class="lm-synth-left">
         <span>Master Volume</span>
         <i></i>
       </div>
-      <div class="lm-synth-tabs">
-        <button type="button">Synth</button>
-        <button type="button" class="is-active">Piano</button>
-        <button type="button">Drums</button>
-        <button type="button">Bass</button>
-        <button type="button">FX</button>
-        <button type="button">Vocals</button>
-        <button type="button">Live</button>
+      <div class="lm-synth-tabs" aria-label="Live instrument modes">
+        <button type="button" data-live-mode="synth">Synth</button>
+        <button type="button" class="is-active" data-live-mode="piano">Piano</button>
+        <button type="button" data-live-mode="drums">Drums</button>
+        <button type="button" data-live-mode="bass">Bass</button>
+        <button type="button" data-live-mode="fx">FX</button>
+        <button type="button" data-live-mode="vocals">Vocals</button>
+        <button type="button" data-live-mode="live">Live</button>
       </div>
-      <div class="lm-mini-piano" aria-hidden="true">
-        <span></span><b></b><span></span><b></b><span></span><span></span><b></b><span></span><b></b><span></span><b></b><span></span>
+      <div class="lm-mini-piano" aria-label="Playable C minor blues piano" data-live-piano>
+        <button type="button" data-note="C" data-frequency="261.63">C</button>
+        <button type="button" data-note="Eb" data-frequency="311.13">Eb</button>
+        <button type="button" data-note="F" data-frequency="349.23">F</button>
+        <button type="button" data-note="Gb" data-frequency="369.99">Gb</button>
+        <button type="button" data-note="G" data-frequency="392.00">G</button>
+        <button type="button" data-note="Bb" data-frequency="466.16">Bb</button>
+        <button type="button" data-note="C" data-frequency="523.25">C</button>
+        <button type="button" data-note="Eb" data-frequency="622.25">Eb</button>
+        <button type="button" data-note="F" data-frequency="698.46">F</button>
+        <button type="button" data-note="Gb" data-frequency="739.99">Gb</button>
+        <button type="button" data-note="G" data-frequency="783.99">G</button>
+        <button type="button" data-note="Bb" data-frequency="932.33">Bb</button>
       </div>
       <div class="lm-synth-knobs" aria-hidden="true">
         <span>Reverb<i></i></span>
@@ -66,7 +78,7 @@
         <span>Filter<i></i></span>
         <span>Drive<i></i></span>
       </div>
-      <div class="lm-output-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="lm-output-meter" aria-hidden="true" data-live-meter><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </section>
 
     <main class="lm-live-grid">
@@ -179,7 +191,7 @@
           </div>
         </article>
         <div class="stream-list">
-          <article><time>May<br /><b>25</b><small>6:00 PM</small></time><span class="mini-thumb"></span><div><h3>Retro Waves Live</h3><p>Synthwave - Live Set</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
+          <article><time>May<br /><b>25</b><small>6:00 PM</small></time><span class="mini-thumb video-mini-thumb"><video muted autoplay loop playsinline preload="metadata" aria-label="Retro Waves Live video thumbnail"><source src="./assets/video/retro-waves-live-thumb.mp4" type="video/mp4" /></video></span><div><h3>Retro Waves Live</h3><p>Synthwave - Live Set</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
           <article><time>May<br /><b>25</b><small>8:30 PM</small></time><span class="mini-thumb alt"></span><div><h3>The Cosmic Collective</h3><p>Jam Band - Live</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
           <article><time>May<br /><b>26</b><small>11:00 AM</small></time><span class="mini-thumb gold"></span><div><h3>Creator Economy 2025</h3><p>Conference - Panel</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
         </div>
@@ -198,14 +210,16 @@
       </section>
 
       <section class="lm-spotlight panel-glow">
-        <a class="artist-art video-spotlight-link" href="https://www.youtube.com/watch?v=Aif6MOKqDZE" target="_blank" rel="noopener noreferrer" aria-label="Watch Luna Vex spotlight on YouTube">
-          <img src="https://img.youtube.com/vi/Aif6MOKqDZE/hqdefault.jpg" alt="" loading="lazy" />
+        <a class="artist-art video-spotlight-link local-video-spotlight" href="./assets/video/luna-vex-spotlight.mp4" target="_blank" rel="noopener noreferrer" aria-label="Watch Luna Vex spotlight video">
+          <video muted autoplay loop playsinline preload="metadata" aria-label="Luna Vex spotlight video">
+            <source src="./assets/video/luna-vex-spotlight.mp4" type="video/mp4" />
+          </video>
         </a>
         <div>
           <p>Performer Spotlight</p>
           <h2>Luna Vex</h2>
           <p>Electronic artist, producer, and DJ pushing sonic boundaries and building futures with sound.</p>
-          <a class="live-btn" href="https://www.youtube.com/watch?v=Aif6MOKqDZE" target="_blank" rel="noopener noreferrer">Watch Interview</a>
+          <a class="live-btn" href="./assets/video/luna-vex-spotlight.mp4" target="_blank" rel="noopener noreferrer">Watch Interview</a>
           <small>Upcoming Set - May 25 - 12:30 AM - Galaxy Stage</small>
         </div>
       </section>
@@ -263,7 +277,9 @@
       <div class="points"><b>Ultra Points</b><strong>12,450</strong><span>Rank Ultra Elite</span></div>
     </footer>
 
+    <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
     <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
     <script src="./assets/live-events/js/live-events-redesign.js?v=youtube-media-3" defer></script>
+    <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
   </body>
 </html>

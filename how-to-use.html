@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#070707" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
     <style>
       :root {
         color-scheme: dark;
@@ -1641,10 +1642,49 @@
         opacity: 0.52;
       }
 
+      body.has-sphere-header .hero {
+        width: min(calc(100% - 32px), 1320px);
+        min-height: auto;
+        grid-template-columns: minmax(690px, 0.92fr) minmax(340px, 0.64fr);
+        gap: clamp(28px, 3.4vw, 48px);
+        align-items: center;
+        overflow: visible;
+        padding-inline: clamp(18px, 2.2vw, 28px);
+        padding-top: clamp(136px, 14vw, 172px);
+        padding-bottom: clamp(64px, 7vw, 92px);
+      }
+
+      body.has-sphere-header .hero .hero-copy {
+        max-width: 760px;
+        overflow: visible;
+        padding-inline: clamp(12px, 1.4vw, 20px);
+      }
+
+      body.has-sphere-header .hero .hero-copy h1 {
+        width: 100%;
+        max-width: none;
+        font-size: clamp(3.45rem, 5.25vw, 4.65rem);
+        line-height: 0.92;
+        overflow-wrap: normal;
+        word-break: normal;
+      }
+
       @media (max-width: 760px) {
+        body.has-sphere-header .hero {
+          width: min(calc(100% - 24px), var(--max));
+          grid-template-columns: 1fr;
+          padding-top: clamp(118px, 28vw, 154px);
+        }
+
+        body.has-sphere-header .hero .hero-copy {
+          max-width: 100%;
+        }
+
         .hero .hero-copy h1 {
-          max-width: 9.5ch;
-          font-size: clamp(2.35rem, 10.5vw, 4rem);
+          width: min(100%, 10.5ch);
+          max-width: none;
+          font-size: clamp(2.2rem, 12vw, 3.8rem);
+          line-height: 0.94;
         }
       }
 
@@ -2020,6 +2060,55 @@
           </details>
         </div>
       </section>
+
+      <section class="refined-app-band marketing-section reveal-section" id="lottomind-refined" data-reveal>
+        <div class="refined-app-copy">
+          <video class="refined-copy-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+          </video>
+          <p class="eyebrow">Ultra Studio -> LottoMind Refined App -> Vault Membership</p>
+          <h2 class="kinetic-word" data-kinetic="ENTER THE LOTTOMIND REFINED APP" tabindex="0">Enter the LottoMind Refined App</h2>
+          <p>
+            Step from the LOTTOMINDED ULTRA studio into the full LottoMind Refined experience - AI number tools,
+            Dream Oracle, saved numbers, credits, scanner tools, rewards, and premium Vault access.
+          </p>
+          <div class="vault-status-card" data-vault-status aria-live="polite">
+            Free demo path active. Premium tools unlock through Gold, Ultra, LottoCredits, or a 10-minute demo pass.
+          </div>
+          <div class="refined-actions">
+            <a class="primary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-vault-launch data-plan="free">Launch LottoMind Refined</a>
+            <button class="secondary-action" type="button" data-vault-open>Unlock Vault</button>
+            <button class="secondary-action" type="button" data-beta-waitlist>Download Beta Coming Soon</button>
+          </div>
+        </div>
+        <div class="refined-bridge-grid" aria-label="LottoMind product bridge">
+          <video class="refined-bridge-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+          </video>
+          <article>
+            <span>01</span>
+            <h3>Create the Signal</h3>
+            <p>Beat DNA, prompts, music workstation, and creative number signals begin inside LOTTOMINDED ULTRA.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Enter LottoMind Refined</h3>
+            <p>AI number tools, Dream Oracle, scanner, saved numbers, rewards, and app workflows open in the Refined demo.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Unlock the Vault</h3>
+            <p>Gold or Ultra membership, credits, beta access, premium tools, and 10-minute demo passes share one demo state.</p>
+          </article>
+        </div>
+        <p class="vault-disclaimer">
+          LottoMind and LottoCredits are for entertainment, organization, music creation, and creative number journaling only.
+          LottoCredits have no cash value and cannot be redeemed for money, prizes, lottery tickets, or gambling.
+          LottoMind does not predict winning lottery numbers.
+        </p>
+      </section>
     </main>
 
     <div class="password-gate" data-password-gate hidden>
@@ -2066,6 +2155,7 @@
       <source src="./assets/audio/lottomind-heart-639hz.mp3?v=guide-heart-639-1" type="audio/mpeg" />
     </audio>
     <script src="./assets/features-app/js/features-raytrace-game.js?v=guide-pong-bg-1" defer></script>
+    <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
     <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
     <script>
       (() => {

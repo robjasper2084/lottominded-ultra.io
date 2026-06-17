@@ -10,7 +10,8 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=home-raytrace-pass-13" />
+    <link rel="stylesheet" href="./styles.css?v=home-spheres-column-2" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
     <link rel="stylesheet" href="./assets/css/home-raytrace.css?v=home-raytrace-pass-13" />
   </head>
   <body class="home-page has-startup-modal has-sphere-header">
@@ -146,9 +147,58 @@
             <a class="secondary-action" href="#lottomind-refined">LottoMind App Beta</a>
           </div>
         </div>
-        <figure class="hero-brand-art" aria-hidden="true">
-          <img src="./assets/brand/lm-frequency-vault-hero.webp" alt="" />
-        </figure>
+        <aside class="hero-brand-art home-spheres-column" aria-label="Interactive LOTTOMINDED lottery spheres">
+          <div class="home-spheres-orbit-mark" aria-hidden="true">
+            <img src="./assets/brand/jazz-network-gold-coin.jpeg" alt="" />
+          </div>
+          <div class="home-spheres-copy">
+            <p class="section-kicker">Beat2Lotto+&trade; Signal Room</p>
+            <h2 class="kinetic-word" data-kinetic="LOTTERY SPHERES IN MOTION" tabindex="0">Lottery Spheres in Motion</h2>
+            <p>
+              Guide the glowing balls, reroll a creative set, and send the signal back into the LOTTOMINDED ULTRA&trade;
+              studio. Creative number generation only. Not a prediction.
+            </p>
+          </div>
+          <div class="home-sphere-readout-panel" aria-label="Current creative signal">
+            <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+            <span>Current Signal</span>
+            <strong data-sphere-signal>05 - 12 - 19 - 27 - 33</strong>
+            <div class="sphere-live-stats" aria-label="Live signal motion stats">
+              <div>
+                <span>Energy</span>
+                <meter min="0" max="100" value="58" data-sphere-energy>58</meter>
+              </div>
+              <div>
+                <span>Orbit</span>
+                <strong data-sphere-orbit>Calm</strong>
+              </div>
+            </div>
+            <p>Move your pointer through the sphere field to bend the orbit path.</p>
+            <div class="sphere-generated-sets" data-sphere-generated-sets aria-live="polite">
+              <strong>Move trigger</strong>
+              <span data-sphere-move-count>Move the balls 3 times to generate sets.</span>
+              <dl>
+                <div>
+                  <dt>Pick 6</dt>
+                  <dd data-sphere-pick6>--</dd>
+                </div>
+                <div>
+                  <dt>Pick 3</dt>
+                  <dd data-sphere-pick3>--</dd>
+                </div>
+                <div>
+                  <dt>Pick 4</dt>
+                  <dd data-sphere-pick4>--</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+          <div class="sphere-actions home-sphere-actions">
+            <button class="primary-action" type="button" data-reroll-spheres>Reroll Spheres</button>
+            <a class="secondary-action" href="./beat2lotto-plus.html#beat2lotto">Open Beat2Lotto+&trade;</a>
+            <a class="secondary-action" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+          </div>
+        </aside>
         <div class="domain-strip" aria-label="Brand identity">
           <video class="domain-strip-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
             <source src="./assets/video/lottomind-logo-sting.mp4" type="video/mp4" />
@@ -211,7 +261,7 @@
             Dream Oracle, saved numbers, credits, scanner tools, rewards, and premium Vault access.
           </p>
           <div class="vault-status-card" data-vault-status aria-live="polite">
-            Free demo path active. Premium tools unlock through Gold, Ultra, LottoCredits, or a 24-hour pass.
+            Free demo path active. Premium tools unlock through Gold, Ultra, LottoCredits, or a 10-minute demo pass.
           </div>
           <div class="refined-actions">
             <a class="primary-action" href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-vault-launch data-plan="free">Launch LottoMind Refined</a>
@@ -237,7 +287,7 @@
           <article>
             <span>03</span>
             <h3>Unlock the Vault</h3>
-            <p>Gold or Ultra membership, credits, beta access, premium tools, and 24-hour passes share one demo state.</p>
+            <p>Gold or Ultra membership, credits, beta access, premium tools, and 10-minute demo passes share one demo state.</p>
           </article>
         </div>
         <p class="vault-disclaimer">
@@ -259,8 +309,9 @@
       <span id="site-year"></span>
     </footer>
 
+    <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
     <script src="./site.js?v=home-raytrace-pass-13" defer></script>
-    <script src="./lottery-spheres.js?v=home-gold-balls-feature-hide-1" defer></script>
+    <script src="./lottery-spheres.js?v=home-spheres-column-1" defer></script>
     <script src="./assets/js/home-raytrace.js?v=home-raytrace-pass-13" defer></script>
   </body>
 </html>

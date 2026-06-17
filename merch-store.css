@@ -184,7 +184,7 @@
   position: relative;
   min-height: 78vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(24rem, min(39.2rem, 54vw));
+  grid-template-columns: minmax(0, 1fr) minmax(24rem, min(45.1rem, 56vw));
   align-items: end;
   gap: clamp(1.2rem, 3vw, 3rem);
   padding: clamp(7rem, 12vw, 10rem) clamp(1rem, 5vw, 5rem) clamp(2rem, 5vw, 4rem);
@@ -395,7 +395,7 @@
   position: relative;
   align-self: center;
   justify-self: center;
-  width: min(100%, 33.3rem);
+  width: min(100%, 38.3rem);
   overflow: hidden;
   border: 1px solid rgba(255, 209, 102, 0.18);
   border-radius: 18px;

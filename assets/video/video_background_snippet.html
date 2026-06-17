@@ -1,0 +1,35 @@
+<!-- Put videos in assets/video/ and add this near the top of your page body -->
+<div class="lm-video-bg" aria-hidden="true">
+  <video autoplay muted loop playsinline preload="auto" poster="assets/video/lm-portal-a-poster.jpg">
+    <source src="assets/video/lm-portal-bg-a-6s.mp4" type="video/mp4" />
+  </video>
+</div>
+
+<style>
+  .lm-video-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: #03050a;
+  }
+
+  .lm-video-bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.34;
+    filter: saturate(1.22) contrast(1.08) brightness(0.82);
+    mix-blend-mode: screen;
+  }
+
+  .lm-video-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(41, 247, 255, 0.16), transparent 32rem),
+      linear-gradient(180deg, rgba(3, 5, 10, 0.12), rgba(3, 5, 10, 0.86));
+  }
+</style>

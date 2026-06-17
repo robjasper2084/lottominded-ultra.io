@@ -1,0 +1,20 @@
+# LottoMinded Ultra FFmpeg Commands
+# Replace input.mp4 with your video file path.
+
+# Web-ready 3-second transition clip, muted
+ffmpeg -y -t 3 -i input.mp4 -map 0:v:0 -an -vf "scale=960:-2,fps=24" -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -movflags +faststart assets/video/lm-transition-open-3s.mp4
+
+# Lightweight 6-second background loop, muted
+ffmpeg -y -t 6 -i input.mp4 -map 0:v:0 -an -vf "scale=960:-2,fps=24" -c:v libx264 -preset ultrafast -crf 31 -pix_fmt yuv420p -movflags +faststart assets/video/lm-portal-bg-6s.mp4
+
+# Poster image
+ffmpeg -y -ss 1 -i input.mp4 -frames:v 1 -q:v 3 assets/video/lm-portal-poster.jpg
+
+# Animated WebP preview, 3 seconds
+ffmpeg -y -t 3 -i input.mp4 -vf "fps=12,scale=640:-1:flags=lanczos" -loop 0 assets/video/lm-transition-preview.webp
+
+# Square crop for social preview
+ffmpeg -y -i input.mp4 -vf "crop='min(iw,ih)':'min(iw,ih)',scale=1080:1080,fps=24" -c:v libx264 -preset ultrafast -crf 28 -pix_fmt yuv420p -movflags +faststart assets/video/lm-portal-square.mp4
+
+# Extract frames into a folder
+ffmpeg -y -i input.mp4 -vf "fps=12,scale=960:-1" assets/video/frames/lm-frame-%04d.jpg
