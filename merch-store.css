@@ -530,7 +530,7 @@
   background:
     linear-gradient(90deg, rgba(2, 5, 12, 0.42), rgba(0, 245, 255, 0.08), rgba(255, 209, 102, 0.06), rgba(2, 5, 12, 0.42)),
     rgba(0, 245, 255, 0.06);
-  padding: 0.96rem 0;
+  padding: 1.44rem 0;
   perspective: 720px;
   white-space: nowrap;
 }
@@ -554,10 +554,10 @@
   pointer-events: none;
   color: rgba(41, 247, 255, 0.12);
   font-family: "Courier New", monospace;
-  font-size: 0.72rem;
+  font-size: 1.08rem;
   font-weight: 900;
-  letter-spacing: 0.52rem;
-  line-height: 1.4;
+  letter-spacing: 0.78rem;
+  line-height: 1.5;
   text-transform: uppercase;
   text-shadow: 0 0 12px rgba(41, 247, 255, 0.28);
   transform: rotate(-7deg) translateY(-12%);
@@ -590,7 +590,7 @@
   padding-inline: clamp(1.55rem, 4.5vw, 4.6rem);
   color: #fff1a8;
   font-weight: 900;
-  font-size: clamp(0.92rem, 1.45vw, 1.22rem);
+  font-size: clamp(1.38rem, 2.18vw, 1.83rem);
   text-transform: uppercase;
   letter-spacing: 0;
   text-decoration: none;
@@ -604,8 +604,8 @@
 }
 
 .merch-strip a::after {
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.63rem;
+  height: 0.63rem;
   margin-left: clamp(1.55rem, 4.5vw, 4.6rem);
   border-radius: 50%;
   content: "";
@@ -656,7 +656,7 @@
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(25rem, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 1.22fr);
   gap: clamp(1.2rem, 3vw, 2rem);
   align-items: stretch;
   border-block: 1px solid rgba(41, 247, 255, 0.18);

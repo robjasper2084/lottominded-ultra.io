@@ -36,12 +36,6 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-body * {
-  cursor: var(--lm-mascot-cursor);
-}
-
 input[type="email"],
 input[type="number"],
 input[type="password"],
@@ -190,7 +184,7 @@ body::after {
 
 body.has-mascot-motion-cursor,
 body.has-mascot-motion-cursor * {
-  cursor: none;
+  cursor: auto;
 }
 
 body.has-mascot-motion-cursor input[type="email"],
@@ -10040,7 +10034,7 @@ body.has-stream-startup-audio {
   position: fixed;
   right: clamp(0.9rem, 2vw, 1.4rem);
   bottom: clamp(0.9rem, 2vw, 1.4rem);
-  z-index: 82;
+  z-index: 91;
   display: inline-grid;
   width: clamp(3.5rem, 5.2vw, 4.2rem);
   min-width: 0;
@@ -11218,3 +11212,172 @@ body.vault-gateway-open {
   }
 }
 /* End LottoMind app home polish. */
+
+/* hud-menu-upgrade */
+.universal-page-menu {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(41, 247, 255, 0.14), transparent 25rem),
+    linear-gradient(rgba(41, 247, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.03) 1px, transparent 1px),
+    rgba(0, 0, 0, 0.9);
+  background-size: auto, 4rem 4rem, 4rem 4rem, auto;
+}
+
+.universal-page-menu-panel {
+  --hud-x: 50%;
+  --hud-y: 50%;
+  overflow: hidden;
+  border-color: rgba(41, 247, 255, 0.7);
+  color: #effcff;
+  background:
+    radial-gradient(circle at var(--hud-x) var(--hud-y), rgba(41, 247, 255, 0.2), transparent 12rem),
+    linear-gradient(135deg, rgba(5, 26, 44, 0.94), rgba(1, 5, 11, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 4rem rgba(41, 247, 255, 0.08),
+    0 0 0 1px rgba(41, 247, 255, 0.24),
+    0 0 4rem rgba(0, 166, 255, 0.28),
+    0 34px 90px rgba(0, 0, 0, 0.62);
+}
+
+.universal-page-menu-panel::before,
+.universal-page-menu-panel::after,
+.universal-page-menu-scan {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.universal-page-menu-panel::before {
+  inset: 0;
+  border: 1px solid transparent;
+  border-image: linear-gradient(90deg, rgba(41, 247, 255, 0.05), rgba(255, 224, 113, 0.72), rgba(41, 247, 255, 0.72), rgba(255, 79, 216, 0.56), rgba(41, 247, 255, 0.05)) 1;
+  opacity: 0.9;
+}
+
+.universal-page-menu-panel::after {
+  right: 1.2rem;
+  bottom: 1.2rem;
+  width: min(12rem, 26vw);
+  height: 0.3rem;
+  background: repeating-linear-gradient(90deg, rgba(94, 255, 157, 0.9) 0 0.85rem, transparent 0.85rem 1.35rem);
+  filter: drop-shadow(0 0 0.7rem rgba(41, 247, 255, 0.62));
+  opacity: 0.82;
+}
+
+.universal-page-menu-scan {
+  inset: -40% 0 auto;
+  height: 44%;
+  background: linear-gradient(180deg, transparent, rgba(41, 247, 255, 0.1), transparent);
+  mix-blend-mode: screen;
+  animation: hudMenuScan 4.8s ease-in-out infinite;
+}
+
+.universal-page-menu-panel strong {
+  position: relative;
+  z-index: 1;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.universal-page-menu-panel strong span,
+.universal-page-menu-panel strong small {
+  display: block;
+}
+
+.universal-page-menu-panel strong small {
+  margin-top: 0.28rem;
+  color: rgba(94, 255, 157, 0.78);
+  font-family: var(--ui-font);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+}
+
+.universal-page-menu-status {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  color: rgba(226, 244, 255, 0.76);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.universal-page-menu-status span {
+  padding: 0.42rem 0.58rem;
+  border: 1px solid rgba(41, 247, 255, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.universal-page-menu-links {
+  position: relative;
+  z-index: 1;
+}
+
+.universal-page-menu-links a {
+  position: relative;
+  justify-content: space-between;
+  gap: 0.75rem;
+  overflow: hidden;
+  text-align: left;
+}
+
+.universal-page-menu-links a::before {
+  content: attr(data-hud-index);
+  color: rgba(94, 255, 157, 0.78);
+  font-family: var(--ui-font);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+
+.universal-page-menu-links a span {
+  flex: 1 1 auto;
+}
+
+.universal-page-menu-links a i {
+  width: 2.7rem;
+  height: 0.55rem;
+  flex: 0 0 auto;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.1), rgba(41, 247, 255, 0.8)),
+    repeating-linear-gradient(90deg, transparent 0 0.34rem, rgba(255, 255, 255, 0.5) 0.34rem 0.4rem);
+  opacity: 0.35;
+  transform: scaleX(0.55);
+  transform-origin: right;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.universal-page-menu-links a:is(:hover, :focus-visible, .is-active, .is-armed) i {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.universal-page-menu-links a.is-launching {
+  transform: translateY(1px) scale(0.985);
+  filter: brightness(1.18);
+}
+
+.universal-page-menu-readout {
+  position: relative;
+  z-index: 1;
+  min-height: 2.3rem;
+  margin: 0;
+  padding: 0.72rem 0.9rem;
+  border-left: 3px solid rgba(94, 255, 157, 0.82);
+  color: rgba(226, 244, 255, 0.84);
+  background: rgba(0, 0, 0, 0.26);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+@keyframes hudMenuScan {
+  from {
+    transform: translateY(-15%);
+  }
+  to {
+    transform: translateY(260%);
+  }
+}

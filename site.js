@@ -628,11 +628,7 @@ setupManualPianoHeader();
 setupHeaderPadMoodRing();
 
 function setupUniversalFloatingMenu() {
-  const existingToggle = document.querySelector(".pl-floating, .motion-menu-toggle, [data-universal-menu-toggle]");
-  if (existingToggle) {
-    existingToggle.classList.add("universal-floating-trigger");
-    return;
-  }
+  if (document.getElementById("universalPageMenu")) return;
 
   const links = [
     ["Home", "./how-to-use.html"],
@@ -646,14 +642,20 @@ function setupUniversalFloatingMenu() {
     ["Studio", "./lottomind-stem-studio/index.html"]
   ];
 
-  const toggle = document.createElement("button");
-  toggle.className = "universal-menu-toggle";
-  toggle.type = "button";
+  const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle, .pl-floating");
+  const toggle = existingToggle || document.createElement("button");
+  if (!existingToggle) {
+    toggle.className = "universal-menu-toggle";
+    toggle.textContent = "Menu";
+  } else {
+    toggle.classList.add("universal-floating-trigger");
+    if (!toggle.textContent.trim()) toggle.textContent = "Menu";
+  }
+  if (toggle.tagName === "BUTTON") toggle.type = "button";
   toggle.dataset.universalMenuToggle = "true";
   toggle.setAttribute("aria-controls", "universalPageMenu");
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-label", "Open page menu");
-  toggle.textContent = "Menu";
 
   const menu = document.createElement("div");
   menu.className = "universal-page-menu";
@@ -663,55 +665,251 @@ function setupUniversalFloatingMenu() {
   menu.setAttribute("aria-label", "Page menu");
   menu.setAttribute("aria-hidden", "true");
   menu.innerHTML = `
-    <div class="universal-page-menu-panel">
+    <div class="universal-page-menu-panel" data-hud-panel>
       <button class="universal-page-menu-close" type="button" aria-label="Close page menu">X</button>
-      <strong>LOTTOMINDED ULTRA</strong>
+      <div class="universal-page-menu-scan" aria-hidden="true"></div>
+      <strong><span>LOTTOMINDED ULTRA</span><small>HUD NAV / SIGNAL ROUTE</small></strong>
+      <div class="universal-page-menu-status" aria-hidden="true">
+        <span>Route online</span>
+        <span data-hud-clock>00:00</span>
+      </div>
       <nav class="universal-page-menu-links" aria-label="Page menu links">
-        ${links.map(([label, href]) => `<a href="${href}">${label}</a>`).join("")}
+        ${links.map(([label, href], index) => `<a href="${href}" data-hud-index="${String(index + 1).padStart(2, "0")}"><span>${label}</span><i aria-hidden="true"></i></a>`).join("")}
       </nav>
+      <p class="universal-page-menu-readout" data-hud-readout>Point to a route to preview the signal lane.</p>
     </div>
   `;
 
+  const panel = menu.querySelector("[data-hud-panel]");
+  const menuLinks = Array.from(menu.querySelectorAll("a[href]"));
+  const hudClock = menu.querySelector("[data-hud-clock]");
+  const hudReadout = menu.querySelector("[data-hud-readout]");
+
+  const updateHudClock = () => {
+    if (!hudClock) return;
+    const now = new Date();
+    hudClock.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const setHudReadout = (link) => {
+    if (!hudReadout || !link) return;
+    const label = link.textContent.trim();
+    const index = link.dataset.hudIndex || "--";
+    hudReadout.textContent = `Route ${index} armed: ${label} signal lane ready.`;
+  };
+
+  const clearHudReadout = () => {
+    if (hudReadout) hudReadout.textContent = "Point to a route to preview the signal lane.";
+  };
+
+  const armLink = (link) => {
+    menuLinks.forEach((item) => item.classList.toggle("is-armed", item === link));
+    setHudReadout(link);
+  };
+
   const setActiveLink = () => {
     const current = new URL(window.location.href);
-    menu.querySelectorAll("a[href]").forEach((link) => {
+    menuLinks.forEach((link) => {
       const target = new URL(link.getAttribute("href"), window.location.href);
       const samePath = target.pathname.replace(/\/index\.html$/, "/") === current.pathname.replace(/\/index\.html$/, "/");
       link.classList.toggle("is-active", samePath);
+      if (samePath) setHudReadout(link);
     });
   };
 
   let lastFocus = null;
   const open = () => {
+    if (menu.classList.contains("is-open")) return;
     lastFocus = document.activeElement;
     menu.classList.add("is-open");
     menu.setAttribute("aria-hidden", "false");
     toggle.setAttribute("aria-expanded", "true");
     document.body.classList.add("universal-menu-open");
+    updateHudClock();
     setActiveLink();
-    window.setTimeout(() => menu.querySelector("a, button")?.focus(), 20);
+    window.setTimeout(() => (menu.querySelector("a.is-active") || menu.querySelector("a") || menu.querySelector("button"))?.focus(), 20);
   };
 
-  const close = () => {
+  const close = ({ restoreFocus = true } = {}) => {
     menu.classList.remove("is-open");
     menu.setAttribute("aria-hidden", "true");
     toggle.setAttribute("aria-expanded", "false");
     document.body.classList.remove("universal-menu-open");
-    lastFocus?.focus?.();
+    menuLinks.forEach((link) => link.classList.remove("is-armed", "is-launching"));
+    clearHudReadout();
+    if (restoreFocus) lastFocus?.focus?.();
   };
 
-  document.body.append(toggle, menu);
-  toggle.addEventListener("click", open);
-  menu.querySelector(".universal-page-menu-close")?.addEventListener("click", close);
+  if (!existingToggle) document.body.append(toggle);
+  document.body.append(menu);
+
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (menu.classList.contains("is-open")) {
+      close({ restoreFocus: false });
+    } else {
+      open();
+    }
+  });
+
+  menu.querySelector(".universal-page-menu-close")?.addEventListener("click", () => close());
   menu.addEventListener("click", (event) => {
     if (event.target === menu) close();
   });
+
+  panel?.addEventListener("pointermove", (event) => {
+    const rect = panel.getBoundingClientRect();
+    panel.style.setProperty("--hud-x", `${Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100)).toFixed(2)}%`);
+    panel.style.setProperty("--hud-y", `${Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100)).toFixed(2)}%`);
+  }, { passive: true });
+
+  menuLinks.forEach((link) => {
+    link.addEventListener("pointerenter", () => armLink(link), { passive: true });
+    link.addEventListener("focus", () => armLink(link));
+    link.addEventListener("pointerleave", () => link.classList.remove("is-armed"), { passive: true });
+    link.addEventListener("blur", () => link.classList.remove("is-armed"));
+    link.addEventListener("pointerdown", () => link.classList.add("is-launching"));
+    link.addEventListener("pointerup", () => link.classList.remove("is-launching"));
+    link.addEventListener("pointercancel", () => link.classList.remove("is-launching"));
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menu.classList.contains("is-open")) close();
+    if (!menu.classList.contains("is-open") || !["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key) || !menuLinks.length) return;
+    const activeIndex = Math.max(0, menuLinks.indexOf(document.activeElement));
+    const direction = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+    const next = menuLinks[(activeIndex + direction + menuLinks.length) % menuLinks.length];
+    event.preventDefault();
+    next?.focus();
   });
 }
 
 setupUniversalFloatingMenu();
+
+function setupSharedLivePlayers() {
+  if (document.body.classList.contains("lm-live-page")) return;
+  document.querySelectorAll("[data-live-player]").forEach((player) => {
+    if (player.dataset.livePlayerReady === "true") return;
+    const audio = player.querySelector("[data-live-player-audio]");
+    const toggle = player.querySelector("[data-live-player-toggle]");
+    const prev = player.querySelector("[data-live-player-prev]");
+    const next = player.querySelector("[data-live-player-next]");
+    const time = player.querySelector("[data-live-player-time]");
+    const wave = player.querySelector(".now-wave");
+    if (!audio || !toggle) return;
+    player.dataset.livePlayerReady = "true";
+
+    let context = null;
+    let analyser = null;
+    let data = null;
+    let source = null;
+    let frame = 0;
+
+    const two = (value) => String(value).padStart(2, "0");
+    const formatTime = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return "--:--";
+      const safe = Math.floor(seconds);
+      const hours = Math.floor(safe / 3600);
+      const minutes = Math.floor((safe % 3600) / 60);
+      const secs = safe % 60;
+      return hours ? `${hours}:${two(minutes)}:${two(secs)}` : `${minutes}:${two(secs)}`;
+    };
+
+    const update = () => {
+      const isPlaying = !audio.paused && !audio.ended;
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      const progress = duration ? Math.min(1, Math.max(0, audio.currentTime / duration)) : 0;
+      player.classList.toggle("is-playing", isPlaying);
+      player.style.setProperty("--player-progress", progress.toFixed(3));
+      toggle.textContent = isPlaying ? "II" : "\u25b6";
+      toggle.setAttribute("aria-pressed", String(isPlaying));
+      toggle.setAttribute("aria-label", isPlaying ? "Pause live mix" : "Play live mix");
+      if (time) time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(duration)}`;
+    };
+
+    const resetWave = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+      wave?.style.setProperty("--live-energy", "0");
+      wave?.style.setProperty("--live-bass", "0");
+    };
+
+    const setupAnalyser = () => {
+      const AudioCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtor || !wave) return;
+      context = context || new AudioCtor();
+      if (!analyser) {
+        analyser = context.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.78;
+        data = new Uint8Array(analyser.frequencyBinCount);
+        source = context.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(context.destination);
+      }
+    };
+
+    const startWave = () => {
+      if (!analyser || !data || frame) return;
+      const render = () => {
+        analyser.getByteFrequencyData(data);
+        let energy = 0;
+        let bass = 0;
+        const bassCount = Math.max(1, Math.floor(data.length * 0.18));
+        data.forEach((value, index) => {
+          const normalized = value / 255;
+          energy += normalized;
+          if (index < bassCount) bass += normalized;
+        });
+        energy /= data.length;
+        bass /= bassCount;
+        wave?.style.setProperty("--live-energy", Math.min(1, energy * 2.1).toFixed(3));
+        wave?.style.setProperty("--live-bass", Math.min(1, bass * 2.4).toFixed(3));
+        frame = window.requestAnimationFrame(render);
+      };
+      frame = window.requestAnimationFrame(render);
+    };
+
+    const togglePlayback = async () => {
+      if (audio.paused || audio.ended) {
+        try {
+          setupAnalyser();
+          await context?.resume?.();
+          audio.volume = 0.72;
+          await audio.play();
+          startWave();
+        } catch {
+          player.classList.add("needs-user-audio");
+        }
+      } else {
+        audio.pause();
+        resetWave();
+      }
+      update();
+    };
+
+    toggle.addEventListener("click", togglePlayback);
+    prev?.addEventListener("click", () => {
+      audio.currentTime = Math.max(0, audio.currentTime - 15);
+      update();
+    });
+    next?.addEventListener("click", () => {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : audio.currentTime + 15;
+      audio.currentTime = Math.min(duration, audio.currentTime + 15);
+      update();
+    });
+    ["loadedmetadata", "timeupdate", "play", "pause", "ended", "durationchange"].forEach((eventName) => {
+      audio.addEventListener(eventName, update);
+    });
+    audio.addEventListener("play", startWave);
+    audio.addEventListener("pause", resetWave);
+    audio.addEventListener("ended", resetWave);
+    update();
+    resetWave();
+  });
+}
+
+setupSharedLivePlayers();
 
 
 const REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
@@ -821,11 +1019,9 @@ function setupLottoMindVaultGateway() {
       <button class="vault-gateway-close" type="button" aria-label="Close LottoMind Vault Gateway">X</button>
       <p class="eyebrow">LottoMind Vault Gateway</p>
       <h2>LottoMind Vault Gateway</h2>
-      <p class="vault-gateway-copy">Choose a demo access lane before entering LottoMind Refined. Free users can still enter the app; premium tools stay locked unless Gold, Ultra, credits, or a 10-minute demo pass is active.</p>
+      <p class="vault-gateway-copy">Choose an access lane before entering LottoMind Refined. Premium tools stay locked unless credits, Ultra access, or a 10-minute demo pass is active.</p>
       <div class="vault-gateway-status" data-vault-gateway-status aria-live="polite"></div>
       <div class="vault-gateway-actions">
-        <button type="button" data-vault-choice="free">Free Demo</button>
-        <button type="button" data-vault-choice="gold">Unlock Gold Vault</button>
         <button type="button" data-vault-choice="pass">Use 10-Min Demo</button>
         <button type="button" data-vault-choice="credits">Buy Credits</button>
         <button type="button" class="primary-action" data-vault-continue>Continue to App</button>
@@ -841,7 +1037,7 @@ function setupLottoMindVaultGateway() {
     const planLabel = state.plan === "ultra" ? "Ultra" : state.plan === "gold" ? "Gold" : state.passActive ? "10-min demo" : "Free";
     const activeText = state.vaultActive
       ? "Vault Access Active. Premium LottoMind Refined tools unlocked."
-      : "Free demo active. Premium tools stay locked inside LottoMind Refined.";
+      : "Standard access active. Premium tools stay locked inside LottoMind Refined.";
     const text = message || `${activeText} ${state.credits} LottoCredits available.`;
     badge.innerHTML = `<strong>${state.credits}</strong><span>${planLabel} credits</span>`;
     statusTargets.forEach((target) => {
@@ -885,7 +1081,7 @@ function setupLottoMindVaultGateway() {
         href: link.href,
         tool: link.dataset.vaultTool || ""
       };
-      open(requestedPlan === "free" ? "Free demo selected. Continue to App when ready." : "Vault lane selected. Choose access or continue.");
+      open(requestedPlan === "free" ? "Continue to App when ready." : "Vault lane selected. Choose access or continue.");
     });
   });
 
@@ -912,7 +1108,7 @@ function setupLottoMindVaultGateway() {
       const choice = button.dataset.vaultChoice;
       if (choice === "free") {
         setVaultState({ plan: "free" });
-        update("Free demo selected. Continue to App to enter with premium tools locked.");
+        update("Standard access selected. Continue to App when ready.");
       }
       if (choice === "gold") {
         const credits = Math.max(getVaultState().credits, 500);
@@ -2452,7 +2648,7 @@ function setupNegativeCursorLens() {
   });
 }
 
-setupNegativeCursorLens();
+// Use the native browser pointer without the floating lens overlay.
 
 function setupMascotMotionCursor() {
   if (document.body.dataset.cursorMode !== "mascot") return;
@@ -2574,7 +2770,7 @@ function setupMascotMotionCursor() {
   window.requestAnimationFrame(render);
 }
 
-setupMascotMotionCursor();
+// Mascot cursor mode is disabled so page controls keep normal cursor behavior.
 
 function showGamePip() {
   if (!gamePip) return;

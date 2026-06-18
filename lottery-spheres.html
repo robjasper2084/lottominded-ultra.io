@@ -10,9 +10,9 @@
     <title>LOTTOMINDED ULTRA | Lottery Spheres</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=no-raytrace-explode-tabs-1" />
+    <link rel="stylesheet" href="./styles.css?v=cursor-native-1" />
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
-    <link rel="stylesheet" href="./lottery-spheres.css?v=global-tabs-menu-2" />
+    <link rel="stylesheet" href="./lottery-spheres.css?v=spheres-player-color-1" />
   </head>
   <body class="lottery-spheres-page">
     <header class="site-header home-like-header lottery-spheres-header" data-site-header>
@@ -48,7 +48,7 @@
     <audio data-sphere-soundtrack src="./assets/audio/lottomind-vault-174-hz.mp3" loop preload="auto"></audio>
 
     <main>
-      <section class="sphere-stage" id="spheres" data-spheres-stage data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg" aria-label="Interactive LOTTOMINDED lottery spheres">
+      <section class="sphere-stage" id="spheres" data-spheres-stage aria-label="Interactive LOTTOMINDED lottery spheres">
         <canvas class="sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
         <div class="sphere-scanline" aria-hidden="true"></div>
         <div class="sphere-grid" aria-hidden="true"></div>
@@ -114,14 +114,25 @@
 
     </main>
 
+    <footer class="lm-live-player spheres-live-player" id="player" data-live-player aria-label="Lottery Spheres live mix player">
+      <audio data-live-player-audio preload="metadata" src="./assets/audio/digital-static-live-mix.mp3"></audio>
+      <div class="now-art"></div>
+      <div class="now-copy"><small>Now Playing</small><strong>Neon Horizons 2025 - Main Stage</strong><span>Mind of the Future Live Mix</span></div>
+      <div class="now-wave" aria-hidden="true"><i></i></div>
+      <button type="button" aria-label="Back 15 seconds" data-live-player-prev>&lt;&lt;</button>
+      <button type="button" class="big" aria-label="Play live mix" aria-pressed="false" data-live-player-toggle>&#9654;</button>
+      <button type="button" aria-label="Forward 15 seconds" data-live-player-next>&gt;&gt;</button>
+      <span class="time" data-live-player-time>0:00 / --:--</span>
+      <div class="points"><b>Ultra Points</b><strong>12,450</strong><span>Rank Ultra Elite</span></div>
+    </footer>
     <footer>
       <span>LOTTOMINDED ULTRA</span>
-      <span>Interactive creative signal room.</span>
+      <span>All rights reserved.</span>
       <span>2026</span>
     </footer>
 
     <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
-    <script src="./site.js?v=no-raytrace-tabs-1" defer></script>
-    <script src="./lottery-spheres.js?v=sphere-audio-members-1" defer></script>
+    <script src="./site.js?v=cursor-native-1" defer></script>
+    <script src="./lottery-spheres.js?v=sphere-live-duck-1" defer></script>
   </body>
 </html>

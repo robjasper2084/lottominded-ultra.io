@@ -17,7 +17,13 @@
   const audioSkipButton = document.querySelector("[data-sphere-audio-skip]");
   const audioStatus = document.querySelector("[data-sphere-audio-status]");
   const sphereSoundtrack = document.querySelector("[data-sphere-soundtrack]");
+  const liveMixAudio = document.querySelector("[data-live-player] [data-live-player-audio]");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const sphereSoundtrackFullVolume = 0.58;
+  const sphereSoundtrackDuckedVolume = 0.22;
+  let sphereSoundtrackStarted = false;
+  let sphereSoundtrackUserSkipped = false;
+  let liveMixDucking = false;
 
   const sphereTheme = stage.dataset.spheresTheme || "default";
   const standardPalette = [
@@ -345,8 +351,10 @@
     try {
       setupSphereAudioAnalyzer();
       if (audioContext?.state === "suspended") await audioContext.resume();
-      sphereSoundtrack.volume = 0.58;
+      sphereSoundtrack.volume = liveMixDucking ? sphereSoundtrackDuckedVolume : sphereSoundtrackFullVolume;
       await sphereSoundtrack.play();
+      sphereSoundtrackStarted = true;
+      sphereSoundtrackUserSkipped = false;
       setAudioGateOpen(false);
       stage.classList.add("has-sphere-soundtrack");
       if (audioStatus) audioStatus.textContent = "";
@@ -509,14 +517,35 @@
 
   if (sphereSoundtrack && audioGate) setAudioGateOpen(true);
   audioStartButton?.addEventListener("click", startSphereAudio);
-  audioSkipButton?.addEventListener("click", () => setAudioGateOpen(false));
+  audioSkipButton?.addEventListener("click", () => {
+    sphereSoundtrackUserSkipped = true;
+    setAudioGateOpen(false);
+  });
   sphereSoundtrack?.addEventListener("play", () => {
+    sphereSoundtrackStarted = true;
+    sphereSoundtrackUserSkipped = false;
     setAudioGateOpen(false);
     stage.classList.add("has-sphere-soundtrack");
   });
   sphereSoundtrack?.addEventListener("pause", () => {
     stage.classList.remove("has-sphere-soundtrack");
   });
+
+  function setSphereBedDucked(ducked) {
+    if (!sphereSoundtrack || sphereSoundtrackUserSkipped) return;
+    liveMixDucking = ducked;
+    sphereSoundtrack.volume = ducked ? sphereSoundtrackDuckedVolume : sphereSoundtrackFullVolume;
+    if (!sphereSoundtrackStarted) return;
+    if (sphereSoundtrack.paused || sphereSoundtrack.ended) {
+      sphereSoundtrack.play().catch(() => {
+        if (audioStatus) audioStatus.textContent = "Tap Start Music to bring the sphere soundtrack back.";
+      });
+    }
+  }
+
+  liveMixAudio?.addEventListener("play", () => setSphereBedDucked(true));
+  liveMixAudio?.addEventListener("pause", () => setSphereBedDucked(false));
+  liveMixAudio?.addEventListener("ended", () => setSphereBedDucked(false));
 
   window.addEventListener("lottomind:beat-energy", (event) => {
     const nextPulse = clamp01(event.detail?.energy);

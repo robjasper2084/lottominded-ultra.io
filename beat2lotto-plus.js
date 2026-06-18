@@ -22,6 +22,13 @@ let beatAnalyser = null;
 let beatSourceNode = null;
 let beatEnergyRaf = 0;
 let beatTimeDomainData = null;
+const b2lPlayer = document.querySelector("[data-b2l-live-player]");
+const b2lPlayerToggle = b2lPlayer?.querySelector("[data-b2l-player-toggle]");
+const b2lPlayerPrev = b2lPlayer?.querySelector("[data-b2l-player-prev]");
+const b2lPlayerNext = b2lPlayer?.querySelector("[data-b2l-player-next]");
+const b2lPlayerTime = b2lPlayer?.querySelector("[data-b2l-player-time]");
+const b2lPlayerTitle = b2lPlayer?.querySelector("[data-b2l-player-title]");
+const b2lPlayerSubtitle = b2lPlayer?.querySelector("[data-b2l-player-subtitle]");
 
 function pulseElement(element, className = "is-copy-pulsed", duration = 900) {
   if (!element) return;
@@ -91,20 +98,59 @@ function playBeatEnergySeries(series, bpm = 120) {
   }, stepMs);
 }
 
+
+function formatB2LMediaTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "--:--";
+  const minutes = Math.floor(seconds / 60);
+  const remaining = Math.floor(seconds % 60);
+  return `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+function syncB2LLivePlayer() {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  const hasAudio = Boolean(audio?.src);
+  const duration = hasAudio && Number.isFinite(audio.duration) ? audio.duration : 0;
+  const progress = duration ? Math.min(1, Math.max(0, audio.currentTime / duration)) : 0;
+  const isPlaying = hasAudio && !audio.paused && !audio.ended;
+
+  b2lPlayer?.style.setProperty("--player-progress", progress.toFixed(3));
+  b2lPlayer?.classList.toggle("is-playing", isPlaying);
+  b2lPlayer?.classList.toggle("is-disabled", !hasAudio);
+
+  [b2lPlayerToggle, b2lPlayerPrev, b2lPlayerNext].forEach((button) => {
+    if (!button) return;
+    button.disabled = !hasAudio;
+    button.setAttribute("aria-disabled", String(!hasAudio));
+  });
+
+  if (b2lPlayerToggle) {
+    b2lPlayerToggle.innerHTML = isPlaying ? "II" : "&#9654;";
+    b2lPlayerToggle.setAttribute("aria-pressed", String(isPlaying));
+  }
+
+  if (b2lPlayerTime) {
+    b2lPlayerTime.textContent = `${formatB2LMediaTime(audio?.currentTime || 0)} / ${formatB2LMediaTime(duration)}`;
+  }
+}
 function setBeatPlaybackStatus(message) {
   const status = document.querySelector("#beatPlaybackStatus");
   if (status) status.textContent = message;
+  if (b2lPlayerSubtitle) b2lPlayerSubtitle.textContent = message;
+  syncB2LLivePlayer();
 }
 
 function setBeatPlaybackEnergy(energy) {
   const playback = document.querySelector("#beatPlayback");
-  if (playback) playback.style.setProperty("--beat-live-energy", clamp01(energy).toFixed(3));
+  const safeEnergy = clamp01(energy);
+  if (playback) playback.style.setProperty("--beat-live-energy", safeEnergy.toFixed(3));
+  if (b2lPlayer) b2lPlayer.style.setProperty("--beat-live-energy", safeEnergy.toFixed(3));
 }
 
 function setBeatPlaybackButtonState(isPlaying) {
   const button = document.querySelector("#playBeatAudio");
   if (!button) return;
   button.textContent = isPlaying ? "Pause uploaded beat" : "Play uploaded beat";
+  syncB2LLivePlayer();
 }
 
 function stopLiveBeatEnergy() {
@@ -152,6 +198,9 @@ function resetBeatPlayback() {
   if (playback) playback.hidden = true;
   if (beatAudioUrl) URL.revokeObjectURL(beatAudioUrl);
   beatAudioUrl = "";
+  if (b2lPlayerTitle) b2lPlayerTitle.textContent = "Beat2Lotto+ Uploaded Media";
+  if (b2lPlayerSubtitle) b2lPlayerSubtitle.textContent = "Import audio to drive the signal";
+  syncB2LLivePlayer();
 }
 
 async function ensureBeatAnalyser() {
@@ -205,6 +254,7 @@ function renderLiveBeatEnergy() {
     index: Math.floor(audio.currentTime * 12),
     currentTime: audio.currentTime
   });
+  syncB2LLivePlayer();
   beatEnergyRaf = window.requestAnimationFrame(renderLiveBeatEnergy);
 }
 
@@ -404,7 +454,8 @@ async function analyzeBeatFile(file) {
       <span>Golden spheres are reacting to uploaded beat energy.</span>
     `;
     playBeatEnergySeries(energySeries, Number(document.querySelector("#lottoBpm")?.value) || 120);
-    renderResults();
+    syncB2LLivePlayer();
+renderResults();
   } catch (error) {
     importedBeatAnalysis = null;
     window.clearInterval(beatPulseTimer);
@@ -526,6 +577,24 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+
+b2lPlayerToggle?.addEventListener("click", toggleBeatPlayback);
+b2lPlayerPrev?.addEventListener("click", () => {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  if (!audio?.src) return;
+  audio.currentTime = Math.max(0, audio.currentTime - 15);
+  syncB2LLivePlayer();
+});
+b2lPlayerNext?.addEventListener("click", () => {
+  const audio = document.querySelector("#lottoAudioPlayer");
+  if (!audio?.src) return;
+  const duration = Number.isFinite(audio.duration) ? audio.duration : audio.currentTime + 15;
+  audio.currentTime = Math.min(duration, audio.currentTime + 15);
+  syncB2LLivePlayer();
+});
+["loadedmetadata", "durationchange", "timeupdate", "play", "pause", "ended"].forEach((eventName) => {
+  document.querySelector("#lottoAudioPlayer")?.addEventListener(eventName, syncB2LLivePlayer);
+});
 document.querySelector("#generateLotto")?.addEventListener("click", renderResults);
 document.querySelector("#copyLotto")?.addEventListener("click", copyResults);
 document.querySelector("#lottoAudioFile")?.addEventListener("change", (event) => analyzeBeatFile(event.target.files?.[0]));
@@ -563,4 +632,5 @@ window.addEventListener("beforeunload", () => {
 renderKeyboard();
 syncNoteChips();
 buildSheetPrompts();
+syncB2LLivePlayer();
 renderResults();
