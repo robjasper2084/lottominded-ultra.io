@@ -281,6 +281,7 @@
   }
 
   function scanPageMedia() {
+    if (document.hidden) return;
     document.querySelectorAll("audio, video").forEach((media) => {
       if (!media.paused && !media.muted && media.volume > 0) connectPlayableMedia(media);
     });
@@ -481,7 +482,7 @@
   document.addEventListener("volumechange", (event) => {
     if (event.target instanceof HTMLMediaElement) connectPlayableMedia(event.target);
   }, true);
-  window.setInterval(scanPageMedia, 1600);
+  const scanTimer = window.setInterval(scanPageMedia, 2200);
   startEqRender();
 
 
@@ -651,6 +652,7 @@
   });
 
   window.addEventListener("pagehide", () => {
+    window.clearInterval(scanTimer);
     if (eqFrame) window.cancelAnimationFrame(eqFrame);
   });
 })();

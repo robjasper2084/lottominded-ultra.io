@@ -470,7 +470,7 @@ function initPageTransitions() {
   const transitionVideoUrl = new URL("video/lm-transition-open-3s.mp4", SITE_ASSET_BASE_URL).href;
   const transitionPosterUrl = new URL("video/lm-portal-a-poster.jpg", SITE_ASSET_BASE_URL).href;
   wipe.innerHTML = `
-    <video class="page-wipe-video" muted playsinline preload="auto" poster="${transitionPosterUrl}">
+    <video class="page-wipe-video" muted playsinline preload="metadata" poster="${transitionPosterUrl}">
       <source src="${transitionVideoUrl}" type="video/mp4">
     </video>
     <div class="page-wipe-signal" aria-hidden="true"></div>
@@ -536,6 +536,146 @@ function initPageTransitions() {
 }
 
 initPageTransitions();
+
+function initVideoPerformanceMode() {
+  const videos = Array.from(document.querySelectorAll("video"));
+  if (!videos.length) return;
+
+  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 2;
+  const visibleVideos = new Set();
+  let refreshFrame = 0;
+
+  const isTransitionVideo = (video) =>
+    video.matches("[data-lm-transition-video], .page-wipe-video") ||
+    video.closest("[data-lm-page-transition], .page-wipe");
+
+  const canManageVideo = (video) =>
+    !isTransitionVideo(video) &&
+    video.dataset.lmVideoUnmanaged !== "true" &&
+    (video.autoplay || video.loop || video.muted || video.hasAttribute("poster"));
+
+  const isSoundActive = (video) =>
+    video.classList.contains("is-sound-active") ||
+    (!video.muted && !video.paused);
+
+  const managedVideos = videos.filter(canManageVideo);
+  if (!managedVideos.length) return;
+
+  const pauseManagedVideo = (video) => {
+    if (isSoundActive(video)) return;
+    try {
+      video.pause();
+    } catch {
+      /* Decorative media should never block page interaction. */
+    }
+  };
+
+  const isPlayableDecorativeVideo = (video) => {
+    if (!video.isConnected || document.hidden) return false;
+    if (video.closest(".is-hidden, [hidden]")) return false;
+    if (isSoundActive(video)) return false;
+    return Boolean(video.autoplay || video.loop) && video.muted;
+  };
+
+  const distanceFromViewportCenter = (video) => {
+    const rect = video.getBoundingClientRect();
+    const center = rect.top + rect.height / 2;
+    return Math.abs(center - window.innerHeight / 2);
+  };
+
+  const refreshVideoPlayback = () => {
+    refreshFrame = 0;
+
+    if (document.hidden) {
+      managedVideos.forEach(pauseManagedVideo);
+      document.body.dataset.lmActiveVideoCount = "0";
+      return;
+    }
+
+    const candidates = Array.from(visibleVideos)
+      .filter(isPlayableDecorativeVideo)
+      .sort((a, b) => distanceFromViewportCenter(a) - distanceFromViewportCenter(b));
+
+    let activeCount = 0;
+    candidates.forEach((video, index) => {
+      if (index >= maxActiveDecorativeVideos) {
+        pauseManagedVideo(video);
+        return;
+      }
+
+      activeCount += 1;
+      if (!video.paused) return;
+      video.play()?.catch?.(() => {
+        /* Autoplay can be blocked; the poster remains in place. */
+      });
+    });
+
+    managedVideos.forEach((video) => {
+      if (!visibleVideos.has(video)) pauseManagedVideo(video);
+    });
+
+    document.body.dataset.lmActiveVideoCount = String(activeCount);
+  };
+
+  const scheduleVideoRefresh = () => {
+    if (refreshFrame) return;
+    refreshFrame = window.requestAnimationFrame(refreshVideoPlayback);
+  };
+
+  managedVideos.forEach((video) => {
+    video.playsInline = true;
+    video.setAttribute("playsinline", "");
+    if (!video.hasAttribute("preload") || video.getAttribute("preload") === "auto") {
+      video.setAttribute("preload", "metadata");
+      video.preload = "metadata";
+    }
+    video.dataset.lmVideoOptimized = "true";
+    if (reducedMotionQuery.matches && video.autoplay && video.muted) pauseManagedVideo(video);
+  });
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          visibleVideos.add(entry.target);
+        } else {
+          visibleVideos.delete(entry.target);
+          pauseManagedVideo(entry.target);
+        }
+      });
+      scheduleVideoRefresh();
+    }, { rootMargin: "280px 0px", threshold: 0.02 });
+
+    managedVideos.forEach((video) => observer.observe(video));
+  } else {
+    managedVideos.forEach((video) => visibleVideos.add(video));
+  }
+
+  document.addEventListener("visibilitychange", scheduleVideoRefresh);
+  window.addEventListener("scroll", scheduleVideoRefresh, { passive: true });
+  window.addEventListener("resize", scheduleVideoRefresh);
+  window.addEventListener("pagehide", () => managedVideos.forEach(pauseManagedVideo));
+  window.addEventListener("lottomind:page-transition", () => managedVideos.forEach(pauseManagedVideo));
+  document.addEventListener("play", (event) => {
+    if (managedVideos.includes(event.target)) scheduleVideoRefresh();
+  }, true);
+
+  window.LMVideoPerformance = {
+    refresh: scheduleVideoRefresh,
+    getState() {
+      return {
+        managed: managedVideos.length,
+        visible: visibleVideos.size,
+        active: Number(document.body.dataset.lmActiveVideoCount || 0)
+      };
+    }
+  };
+
+  document.body.dataset.lmVideoPerformance = "ready";
+  window.setTimeout(scheduleVideoRefresh, 120);
+}
+
+initVideoPerformanceMode();
 
 function setupManualPianoHeader() {
   if (document.body.classList.contains("has-sphere-header")) return;

@@ -35,6 +35,7 @@
     : new URL("./assets/video/transitions/", window.location.href);
 
   const preloaded = new Map();
+  const MAX_PRELOADED_CLIPS = 4;
   let transitioning = false;
   let navigationTimer = 0;
   let cleanupTimer = 0;
@@ -91,29 +92,40 @@
     if (preloaded.has(url)) return preloaded.get(url);
 
     const media = document.createElement("video");
-    media.preload = "auto";
+    media.preload = "metadata";
     media.muted = true;
     media.playsInline = true;
     media.src = url;
     media.load();
     preloaded.set(url, media);
 
+    while (preloaded.size > MAX_PRELOADED_CLIPS) {
+      const staleUrl = preloaded.keys().next().value;
+      const staleMedia = preloaded.get(staleUrl);
+      staleMedia?.pause?.();
+      staleMedia?.removeAttribute?.("src");
+      staleMedia?.load?.();
+      preloaded.delete(staleUrl);
+    }
+
     return media;
   }
 
-  function preloadLikelyDestinations() {
-    const themes = new Set([themeForPath(window.location.pathname)]);
-
-    document.querySelectorAll("a[href]").forEach((link) => {
-      try {
-        const url = new URL(link.href, window.location.href);
-        if (url.origin !== window.location.origin) return;
-        themes.add(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)));
-      } catch (_) {}
-    });
-
-    themes.forEach((theme) => preload(theme, "open"));
+  function preloadCurrentArrival() {
     preload(themeForPath(window.location.pathname), "close");
+  }
+
+  function preloadLinkDestination(link) {
+    if (!link || link.dataset.noTransition === "true") return;
+
+    const href = link.getAttribute("href");
+    if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return;
+
+    try {
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin) return;
+      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open");
+    } catch (_) {}
   }
 
   function playVideo(theme, phase) {
@@ -207,6 +219,8 @@
     const linkText = link.textContent?.replace(/\s+/g, " ").trim();
     const destinationLabel = customLabel || linkText || theme;
 
+    preload(theme, "open");
+
     try {
       sessionStorage.setItem(ARRIVAL_KEY, "yes");
       sessionStorage.setItem(THEME_KEY, theme);
@@ -256,6 +270,14 @@
     beginNavigation(link);
   });
 
+  document.addEventListener("pointerenter", (event) => {
+    preloadLinkDestination(event.target.closest?.("a[href]"));
+  }, true);
+
+  document.addEventListener("focusin", (event) => {
+    preloadLinkDestination(event.target.closest?.("a[href]"));
+  });
+
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) resetTransition();
   });
@@ -265,7 +287,7 @@
   });
 
   const schedulePreload = window.requestIdleCallback || ((callback) => setTimeout(callback, 250));
-  schedulePreload(preloadLikelyDestinations);
+  schedulePreload(preloadCurrentArrival);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", playArrival, { once: true });
