@@ -51,6 +51,8 @@
   let idlePhase = 0;
   let visualImpulse = 0;
   let lastEqSnapshot = { average: 0, bass: 0, mid: 0, high: 0 };
+  const featureEntryVolume = 0.36;
+  const featureManualVolume = 0.58;
   const mediaSources = new WeakSet();
   const fxState = { drive: 0.16, reverb: 0.22, delay: 0.18, master: 0.72 };
 
@@ -305,7 +307,9 @@
     }
     try {
       featureTrack.loop = false;
-      featureTrack.volume = 1;
+      const targetVolume = entry ? featureEntryVolume : featureManualVolume;
+      featureTrack.volume = targetVolume;
+      document.body.dataset.featureTrackVolume = targetVolume.toFixed(2);
       await featureTrack.play();
       setEqStatus(entry ? "Digital Static" : "Playing");
       startEqRender();
@@ -448,6 +452,7 @@
         contextState: audioCtx?.state || "not-started",
         featureTrackConnected: featureTrack ? mediaSources.has(featureTrack) : false,
         featureTrackPaused: featureTrack ? featureTrack.paused : true,
+        featureTrackVolume: featureTrack ? featureTrack.volume : 0,
         effects: { ...fxState },
         eq: { ...lastEqSnapshot }
       };

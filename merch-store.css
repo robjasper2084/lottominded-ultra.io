@@ -656,7 +656,7 @@
   isolation: isolate;
   overflow: hidden;
   display: grid;
-  grid-template-columns: minmax(22rem, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: minmax(0, min(100%, 800px)) minmax(0, 1fr);
   gap: clamp(1.2rem, 3vw, 2rem);
   align-items: stretch;
   border-block: 1px solid rgba(41, 247, 255, 0.18);
@@ -857,10 +857,12 @@
   isolation: isolate;
   overflow: hidden;
   grid-column: 1;
+  width: min(100%, 800px);
+  height: 715px;
+  min-height: 0;
   grid-template-columns: 1fr;
   align-items: start;
   align-content: space-between;
-  min-height: clamp(34rem, 58vw, 54rem);
   padding: clamp(1.25rem, 3vw, 2.1rem);
   border: 1px solid rgba(41, 247, 255, 0.2);
   border-radius: 12px;
@@ -2110,6 +2112,7 @@
   }
 
   .merch-drop-section .merch-section-copy {
+    height: auto;
     min-height: clamp(30rem, 86vw, 39rem);
   }
 
