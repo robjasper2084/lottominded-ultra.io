@@ -1,243 +1,275 @@
 (() => {
   "use strict";
 
-  /*
-    LottoMind portal transition audio.
-    - Put real audio files in assets/audio/.
-    - Rename files by editing AUDIO_CONFIG.files below.
-    - Disable sounds by setting AUDIO_CONFIG.enabled to false.
-    - Adjust loudness with AUDIO_CONFIG.volume.
-    - To try an arrival shutdown sound, set playCloseOnArrival to true.
-  */
-  const AUDIO_CONFIG = {
-    enabled: true,
-    volume: 0.38,
-    playCloseBeforeNavigate: true,
-    closeDelay: 520,
-    playCloseOnArrival: false,
-    files: {
-      open: "lm-portal-open.mp3",
-      close: "lm-portal-close.mp3",
-    },
+  const ARRIVAL_KEY = "lmTransitionArriving";
+  const THEME_KEY = "lmTransitionTheme";
+  const LABEL_KEY = "lmTransitionLabel";
+  const DURATION = 870;
+  const NAVIGATE_AT = 835;
+
+  const THEMES = {
+    home:       { rgb: "41 247 255",  color: "#29f7ff" },
+    features:   { rgb: "0 255 200",   color: "#00ffc8" },
+    events:     { rgb: "255 79 216",  color: "#ff4fd8" },
+    merch:      { rgb: "255 224 113", color: "#ffe071" },
+    prompts:    { rgb: "138 92 255",  color: "#8a5cff" },
+    guide:      { rgb: "94 255 157",  color: "#5eff9d" },
+    studio:     { rgb: "61 123 255",  color: "#3d7bff" },
+    beat2lotto: { rgb: "255 105 45",  color: "#ff692d" },
+    spheres:    { rgb: "255 200 74",  color: "#ffc84a" }
   };
 
-  const reducedMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-  const SOUND_TIMING = {
-    open: 500,
-    close: 380,
-    fadeOut: 36,
-  };
-  const scriptUrl =
-    document.currentScript?.src || new URL("./assets/js/lm-page-transition.js", document.baseURI).href;
-  const audioBaseUrl = new URL("../audio/", scriptUrl);
-  const cachedAudio = new Map();
-  const failedAudio = new Set();
-  let unlocked = false;
-  let audioContext = null;
+  const overlay = document.querySelector("[data-lm-page-transition]");
+  const video = overlay?.querySelector("[data-lm-transition-video]");
+  const label = overlay?.querySelector("[data-lm-transition-label]");
 
-  function audioAllowed() {
-    return AUDIO_CONFIG.enabled && !reducedMotionQuery?.matches;
+  if (!overlay || !video) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const scriptElement =
+    document.currentScript ||
+    document.querySelector('script[src*="lm-page-transition.js"]');
+
+  const videoBase = scriptElement
+    ? new URL("../video/transitions/", scriptElement.src)
+    : new URL("./assets/video/transitions/", window.location.href);
+
+  const preloaded = new Map();
+  let transitioning = false;
+  let navigationTimer = 0;
+  let cleanupTimer = 0;
+
+  function normalizeTheme(value) {
+    return Object.prototype.hasOwnProperty.call(THEMES, value) ? value : "home";
   }
 
-  function resolveAudioUrl(fileName) {
-    return new URL(fileName, audioBaseUrl).href;
+  function themeForPath(pathname) {
+    const path = decodeURIComponent(pathname || "").toLowerCase();
+    const filename = path.split("/").filter(Boolean).pop() || "";
+
+    if (/beat2lotto/.test(path)) return "beat2lotto";
+    if (/lottery-spheres|selcirm|spheres/.test(path)) return "spheres";
+    if (/lottomind-stem-studio|stem-studio|studio/.test(path)) return "studio";
+    if (/live-events|events/.test(path)) return "events";
+    if (/merch/.test(path)) return "merch";
+    if (/prompt/.test(path)) return "prompts";
+    if (/how-to-use|guide/.test(path)) return "guide";
+    if (/features-app|features/.test(path)) return "features";
+    if (!filename || filename === "index.html") return "home";
+
+    return "home";
   }
 
-  function getAudioContext() {
-    if (!audioAllowed() || !AudioContextCtor) return null;
-    if (!audioContext) {
+  function clipUrl(theme, phase) {
+    const safeTheme = normalizeTheme(theme);
+    const safePhase = phase === "close" ? "close" : "open";
+    return new URL(`lm-${safeTheme}-${safePhase}.mp4`, videoBase).href;
+  }
+
+  function applyTheme(theme) {
+    const safeTheme = normalizeTheme(theme);
+    const meta = THEMES[safeTheme];
+
+    overlay.dataset.transitionTheme = safeTheme;
+    overlay.style.setProperty("--lm-transition-rgb", meta.rgb);
+    overlay.style.setProperty("--lm-transition-color", meta.color);
+
+    return safeTheme;
+  }
+
+  function setLabel(text, phase) {
+    if (!label) return;
+
+    const clean = String(text || "NEXT SIGNAL").replace(/\s+/g, " ").trim();
+    label.textContent = phase === "close"
+      ? `${clean.toUpperCase()} - SIGNAL LOCKED`
+      : `OPENING ${clean.toUpperCase()}`;
+  }
+
+  function preload(theme, phase = "open") {
+    const url = clipUrl(theme, phase);
+    if (preloaded.has(url)) return preloaded.get(url);
+
+    const media = document.createElement("video");
+    media.preload = "auto";
+    media.muted = true;
+    media.playsInline = true;
+    media.src = url;
+    media.load();
+    preloaded.set(url, media);
+
+    return media;
+  }
+
+  function preloadLikelyDestinations() {
+    const themes = new Set([themeForPath(window.location.pathname)]);
+
+    document.querySelectorAll("a[href]").forEach((link) => {
       try {
-        audioContext = new AudioContextCtor();
-      } catch {
-        audioContext = null;
-      }
-    }
-    return audioContext;
+        const url = new URL(link.href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+        themes.add(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)));
+      } catch (_) {}
+    });
+
+    themes.forEach((theme) => preload(theme, "open"));
+    preload(themeForPath(window.location.pathname), "close");
   }
 
-  function cacheSound(kind) {
-    if (!audioAllowed() || cachedAudio.has(kind) || failedAudio.has(kind)) return;
-    const fileName = AUDIO_CONFIG.files[kind];
-    if (!fileName) return;
+  function playVideo(theme, phase) {
+    const url = clipUrl(theme, phase);
+
+    if (video.src !== url) {
+      video.src = url;
+      video.load();
+    }
 
     try {
-      const audio = new Audio(resolveAudioUrl(fileName));
-      audio.preload = "auto";
-      audio.volume = AUDIO_CONFIG.volume;
-      audio.addEventListener(
-        "error",
-        () => {
-          failedAudio.add(kind);
-        },
-        { once: true },
-      );
-      audio.load();
-      cachedAudio.set(kind, audio);
-    } catch {
-      failedAudio.add(kind);
-    }
+      video.currentTime = 0;
+    } catch (_) {}
+
+    const playback = video.play();
+    playback?.catch?.(() => {
+      // The CSS flash and background remain as a graceful visual fallback.
+    });
   }
 
-  function preloadSounds() {
-    cacheSound("open");
-    cacheSound("close");
+  function activate(theme, phase, text) {
+    window.clearTimeout(cleanupTimer);
+
+    const safeTheme = applyTheme(theme);
+    setLabel(text, phase);
+
+    overlay.classList.remove("is-opening", "is-closing");
+    // Force animation restart when navigating quickly or restoring from bfcache.
+    void overlay.offsetWidth;
+    overlay.classList.add("is-active", phase === "close" ? "is-closing" : "is-opening");
+    document.body.classList.add("lm-page-is-transitioning");
+
+    if (!reduceMotion.matches) playVideo(safeTheme, phase);
+
+    window.dispatchEvent(new CustomEvent("lottomind:page-transition", {
+      detail: { phase, theme: safeTheme, label: text || "" }
+    }));
   }
 
-  function unlockAudio() {
-    if (!audioAllowed()) return;
-    unlocked = true;
-    preloadSounds();
-    getAudioContext()?.resume?.().catch(() => {});
+  function resetTransition() {
+    window.clearTimeout(navigationTimer);
+    window.clearTimeout(cleanupTimer);
+
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+
+    overlay.classList.remove("is-active", "is-opening", "is-closing");
+    document.documentElement.classList.remove("lm-transition-arriving");
+    document.body.classList.remove("lm-page-is-transitioning");
+    transitioning = false;
   }
 
-  function playSynth(kind) {
-    if (!audioAllowed()) return;
-    const context = getAudioContext();
-    if (!context) return;
+  function shouldTransition(event, link) {
+    if (!link || event.defaultPrevented || transitioning) return false;
+    if (event.button !== 0) return false;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+    if (link.hasAttribute("download")) return false;
+    if (link.dataset.noTransition === "true") return false;
 
-    const now = context.currentTime + 0.008;
-    const isClose = kind === "close";
-    const duration = isClose ? 0.34 : 0.46;
-    const carrier = context.createOscillator();
-    const body = context.createOscillator();
-    const filter = context.createBiquadFilter();
-    const gain = context.createGain();
+    const target = link.getAttribute("target");
+    if (target && target !== "_self") return false;
 
-    carrier.type = isClose ? "square" : "sawtooth";
-    body.type = "triangle";
-    filter.type = "bandpass";
-    filter.Q.setValueAtTime(isClose ? 9 : 6, now);
+    const href = link.getAttribute("href");
+    if (!href || /^(#|mailto:|tel:|javascript:)/i.test(href)) return false;
 
-    if (isClose) {
-      carrier.frequency.setValueAtTime(940, now);
-      carrier.frequency.exponentialRampToValueAtTime(180, now + duration * 0.68);
-      carrier.frequency.exponentialRampToValueAtTime(92, now + duration);
-      body.frequency.setValueAtTime(170, now);
-      body.frequency.exponentialRampToValueAtTime(58, now + duration);
-      filter.frequency.setValueAtTime(3200, now);
-      filter.frequency.exponentialRampToValueAtTime(620, now + duration);
-    } else {
-      carrier.frequency.setValueAtTime(180, now);
-      carrier.frequency.exponentialRampToValueAtTime(920, now + duration * 0.72);
-      carrier.frequency.exponentialRampToValueAtTime(680, now + duration);
-      body.frequency.setValueAtTime(72, now);
-      body.frequency.exponentialRampToValueAtTime(164, now + duration);
-      filter.frequency.setValueAtTime(540, now);
-      filter.frequency.exponentialRampToValueAtTime(3400, now + duration * 0.82);
+    let url;
+    try {
+      url = new URL(link.href, window.location.href);
+    } catch (_) {
+      return false;
     }
 
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * (isClose ? 0.34 : 0.42), now + 0.028);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.18, now + duration * 0.58);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    if (url.origin !== window.location.origin) return false;
 
-    carrier.connect(filter);
-    body.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
+    const sameDocument =
+      url.pathname === window.location.pathname &&
+      url.search === window.location.search;
 
-    const cleanup = () => {
-      [carrier, body, filter, gain].forEach((node) => {
-        try {
-          node.disconnect();
-        } catch {
-          /* Audio nodes may already be disconnected after a quick page change. */
-        }
-      });
-    };
+    if (sameDocument) return false;
 
-    carrier.addEventListener("ended", cleanup, { once: true });
-    carrier.start(now);
-    body.start(now);
-    carrier.stop(now + duration + 0.05);
-    body.stop(now + duration + 0.05);
+    return true;
   }
 
-  function playSound(kind) {
-    if (!audioAllowed()) return;
-    unlockAudio();
+  function beginNavigation(link) {
+    transitioning = true;
 
-    const baseAudio = cachedAudio.get(kind);
-    if (!baseAudio || failedAudio.has(kind)) {
-      playSynth(kind);
+    const url = new URL(link.href, window.location.href);
+    const theme = normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname));
+    const customLabel = link.dataset.transitionTitle;
+    const linkText = link.textContent?.replace(/\s+/g, " ").trim();
+    const destinationLabel = customLabel || linkText || theme;
+
+    try {
+      sessionStorage.setItem(ARRIVAL_KEY, "yes");
+      sessionStorage.setItem(THEME_KEY, theme);
+      sessionStorage.setItem(LABEL_KEY, destinationLabel);
+    } catch (_) {}
+
+    activate(theme, "open", destinationLabel);
+
+    navigationTimer = window.setTimeout(() => {
+      window.location.assign(url.href);
+    }, reduceMotion.matches ? 120 : NAVIGATE_AT);
+  }
+
+  function playArrival() {
+    let arriving = document.documentElement.classList.contains("lm-transition-arriving");
+    let theme = themeForPath(window.location.pathname);
+    let destinationLabel = document.title || theme;
+
+    try {
+      arriving = arriving || sessionStorage.getItem(ARRIVAL_KEY) === "yes";
+      theme = normalizeTheme(sessionStorage.getItem(THEME_KEY) || theme);
+      destinationLabel = sessionStorage.getItem(LABEL_KEY) || destinationLabel;
+      sessionStorage.removeItem(ARRIVAL_KEY);
+      sessionStorage.removeItem(THEME_KEY);
+      sessionStorage.removeItem(LABEL_KEY);
+    } catch (_) {}
+
+    if (!arriving) {
+      document.documentElement.classList.remove("lm-transition-arriving");
       return;
     }
 
-    try {
-      const audio = baseAudio.cloneNode(true);
-      audio.volume = AUDIO_CONFIG.volume;
-      audio.currentTime = 0;
-      applyPlaybackFade(audio, kind);
-      const playback = audio.play();
-      if (playback?.catch) {
-        playback.catch(() => {
-          failedAudio.add(kind);
-          playSynth(kind);
-        });
-      }
-    } catch {
-      failedAudio.add(kind);
-      playSynth(kind);
-    }
-  }
+    transitioning = true;
+    activate(theme, "close", destinationLabel);
 
-  function applyPlaybackFade(audio, kind) {
-    const totalMs = SOUND_TIMING[kind] || SOUND_TIMING.open;
-    const fadeMs = Math.min(SOUND_TIMING.fadeOut, totalMs);
-    const fadeStart = Math.max(0, totalMs - fadeMs);
-    const startVolume = AUDIO_CONFIG.volume;
-    let rafId = 0;
-    const fadeTimer = window.setTimeout(() => {
-      const startedAt = performance.now();
-      const tick = () => {
-        const progress = Math.min(1, (performance.now() - startedAt) / fadeMs);
-        audio.volume = startVolume * (1 - progress);
-        if (progress < 1 && !audio.paused) {
-          rafId = window.requestAnimationFrame(tick);
-        }
-      };
-      tick();
-    }, fadeStart);
-
-    audio.addEventListener(
-      "ended",
-      () => {
-        window.clearTimeout(fadeTimer);
-        if (rafId) window.cancelAnimationFrame(rafId);
-      },
-      { once: true },
+    cleanupTimer = window.setTimeout(
+      resetTransition,
+      reduceMotion.matches ? 150 : DURATION + 70
     );
   }
 
-  function scheduleCloseBeforeNavigate() {
-    if (!AUDIO_CONFIG.playCloseBeforeNavigate) return 0;
-    window.setTimeout(() => playSound("close"), AUDIO_CONFIG.closeDelay);
-    return AUDIO_CONFIG.closeDelay + 140;
-  }
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href]");
+    if (!shouldTransition(event, link)) return;
 
-  function playCloseOnArrival() {
-    if (AUDIO_CONFIG.playCloseOnArrival) {
-      window.setTimeout(() => playSound("close"), 80);
-    }
-  }
-
-  ["pointerdown", "touchstart", "keydown"].forEach((eventName) => {
-    window.addEventListener(eventName, unlockAudio, {
-      once: true,
-      passive: eventName !== "keydown",
-    });
+    event.preventDefault();
+    beginNavigation(link);
   });
 
-  preloadSounds();
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) resetTransition();
+  });
 
-  window.LMPageTransitionAudio = {
-    config: AUDIO_CONFIG,
-    preload: preloadSounds,
-    unlock: unlockAudio,
-    play: playSound,
-    playCloseBeforeNavigate: scheduleCloseBeforeNavigate,
-    playCloseOnArrival,
-  };
-  document.documentElement?.setAttribute("data-lm-transition-audio", "ready");
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && !transitioning) video.pause();
+  });
+
+  const schedulePreload = window.requestIdleCallback || ((callback) => setTimeout(callback, 250));
+  schedulePreload(preloadLikelyDestinations);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", playArrival, { once: true });
+  } else {
+    playArrival();
+  }
 })();

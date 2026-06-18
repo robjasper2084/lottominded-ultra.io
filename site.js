@@ -462,6 +462,7 @@ setupPasswordGates();
 
 function initPageTransitions() {
   if (reducedMotionQuery.matches) return;
+  if (document.querySelector("[data-lm-page-transition]")) return;
 
   const wipe = document.createElement("div");
   wipe.className = "page-wipe";

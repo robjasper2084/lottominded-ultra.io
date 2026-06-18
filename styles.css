@@ -21,7 +21,7 @@
 }
 
 @view-transition {
-  navigation: auto;
+  navigation: none;
 }
 
 ::view-transition-old(root) {

@@ -10,8 +10,15 @@
     <title>Beat2Lotto+ | Current Signal Console</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=cursor-native-1" />
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
+    <link rel="stylesheet" href="./styles.css?v=verified-transitions-1" />
+    <script>
+      try {
+        if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
+          document.documentElement.classList.add("lm-transition-arriving");
+        }
+      } catch (error) {}
+    </script>
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
 <link rel="stylesheet" href="./beat2lotto-plus.css?v=beat2lotto-static-logo-1" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-4" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-4" />
@@ -143,6 +150,13 @@
     </style>
   </head>
 <body class="prompt-lab-page has-manual-instrument-header pl-page beat2lotto-current-page">
+  <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
+    <div class="lm-page-transition__flash"></div>
+    <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="auto"></video>
+    <div class="lm-page-transition__vignette"></div>
+    <div class="lm-page-transition__scanlines"></div>
+    <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
+  </div>
     <canvas id="b2lBallpassGame" class="b2l-game-generator-bg" data-b2l-ballpass-canvas aria-hidden="true"></canvas>
     <div class="b2l-game-generator-vignette" aria-hidden="true"></div>
 
@@ -324,8 +338,9 @@
 
     <script src="./assets/js/beat2lotto-ballpass.js?v=ballpass-1" defer></script>
     <script src="./beat2lotto-plus.js?v=hud-spheres-b2l-8124-3" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
-    <script src="./site.js?v=cursor-native-1" defer></script>
+    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
+    <script src="./assets/js/lm-page-transition.js?v=verified-transitions-1" defer></script>
+    <script src="./site.js?v=verified-transitions-1" defer></script>
     <script src="./lottery-spheres.js?v=touch-spheres-1" defer></script>
     <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-4" defer></script>
   </body>

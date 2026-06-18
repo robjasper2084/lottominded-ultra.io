@@ -10,12 +10,26 @@
     <title>LOTTOMINDED ULTRA | Merch + Gallery Store</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=cursor-native-1" />
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=portal-audio-1" />
+    <link rel="stylesheet" href="./styles.css?v=verified-transitions-1" />
+    <script>
+      try {
+        if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
+          document.documentElement.classList.add("lm-transition-arriving");
+        }
+      } catch (error) {}
+    </script>
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
     <link rel="stylesheet" href="./merch-store.css?v=gallery-video-drop-800-2" />
     <link rel="stylesheet" href="./assets/css/juneteenth-event-popup.css?v=juneteenth-event-3" />
   </head>
   <body class="merch-store-page has-sphere-tabs">
+    <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
+      <div class="lm-page-transition__flash"></div>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="auto"></video>
+      <div class="lm-page-transition__vignette"></div>
+      <div class="lm-page-transition__scanlines"></div>
+      <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
+    </div>
     <header class="site-header home-like-header sphere-tabs-header merch-sphere-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./how-to-use.html" aria-label="LOTTOMINDED ULTRA home">
@@ -259,8 +273,9 @@
       <span id="site-year"></span>
     </footer>
 
-    <script src="./assets/js/lm-page-transition.js?v=portal-audio-1" defer></script>
-    <script src="./site.js?v=cursor-native-1" defer></script>
+    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
+    <script src="./assets/js/lm-page-transition.js?v=verified-transitions-1" defer></script>
+    <script src="./site.js?v=verified-transitions-1" defer></script>
     <script src="./live-events.js?v=audio-artlines-2" defer></script>
     <script src="./merch-store.js?v=cinematic-motion-1" defer></script>
     <script src="./assets/js/juneteenth-event-popup.js?v=juneteenth-event-3" defer></script>
