@@ -4,8 +4,8 @@
   const ARRIVAL_KEY = "lmTransitionArriving";
   const THEME_KEY = "lmTransitionTheme";
   const LABEL_KEY = "lmTransitionLabel";
-  const DURATION = 870;
-  const NAVIGATE_AT = 835;
+  const DURATION = 620;
+  const NAVIGATE_AT = 520;
 
   const THEMES = {
     home:       { rgb: "41 247 255",  color: "#29f7ff" },
@@ -87,12 +87,19 @@
       : `OPENING ${clean.toUpperCase()}`;
   }
 
-  function preload(theme, phase = "open") {
+  function preload(theme, phase = "open", eager = false) {
     const url = clipUrl(theme, phase);
-    if (preloaded.has(url)) return preloaded.get(url);
+    if (preloaded.has(url)) {
+      const existing = preloaded.get(url);
+      if (eager && existing.preload !== "auto") {
+        existing.preload = "auto";
+        existing.load();
+      }
+      return existing;
+    }
 
     const media = document.createElement("video");
-    media.preload = "metadata";
+    media.preload = eager ? "auto" : "metadata";
     media.muted = true;
     media.playsInline = true;
     media.src = url;
@@ -112,7 +119,7 @@
   }
 
   function preloadCurrentArrival() {
-    preload(themeForPath(window.location.pathname), "close");
+    preload(themeForPath(window.location.pathname), "close", true);
   }
 
   function preloadLinkDestination(link) {
@@ -124,12 +131,15 @@
     try {
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open");
+      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open", true);
     } catch (_) {}
   }
 
   function playVideo(theme, phase) {
     const url = clipUrl(theme, phase);
+
+    video.preload = "auto";
+    video.setAttribute("preload", "auto");
 
     if (video.src !== url) {
       video.src = url;
@@ -219,7 +229,7 @@
     const linkText = link.textContent?.replace(/\s+/g, " ").trim();
     const destinationLabel = customLabel || linkText || theme;
 
-    preload(theme, "open");
+    preload(theme, "open", true);
 
     try {
       sessionStorage.setItem(ARRIVAL_KEY, "yes");

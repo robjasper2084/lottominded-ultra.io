@@ -543,6 +543,9 @@ function initVideoPerformanceMode() {
 
   const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 2;
   const visibleVideos = new Set();
+  let transitionCooldownUntil = document.documentElement.classList.contains("lm-transition-arriving")
+    ? performance.now() + 900
+    : performance.now() + 650;
   let refreshFrame = 0;
 
   const isTransitionVideo = (video) =>
@@ -561,6 +564,56 @@ function initVideoPerformanceMode() {
   const managedVideos = videos.filter(canManageVideo);
   if (!managedVideos.length) return;
 
+  const isNearViewport = (video, margin = 520) => {
+    const rect = video.getBoundingClientRect();
+    return rect.bottom >= -margin && rect.top <= window.innerHeight + margin;
+  };
+
+  const rememberVideoSources = (video) => {
+    if (video.dataset.lmLazySourcesReady === "true") return;
+    if (video.hasAttribute("src")) {
+      video.dataset.lmLazySrc = video.getAttribute("src");
+    }
+    video.querySelectorAll("source").forEach((source) => {
+      if (source.hasAttribute("src")) source.dataset.lmLazySrc = source.getAttribute("src");
+    });
+    video.dataset.lmLazySourcesReady = "true";
+  };
+
+  const restoreVideoSources = (video) => {
+    let changed = false;
+    if (video.dataset.lmLazySrc && !video.hasAttribute("src")) {
+      video.setAttribute("src", video.dataset.lmLazySrc);
+      changed = true;
+    }
+    video.querySelectorAll("source").forEach((source) => {
+      if (source.dataset.lmLazySrc && !source.hasAttribute("src")) {
+        source.setAttribute("src", source.dataset.lmLazySrc);
+        changed = true;
+      }
+    });
+    if (changed) video.load();
+  };
+
+  const unloadVideoSources = (video) => {
+    if (isSoundActive(video) || isNearViewport(video, 120)) return;
+    let changed = false;
+    if (video.dataset.lmLazySrc && video.hasAttribute("src")) {
+      video.removeAttribute("src");
+      changed = true;
+    }
+    video.querySelectorAll("source").forEach((source) => {
+      if (source.dataset.lmLazySrc && source.hasAttribute("src")) {
+        source.removeAttribute("src");
+        changed = true;
+      }
+    });
+    if (changed) {
+      pauseManagedVideo(video);
+      video.load();
+    }
+  };
+
   const pauseManagedVideo = (video) => {
     if (isSoundActive(video)) return;
     try {
@@ -572,6 +625,9 @@ function initVideoPerformanceMode() {
 
   const isPlayableDecorativeVideo = (video) => {
     if (!video.isConnected || document.hidden) return false;
+    if (document.body.classList.contains("lm-page-is-transitioning") || performance.now() < transitionCooldownUntil) {
+      return false;
+    }
     if (video.closest(".is-hidden, [hidden]")) return false;
     if (isSoundActive(video)) return false;
     return Boolean(video.autoplay || video.loop) && video.muted;
@@ -592,6 +648,13 @@ function initVideoPerformanceMode() {
       return;
     }
 
+    if (document.body.classList.contains("lm-page-is-transitioning") || performance.now() < transitionCooldownUntil) {
+      managedVideos.forEach(pauseManagedVideo);
+      document.body.dataset.lmActiveVideoCount = "0";
+      window.setTimeout(scheduleVideoRefresh, 260);
+      return;
+    }
+
     const candidates = Array.from(visibleVideos)
       .filter(isPlayableDecorativeVideo)
       .sort((a, b) => distanceFromViewportCenter(a) - distanceFromViewportCenter(b));
@@ -604,6 +667,7 @@ function initVideoPerformanceMode() {
       }
 
       activeCount += 1;
+      restoreVideoSources(video);
       if (!video.paused) return;
       video.play()?.catch?.(() => {
         /* Autoplay can be blocked; the poster remains in place. */
@@ -611,7 +675,10 @@ function initVideoPerformanceMode() {
     });
 
     managedVideos.forEach((video) => {
-      if (!visibleVideos.has(video)) pauseManagedVideo(video);
+      if (!visibleVideos.has(video)) {
+        pauseManagedVideo(video);
+        unloadVideoSources(video);
+      }
     });
 
     document.body.dataset.lmActiveVideoCount = String(activeCount);
@@ -623,6 +690,7 @@ function initVideoPerformanceMode() {
   };
 
   managedVideos.forEach((video) => {
+    rememberVideoSources(video);
     video.playsInline = true;
     video.setAttribute("playsinline", "");
     if (!video.hasAttribute("preload") || video.getAttribute("preload") === "auto") {
@@ -631,16 +699,23 @@ function initVideoPerformanceMode() {
     }
     video.dataset.lmVideoOptimized = "true";
     if (reducedMotionQuery.matches && video.autoplay && video.muted) pauseManagedVideo(video);
+    if (isNearViewport(video, 360)) {
+      restoreVideoSources(video);
+    } else {
+      unloadVideoSources(video);
+    }
   });
 
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
+          restoreVideoSources(entry.target);
           visibleVideos.add(entry.target);
         } else {
           visibleVideos.delete(entry.target);
           pauseManagedVideo(entry.target);
+          unloadVideoSources(entry.target);
         }
       });
       scheduleVideoRefresh();
@@ -648,16 +723,27 @@ function initVideoPerformanceMode() {
 
     managedVideos.forEach((video) => observer.observe(video));
   } else {
-    managedVideos.forEach((video) => visibleVideos.add(video));
+    managedVideos.forEach((video) => {
+      restoreVideoSources(video);
+      visibleVideos.add(video);
+    });
   }
 
   document.addEventListener("visibilitychange", scheduleVideoRefresh);
   window.addEventListener("scroll", scheduleVideoRefresh, { passive: true });
   window.addEventListener("resize", scheduleVideoRefresh);
   window.addEventListener("pagehide", () => managedVideos.forEach(pauseManagedVideo));
-  window.addEventListener("lottomind:page-transition", () => managedVideos.forEach(pauseManagedVideo));
+  window.addEventListener("lottomind:page-transition", (event) => {
+    const phase = event.detail?.phase;
+    transitionCooldownUntil = performance.now() + (phase === "close" ? 760 : 560);
+    managedVideos.forEach(pauseManagedVideo);
+    window.setTimeout(scheduleVideoRefresh, phase === "close" ? 780 : 580);
+  });
   document.addEventListener("play", (event) => {
-    if (managedVideos.includes(event.target)) scheduleVideoRefresh();
+    if (managedVideos.includes(event.target)) {
+      restoreVideoSources(event.target);
+      scheduleVideoRefresh();
+    }
   }, true);
 
   window.LMVideoPerformance = {
@@ -672,7 +758,7 @@ function initVideoPerformanceMode() {
   };
 
   document.body.dataset.lmVideoPerformance = "ready";
-  window.setTimeout(scheduleVideoRefresh, 120);
+  window.setTimeout(scheduleVideoRefresh, 820);
 }
 
 initVideoPerformanceMode();
