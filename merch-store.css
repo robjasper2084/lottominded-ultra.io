@@ -857,8 +857,8 @@
   isolation: isolate;
   overflow: hidden;
   grid-column: 1;
-  width: min(100%, 800px);
-  height: 715px;
+  width: min(90%, 720px);
+  height: 644px;
   min-height: 0;
   grid-template-columns: 1fr;
   align-items: start;
@@ -2113,7 +2113,7 @@
 
   .merch-drop-section .merch-section-copy {
     height: auto;
-    min-height: clamp(30rem, 86vw, 39rem);
+    min-height: clamp(27rem, 77vw, 35.1rem);
   }
 
   .merch-drop-section .merch-section-copy,

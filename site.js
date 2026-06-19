@@ -2876,35 +2876,6 @@ function setupPromptBallpassGame() {
 
 setupPromptBallpassGame();
 
-function setupNegativeCursorLens() {
-  if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
-
-  const lens = document.createElement("div");
-  lens.className = "negative-cursor-lens";
-  lens.setAttribute("aria-hidden", "true");
-  document.body.classList.add("has-negative-cursor-lens");
-  document.body.append(lens);
-
-  function moveLens(event) {
-    if (isEditableTarget(event.target)) {
-      lens.classList.remove("is-visible");
-      return;
-    }
-
-    lens.style.setProperty("--negative-cursor-x", `${event.clientX}px`);
-    lens.style.setProperty("--negative-cursor-y", `${event.clientY}px`);
-    lens.classList.add("is-visible");
-  }
-
-  document.addEventListener("pointermove", moveLens, { passive: true });
-  document.addEventListener("pointerleave", () => {
-    lens.classList.remove("is-visible");
-  }, { passive: true });
-  window.addEventListener("blur", () => {
-    lens.classList.remove("is-visible");
-  });
-}
-
 // Use the mascot artwork as a lightweight mouse pointer without the old lens overlay.
 
 function setupMascotMotionCursor() {
@@ -2932,10 +2903,8 @@ function setupMascotMotionCursor() {
   function render() {
     setPose();
     const tilt = state === "up" ? -5 : state === "down" ? 3 : state === "right" ? 3 : state === "left" ? -3 : 0;
-    const width = cursor.offsetWidth || 58;
-    const height = cursor.offsetHeight || Math.round(width * 420 / 230);
-    const x = Math.round(position.x - width * 0.34);
-    const y = Math.round(position.y - height * 0.16);
+    const x = Math.round(position.x + 1);
+    const y = Math.round(position.y + 1);
     cursor.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${tilt}deg)`;
     if (visible) cursor.classList.add("is-visible");
     window.requestAnimationFrame(render);
