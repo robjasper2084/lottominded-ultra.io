@@ -16,7 +16,7 @@
   --display-font: "Cinzel", "Trajan Pro", "Copperplate Gothic Bold", "Copperplate", "Georgia", serif;
   --body-font: Inter, "Aptos", "Trebuchet MS", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --lm-mascot-cursor: pointer;
-  --lm-mascot-action-sheet: url("./assets/cursor/lottomind-mascot-action-sheet-transparent.png");
+  --lm-mascot-action-sheet: url("./assets/cursor/lottomind-reporter-cursor.png");
   font-family: var(--body-font);
 }
 
@@ -95,24 +95,24 @@ body::after {
   left: 0;
   top: 0;
   z-index: 90;
-  width: clamp(58px, 7vw, 92px);
-  aspect-ratio: 220 / 184;
+  width: clamp(46px, 4.6vw, 72px);
+  aspect-ratio: 230 / 420;
   pointer-events: none;
   opacity: 0;
   background-image: var(--lm-mascot-action-sheet);
   background-repeat: no-repeat;
-  background-size: 600% 400%;
-  background-position: 0% 0%;
+  background-size: contain;
+  background-position: center bottom;
   background-color: transparent;
   filter:
     drop-shadow(0 0 0.6rem rgba(255, 224, 113, 0.36))
     drop-shadow(0 0 1.2rem rgba(138, 92, 255, 0.44))
     drop-shadow(0 0.7rem 0.9rem rgba(0, 0, 0, 0.55));
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
   transform: translate3d(-120px, -120px, 0) scaleX(1);
-  transform-origin: 50% 50%;
+  transform-origin: 38% 16%;
   transition: opacity 180ms ease, filter 180ms ease;
-  will-change: transform, background-position;
+  will-change: transform, opacity;
 }
 
 .negative-cursor-lens {
@@ -182,20 +182,22 @@ body::after {
     drop-shadow(0 0.9rem 1rem rgba(0, 0, 0, 0.6));
 }
 
-body.has-mascot-motion-cursor,
-body.has-mascot-motion-cursor * {
-  cursor: auto;
-}
+@media (hover: hover) and (pointer: fine) {
+  body.has-mascot-motion-cursor,
+  body.has-mascot-motion-cursor * {
+    cursor: none !important;
+  }
 
-body.has-mascot-motion-cursor input[type="email"],
-body.has-mascot-motion-cursor input[type="number"],
-body.has-mascot-motion-cursor input[type="password"],
-body.has-mascot-motion-cursor input[type="search"],
-body.has-mascot-motion-cursor input[type="tel"],
-body.has-mascot-motion-cursor input[type="text"],
-body.has-mascot-motion-cursor input[type="url"],
-body.has-mascot-motion-cursor textarea {
-  cursor: text;
+  body.has-mascot-motion-cursor input[type="email"],
+  body.has-mascot-motion-cursor input[type="number"],
+  body.has-mascot-motion-cursor input[type="password"],
+  body.has-mascot-motion-cursor input[type="search"],
+  body.has-mascot-motion-cursor input[type="tel"],
+  body.has-mascot-motion-cursor input[type="text"],
+  body.has-mascot-motion-cursor input[type="url"],
+  body.has-mascot-motion-cursor textarea {
+    cursor: text !important;
+  }
 }
 
 a {

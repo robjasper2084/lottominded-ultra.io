@@ -15,6 +15,10 @@
   const livePlayerNext = livePlayer?.querySelector("[data-live-player-next]");
   const livePlayerTime = livePlayer?.querySelector("[data-live-player-time]");
   const livePlayerWave = livePlayer?.querySelector(".now-wave");
+  const streamStartup = document.querySelector("[data-stream-startup-audio]");
+  const streamStartupPlay = streamStartup?.querySelector("[data-stream-startup-play]");
+  const streamStartupCloseButtons = streamStartup?.querySelectorAll("[data-stream-startup-close]");
+  const streamStartupStatus = streamStartup?.querySelector("[data-stream-startup-status]");
   let liveAudioContext = null;
   let liveAudioAnalyser = null;
   let liveAudioData = null;
@@ -244,23 +248,90 @@
     liveAudioAnalyser.connect(liveAudioContext.destination);
   }
 
+  async function startLivePlayer(options = {}) {
+    if (!livePlayerAudio) return false;
+    try {
+      livePlayerAudio.volume = options.volume ?? 0.72;
+      if (options.restart) livePlayerAudio.currentTime = 0;
+      const playPromise = livePlayerAudio.play();
+      const playStarted = await Promise.race([
+        playPromise.then(() => true).catch(() => false),
+        new Promise((resolve) => window.setTimeout(() => resolve(false), options.timeout ?? 900))
+      ]);
+      if (!playStarted) throw new Error("Playback was blocked or delayed.");
+      await new Promise((resolve) => window.requestAnimationFrame(resolve));
+      if (livePlayerAudio.paused || livePlayerAudio.ended) throw new Error("Playback did not stay active.");
+      if (!options.deferAnalyser) {
+        setupLiveAnalyser();
+        await Promise.race([
+          liveAudioContext?.resume?.().catch(() => {}),
+          new Promise((resolve) => window.setTimeout(resolve, 500))
+        ]);
+      }
+      livePlayer?.classList.remove("needs-user-audio");
+      startLiveWave();
+      updateLivePlayer();
+      return true;
+    } catch {
+      livePlayer?.classList.add("needs-user-audio");
+      updateLivePlayer();
+      return false;
+    }
+  }
+
   async function toggleLivePlayer() {
     if (!livePlayerAudio) return;
     if (livePlayerAudio.paused || livePlayerAudio.ended) {
-      try {
-        setupLiveAnalyser();
-        await liveAudioContext?.resume?.();
-        livePlayerAudio.volume = 0.72;
-        await livePlayerAudio.play();
-        startLiveWave();
-      } catch {
-        livePlayer?.classList.add("needs-user-audio");
-      }
+      await startLivePlayer({ restart: livePlayerAudio.ended, volume: 0.72 });
     } else {
       livePlayerAudio.pause();
       resetLiveWave();
     }
     updateLivePlayer();
+  }
+
+  function closeStreamStartupPrompt() {
+    streamStartup?.classList.add("is-hidden");
+    streamStartup?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("has-stream-startup-audio");
+    if (streamStartupStatus) streamStartupStatus.textContent = "";
+  }
+
+  function showStreamStartupPrompt(message = "Tap Start Music to play the stream audio.") {
+    if (!streamStartup) return;
+    document.body.classList.add("has-stream-startup-audio");
+    streamStartup.classList.remove("is-hidden");
+    streamStartup.setAttribute("aria-hidden", "false");
+    if (streamStartupStatus) streamStartupStatus.textContent = message;
+  }
+
+  async function startStreamOpenAudio(options = {}) {
+    if (!livePlayerAudio?.hasAttribute("data-stream-open-audio")) return;
+    livePlayer?.setAttribute("data-stream-open-state", "attempting");
+    const started = await startLivePlayer({
+      restart: true,
+      volume: options.volume ?? 0.56,
+      deferAnalyser: !options.userGesture
+    });
+    if (started) {
+      livePlayer?.setAttribute("data-stream-open-state", "playing");
+      closeStreamStartupPrompt();
+      return;
+    }
+    livePlayer?.setAttribute("data-stream-open-state", "blocked");
+    showStreamStartupPrompt("Your browser needs one tap before it can play Verse 1.");
+  }
+
+  function scheduleStreamOpenAudio() {
+    if (!livePlayerAudio?.hasAttribute("data-stream-open-audio")) return;
+    if (livePlayerAudio.dataset.streamOpenReady === "true") return;
+    livePlayerAudio.dataset.streamOpenReady = "true";
+    const run = () => window.setTimeout(() => startStreamOpenAudio({ volume: 0.56 }), 420);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", run, { once: true });
+    } else {
+      run();
+    }
   }
 
   if (livePlayerAudio && livePlayerToggle) {
@@ -283,6 +354,22 @@
     updateLivePlayer();
     resetLiveWave();
   }
+
+  scheduleStreamOpenAudio();
+
+  streamStartupPlay?.addEventListener("click", async () => {
+    if (streamStartupStatus) streamStartupStatus.textContent = "Starting stream audio...";
+    await startStreamOpenAudio({ volume: 0.56, userGesture: true });
+  });
+  streamStartupCloseButtons?.forEach((button) => {
+    button.addEventListener("click", closeStreamStartupPrompt);
+  });
+  streamStartup?.addEventListener("click", (event) => {
+    if (event.target === streamStartup) closeStreamStartupPrompt();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !streamStartup?.classList.contains("is-hidden")) closeStreamStartupPrompt();
+  });
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (character) => ({

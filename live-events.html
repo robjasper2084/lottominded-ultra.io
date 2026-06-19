@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Live Events</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=verified-transitions-1" />
+    <link rel="stylesheet" href="./styles.css?v=mascot-cursor-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -29,6 +29,19 @@
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
     </div>
+    <aside class="stream-startup-audio is-hidden" data-stream-startup-audio aria-label="Stream startup audio" aria-hidden="true">
+      <div class="stream-startup-audio-panel" role="dialog" aria-modal="true" aria-labelledby="streamStartupTitle">
+        <button class="stream-startup-close" type="button" data-stream-startup-close aria-label="Enter stream without startup music">X</button>
+        <p class="eyebrow">Stream Signal</p>
+        <h2 id="streamStartupTitle">Start Stream Audio.</h2>
+        <p>Tap once to play Verse 1 when the stream page opens.</p>
+        <div class="stream-startup-actions">
+          <button class="primary-action" type="button" data-stream-startup-play>Start Music</button>
+          <button class="secondary-action" type="button" data-stream-startup-close>Enter Muted</button>
+        </div>
+        <p class="stream-startup-status" data-stream-startup-status aria-live="polite"></p>
+      </div>
+    </aside>
     <header class="lm-live-topbar" data-live-shell>
       <a class="lm-live-logo" href="./how-to-use.html" aria-label="LOTTOMINDED ULTRA home">
         <img src="./assets/live-events/svg/lm-live-logo.svg" alt="" />
@@ -281,9 +294,9 @@
     </main>
 
     <footer class="lm-live-player" id="player" data-live-player>
-      <audio data-live-player-audio preload="metadata" src="./assets/audio/digital-static-live-mix.mp3"></audio>
+      <audio data-live-player-audio data-stream-open-audio preload="metadata" src="./assets/audio/verse-1-stream-open.mp3"></audio>
       <div class="now-art"></div>
-      <div class="now-copy"><small>Now Playing</small><strong>Neon Horizons 2025 - Main Stage</strong><span>Mind of the Future Live Mix</span></div>
+      <div class="now-copy"><small>Now Playing</small><strong>Verse 1 - Stream Page</strong><span>Stream opens with uploaded media</span></div>
       <div class="now-wave" aria-hidden="true"><i></i></div>
       <button type="button" aria-label="Back 15 seconds" data-live-player-prev>&lt;&lt;</button>
       <button type="button" class="big" aria-label="Play live mix" aria-pressed="false" data-live-player-toggle>&#9654;</button>
@@ -294,8 +307,8 @@
 
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=transition-hotfix-2" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=live-audio-reactive-1" defer></script>
+    <script src="./site.js?v=mascot-cursor-1" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=stream-open-verse-5" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
   </body>
 </html>

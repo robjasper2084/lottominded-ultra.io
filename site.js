@@ -91,6 +91,7 @@ const compactHeaderLabels =
   document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
+const STARTUP_MODAL_SEEN_KEY = "lottominded.ultra.homeStartupSeen.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const PROMPT_ACCESS_KEY = "lottominded.ultra.promptAccess.v1";
 const PROMPT_ACCESS_PASSWORD = "lottomind";
@@ -2367,8 +2368,26 @@ function setupInlineSoundVideos() {
 
 setupInlineSoundVideos();
 
+function hasSeenStartupVideo() {
+  try {
+    return localStorage.getItem(STARTUP_MODAL_SEEN_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function rememberStartupVideoSeen() {
+  try {
+    localStorage.setItem(STARTUP_MODAL_SEEN_KEY, "true");
+  } catch {
+    // Storage may be unavailable in private or locked-down browser modes.
+  }
+}
+
 async function closeStartupVideo(options = {}) {
+  if (options.remember !== false) rememberStartupVideoSeen();
   startupVideoModal?.classList.add("is-hidden");
+  startupVideoModal?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("has-startup-modal");
   startupVideoPlayer?.pause();
   if (options.playMusic === false) return;
@@ -2376,11 +2395,22 @@ async function closeStartupVideo(options = {}) {
 }
 
 function showStartupVideo() {
-  if (!startupVideoModal) return;
+  if (!startupVideoModal || hasSeenStartupVideo()) {
+    startupVideoModal?.classList.add("is-hidden");
+    startupVideoModal?.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("has-startup-modal");
+    return;
+  }
   document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
+  startupVideoModal.setAttribute("aria-hidden", "false");
+  rememberStartupVideoSeen();
   if (!reducedMotionQuery.matches) {
-    startupVideoPlayer.muted = true;
+    startupVideoPlayer.muted = false;
+    startupVideoPlayer.defaultMuted = false;
+    startupVideoPlayer.removeAttribute("muted");
+    startupVideoPlayer.volume = 0.86;
+    startupVideoPlayer.autoplay = true;
     startupVideoPlayer?.play().catch(() => {
       // Browsers may block autoplay until the first user gesture.
     });
@@ -2875,10 +2905,9 @@ function setupNegativeCursorLens() {
   });
 }
 
-// Use the native browser pointer without the floating lens overlay.
+// Use the mascot artwork as a lightweight mouse pointer without the old lens overlay.
 
 function setupMascotMotionCursor() {
-  if (document.body.dataset.cursorMode !== "mascot") return;
   if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
 
   const cursor = document.createElement("div");
@@ -2887,43 +2916,27 @@ function setupMascotMotionCursor() {
   document.body.classList.add("has-mascot-motion-cursor");
   document.body.append(cursor);
 
-  const spriteMap = {
-    idle: [[0, 0]],
-    right: [[1, 0], [2, 0], [3, 0]],
-    left: [[1, 0], [2, 0], [3, 0]],
-    up: [[5, 0]],
-    down: [[4, 0]],
-  };
   const position = { x: -120, y: -120 };
   const last = { x: -120, y: -120, time: 0 };
   let state = "idle";
   let facing = 1;
-  let frameIndex = 0;
-  let frameTimer = 0;
   let idleTimer = 0;
   let heldScrollState = "";
   let visible = false;
 
-  function setSpriteFrame(now) {
-    const frames = spriteMap[state] || spriteMap.idle;
-    if (now - frameTimer > (state === "idle" ? 460 : 115)) {
-      frameIndex = (frameIndex + 1) % frames.length;
-      frameTimer = now;
-    }
-    const [column, row] = frames[frameIndex] || frames[0];
-    cursor.style.backgroundPosition = `${column * 20}% ${row * 33.333}%`;
+  function setPose() {
     cursor.classList.toggle("is-up", state === "up");
     cursor.classList.toggle("is-down", state === "down");
   }
 
-  function render(now) {
-    setSpriteFrame(now);
-    const tilt = state === "up" ? -5 : state === "down" ? 3 : state === "right" || state === "left" ? 4 : 0;
-    const width = cursor.offsetWidth || 74;
-    const height = cursor.offsetHeight || Math.round(width * 184 / 220);
-    const x = Math.round(position.x - width * 0.5);
-    const y = Math.round(position.y - height * 0.52);
-    cursor.style.transform = `translate3d(${x}px, ${y}px, 0) scaleX(${facing}) rotate(${tilt * facing}deg)`;
+  function render() {
+    setPose();
+    const tilt = state === "up" ? -5 : state === "down" ? 3 : state === "right" ? 3 : state === "left" ? -3 : 0;
+    const width = cursor.offsetWidth || 58;
+    const height = cursor.offsetHeight || Math.round(width * 420 / 230);
+    const x = Math.round(position.x - width * 0.34);
+    const y = Math.round(position.y - height * 0.16);
+    cursor.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${tilt}deg)`;
     if (visible) cursor.classList.add("is-visible");
     window.requestAnimationFrame(render);
   }
@@ -2958,14 +2971,12 @@ function setupMascotMotionCursor() {
       state = facing < 0 ? "left" : "right";
     }
 
-    if (state !== "idle") frameIndex %= (spriteMap[state] || spriteMap.idle).length;
     last.x = event.clientX;
     last.y = event.clientY;
     last.time = now;
     idleTimer = window.setTimeout(() => {
       if (heldScrollState) return;
       state = "idle";
-      frameIndex = 0;
     }, 180);
   }, { passive: true });
 
@@ -2986,7 +2997,6 @@ function setupMascotMotionCursor() {
       heldScrollState = "up";
     }
 
-    frameIndex = 0;
   }, { passive: true });
 
   document.addEventListener("pointerleave", () => {
@@ -2994,10 +3004,15 @@ function setupMascotMotionCursor() {
     cursor.classList.remove("is-visible");
   }, { passive: true });
 
+  window.addEventListener("blur", () => {
+    visible = false;
+    cursor.classList.remove("is-visible");
+  });
+
   window.requestAnimationFrame(render);
 }
 
-// Mascot cursor mode is disabled so page controls keep normal cursor behavior.
+setupMascotMotionCursor();
 
 function showGamePip() {
   if (!gamePip) return;
