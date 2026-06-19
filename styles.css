@@ -16,7 +16,7 @@
   --display-font: "Cinzel", "Trajan Pro", "Copperplate Gothic Bold", "Copperplate", "Georgia", serif;
   --body-font: Inter, "Aptos", "Trebuchet MS", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --lm-mascot-cursor: pointer;
-  --lm-mascot-action-sheet: url("./assets/cursor/lottomind-reporter-cursor.png");
+  --lm-mascot-action-sheet: url("./assets/cursor/lottomind-reporter-cursor-v2.webp");
   font-family: var(--body-font);
 }
 
