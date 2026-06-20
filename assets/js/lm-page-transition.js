@@ -4,8 +4,8 @@
   const ARRIVAL_KEY = "lmTransitionArriving";
   const THEME_KEY = "lmTransitionTheme";
   const LABEL_KEY = "lmTransitionLabel";
-  const DURATION = 620;
-  const NAVIGATE_AT = 520;
+  const DURATION = 360;
+  const NAVIGATE_AT = 220;
 
   const THEMES = {
     home:       { rgb: "41 247 255",  color: "#29f7ff" },
@@ -26,6 +26,13 @@
   if (!overlay || !video) return;
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const coarsePointer = window.matchMedia?.("(pointer: coarse)");
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const lowPowerMode =
+    Boolean(connection?.saveData) ||
+    Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+    Boolean(coarsePointer?.matches);
   const scriptElement =
     document.currentScript ||
     document.querySelector('script[src*="lm-page-transition.js"]');
@@ -35,7 +42,7 @@
     : new URL("./assets/video/transitions/", window.location.href);
 
   const preloaded = new Map();
-  const MAX_PRELOADED_CLIPS = 4;
+  const MAX_PRELOADED_CLIPS = lowPowerMode ? 0 : 1;
   let transitioning = false;
   let navigationTimer = 0;
   let cleanupTimer = 0;
@@ -87,23 +94,28 @@
       : `OPENING ${clean.toUpperCase()}`;
   }
 
+  function shouldUseVideoTransition() {
+    return !reduceMotion.matches && !lowPowerMode;
+  }
+
   function preload(theme, phase = "open", eager = false) {
+    if (!shouldUseVideoTransition()) return null;
     const url = clipUrl(theme, phase);
+    const requestedPreload = "metadata";
     if (preloaded.has(url)) {
       const existing = preloaded.get(url);
-      if (eager && existing.preload !== "auto") {
-        existing.preload = "auto";
+      if (requestedPreload === "auto" && existing.preload !== "auto") {
+        existing.preload = requestedPreload;
         existing.load();
       }
       return existing;
     }
 
     const media = document.createElement("video");
-    media.preload = eager ? "auto" : "metadata";
+    media.preload = requestedPreload;
     media.muted = true;
     media.playsInline = true;
     media.src = url;
-    media.load();
     preloaded.set(url, media);
 
     while (preloaded.size > MAX_PRELOADED_CLIPS) {
@@ -119,7 +131,7 @@
   }
 
   function preloadCurrentArrival() {
-    preload(themeForPath(window.location.pathname), "close", true);
+    preload(themeForPath(window.location.pathname), "close", false);
   }
 
   function preloadLinkDestination(link) {
@@ -131,15 +143,16 @@
     try {
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open", true);
+      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open", false);
     } catch (_) {}
   }
 
   function playVideo(theme, phase) {
+    if (!shouldUseVideoTransition()) return;
     const url = clipUrl(theme, phase);
 
-    video.preload = "auto";
-    video.setAttribute("preload", "auto");
+    video.preload = "metadata";
+    video.setAttribute("preload", "metadata");
 
     if (video.src !== url) {
       video.src = url;
@@ -168,7 +181,7 @@
     overlay.classList.add("is-active", phase === "close" ? "is-closing" : "is-opening");
     document.body.classList.add("lm-page-is-transitioning");
 
-    if (!reduceMotion.matches) playVideo(safeTheme, phase);
+    playVideo(safeTheme, phase);
 
     window.dispatchEvent(new CustomEvent("lottomind:page-transition", {
       detail: { phase, theme: safeTheme, label: text || "" }
@@ -229,7 +242,7 @@
     const linkText = link.textContent?.replace(/\s+/g, " ").trim();
     const destinationLabel = customLabel || linkText || theme;
 
-    preload(theme, "open", true);
+    preload(theme, "open", false);
 
     try {
       sessionStorage.setItem(ARRIVAL_KEY, "yes");
@@ -279,10 +292,6 @@
     event.preventDefault();
     beginNavigation(link);
   });
-
-  document.addEventListener("pointerenter", (event) => {
-    preloadLinkDestination(event.target.closest?.("a[href]"));
-  }, true);
 
   document.addEventListener("focusin", (event) => {
     preloadLinkDestination(event.target.closest?.("a[href]"));

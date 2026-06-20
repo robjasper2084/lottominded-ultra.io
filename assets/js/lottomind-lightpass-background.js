@@ -17,6 +17,11 @@
   window[SCRIPT_FLAG] = true;
 
   const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const lowPowerMode =
+    Boolean(connection?.saveData) ||
+    Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   const palette = {
     gold: "255, 224, 113",
     deepGold: "214, 158, 46",
@@ -87,6 +92,7 @@
   let height = 1;
   let dpr = 1;
   let lastFrame = 0;
+  let lastDraw = 0;
   let frameHandle = 0;
   let isPaused = false;
   let staticRendered = false;
@@ -146,7 +152,7 @@
   }
 
   function spawnPassiveStars() {
-    const count = width < 720 ? 22 : 46;
+    const count = width < 720 || lowPowerMode ? 16 : 34;
     passiveStars = Array.from({ length: count }, (_, i) => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -195,7 +201,7 @@
   function resize() {
     width = Math.max(1, window.innerWidth);
     height = Math.max(1, window.innerHeight);
-    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    dpr = Math.min(window.devicePixelRatio || 1, width < 720 || lowPowerMode ? 1 : 1.25);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     canvas.style.width = `${width}px`;
@@ -207,7 +213,7 @@
 
   function pushRipple(x, y, color, strength = 1) {
     ripples.push({ x, y, color, age: 0, life: rand(0.75, 1.25), strength });
-    if (ripples.length > 28) ripples.splice(0, ripples.length - 28);
+    if (ripples.length > 18) ripples.splice(0, ripples.length - 18);
   }
 
   function pushNumber(x, y, color) {
@@ -221,7 +227,7 @@
       age: 0,
       life: rand(1.1, 1.75)
     });
-    if (numberBursts.length > 18) numberBursts.splice(0, numberBursts.length - 18);
+    if (numberBursts.length > 14) numberBursts.splice(0, numberBursts.length - 14);
   }
 
   function pushSparks(x, y, color, amount = 10) {
@@ -239,7 +245,7 @@
         size: rand(0.9, 2.6)
       });
     }
-    if (sparks.length > 160) sparks.splice(0, sparks.length - 160);
+    if (sparks.length > 90) sparks.splice(0, sparks.length - 90);
   }
 
   function onPointerMove(event) {
@@ -674,10 +680,19 @@
   }
 
   function tick(now) {
-    if (isPaused) {
+    if (isPaused || document.hidden) {
+      frameHandle = 0;
+      return;
+    }
+
+    const frameBudget = width < 720 || lowPowerMode || document.body.classList.contains("lm-page-is-transitioning")
+      ? 1000 / 24
+      : 1000 / 30;
+    if (lastDraw && now - lastDraw < frameBudget) {
       frameHandle = requestAnimationFrame(tick);
       return;
     }
+    lastDraw = now;
 
     if (reduceMotion?.matches) {
       if (!staticRendered) {
@@ -700,6 +715,7 @@
   function resume() {
     if (frameHandle) return;
     lastFrame = performance.now();
+    lastDraw = 0;
     frameHandle = requestAnimationFrame(tick);
   }
 

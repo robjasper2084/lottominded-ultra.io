@@ -73,6 +73,14 @@ const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoCloseButtons = document.querySelectorAll("[data-startup-video-close]");
 const startupMusicStart = document.querySelector("[data-startup-music-start]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
+const siteConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+const siteLowPowerMode =
+  Boolean(siteConnection?.saveData) ||
+  Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+  Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+  Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
+document.documentElement.classList.add("lm-perf-steady");
+if (siteLowPowerMode) document.documentElement.classList.add("lm-perf-lite");
 let startupReturnTimer = 0;
 let startupReturnAutoCloseTimer = 0;
 const domainStrip = document.querySelector(".domain-strip");
@@ -546,11 +554,11 @@ function initVideoPerformanceMode() {
   const videos = Array.from(document.querySelectorAll("video"));
   if (!videos.length) return;
 
-  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 2;
+  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 1;
   const visibleVideos = new Set();
   let transitionCooldownUntil = document.documentElement.classList.contains("lm-transition-arriving")
-    ? performance.now() + 900
-    : performance.now() + 650;
+    ? performance.now() + 620
+    : performance.now() + 420;
   let refreshFrame = 0;
 
   const isTransitionVideo = (video) =>
@@ -600,8 +608,13 @@ function initVideoPerformanceMode() {
     if (changed) video.load();
   };
 
-  const unloadVideoSources = (video) => {
-    if (isSoundActive(video) || isNearViewport(video, 120)) return;
+  const keepVideoReady = (video) =>
+    video.hasAttribute("controls") ||
+    video.matches(".startup-video-player, [data-inline-sound-video], [data-merch-sound-video]");
+
+  const unloadVideoSources = (video, options = {}) => {
+    const force = Boolean(options.force);
+    if (isSoundActive(video) || keepVideoReady(video) || (!force && isNearViewport(video, 120))) return;
     let changed = false;
     if (video.dataset.lmLazySrc && video.hasAttribute("src")) {
       video.removeAttribute("src");
@@ -668,6 +681,7 @@ function initVideoPerformanceMode() {
     candidates.forEach((video, index) => {
       if (index >= maxActiveDecorativeVideos) {
         pauseManagedVideo(video);
+        unloadVideoSources(video, { force: true });
         return;
       }
 
@@ -698,9 +712,10 @@ function initVideoPerformanceMode() {
     rememberVideoSources(video);
     video.playsInline = true;
     video.setAttribute("playsinline", "");
-    if (!video.hasAttribute("preload") || video.getAttribute("preload") === "auto") {
-      video.setAttribute("preload", "metadata");
-      video.preload = "metadata";
+    const preloadMode = keepVideoReady(video) ? "metadata" : "none";
+    if (!video.hasAttribute("preload") || video.getAttribute("preload") === "auto" || video.getAttribute("preload") === "metadata") {
+      video.setAttribute("preload", preloadMode);
+      video.preload = preloadMode;
     }
     video.dataset.lmVideoOptimized = "true";
     if (reducedMotionQuery.matches && video.autoplay && video.muted) pauseManagedVideo(video);
@@ -740,9 +755,9 @@ function initVideoPerformanceMode() {
   window.addEventListener("pagehide", () => managedVideos.forEach(pauseManagedVideo));
   window.addEventListener("lottomind:page-transition", (event) => {
     const phase = event.detail?.phase;
-    transitionCooldownUntil = performance.now() + (phase === "close" ? 760 : 560);
+    transitionCooldownUntil = performance.now() + (phase === "close" ? 520 : 360);
     managedVideos.forEach(pauseManagedVideo);
-    window.setTimeout(scheduleVideoRefresh, phase === "close" ? 780 : 580);
+    window.setTimeout(scheduleVideoRefresh, phase === "close" ? 540 : 380);
   });
   document.addEventListener("play", (event) => {
     if (managedVideos.includes(event.target)) {
@@ -767,6 +782,102 @@ function initVideoPerformanceMode() {
 }
 
 initVideoPerformanceMode();
+
+function initDeferredImages() {
+  const deferredImages = Array.from(document.querySelectorAll("img[data-src]"));
+  if (!deferredImages.length) return;
+
+  const revealImage = (image) => {
+    const nextSrc = image.dataset.src;
+    if (!nextSrc) return;
+    image.src = nextSrc;
+    image.removeAttribute("data-src");
+  };
+
+  if (!("IntersectionObserver" in window)) {
+    window.setTimeout(() => deferredImages.forEach(revealImage), 500);
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      revealImage(entry.target);
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: "260px 0px", threshold: 0.01 });
+
+  deferredImages.forEach((image) => observer.observe(image));
+}
+
+initDeferredImages();
+
+function initDeferredFrames() {
+  const frames = Array.from(document.querySelectorAll("iframe[data-src]"));
+  if (!frames.length) return;
+
+  const revealFrame = (frame) => {
+    const nextSrc = frame.dataset.src;
+    if (!nextSrc || frame.getAttribute("src") === nextSrc) return;
+    frame.src = nextSrc;
+    frame.removeAttribute("data-src");
+  };
+
+  const manualFrames = frames.filter((frame) => frame.dataset.lmFrameManual === "true");
+  manualFrames.forEach((frame) => {
+    const holder = frame.closest("[data-lm-frame-holder]") || frame.parentElement;
+    if (!holder || holder.querySelector("[data-lm-load-frame]")) return;
+    const loadButton = document.createElement("button");
+    loadButton.type = "button";
+    loadButton.className = "lm-frame-load";
+    loadButton.dataset.lmLoadFrame = "true";
+    const label = frame.dataset.lmLoadLabel || frame.getAttribute("title") || "Load live media";
+    loadButton.innerHTML = `<span>${label}</span><small>Tap to start the embedded player</small>`;
+    holder.appendChild(loadButton);
+    loadButton.addEventListener("click", () => {
+      revealFrame(frame);
+      holder.classList.add("is-frame-loaded");
+      loadButton.remove();
+    }, { once: true });
+  });
+
+  const autoFrames = frames.filter((frame) => frame.dataset.lmFrameManual !== "true");
+  if (!autoFrames.length) return;
+
+  if (!("IntersectionObserver" in window)) {
+    window.setTimeout(() => autoFrames.forEach(revealFrame), 900);
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      revealFrame(entry.target);
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: "360px 0px", threshold: 0.01 });
+
+  autoFrames.forEach((frame) => observer.observe(frame));
+}
+
+initDeferredFrames();
+
+function initImagePerformanceMode() {
+  const images = Array.from(document.querySelectorAll("img"));
+  if (!images.length) return;
+
+  images.forEach((image) => {
+    if (!image.hasAttribute("decoding")) image.setAttribute("decoding", "async");
+    const keepEager = image.closest(
+      ".site-header, .home-sphere-header, .startup-video-panel, .merch-hero, .feature-topbar, .lm-live-topbar, .hero-card"
+    );
+    if (!keepEager && !image.hasAttribute("loading")) image.setAttribute("loading", "lazy");
+  });
+
+  document.body.dataset.lmImagePerformance = "ready";
+}
+
+initImagePerformanceMode();
 
 function setupManualPianoHeader() {
   if (document.body.classList.contains("has-sphere-header")) return;

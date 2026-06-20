@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="lm-perf-steady">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Merch + Gallery Store</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=mascot-clean-1" />
+    <link rel="stylesheet" href="./styles.css?v=perf-guard-2" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,14 +18,14 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
-    <link rel="stylesheet" href="./merch-store.css?v=drop-copy-compact-merch-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=perf-guard-2" />
+    <link rel="stylesheet" href="./merch-store.css?v=perf-guard-4" />
     <link rel="stylesheet" href="./assets/css/juneteenth-event-popup.css?v=juneteenth-popup-half-1" />
   </head>
   <body class="merch-store-page has-sphere-tabs">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
@@ -56,7 +56,7 @@
 
     <main class="merch-main">
       <section class="merch-hero" data-merch-tilt>
-        <video class="merch-hero-video" autoplay muted loop playsinline preload="metadata">
+        <video class="merch-hero-video" muted loop playsinline preload="none" data-lm-video-unmanaged="true">
           <source src="./assets/merch/merch-motion-01.mp4" type="video/mp4" />
         </video>
         <button class="merch-hero-video-toggle" type="button" data-merch-hero-sound-toggle aria-pressed="false">Hero sound</button>
@@ -72,7 +72,7 @@
           </div>
         </div>
         <div class="merch-hero-product" data-merch-sound-card>
-          <video class="merch-product-video" autoplay muted loop playsinline controls preload="metadata" poster="./assets/merch/metro-cap-hero.png" data-merch-sound-video>
+          <video class="merch-product-video" muted loop playsinline controls preload="none" data-lm-video-unmanaged="true" poster="./assets/merch/metro-cap-hero.png" data-merch-sound-video>
             <source src="./assets/video/E2887E5E-CD89-45E3-ABC2-E32ED00C2652.mp4" type="video/mp4" />
             <source src="./assets/video/merch-hero-blended.mp4" type="video/mp4" />
           </video>
@@ -118,7 +118,7 @@
         <div class="merch-section-copy">
           <h2>Drop-ready apparel with a studio signal.</h2>
           <div class="merch-drop-video" aria-hidden="true">
-            <video autoplay muted loop playsinline preload="metadata">
+            <video muted loop playsinline preload="none" data-lm-video-unmanaged="true">
               <source src="./assets/merch/merch-drop-signal-20260518.mp4" type="video/mp4" />
             </video>
           </div>
@@ -129,7 +129,7 @@
         </div>
         <div class="product-grid merch-swipe-rail" aria-label="Merch products" data-swipe-rail tabindex="0">
           <article class="product-card">
-            <img src="./assets/merch/detroit-embroidered-hoodie-closeup.png" alt="Close-up of embroidered Detroit hoodie graphic" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/detroit-embroidered-hoodie-closeup.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Close-up of embroidered Detroit hoodie graphic" />
             <span class="product-hover-price" aria-hidden="true">$200</span>
             <div>
               <h3>Detroit Embroidery Hoodie</h3>
@@ -138,7 +138,7 @@
             </div>
           </article>
           <article class="product-card">
-            <img src="./assets/merch/innovation-floor-model-hoodie.png" alt="Model wearing navy Innovation Floor hoodie" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/innovation-floor-model-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Model wearing navy Innovation Floor hoodie" />
             <span class="product-hover-price" aria-hidden="true">$49</span>
             <div>
               <h3>Innovation Floor Model Hoodie</h3>
@@ -147,7 +147,7 @@
             </div>
           </article>
           <article class="product-card featured" id="hoodies">
-            <img src="./assets/merch/innovation-floor-hoodie.png" alt="Navy Innovation Floor hoodie product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/innovation-floor-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Navy Innovation Floor hoodie product photo" />
             <span class="product-hover-price" aria-hidden="true">$84</span>
             <div>
               <h3>Innovation Floor Hoodie</h3>
@@ -156,7 +156,7 @@
             </div>
           </article>
           <article class="product-card" id="caps">
-            <img src="./assets/merch/gallery-orb-06.png" alt="Navy embroidered LottoMind baseball cap product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-06.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Navy embroidered LottoMind baseball cap product photo" />
             <span class="product-hover-price" aria-hidden="true">$38</span>
             <div>
               <h3>1701 Signal Cap</h3>
@@ -165,7 +165,7 @@
             </div>
           </article>
           <article class="product-card" id="keychains">
-            <img src="./assets/merch/lottomind-keychain-counter-display.webp" alt="LottoMind collectible keychain package displayed on a shop counter" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/lottomind-keychain-counter-display.webp" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="LottoMind collectible keychain package displayed on a shop counter" />
             <span class="product-hover-price" aria-hidden="true">$25</span>
             <div>
               <h3>LottoMind Collectible Keychain</h3>
@@ -174,7 +174,7 @@
             </div>
           </article>
           <article class="product-card" id="polos">
-            <img src="./assets/merch/gallery-orb-02.png" alt="Metro Signal Polo product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-02.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Metro Signal Polo product photo" />
             <span class="product-hover-price" aria-hidden="true">$54</span>
             <div>
               <h3>Metro Signal Polo</h3>
@@ -183,7 +183,7 @@
             </div>
           </article>
           <article class="product-card">
-            <img src="./assets/merch/boogie-man-sweater.png" alt="Blue patterned Boogie Man knit sweater product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/boogie-man-sweater.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Blue patterned Boogie Man knit sweater product photo" />
             <span class="product-hover-price" aria-hidden="true">$365</span>
             <div>
               <h3>Boogie Man Knit Sweater</h3>
@@ -192,7 +192,7 @@
             </div>
           </article>
           <article class="product-card">
-            <img src="./assets/merch/detroit-1701-hoodie.png" alt="Navy City of Detroit 1701 hoodie product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/detroit-1701-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Navy City of Detroit 1701 hoodie product photo" />
             <span class="product-hover-price" aria-hidden="true">$72</span>
             <div>
               <h3>City of Detroit 1701 Hoodie</h3>
@@ -201,7 +201,7 @@
             </div>
           </article>
           <article class="product-card">
-            <img src="./assets/merch/cyber-brain-glow-hoodie.png" alt="Black cyber brain glow hoodie product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/cyber-brain-glow-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Black cyber brain glow hoodie product photo" />
             <span class="product-hover-price" aria-hidden="true">$150</span>
             <div>
               <h3>Cyber Brain Glow Hoodie</h3>
@@ -210,7 +210,7 @@
             </div>
           </article>
           <article class="product-card">
-            <img src="./assets/merch/lottomind-coin-hoodie-cap.png" alt="Black LottoMind coin hoodie and matching cap product photo" />
+            <img loading="lazy" decoding="async" data-src="./assets/merch/lottomind-coin-hoodie-cap.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Black LottoMind coin hoodie and matching cap product photo" />
             <span class="product-hover-price" aria-hidden="true">$75</span>
             <div>
               <h3>LottoMind Coin Set</h3>
@@ -238,26 +238,26 @@
           </p>
         </div>
         <div class="gallery-motion-rail" aria-label="Gallery motion previews">
-          <video autoplay muted loop playsinline preload="metadata">
+          <video muted loop playsinline preload="none" data-lm-video-unmanaged="true">
             <source src="./assets/merch/gallery-motion-upload-20260518.mp4" type="video/mp4" />
           </video>
         </div>
         <div class="gallery-grid merch-swipe-rail" data-swipe-rail tabindex="0">
-          <article><img src="./assets/merch/lottomind-keychain-counter-display.webp" alt="LottoMind collectible keychain package gallery artwork" /><span>Keychain Drop</span><strong class="gallery-price">$25</strong></article>
-          <article><img src="./assets/merch/boogie-man-sweater.png" alt="Boogie Man knit sweater gallery artwork" /><span>Boogie Knit</span><strong class="gallery-price">$365</strong></article>
-          <article><img src="./assets/merch/city-of-detroit-1701-mark.png" alt="City of Detroit 1701 gallery artwork" /><span>City 1701 Mark</span><strong class="gallery-price">$42</strong></article>
-          <article><img src="./assets/merch/innovation-floor-model-hoodie.png" alt="Innovation Floor model hoodie gallery artwork" /><span>Model Drop</span><strong class="gallery-price">$49</strong></article>
-          <article><img src="./assets/merch/innovation-floor-hoodie.png" alt="Innovation Floor hoodie gallery artwork" /><span>Innovation Floor</span><strong class="gallery-price">$84</strong></article>
-          <article><img src="./assets/merch/detroit-embroidered-hoodie-closeup.png" alt="Detroit embroidered hoodie closeup gallery artwork" /><span>Embroidery Detail</span><strong class="gallery-price">$200</strong></article>
-          <article><img src="./assets/merch/detroit-1701-hoodie.png" alt="Detroit 1701 hoodie gallery artwork" /><span>1701 Hoodie</span><strong class="gallery-price">$72</strong></article>
-          <article><img src="./assets/merch/cyber-brain-glow-hoodie.png" alt="Cyber brain glow hoodie gallery artwork" /><span>Cyber Brain Glow</span><strong class="gallery-price">$150</strong></article>
-          <article><img src="./assets/merch/lottomind-coin-hoodie-cap.png" alt="LottoMind coin hoodie and cap gallery artwork" /><span>Coin Hoodie Set</span><strong class="gallery-price">$75</strong></article>
-          <article><img src="./assets/merch/gallery-orb-01.png" alt="Neon LottoMind gallery artwork" /><span>Neural Vault I</span><strong class="gallery-price">$68</strong></article>
-          <article><img src="./assets/merch/gallery-orb-02.png" alt="Neon LottoMind gallery artwork" /><span>Signal Crown</span><strong class="gallery-price">$54</strong></article>
-          <article><img src="./assets/merch/gallery-orb-03.png" alt="Neon LottoMind gallery artwork" /><span>Frequency Halo</span><strong class="gallery-price">$38</strong></article>
-          <article><img src="./assets/merch/gallery-orb-04.png" alt="Neon LottoMind gallery artwork" /><span>Live Orb Study</span><strong class="gallery-price">$72</strong></article>
-          <article><img src="./assets/merch/gallery-orb-05.png" alt="Neon LottoMind gallery artwork" /><span>Cyber Brain Plate</span><strong class="gallery-price">$54</strong></article>
-          <article><img src="./assets/merch/gallery-orb-06.png" alt="Neon LottoMind gallery artwork" /><span>Studio Signal</span><strong class="gallery-price">$38</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/lottomind-keychain-counter-display.webp" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="LottoMind collectible keychain package gallery artwork" /><span>Keychain Drop</span><strong class="gallery-price">$25</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/boogie-man-sweater.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Boogie Man knit sweater gallery artwork" /><span>Boogie Knit</span><strong class="gallery-price">$365</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/city-of-detroit-1701-mark.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="City of Detroit 1701 gallery artwork" /><span>City 1701 Mark</span><strong class="gallery-price">$42</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/innovation-floor-model-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Innovation Floor model hoodie gallery artwork" /><span>Model Drop</span><strong class="gallery-price">$49</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/innovation-floor-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Innovation Floor hoodie gallery artwork" /><span>Innovation Floor</span><strong class="gallery-price">$84</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/detroit-embroidered-hoodie-closeup.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Detroit embroidered hoodie closeup gallery artwork" /><span>Embroidery Detail</span><strong class="gallery-price">$200</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/detroit-1701-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Detroit 1701 hoodie gallery artwork" /><span>1701 Hoodie</span><strong class="gallery-price">$72</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/cyber-brain-glow-hoodie.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Cyber brain glow hoodie gallery artwork" /><span>Cyber Brain Glow</span><strong class="gallery-price">$150</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/lottomind-coin-hoodie-cap.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="LottoMind coin hoodie and cap gallery artwork" /><span>Coin Hoodie Set</span><strong class="gallery-price">$75</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-01.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Neural Vault I</span><strong class="gallery-price">$68</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-02.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Signal Crown</span><strong class="gallery-price">$54</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-03.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Frequency Halo</span><strong class="gallery-price">$38</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-04.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Live Orb Study</span><strong class="gallery-price">$72</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-05.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Cyber Brain Plate</span><strong class="gallery-price">$54</strong></article>
+          <article><img loading="lazy" decoding="async" data-src="./assets/merch/gallery-orb-06.png" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3C/svg%3E" alt="Neon LottoMind gallery artwork" /><span>Studio Signal</span><strong class="gallery-price">$38</strong></article>
         </div>
       </section>
 
@@ -286,8 +286,8 @@
     </footer>
 
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=home-startup-music-1" defer></script>
+    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-3" defer></script>
+    <script src="./site.js?v=perf-guard-5" defer></script>
     <script src="./live-events.js?v=audio-artlines-2" defer></script>
     <script src="./merch-store.js?v=cinematic-motion-1" defer></script>
     <script src="./assets/js/juneteenth-event-popup.js?v=juneteenth-event-3" defer></script>
