@@ -12,11 +12,6 @@
   }
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const lowPowerMode =
-    Boolean(connection?.saveData) ||
-    Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
-    Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   const state = {
     width: 1,
     height: 1,
@@ -50,8 +45,6 @@
 
   const seedBase = Date.now() ^ Math.floor(window.innerWidth * 131 + window.innerHeight * 17);
   let rng = mulberry32(seedBase >>> 0);
-  let frameHandle = 0;
-  let lastDraw = 0;
 
   function mulberry32(seed) {
     return () => {
@@ -131,7 +124,7 @@
     const rect = canvas.getBoundingClientRect();
     const width = Math.max(1, rect.width || stage.clientWidth || window.innerWidth);
     const height = Math.max(1, rect.height || hostHeight);
-    const dpr = Math.min(window.devicePixelRatio || 1, reduceMotion || lowPowerMode || width < 720 ? 1 : 1.15);
+    const dpr = Math.min(window.devicePixelRatio || 1, reduceMotion ? 1 : 1.35);
 
     state.width = width;
     state.height = height;
@@ -517,21 +510,6 @@
   }
 
   function frame(now) {
-    if (document.hidden) {
-      state.lastFrame = 0;
-      frameHandle = 0;
-      return;
-    }
-
-    const frameBudget = reduceMotion || lowPowerMode || state.width < 720 || document.body.classList.contains("lm-page-is-transitioning")
-      ? 1000 / 24
-      : 1000 / 30;
-    if (lastDraw && now - lastDraw < frameBudget) {
-      frameHandle = requestAnimationFrame(frame);
-      return;
-    }
-    lastDraw = now;
-
     if (!state.lastFrame) {
       state.lastFrame = now;
     }
@@ -540,14 +518,7 @@
     update(dt);
     draw();
     syncCanvasState();
-    frameHandle = requestAnimationFrame(frame);
-  }
-
-  function resume() {
-    if (frameHandle) return;
-    state.lastFrame = 0;
-    lastDraw = 0;
-    frameHandle = requestAnimationFrame(frame);
+    requestAnimationFrame(frame);
   }
 
   const controller = {
@@ -593,15 +564,7 @@
       resize();
     }
   }, { passive: true });
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      if (frameHandle) cancelAnimationFrame(frameHandle);
-      frameHandle = 0;
-      return;
-    }
-    resume();
-  }, { passive: true });
 
   resize();
-  resume();
+  requestAnimationFrame(frame);
 })();

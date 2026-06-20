@@ -2,11 +2,6 @@
   const canvas = document.getElementById("featureRaytraceGame");
   if (!canvas) return;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const lowPowerMode =
-    Boolean(connection?.saveData) ||
-    Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
-    Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   const ctx = canvas.getContext("2d");
   const els = {
     score: document.getElementById("rayScore"),
@@ -29,13 +24,12 @@
     level: 7,
     lastClear: performance.now(),
   };
-  let lastDraw = 0;
 
   function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
   function resize() {
+    state.dpr = Math.min(window.devicePixelRatio || 1, 2);
     state.width = window.innerWidth;
     state.height = window.innerHeight;
-    state.dpr = Math.min(window.devicePixelRatio || 1, reduceMotion || lowPowerMode || state.width < 720 ? 1 : 1.2);
     canvas.width = Math.round(state.width * state.dpr);
     canvas.height = Math.round(state.height * state.dpr);
     canvas.style.width = `${state.width}px`;
@@ -155,16 +149,6 @@
     ctx.stroke();
   }
   function draw(now) {
-    if (document.hidden) return;
-    const frameBudget = reduceMotion || lowPowerMode || state.width < 720 || document.body.classList.contains("lm-page-is-transitioning")
-      ? 1000 / 24
-      : 1000 / 30;
-    if (lastDraw && now - lastDraw < frameBudget) {
-      if (!reduceMotion) requestAnimationFrame(draw);
-      return;
-    }
-    lastDraw = now;
-
     const hitCount = state.targets.filter((t) => t.hit).length;
     if (els.score) els.score.textContent = Math.round(state.score).toLocaleString();
     if (els.high) els.high.textContent = Math.max(state.high, state.score).toLocaleString();
@@ -262,12 +246,6 @@
     }
   }
   window.addEventListener("resize", resize);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && !reduceMotion) {
-      lastDraw = 0;
-      requestAnimationFrame(draw);
-    }
-  }, { passive: true });
   window.addEventListener("pointermove", (event) => {
     state.pointer.x = event.clientX;
     state.pointer.y = event.clientY;

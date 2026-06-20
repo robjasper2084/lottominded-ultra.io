@@ -2205,59 +2205,6 @@
   }
 }
 
-html.lm-perf-steady .merch-store-page .merch-akari-field,
-html.lm-perf-steady .merch-store-page .merch-akari-field::before,
-html.lm-perf-steady .merch-store-page .merch-akari-field::after,
-html.lm-perf-steady .merch-store-page .merch-akari-field span,
-html.lm-perf-steady .merch-store-page .gallery-section::before,
-html.lm-perf-steady .merch-store-page .merch-drop-section .merch-section-copy::before,
-html.lm-perf-steady .merch-store-page .merch-drop-section .merch-section-copy::after,
-html.lm-perf-steady .merch-store-page .merch-drop-section .merch-section-copy h2::after,
-html.lm-perf-steady .merch-store-page .merch-strip::before,
-html.lm-perf-steady .merch-store-page .merch-strip::after,
-html.lm-perf-steady .merch-store-page .merch-strip a {
-  animation: none !important;
-  transition-duration: 80ms !important;
-  will-change: auto !important;
-}
-
-html.lm-perf-steady .merch-store-page .merch-strip-track {
-  animation-duration: 44s !important;
-  will-change: transform;
-}
-
-html.lm-perf-steady .merch-store-page .merch-akari-field,
-html.lm-perf-steady .merch-store-page .merch-akari-field span {
-  transform: none !important;
-}
-
-html.lm-perf-steady .merch-store-page .merch-akari-field::before {
-  opacity: 0.48;
-}
-
-html.lm-perf-steady .merch-store-page .merch-akari-field span {
-  opacity: 0.54;
-}
-
-@media (max-width: 900px) {
-  html.lm-perf-steady .merch-store-page .merch-strip {
-    justify-content: center;
-    overflow-x: auto;
-    padding-inline: 1rem;
-  }
-
-  html.lm-perf-steady .merch-store-page .merch-strip-track {
-    flex-wrap: wrap;
-    justify-content: center;
-    min-width: 0;
-    animation: none !important;
-  }
-
-  html.lm-perf-steady .merch-store-page .merch-strip-track[aria-hidden="true"] {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .bag-drawer.is-cart-popping,
   .product-card.is-add-popping,

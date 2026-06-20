@@ -18,11 +18,6 @@
   if (!ctx) return;
 
   const reduceMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  const lowPowerMode =
-    Boolean(connection?.saveData) ||
-    Boolean(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
-    Boolean(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
   const palette = {
     gold: "255, 224, 113",
     cyan: "41, 247, 255",
@@ -58,8 +53,6 @@
   };
 
   let rng = mulberry32(hashSeed(`${Date.now()}|${window.innerWidth}|${window.innerHeight}|beat2lotto`) >>> 0);
-  let frameHandle = 0;
-  let lastDraw = 0;
 
   function hashSeed(input) {
     let h = 2166136261;
@@ -159,7 +152,7 @@
     ];
 
     if (!state.orbs.length) {
-      state.orbs = Array.from({ length: state.width < 720 || lowPowerMode ? 5 : 8 }, createOrb);
+      state.orbs = Array.from({ length: state.width < 720 ? 6 : 10 }, createOrb);
     }
     state.orbs.forEach(placeOrb);
   }
@@ -168,7 +161,7 @@
     const reduced = reduceMotionQuery?.matches;
     state.width = Math.max(1, window.innerWidth);
     state.height = Math.max(1, window.innerHeight);
-    state.dpr = Math.min(window.devicePixelRatio || 1, reduced || lowPowerMode || state.width < 720 ? 1 : 1.2);
+    state.dpr = Math.min(window.devicePixelRatio || 1, reduced ? 1 : 1.65);
 
     canvas.width = Math.round(state.width * state.dpr);
     canvas.height = Math.round(state.height * state.dpr);
@@ -234,12 +227,12 @@
         hue
       });
     }
-    if (state.sparks.length > 110) state.sparks.splice(0, state.sparks.length - 110);
+    if (state.sparks.length > 180) state.sparks.splice(0, state.sparks.length - 180);
   }
 
   function addRipple(x, y, hue, strength = 1) {
     state.ripples.push({ x, y, hue, age: 0, life: rand(0.7, 1.2), strength });
-    if (state.ripples.length > 18) state.ripples.splice(0, state.ripples.length - 18);
+    if (state.ripples.length > 24) state.ripples.splice(0, state.ripples.length - 24);
   }
 
   function scoreEvent(points, comboBoost) {
@@ -368,7 +361,7 @@
     });
 
     ball.trail.push({ x: ball.x, y: ball.y, age: 0 });
-    if (ball.trail.length > 34) ball.trail.splice(0, ball.trail.length - 34);
+    if (ball.trail.length > 42) ball.trail.splice(0, ball.trail.length - 42);
   }
 
   function nextRayHit(pos, dir) {
@@ -720,21 +713,6 @@
   }
 
   function frame(now) {
-    if (document.hidden) {
-      state.lastFrame = 0;
-      frameHandle = 0;
-      return;
-    }
-
-    const frameBudget = reduceMotionQuery?.matches || lowPowerMode || state.width < 720 || document.body.classList.contains("lm-page-is-transitioning")
-      ? 1000 / 24
-      : 1000 / 30;
-    if (lastDraw && now - lastDraw < frameBudget) {
-      frameHandle = window.requestAnimationFrame(frame);
-      return;
-    }
-    lastDraw = now;
-
     if (!state.lastFrame) state.lastFrame = now;
     const reduced = reduceMotionQuery?.matches;
     const dt = clamp((now - state.lastFrame) / 1000, 0, reduced ? 0.024 : 0.034);
@@ -742,14 +720,7 @@
     update(dt);
     draw();
     syncDataset();
-    frameHandle = window.requestAnimationFrame(frame);
-  }
-
-  function resume() {
-    if (frameHandle) return;
-    state.lastFrame = 0;
-    lastDraw = 0;
-    frameHandle = window.requestAnimationFrame(frame);
+    window.requestAnimationFrame(frame);
   }
 
   const controller = {
@@ -793,16 +764,8 @@
   window.addEventListener("keydown", (event) => onKey(event, true));
   window.addEventListener("keyup", (event) => onKey(event, false));
   reduceMotionQuery?.addEventListener?.("change", resize);
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      if (frameHandle) window.cancelAnimationFrame(frameHandle);
-      frameHandle = 0;
-      return;
-    }
-    resume();
-  }, { passive: true });
 
   resize();
   syncDataset();
-  resume();
+  window.requestAnimationFrame(frame);
 })();

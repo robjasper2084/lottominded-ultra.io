@@ -48,8 +48,6 @@
   let reverbWet = null;
   let eqData = null;
   let eqFrame = 0;
-  let idleEqFrames = 0;
-  let scanTimer = 0;
   let idlePhase = 0;
   let visualImpulse = 0;
   let lastEqSnapshot = { average: 0, bass: 0, mid: 0, high: 0 };
@@ -289,11 +287,6 @@
     });
   }
 
-  function ensureScanTimer() {
-    if (scanTimer) return;
-    scanTimer = window.setInterval(scanPageMedia, 3500);
-  }
-
 
   async function startFeatureTrack({ restart = false, entry = false } = {}) {
     if (!featureTrack) return false;
@@ -320,7 +313,6 @@
       document.body.dataset.featureTrackVolume = targetVolume.toFixed(2);
       await featureTrack.play();
       setEqStatus(entry ? "Digital Static" : "Playing");
-      ensureScanTimer();
       startEqRender();
       syncPlayerUi();
       return true;
@@ -332,15 +324,8 @@
   }
   function startEqRender() {
     if (eqFrame || !eqBars.length) return;
-    idleEqFrames = 0;
 
     const render = () => {
-      if (document.hidden) {
-        eqFrame = 0;
-        setBeatVars(0, 0);
-        return;
-      }
-
       let average = 0;
       let bass = 0;
       let mid = 0;
@@ -420,17 +405,6 @@
       });
 
       visualImpulse *= 0.93;
-      const shouldKeepRendering =
-        (featureTrack && !featureTrack.paused && !featureTrack.ended) ||
-        average > 0.018 ||
-        visualImpulse > 0.025;
-      idleEqFrames = shouldKeepRendering ? 0 : idleEqFrames + 1;
-      if (idleEqFrames > 60) {
-        eqFrame = 0;
-        setBeatVars(0, 0);
-        syncPlayerUi();
-        return;
-      }
       eqFrame = window.requestAnimationFrame(render);
     };
 
@@ -497,29 +471,19 @@
   ["pointerdown", "touchstart", "keydown"].forEach((type) => {
     document.addEventListener(type, () => {
       getContext();
-      ensureScanTimer();
       scanPageMedia();
       startEqRender();
     }, { once: true, passive: true });
   });
 
   document.addEventListener("play", (event) => {
-    ensureScanTimer();
     if (event.target instanceof HTMLMediaElement) connectPlayableMedia(event.target);
   }, true);
   document.addEventListener("volumechange", (event) => {
-    ensureScanTimer();
     if (event.target instanceof HTMLMediaElement) connectPlayableMedia(event.target);
   }, true);
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      if (eqFrame) window.cancelAnimationFrame(eqFrame);
-      eqFrame = 0;
-      return;
-    }
-    if (featureTrack && !featureTrack.paused && !featureTrack.ended) startEqRender();
-  }, { passive: true });
+  const scanTimer = window.setInterval(scanPageMedia, 2200);
+  startEqRender();
 
 
   if (featureTrack) {
@@ -578,7 +542,6 @@
     featureTrack.addEventListener("play", () => {
       connectPlayableMedia(featureTrack);
       setEqStatus("Playing");
-      ensureScanTimer();
       startEqRender();
       syncPlayerUi();
     });
@@ -689,7 +652,7 @@
   });
 
   window.addEventListener("pagehide", () => {
-    if (scanTimer) window.clearInterval(scanTimer);
+    window.clearInterval(scanTimer);
     if (eqFrame) window.cancelAnimationFrame(eqFrame);
   });
 })();

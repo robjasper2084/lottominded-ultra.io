@@ -865,19 +865,3 @@ body.features-cinematic-page.is-feature-beat-active .motion-rail {
     inset 0 4px 10px rgba(0, 0, 0, 0.88),
     0 0 26px rgba(138, 92, 255, 0.62);
 }
-
-/* tab-hover-calm: tabs stay steady on hover; active states still read as active. */
-.feature-nav a:hover:not(.is-active),
-.rail-cards a:hover,
-.mode-tabs button:hover:not(.is-active) {
-  border-color: rgba(130, 200, 255, 0.18) !important;
-  color: var(--lm-text) !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012)) !important;
-  box-shadow: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-.rail-cards a {
-  will-change: auto;
-}
