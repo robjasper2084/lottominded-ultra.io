@@ -1307,3 +1307,88 @@
     display: none;
   }
 }
+
+.lottery-spheres-page .spheres-player-ripples {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482998;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.lottery-spheres-page .spheres-player-ripple {
+  position: fixed;
+  left: var(--ripple-x);
+  top: var(--ripple-y);
+  width: var(--ripple-size);
+  aspect-ratio: 1;
+  border: 1px solid rgba(178, 255, 246, 0.5);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(41, 247, 255, 0.18) 0 12%, rgba(94, 255, 157, 0.12) 22%, transparent 58%),
+    conic-gradient(from 60deg, transparent, rgba(255, 244, 178, 0.22), transparent, rgba(41, 247, 255, 0.24), transparent);
+  box-shadow:
+    0 0 20px rgba(41, 247, 255, 0.24),
+    inset 0 0 26px rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.18);
+  animation: spheresPlayerRipple 920ms ease-out forwards;
+  mix-blend-mode: screen;
+}
+
+.lottery-spheres-page .spheres-live-player.is-floatable {
+  left: var(--spheres-player-left, 50%);
+  top: var(--spheres-player-top, calc(100vh - 184px));
+  right: auto;
+  bottom: auto;
+  z-index: 2147483000;
+  cursor: grab;
+  touch-action: none;
+  transform: translate(-50%, -50%) !important;
+}
+
+.lottery-spheres-page .spheres-live-player.is-floatable:hover,
+.lottery-spheres-page .spheres-live-player.is-floatable:focus-within,
+.lottery-spheres-page .spheres-live-player.is-floatable.is-pointer-reactive,
+.lottery-spheres-page .spheres-live-player.is-floatable.is-touch-reactive,
+.lottery-spheres-page .spheres-live-player.is-floatable.is-pressed {
+  transform: translate(-50%, -50%) scale(1.018) !important;
+}
+
+.lottery-spheres-page .spheres-live-player.is-floatable.is-dragging {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.04) !important;
+  box-shadow:
+    inset 0.72rem 0.55rem 1.15rem rgba(255, 255, 255, 0.24),
+    inset -1.25rem -1.55rem 2.25rem rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 244, 178, 0.5),
+    0 0 46px rgba(41, 247, 255, 0.66),
+    0 0 82px rgba(94, 255, 157, 0.26),
+    0 30px 82px rgba(0, 0, 0, 0.58);
+}
+
+.lottery-spheres-page .spheres-live-player.is-floatable button {
+  touch-action: manipulation;
+}
+
+@keyframes spheresPlayerRipple {
+  0% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scale(0.18);
+    filter: blur(0);
+  }
+  72% {
+    opacity: 0.34;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.12);
+    filter: blur(1.8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lottery-spheres-page .spheres-player-ripple {
+    display: none;
+  }
+}

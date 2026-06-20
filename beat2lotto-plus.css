@@ -673,6 +673,11 @@ button.is-copy-pulsed {
   .beat2lotto-current-page #b2lBallpassGame.b2l-game-generator-bg {
     opacity: 0.46;
   }
+
+  .beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::before,
+  .beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::after {
+    animation: none;
+  }
 }
 
 /* Final anti-clipping pass for Ballpass view headlines and sphere tabs. */
@@ -699,6 +704,122 @@ button.is-copy-pulsed {
   word-break: normal;
   white-space: nowrap;
   contain: none;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title {
+  --b2l-future-shine: linear-gradient(96deg, #ffffff 0%, #e9fbff 18%, #fff089 44%, #ffffff 66%, #5effff 100%);
+  position: relative;
+  display: inline-block;
+  inline-size: auto;
+  width: auto;
+  max-inline-size: 100%;
+  min-height: 0;
+  margin: 0 0 clamp(0.9rem, 2vw, 1.35rem);
+  padding: 0.02em 0.08em 0.2em 0;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  color: #f8fcff;
+  font-size: clamp(3.2rem, 8.2vw, 7.7rem);
+  line-height: 0.84;
+  background: var(--b2l-future-shine);
+  background-size: 210% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.92),
+    0 0.085em 0 rgba(0, 0, 0, 0.54),
+    0 0 22px rgba(245, 251, 255, 0.72),
+    0 0 48px rgba(41, 247, 255, 0.5),
+    0 0 68px rgba(255, 224, 113, 0.32);
+  filter:
+    drop-shadow(0 0 18px rgba(245, 251, 255, 0.34))
+    drop-shadow(0 0 42px rgba(41, 247, 255, 0.36));
+  animation: lmTextShine 5.2s ease-in-out infinite;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::before,
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::after {
+  position: absolute;
+  pointer-events: none;
+  content: attr(data-title);
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::before {
+  inset: 0;
+  z-index: -1;
+  color: rgba(41, 247, 255, 0.78);
+  -webkit-text-stroke: 0.045em rgba(41, 247, 255, 0.28);
+  text-shadow:
+    0.06em 0.035em 0 rgba(255, 79, 216, 0.32),
+    -0.045em 0 0 rgba(94, 255, 255, 0.38),
+    0 0 32px rgba(41, 247, 255, 0.58);
+  opacity: 0.9;
+  transform: translate3d(0.045em, 0.035em, 0);
+  animation: b2lFutureSignal 3.9s steps(1, end) infinite;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::after {
+  right: 10%;
+  bottom: 0.04em;
+  left: 0.02em;
+  z-index: 1;
+  height: 0.065em;
+  min-height: 0.28rem;
+  content: "";
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 224, 113, 0.95), rgba(41, 247, 255, 0.95) 38%, rgba(255, 79, 216, 0.58) 68%, transparent);
+  box-shadow:
+    0 0 12px rgba(255, 224, 113, 0.52),
+    0 0 28px rgba(41, 247, 255, 0.5);
+  transform-origin: left center;
+  animation: b2lFutureScan 3.7s ease-in-out infinite;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title .tm {
+  color: #ffe071;
+  -webkit-text-fill-color: #ffe071;
+  text-shadow: 0 0 0.55rem rgba(255, 224, 113, 0.44);
+}
+
+@keyframes b2lFutureScan {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scaleX(0.78);
+  }
+  48% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes b2lFutureSignal {
+  0%,
+  84%,
+  100% {
+    clip-path: inset(0);
+    transform: translate3d(0.045em, 0.035em, 0);
+    opacity: 0.9;
+  }
+  86% {
+    clip-path: inset(16% 0 58% 0);
+    transform: translate3d(-0.035em, 0, 0);
+    opacity: 0.7;
+  }
+  88% {
+    clip-path: inset(62% 0 14% 0);
+    transform: translate3d(0.065em, -0.01em, 0);
+    opacity: 0.95;
+  }
+}
+
+@media (max-width: 620px) {
+  .beat2lotto-current-page .beat2lotto-hero .b2l-motion-title {
+    font-size: clamp(2.4rem, 13.5vw, 4.7rem);
+    white-space: normal;
+  }
 }
 
 .beat2lotto-current-page .lotto-output-head h2 {

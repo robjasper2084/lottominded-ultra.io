@@ -73,6 +73,8 @@ const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoCloseButtons = document.querySelectorAll("[data-startup-video-close]");
 const startupMusicStart = document.querySelector("[data-startup-music-start]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
+let startupReturnTimer = 0;
+let startupReturnAutoCloseTimer = 0;
 const domainStrip = document.querySelector(".domain-strip");
 const gamePip = document.querySelector("[data-game-pip]");
 const gamePipClose = document.querySelector("[data-game-pip-close]");
@@ -92,6 +94,8 @@ const compactHeaderLabels =
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
 const STARTUP_MODAL_SEEN_KEY = "lottominded.ultra.homeStartupSeen.v1";
+const STARTUP_MODAL_RETURN_DELAY = 40000;
+const STARTUP_MODAL_RETURN_VISIBLE_MS = 60000;
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const PROMPT_ACCESS_KEY = "lottominded.ultra.promptAccess.v1";
 const PROMPT_ACCESS_PASSWORD = "lottomind";
@@ -2384,7 +2388,14 @@ function rememberStartupVideoSeen() {
   }
 }
 
+function clearStartupReturnAutoClose() {
+  if (!startupReturnAutoCloseTimer) return;
+  window.clearTimeout(startupReturnAutoCloseTimer);
+  startupReturnAutoCloseTimer = 0;
+}
+
 async function closeStartupVideo(options = {}) {
+  clearStartupReturnAutoClose();
   if (options.remember !== false) rememberStartupVideoSeen();
   startupVideoModal?.classList.add("is-hidden");
   startupVideoModal?.setAttribute("aria-hidden", "true");
@@ -2395,7 +2406,7 @@ async function closeStartupVideo(options = {}) {
 }
 
 function showStartupVideo() {
-  if (!startupVideoModal || hasSeenStartupVideo()) {
+  if (!startupVideoModal) {
     startupVideoModal?.classList.add("is-hidden");
     startupVideoModal?.setAttribute("aria-hidden", "true");
     document.body.classList.remove("has-startup-modal");
@@ -2415,6 +2426,35 @@ function showStartupVideo() {
       // Browsers may block autoplay until the first user gesture.
     });
   }
+}
+
+function showStartupVideoReturn() {
+  if (!startupVideoModal) return;
+  document.body.classList.add("has-startup-modal");
+  startupVideoModal.classList.remove("is-hidden");
+  startupVideoModal.setAttribute("aria-hidden", "false");
+  if (!reducedMotionQuery.matches && startupVideoPlayer) {
+    startupVideoPlayer.muted = false;
+    startupVideoPlayer.defaultMuted = false;
+    startupVideoPlayer.removeAttribute("muted");
+    startupVideoPlayer.volume = 0.72;
+    startupVideoPlayer.currentTime = 0;
+    startupVideoPlayer.play().catch(() => {
+      // Browsers may block timed playback until the first user gesture.
+    });
+  }
+  clearStartupReturnAutoClose();
+  startupReturnAutoCloseTimer = window.setTimeout(() => {
+    closeStartupVideo({ remember: false, playMusic: false });
+  }, STARTUP_MODAL_RETURN_VISIBLE_MS);
+}
+
+function scheduleStartupVideoReturn() {
+  if (!startupVideoModal || startupReturnTimer) return;
+  startupReturnTimer = window.setTimeout(() => {
+    startupReturnTimer = 0;
+    showStartupVideoReturn();
+  }, STARTUP_MODAL_RETURN_DELAY);
 }
 
 function getGamePipOffset() {
@@ -3060,6 +3100,7 @@ function endGamePipDrag(event) {
 }
 
 showStartupVideo();
+scheduleStartupVideoReturn();
 
 startupVideoCloseButtons.forEach((button) => {
   button.addEventListener("click", () => closeStartupVideo());

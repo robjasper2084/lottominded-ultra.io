@@ -161,6 +161,71 @@
   color: rgba(248, 240, 220, 0.7);
 }
 
+.merch-store-page .juneteenth-event-popup {
+  padding: clamp(10px, 2.2vw, 28px);
+}
+
+.merch-store-page .juneteenth-popup-panel {
+  width: min(520px, calc(100vw - 24px));
+  max-height: min(78vh, 620px);
+  border-radius: 18px;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.72), 0 0 26px rgba(212, 175, 55, 0.18);
+}
+
+.merch-store-page .juneteenth-popup-close {
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  font-size: 0.76rem;
+}
+
+.merch-store-page .juneteenth-popup-head {
+  gap: 8px;
+  padding: 12px 54px 10px 18px;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+.merch-store-page .juneteenth-popup-head small {
+  font-size: 0.68rem;
+}
+
+.merch-store-page .juneteenth-popup-image {
+  max-height: 260px;
+}
+
+.merch-store-page .juneteenth-popup-body {
+  padding: clamp(14px, 2.2vw, 20px);
+}
+
+.merch-store-page .juneteenth-popup-kicker {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+
+.merch-store-page .juneteenth-popup-body h2 {
+  font-size: clamp(1.65rem, 4vw, 2.45rem);
+  line-height: 0.98;
+}
+
+.merch-store-page .juneteenth-popup-body p {
+  margin-block: 0.5rem;
+  font-size: clamp(0.86rem, 1.9vw, 0.98rem);
+}
+
+.merch-store-page .juneteenth-popup-actions {
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.merch-store-page .juneteenth-button {
+  min-height: 38px;
+  padding: 0.66rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+}
+
 .juneteenth-stream-feature {
   position: relative;
   z-index: 1;

@@ -574,3 +574,175 @@
   window.addEventListener("resize", resize, { passive: true });
   resize();
 })();
+
+(() => {
+  const player = document.querySelector(".spheres-live-player[data-live-player]");
+  if (!player || player.dataset.spheresFloatReady === "true") return;
+
+  const storageKey = "lottominded.ultra.spheresPlayerPosition.v1";
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const interactiveSelector = "button, a, input, textarea, select, audio, video, [role='button']";
+  const ripples = document.createElement("div");
+  let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  let drag = null;
+  let lastRipple = { time: 0, x: 0, y: 0 };
+  let resizeFrame = 0;
+
+  ripples.className = "spheres-player-ripples";
+  ripples.setAttribute("aria-hidden", "true");
+  document.body.appendChild(ripples);
+
+  player.dataset.spheresFloatReady = "true";
+  player.classList.add("is-floatable");
+  player.setAttribute("aria-grabbed", "false");
+
+  function getPlayerSize() {
+    const rect = player.getBoundingClientRect();
+    return {
+      width: rect.width || 300,
+      height: rect.height || 300
+    };
+  }
+
+  function clampPosition(x, y) {
+    const margin = 12;
+    const { width, height } = getPlayerSize();
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    const minX = Math.min(window.innerWidth / 2, halfWidth + margin);
+    const maxX = Math.max(window.innerWidth / 2, window.innerWidth - halfWidth - margin);
+    const minY = Math.min(window.innerHeight / 2, halfHeight + margin);
+    const maxY = Math.max(window.innerHeight / 2, window.innerHeight - halfHeight - margin);
+    return {
+      x: Math.min(maxX, Math.max(minX, x)),
+      y: Math.min(maxY, Math.max(minY, y))
+    };
+  }
+
+  function defaultPosition() {
+    const { height } = getPlayerSize();
+    return clampPosition(window.innerWidth / 2, window.innerHeight - height / 2 - 18);
+  }
+
+  function savePosition() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(position));
+    } catch {
+      // Storage can be unavailable in private or locked-down browser modes.
+    }
+  }
+
+  function applyPosition(x, y, options = {}) {
+    position = clampPosition(x, y);
+    player.style.setProperty("--spheres-player-left", `${Math.round(position.x)}px`);
+    player.style.setProperty("--spheres-player-top", `${Math.round(position.y)}px`);
+    if (options.save) savePosition();
+  }
+
+  function loadPosition() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+      if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) {
+        applyPosition(saved.x, saved.y);
+        return;
+      }
+    } catch {
+      // Ignore invalid saved data and fall back to the default bottom-center position.
+    }
+    const next = defaultPosition();
+    applyPosition(next.x, next.y);
+  }
+
+  function spawnRipple(x, y, force = false) {
+    if (reduceMotion.matches) return;
+    const now = performance.now();
+    const distance = Math.hypot(x - lastRipple.x, y - lastRipple.y);
+    if (!force && now - lastRipple.time < 58 && distance < 18) return;
+
+    lastRipple = { time: now, x, y };
+    const ripple = document.createElement("span");
+    const size = Math.min(190, Math.max(64, 58 + distance * 1.35));
+    ripple.className = "spheres-player-ripple";
+    ripple.style.setProperty("--ripple-x", `${Math.round(x)}px`);
+    ripple.style.setProperty("--ripple-y", `${Math.round(y)}px`);
+    ripple.style.setProperty("--ripple-size", `${Math.round(size)}px`);
+    ripples.appendChild(ripple);
+
+    while (ripples.childElementCount > 26) ripples.firstElementChild?.remove();
+    window.setTimeout(() => ripple.remove(), 960);
+  }
+
+  function beginDrag(event) {
+    if (drag) return;
+    if (event.button !== undefined && event.button !== 0) return;
+    if (event.target.closest(interactiveSelector)) return;
+
+    const pointerId = event.pointerId ?? "mouse";
+    drag = {
+      id: pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: position.x,
+      originY: position.y
+    };
+
+    player.classList.add("is-dragging");
+    player.setAttribute("aria-grabbed", "true");
+    if (Number.isFinite(event.pointerId)) player.setPointerCapture?.(event.pointerId);
+    spawnRipple(position.x, position.y, true);
+    event.preventDefault();
+  }
+
+  function moveDrag(event) {
+    const pointerId = event.pointerId ?? "mouse";
+    if (!drag || pointerId !== drag.id) return;
+    applyPosition(
+      drag.originX + event.clientX - drag.startX,
+      drag.originY + event.clientY - drag.startY
+    );
+    spawnRipple(position.x, position.y);
+    event.preventDefault();
+  }
+
+  function endDrag(event) {
+    const pointerId = event.pointerId ?? "mouse";
+    if (!drag || pointerId !== drag.id) return;
+    if (Number.isFinite(event.pointerId)) player.releasePointerCapture?.(event.pointerId);
+    player.classList.remove("is-dragging");
+    player.setAttribute("aria-grabbed", "false");
+    spawnRipple(position.x, position.y, true);
+    savePosition();
+    drag = null;
+  }
+
+  function cancelDrag() {
+    if (!drag) return;
+    player.classList.remove("is-dragging");
+    player.setAttribute("aria-grabbed", "false");
+    savePosition();
+    drag = null;
+  }
+
+  player.addEventListener("pointerdown", beginDrag);
+  player.addEventListener("pointermove", moveDrag);
+  player.addEventListener("pointerup", endDrag);
+  player.addEventListener("pointercancel", endDrag);
+  window.addEventListener("pointermove", moveDrag);
+  window.addEventListener("pointerup", endDrag);
+  window.addEventListener("pointercancel", endDrag);
+  player.addEventListener("mousedown", beginDrag);
+  window.addEventListener("mousemove", moveDrag);
+  window.addEventListener("mouseup", endDrag);
+  player.addEventListener("lostpointercapture", cancelDrag);
+  window.addEventListener("blur", cancelDrag);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) cancelDrag();
+  });
+
+  window.addEventListener("resize", () => {
+    window.cancelAnimationFrame(resizeFrame);
+    resizeFrame = window.requestAnimationFrame(() => applyPosition(position.x, position.y, { save: true }));
+  }, { passive: true });
+
+  window.requestAnimationFrame(loadPosition);
+})();
