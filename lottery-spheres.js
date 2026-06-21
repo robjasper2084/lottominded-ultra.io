@@ -586,6 +586,7 @@
   let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
   let drag = null;
   let lastRipple = { time: 0, x: 0, y: 0 };
+  let rippleHue = Math.floor(Math.random() * 360);
   let resizeFrame = 0;
 
   ripples.className = "spheres-player-ripples";
@@ -657,19 +658,27 @@
     if (reduceMotion.matches) return;
     const now = performance.now();
     const distance = Math.hypot(x - lastRipple.x, y - lastRipple.y);
-    if (!force && now - lastRipple.time < 58 && distance < 18) return;
+    if (!force && now - lastRipple.time < 42 && distance < 10) return;
 
+    const angle = Math.atan2(y - lastRipple.y, x - lastRipple.x) * (180 / Math.PI);
     lastRipple = { time: now, x, y };
     const ripple = document.createElement("span");
-    const size = Math.min(190, Math.max(64, 58 + distance * 1.35));
+    const size = Math.min(460, Math.max(force ? 220 : 130, 118 + distance * 2.25));
+    const stretch = Math.min(2.1, Math.max(1.18, 1 + distance / 150));
+    rippleHue = (rippleHue + 37 + distance * 0.4) % 360;
     ripple.className = "spheres-player-ripple";
     ripple.style.setProperty("--ripple-x", `${Math.round(x)}px`);
     ripple.style.setProperty("--ripple-y", `${Math.round(y)}px`);
     ripple.style.setProperty("--ripple-size", `${Math.round(size)}px`);
+    ripple.style.setProperty("--ripple-scale-x", stretch.toFixed(2));
+    ripple.style.setProperty("--ripple-rotate", `${Number.isFinite(angle) ? Math.round(angle) : 0}deg`);
+    ripple.style.setProperty("--ripple-hue", `${Math.round(rippleHue)}`);
+    ripple.style.setProperty("--ripple-hue-alt", `${Math.round((rippleHue + 82) % 360)}`);
+    ripple.style.setProperty("--ripple-hue-third", `${Math.round((rippleHue + 176) % 360)}`);
     ripples.appendChild(ripple);
 
-    while (ripples.childElementCount > 26) ripples.firstElementChild?.remove();
-    window.setTimeout(() => ripple.remove(), 960);
+    while (ripples.childElementCount > 42) ripples.firstElementChild?.remove();
+    window.setTimeout(() => ripple.remove(), 1680);
   }
 
   function beginDrag(event) {

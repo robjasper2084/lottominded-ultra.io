@@ -5,18 +5,18 @@
   const navItems = [
     { label: "Home", href: "./index.html#top", icon: "HM" },
     { label: "Features", href: "./features-app.html", icon: "FX" },
-    {
-      label: "LottoMind App",
-      href: "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/",
-      icon: "LM",
-      attrs: ' data-vault-launch data-plan="free"',
-    },
     { label: "Streams", href: "./live-events.html", icon: "EV" },
     { label: "Spheres", href: "./lottery-spheres.html#spheres", icon: "SP" },
     { label: "Beat2Lotto+", href: "./beat2lotto-plus.html#beat2lotto", icon: "B2" },
     { label: "Merch", href: "./merch-store.html", icon: "MC" },
     { label: "Guide", href: "./how-to-use.html", icon: "GD" },
     { label: "Studio", href: "./lottomind-stem-studio/index.html", icon: "ST" },
+    {
+      label: "LottoMind App",
+      href: "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/",
+      icon: "LM",
+      attrs: ' data-vault-launch data-plan="free"',
+    },
   ];
 
   const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
@@ -866,12 +866,12 @@ function setupUniversalFloatingMenu() {
     ["Home", "./how-to-use.html"],
     ["Features", "./features-app.html"],
     ["Events", "./live-events.html"],
-    ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"],
     ["Spheres", "./lottery-spheres.html#spheres"],
     ["Beat2Lotto+", "./beat2lotto-plus.html#beat2lotto"],
     ["Merch", "./merch-store.html"],
     ["Guide", "./how-to-use.html"],
-    ["Studio", "./lottomind-stem-studio/index.html"]
+    ["Studio", "./lottomind-stem-studio/index.html"],
+    ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"]
   ];
 
   const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle, .pl-floating");
@@ -1142,6 +1142,183 @@ function setupSharedLivePlayers() {
 }
 
 setupSharedLivePlayers();
+
+function setupSphereOrbLivePlayers() {
+  const players = Array.from(document.querySelectorAll(".sphere-orb-live-player"));
+  if (!players.length) return;
+
+  document.body.classList.add("has-sphere-orb-player");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const interactiveSelector = "button, a, input, textarea, select, audio, video, [role='button']";
+
+  players.forEach((player, index) => {
+    if (player.dataset.sphereOrbReady === "true") return;
+
+    const storageKey = `lottominded.ultra.orbPlayer.${location.pathname.replace(/[^a-z0-9]+/gi, "-")}.${index}.v1`;
+    const ripples = document.createElement("div");
+    let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    let drag = null;
+    let lastRipple = { time: 0, x: 0, y: 0 };
+    let resizeFrame = 0;
+
+    ripples.className = "spheres-player-ripples";
+    ripples.setAttribute("aria-hidden", "true");
+    document.body.appendChild(ripples);
+
+    player.dataset.sphereOrbReady = "true";
+    player.classList.add("is-floatable");
+    player.setAttribute("aria-grabbed", "false");
+
+    const getPlayerSize = () => {
+      const rect = player.getBoundingClientRect();
+      return {
+        width: rect.width || 300,
+        height: rect.height || 300
+      };
+    };
+
+    const clampPosition = (x, y) => {
+      const margin = 12;
+      const { width, height } = getPlayerSize();
+      const halfWidth = width / 2;
+      const halfHeight = height / 2;
+      const minX = Math.min(window.innerWidth / 2, halfWidth + margin);
+      const maxX = Math.max(window.innerWidth / 2, window.innerWidth - halfWidth - margin);
+      const minY = Math.min(window.innerHeight / 2, halfHeight + margin);
+      const maxY = Math.max(window.innerHeight / 2, window.innerHeight - halfHeight - margin);
+      return {
+        x: Math.min(maxX, Math.max(minX, x)),
+        y: Math.min(maxY, Math.max(minY, y))
+      };
+    };
+
+    const savePosition = () => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(position));
+      } catch {
+        // Ignore locked-down storage modes.
+      }
+    };
+
+    const applyPosition = (x, y, options = {}) => {
+      position = clampPosition(x, y);
+      player.style.setProperty("--spheres-player-left", `${Math.round(position.x)}px`);
+      player.style.setProperty("--spheres-player-top", `${Math.round(position.y)}px`);
+      if (options.save) savePosition();
+    };
+
+    const defaultPosition = () => {
+      const { height } = getPlayerSize();
+      const bottomOffset = document.body.classList.contains("beat2lotto-current-page") ? 148 : 126;
+      return clampPosition(window.innerWidth / 2, window.innerHeight - height / 2 - bottomOffset);
+    };
+
+    const loadPosition = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+        if (Number.isFinite(saved?.x) && Number.isFinite(saved?.y)) {
+          applyPosition(saved.x, saved.y);
+          return;
+        }
+      } catch {
+        // Fall back to the default bottom-center position.
+      }
+      const next = defaultPosition();
+      applyPosition(next.x, next.y);
+    };
+
+    const spawnRipple = (x, y, force = false) => {
+      if (reduceMotion.matches) return;
+      const now = performance.now();
+      const distance = Math.hypot(x - lastRipple.x, y - lastRipple.y);
+      if (!force && now - lastRipple.time < 58 && distance < 18) return;
+
+      lastRipple = { time: now, x, y };
+      const ripple = document.createElement("span");
+      const size = Math.min(190, Math.max(64, 58 + distance * 1.35));
+      ripple.className = "spheres-player-ripple";
+      ripple.style.setProperty("--ripple-x", `${Math.round(x)}px`);
+      ripple.style.setProperty("--ripple-y", `${Math.round(y)}px`);
+      ripple.style.setProperty("--ripple-size", `${Math.round(size)}px`);
+      ripples.appendChild(ripple);
+
+      while (ripples.childElementCount > 26) ripples.firstElementChild?.remove();
+      window.setTimeout(() => ripple.remove(), 960);
+    };
+
+    const beginDrag = (event) => {
+      if (drag) return;
+      if (event.button !== undefined && event.button !== 0) return;
+      if (event.target.closest(interactiveSelector)) return;
+
+      drag = {
+        id: event.pointerId ?? "mouse",
+        startX: event.clientX,
+        startY: event.clientY,
+        originX: position.x,
+        originY: position.y
+      };
+
+      player.classList.add("is-dragging");
+      player.setAttribute("aria-grabbed", "true");
+      if (Number.isFinite(event.pointerId)) player.setPointerCapture?.(event.pointerId);
+      spawnRipple(position.x, position.y, true);
+      event.preventDefault();
+    };
+
+    const moveDrag = (event) => {
+      const pointerId = event.pointerId ?? "mouse";
+      if (!drag || pointerId !== drag.id) return;
+      applyPosition(
+        drag.originX + event.clientX - drag.startX,
+        drag.originY + event.clientY - drag.startY
+      );
+      spawnRipple(position.x, position.y);
+      event.preventDefault();
+    };
+
+    const endDrag = (event) => {
+      const pointerId = event.pointerId ?? "mouse";
+      if (!drag || pointerId !== drag.id) return;
+      if (Number.isFinite(event.pointerId)) player.releasePointerCapture?.(event.pointerId);
+      player.classList.remove("is-dragging");
+      player.setAttribute("aria-grabbed", "false");
+      spawnRipple(position.x, position.y, true);
+      savePosition();
+      drag = null;
+    };
+
+    const cancelDrag = () => {
+      if (!drag) return;
+      player.classList.remove("is-dragging");
+      player.setAttribute("aria-grabbed", "false");
+      savePosition();
+      drag = null;
+    };
+
+    player.addEventListener("pointerdown", beginDrag);
+    player.addEventListener("pointermove", moveDrag);
+    player.addEventListener("pointerup", endDrag);
+    player.addEventListener("pointercancel", endDrag);
+    window.addEventListener("pointermove", moveDrag);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+    player.addEventListener("lostpointercapture", cancelDrag);
+    window.addEventListener("blur", cancelDrag);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) cancelDrag();
+    });
+
+    window.addEventListener("resize", () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => applyPosition(position.x, position.y, { save: true }));
+    }, { passive: true });
+
+    window.requestAnimationFrame(loadPosition);
+  });
+}
+
+setupSphereOrbLivePlayers();
 
 
 const REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
@@ -1721,7 +1898,64 @@ function setupHomePianoHoverToggle(pianoHeader) {
   siteHeader.addEventListener("focusin", () => setHidden(false));
 }
 
+function setupSiteHeaderClickToggle() {
+  if (!siteHeader) return;
+  if (siteHeader.dataset.clickHeaderToggleReady === "true") return;
+  siteHeader.dataset.clickHeaderToggleReady = "true";
+
+  siteHeader.classList.remove("is-home-header-hidden", "is-sphere-hover-hidden", "is-universal-header-hidden");
+  document.body.classList.remove("is-home-header-hidden", "is-sphere-header-hidden", "is-universal-header-hidden");
+
+  const toggle = document.createElement("button");
+  toggle.className = "header-click-toggle";
+  toggle.type = "button";
+  toggle.textContent = "NAV";
+  toggle.setAttribute("aria-label", "Show site header");
+  toggle.setAttribute("aria-expanded", "true");
+  document.body.append(toggle);
+
+  const interactiveSelector = [
+    "a",
+    "button",
+    "input",
+    "textarea",
+    "select",
+    "label",
+    "[role='button']",
+    "[data-no-header-toggle]",
+    ".universal-menu-toggle",
+    ".universal-floating-trigger",
+    ".direct-action",
+    ".direct-launch"
+  ].join(",");
+
+  const setHidden = (hidden) => {
+    siteHeader.classList.toggle("is-click-header-hidden", hidden);
+    document.body.classList.toggle("is-click-header-hidden", hidden);
+    toggle.setAttribute("aria-expanded", String(!hidden));
+    toggle.setAttribute("aria-label", hidden ? "Show site header" : "Hide site header");
+  };
+
+  siteHeader.addEventListener("click", (event) => {
+    if (event.defaultPrevented || event.target.closest(interactiveSelector)) return;
+    setHidden(true);
+  });
+
+  toggle.addEventListener("click", () => {
+    setHidden(siteHeader.classList.contains("is-click-header-hidden") ? false : true);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && siteHeader.classList.contains("is-click-header-hidden")) {
+      setHidden(false);
+    }
+  });
+
+  setHidden(false);
+}
+
 function setupHomeHeaderHoverReveal() {
+  return setupSiteHeaderClickToggle();
   const canUseHoverReveal =
     document.body.classList.contains("home-page") ||
     document.body.classList.contains("prompt-lab-page");
@@ -1776,6 +2010,7 @@ function setupHomeHeaderHoverReveal() {
 setupHomeHeaderHoverReveal();
 
 function setupHomeSphereHeaderToggle() {
+  return setupSiteHeaderClickToggle();
   if (!siteHeader) return;
   if (!document.body.classList.contains("home-page") || !document.body.classList.contains("has-sphere-header")) return;
   if (siteHeader.dataset.sphereHeaderToggleReady === "true") return;
@@ -1867,6 +2102,7 @@ function setupHomeSphereHeaderToggle() {
 setupHomeSphereHeaderToggle();
 
 function setupPlainSiteHeaderHoverToggle() {
+  return setupSiteHeaderClickToggle();
   if (!siteHeader) return;
   if (document.body.classList.contains("has-manual-instrument-header")) return;
   if (document.body.classList.contains("has-sphere-header")) return;

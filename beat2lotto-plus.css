@@ -1149,6 +1149,34 @@ button.is-copy-pulsed {
   font-size: clamp(1.4rem, 3.36vw, 2.6rem);
 }
 
+/* Clear Beat2Lotto title pass: no glow, no ghost layers. */
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title,
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title:is(:hover, :focus-visible) {
+  color: #f1fbff !important;
+  -webkit-text-fill-color: #f1fbff !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.72),
+    0 4px 0 rgba(12, 42, 54, 0.54) !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::before,
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+.beat2lotto-current-page .beat2lotto-hero .b2l-motion-title .tm {
+  color: #fff0a8 !important;
+  -webkit-text-fill-color: #fff0a8 !important;
+  text-shadow: none !important;
+}
+
 .prompt-lab-beat2lotto-top .beat2lotto-coin-orb img[src*="beat2lotto-static-logo-coin"] {
   object-fit: cover;
   object-position: center;
