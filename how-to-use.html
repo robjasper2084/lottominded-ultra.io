@@ -10,7 +10,7 @@
     <title>LottoMind™ | Simple User Guide</title>
     <meta name="theme-color" content="#070707" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=header-click-orb-1" />
+    <link rel="stylesheet" href="./styles.css?v=compositor-pass-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,7 +18,7 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
     <style>
       :root {
         color-scheme: dark;
@@ -1008,65 +1008,78 @@
         pointer-events: none;
         opacity: 0;
         background: linear-gradient(180deg, rgba(3, 8, 10, 0.22), rgba(3, 8, 10, 0.02));
-        animation: guideWordRainFade 2.95s ease both;
+        animation: guideWordRainFade 5.2s ease both;
       }
 
       .guide-word-rain span {
         position: absolute;
         top: -14vh;
         left: var(--rain-x);
-        color: rgba(41, 247, 255, 0.9);
+        color: hsl(var(--rain-hue, 186) 96% 68%);
         font-family: var(--display-font);
-        font-size: clamp(0.88rem, 1.28vw, 1.35rem);
-        font-weight: 900;
+        font-size: clamp(1.4rem, 2.05vw, 2.16rem);
+        font-weight: 1000;
         line-height: 1.34;
         text-align: center;
         text-transform: uppercase;
         min-width: 8ch;
         white-space: pre-line;
+        -webkit-text-stroke: 1px rgba(255, 255, 255, 0.18);
         text-shadow:
-          0 0 10px rgba(41, 247, 255, 0.72),
-          0 0 22px rgba(255, 223, 117, 0.22);
-        opacity: 0;
+          0 0 12px hsl(var(--rain-hue, 186) 96% 68% / 0.7),
+          0 0 28px rgba(255, 223, 117, 0.32),
+          0 8px 24px rgba(0, 0, 0, 0.56);
+        opacity: 0.95;
         animation: guideWordCascade var(--rain-speed) linear var(--rain-delay) both;
       }
 
       .guide-word-rain span:nth-child(3n) {
-        color: rgba(255, 223, 117, 0.92);
+        --rain-hue: 48;
       }
 
       .guide-word-rain span:nth-child(4n) {
-        color: rgba(94, 255, 157, 0.86);
+        --rain-hue: 148;
+      }
+
+      .guide-word-rain span:nth-child(5n) {
+        --rain-hue: 312;
+      }
+
+      .guide-word-rain span:nth-child(7n) {
+        --rain-hue: 260;
       }
 
       @keyframes guideWordRainFade {
         0% { opacity: 0; }
         12% { opacity: 1; }
-        78% { opacity: 0.95; }
-        100% { opacity: 0; }
+        100% { opacity: 1; }
       }
 
       @keyframes guideWordCascade {
         0% {
           top: -14vh;
-          opacity: 0;
+          opacity: 0.92;
           filter: blur(5px);
+          transform: scale(0.88);
         }
 
         12% {
           opacity: 0.95;
           filter: blur(0);
+          transform: scale(1);
         }
 
         84% {
-          opacity: 0.86;
-          filter: blur(0.8px);
+          opacity: 0.96;
+          filter: blur(0.2px);
+          transform: scale(1.18);
         }
 
         100% {
-          top: 106vh;
-          opacity: 0;
-          filter: blur(8px);
+          top: 116vh;
+          opacity: 0.96;
+          filter: blur(0.4px);
+          transform: scale(1.32);
         }
       }
       .section-head p,
@@ -2146,8 +2159,8 @@
       <section class="refined-app-band marketing-section reveal-section" id="lottomind-refined" data-reveal>
         <div class="refined-app-copy">
           <video class="refined-copy-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
           </video>
           <p class="eyebrow">Ultra Studio -> LottoMind Refined App -> Vault Membership</p>
           <h2 class="kinetic-word" data-kinetic="ENTER THE LOTTOMIND REFINED APP" tabindex="0">Enter the LottoMind Refined App</h2>
@@ -2166,8 +2179,8 @@
         </div>
         <div class="refined-bridge-grid" aria-label="LottoMind product bridge">
           <video class="refined-bridge-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
           </video>
           <article>
             <span>01</span>
@@ -2236,10 +2249,10 @@
     <audio id="guideStartupSoundtrack" preload="metadata" data-guide-startup-soundtrack>
       <source src="./assets/audio/lottomind-heart-639hz.mp3?v=guide-heart-639-1" type="audio/mpeg" />
     </audio>
-    <script src="./assets/features-app/js/features-raytrace-game.js?v=guide-pong-bg-1" defer></script>
+    <script src="./assets/features-app/js/features-raytrace-game.js?v=perf-fixes-1" defer></script>
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=header-click-orb-1" defer></script>
+    <script src="./site.js?v=perf-fixes-1" defer></script>
     <script>
       (() => {
         const accessPassword = "lottomind";
@@ -2456,21 +2469,22 @@
             const rain = document.createElement("div");
             rain.className = "guide-word-rain";
             rain.setAttribute("aria-hidden", "true");
-            const lanes = Math.min(34, Math.max(18, Math.ceil(window.innerWidth / 42)));
+            const lanes = Math.min(28, Math.max(12, Math.ceil(window.innerWidth / 58)));
             for (let index = 0; index < lanes; index += 1) {
               const column = document.createElement("span");
               const start = index % words.length;
               column.textContent = Array.from({ length: 9 }, (_, wordIndex) => words[(start + wordIndex) % words.length]).join("\n");
               column.style.setProperty("--rain-x", `${Math.round((index + 0.35) * (100 / lanes))}%`);
               column.style.setProperty("--rain-delay", `${(index % 8) * 0.055}s`);
-              column.style.setProperty("--rain-speed", `${2.05 + (index % 6) * 0.16}s`);
+              column.style.setProperty("--rain-hue", `${(188 + index * 31) % 360}`);
+              column.style.setProperty("--rain-speed", `${3.8 + (index % 6) * 0.22}s`);
               rain.append(column);
             }
             document.body.append(rain);
             window.setTimeout(() => {
               rain.remove();
               heading.dataset.wordRainActive = "false";
-            }, 3300);
+            }, 5600);
           }, 720);
         };
 

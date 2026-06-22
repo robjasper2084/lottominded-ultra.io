@@ -1,14 +1,14 @@
 :root {
   --lm-transition-rgb: 41 247 255;
   --lm-transition-color: #29f7ff;
-  --lm-transition-duration: 870ms;
+  --lm-transition-duration: 620ms;
 }
 
 .lm-page-transition {
   position: fixed;
   inset: 0;
   z-index: 999999;
-  display: grid;
+  display: none;
   place-items: center;
   overflow: hidden;
   visibility: hidden;
@@ -22,6 +22,7 @@
 
 html.lm-transition-arriving .lm-page-transition,
 .lm-page-transition.is-active {
+  display: grid;
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
@@ -58,7 +59,7 @@ html.lm-transition-arriving .lm-page-transition,
 }
 
 .lm-page-transition.is-closing .lm-page-transition__flash {
-  animation: lmTransitionCloseSpark 140ms 630ms ease-out both;
+  animation: lmTransitionCloseSpark 140ms 430ms ease-out both;
 }
 
 .lm-page-transition__video {
@@ -70,10 +71,10 @@ html.lm-transition-arriving .lm-page-transition,
   object-fit: cover;
   object-position: center;
   opacity: 0;
-  mix-blend-mode: screen;
-  filter: contrast(1.08) saturate(1.14);
+  mix-blend-mode: normal;
+  filter: none;
   transform: translateZ(0);
-  will-change: opacity, filter;
+  will-change: opacity;
 }
 
 .lm-page-transition.is-opening .lm-page-transition__video {
@@ -120,7 +121,7 @@ html.lm-transition-arriving .lm-page-transition,
   color: rgba(241, 250, 255, 0.88);
   background: rgba(2, 5, 12, 0.52);
   box-shadow: 0 0 24px rgb(var(--lm-transition-rgb) / 0.14);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
   font: 800 clamp(0.62rem, 1.5vw, 0.78rem)/1 system-ui, sans-serif;
   letter-spacing: 0.18em;
   text-transform: uppercase;

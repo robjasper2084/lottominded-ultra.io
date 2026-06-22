@@ -7,7 +7,7 @@
     <title>LOTTOMINDED ULTRA | Feature Signal Route</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=header-click-orb-1" />
+    <link rel="stylesheet" href="./styles.css?v=compositor-pass-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -15,8 +15,8 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
-    <link rel="stylesheet" href="./assets/features-app/css/features-cinematic-raytrace.css?v=hide-top-console-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
+    <link rel="stylesheet" href="./assets/features-app/css/features-cinematic-raytrace.css?v=compositor-pass-3" />
   </head>
   <body class="features-cinematic-page">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
@@ -31,7 +31,7 @@
       <video class="feature-video-backdrop feature-video-backdrop-a" autoplay muted loop playsinline preload="metadata" poster="./assets/video/lm-feature-portal-poster.jpg">
         <source src="./assets/video/lm-feature-portal-loop.mp4" type="video/mp4" />
       </video>
-      <video class="feature-video-backdrop feature-video-backdrop-b" autoplay muted loop playsinline preload="metadata" poster="./assets/video/lm-feature-signal-poster.jpg">
+      <video class="feature-video-backdrop feature-video-backdrop-b" muted playsinline preload="none" poster="./assets/video/lm-feature-signal-poster.jpg" data-lm-video-unmanaged="true">
         <source src="./assets/video/lm-feature-signal-loop.mp4" type="video/mp4" />
       </video>
     </div>
@@ -43,9 +43,9 @@
       <nav class="feature-nav" aria-label="Feature page navigation">
         <a href="./how-to-use.html">Lottomind</a>
         <a class="is-active" href="./features-app.html">Features</a>
+        <a href="./lottery-spheres.html#spheres">Spheres</a>
         <a href="https://lottomind.one/">LottoMind App</a>
         <a href="./beat2lotto-plus.html">Beat2Lotto+</a>
-        <a href="./lottery-spheres.html#spheres">SELCIRM</a>
         <a href="./merch-store.html">Merch</a>
         <a href="./how-to-use.html">Guide</a>
       </nav>
@@ -215,7 +215,7 @@
     </audio>
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=header-click-orb-1" defer></script>
-    <script src="./assets/features-app/js/features-cinematic-motion.js?v=transition-hotfix-2" defer></script>
+    <script src="./site.js?v=perf-fixes-1" defer></script>
+    <script src="./assets/features-app/js/features-cinematic-motion.js?v=compositor-pass-2" defer></script>
   </body>
 </html>

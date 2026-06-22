@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=header-click-orb-1" />
+    <link rel="stylesheet" href="./styles.css?v=compositor-pass-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,7 +18,7 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
     <link rel="stylesheet" href="./assets/css/home-raytrace.css?v=home-raytrace-pass-13" />
   </head>
   <body class="home-page has-sphere-header">
@@ -109,18 +109,17 @@
 
     <aside class="startup-video-modal is-hidden" data-startup-video aria-label="Lottominded Ultra startup music" aria-hidden="true">
       <div class="startup-video-panel" role="dialog" aria-modal="true" aria-labelledby="startupVideoTitle">
-        <button class="startup-video-close" type="button" data-startup-video-close aria-label="Enter site and start music">X</button>
+        <button class="startup-video-close" type="button" data-startup-video-close aria-label="Enter site">X</button>
         <p class="eyebrow">Lottominded Ultra Signal</p>
         <h2 id="startupVideoTitle">Start the home frequency.</h2>
-        <video class="startup-video-player" autoplay loop playsinline controls preload="auto">
-          <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
+        <video class="startup-video-player" autoplay loop playsinline controls preload="metadata">
+          <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
         </video>
         <div class="startup-video-actions">
-          <button class="primary-action" type="button" data-startup-music-start>Start Music</button>
-          <button class="secondary-action" type="button" data-startup-video-close>Enter Site</button>
+          <button class="primary-action" type="button" data-startup-video-close>Enter Site</button>
         </div>
         <p class="startup-video-copy">
-          Audio starts with this welcome signal. Tap Start Music to load the home page soundtrack from the top.
+          Audio starts with this welcome signal when the site opens. Enter the site when you are ready.
         </p>
         <p class="startup-video-credit">
           Produced by LOTTOMINDED&trade;. Recording artist: Bloom Through Gloom.
@@ -135,7 +134,7 @@
       <div class="home-sphere-scanline" aria-hidden="true"></div>
       <section class="hero kinetic-hero" id="top" data-kinetic-hero>
         <video class="hero-motion" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-          <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
+          <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
           <source src="./assets/video/lottomind-logo-sting.mp4" type="video/mp4" />
         </video>
         <div class="hero-circuit-layer" aria-hidden="true"></div>
@@ -213,7 +212,7 @@
             <a class="secondary-action" href="./lottomind-stem-studio/index.html">Launch Studio</a>
           </div>
         </aside>
-        <div class="domain-strip" aria-label="Brand identity">
+        <div class="domain-strip" aria-label="Brand identity" role="button" tabindex="0" aria-pressed="false">
           <video class="domain-strip-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
             <source src="./assets/video/lottomind-logo-sting.mp4" type="video/mp4" />
           </video>
@@ -254,8 +253,8 @@
         </div>
         <div class="prompt-video-card audio-enabled-card" aria-label="Bloom Through Gloom studio video">
           <video autoplay muted loop playsinline controls preload="metadata" data-inline-sound-video data-inline-sound-volume="0.86">
-            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
-            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
+            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
           </video>
           <button class="inline-sound-button" type="button" data-inline-sound-button>Sound on</button>
           <span>Produced by LOTTOMINDED&trade; Recording artist Bloom Through Gloom</span>
@@ -265,11 +264,11 @@
       <section class="refined-app-band marketing-section reveal-section" id="lottomind-refined" data-reveal>
         <div class="refined-app-copy">
           <video class="refined-copy-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
           </video>
           <p class="eyebrow">Ultra Studio -> LottoMind Refined App -> Vault Membership</p>
-          <h2 class="kinetic-word" data-kinetic="ENTER THE LOTTOMIND REFINED APP" tabindex="0">Enter the LottoMind Refined App</h2>
+          <h2 class="kinetic-word refined-explode-heading" data-kinetic="ENTER THE LOTTOMIND REFINED APP" tabindex="0">Enter the LottoMind Refined App</h2>
           <p>
             Step from the LOTTOMINDED ULTRA studio into the full LottoMind Refined experience - AI number tools,
             Dream Oracle, saved numbers, credits, scanner tools, rewards, and premium Vault access.
@@ -285,8 +284,8 @@
         </div>
         <div class="refined-bridge-grid" aria-label="LottoMind product bridge">
           <video class="refined-bridge-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="./assets/video/bloom-through-gloom-hero.mp4" type="video/mp4" />
-            <source src="./assets/video/home-prompt-bloom-blend.mp4" type="video/mp4" />
+            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
+            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
           </video>
           <article>
             <span>01</span>
@@ -325,8 +324,8 @@
 
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=header-click-orb-1" defer></script>
-    <script src="./lottery-spheres.js?v=home-spheres-column-1" defer></script>
-    <script src="./assets/js/home-raytrace.js?v=home-raytrace-pass-13" defer></script>
+    <script src="./site.js?v=perf-fixes-1" defer></script>
+    <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
+    <script src="./assets/js/home-raytrace.js?v=perf-fixes-1" defer></script>
   </body>
 </html>

@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Lottery Spheres</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=header-click-orb-1" />
+    <link rel="stylesheet" href="./styles.css?v=compositor-pass-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,8 +18,8 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=verified-transitions-1" />
-    <link rel="stylesheet" href="./lottery-spheres.css?v=water-ripple-trail-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
+    <link rel="stylesheet" href="./lottery-spheres.css?v=smooth-ripple-trail-1" />
   </head>
   <body class="lottery-spheres-page">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
@@ -40,6 +40,7 @@
       <nav aria-label="Lottery Spheres navigation">
         <a href="./how-to-use.html" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="./lottery-spheres.html#spheres" data-icon="SP" aria-current="page">Spheres</a>
         <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
         <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
         <a href="./merch-store.html" data-icon="MC">Merch</a>
@@ -47,7 +48,7 @@
       </nav>
     </header>
 
-    <div class="sphere-audio-gate" data-sphere-audio-gate role="dialog" aria-modal="true" aria-label="Sphere background music">
+    <div class="sphere-audio-gate is-hidden" data-sphere-audio-gate role="dialog" aria-modal="true" aria-label="Sphere background music" hidden>
       <div class="sphere-audio-panel">
         <p class="section-kicker">Vault Frequency</p>
         <h2>LottoMind Vault 174 Hz</h2>
@@ -147,7 +148,7 @@
 
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=header-click-orb-1" defer></script>
-    <script src="./lottery-spheres.js?v=water-ripple-trail-1" defer></script>
+    <script src="./site.js?v=perf-fixes-1" defer></script>
+    <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
   </body>
 </html>

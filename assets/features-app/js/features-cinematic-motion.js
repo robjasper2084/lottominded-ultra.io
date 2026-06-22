@@ -50,8 +50,9 @@
   let eqFrame = 0;
   let idlePhase = 0;
   let visualImpulse = 0;
+  let lastBeatPaintAt = 0;
   let lastEqSnapshot = { average: 0, bass: 0, mid: 0, high: 0 };
-  const featureEntryVolume = 0.36;
+  const featureEntryVolume = 0.18;
   const featureManualVolume = 0.58;
   const mediaSources = new WeakSet();
   const fxState = { drive: 0.16, reverb: 0.22, delay: 0.18, master: 0.72 };
@@ -171,24 +172,16 @@
 
   function setBeatVars(energy = 0, bass = 0) {
     const root = document.body;
-    const sway = Math.sin(idlePhase * 1.8) * (7 + bass * 24);
     root.classList.toggle("is-feature-beat-active", energy > 0.035 || bass > 0.035);
     root.style.setProperty("--feature-beat-energy", energy.toFixed(3));
     root.style.setProperty("--feature-beat-bass", bass.toFixed(3));
-    root.style.setProperty("--feature-video-x", `${(sway * 0.26).toFixed(2)}px`);
-    root.style.setProperty("--feature-video-y", `${(-bass * 12).toFixed(2)}px`);
-    root.style.setProperty("--feature-video-scale", (1 + bass * 0.065).toFixed(3));
-    root.style.setProperty("--feature-video-opacity-a", (0.2 + energy * 0.24).toFixed(3));
-    root.style.setProperty("--feature-video-opacity-b", (0.14 + energy * 0.18).toFixed(3));
-    root.style.setProperty("--feature-grid-x", `${(sway * 0.5).toFixed(2)}px`);
-    root.style.setProperty("--feature-grid-y", `${(bass * 28).toFixed(2)}px`);
-    root.style.setProperty("--feature-grid-x-alt", `${(-sway * 0.38).toFixed(2)}px`);
-    root.style.setProperty("--feature-grid-y-alt", `${(-energy * 22).toFixed(2)}px`);
-    root.style.setProperty("--feature-noise-opacity", (0.88 + energy * 0.12).toFixed(3));
-    root.style.setProperty("--feature-overlay-scale", (1 + energy * 0.014).toFixed(3));
-    root.style.setProperty("--feature-overlay-opacity", (0.86 + bass * 0.14).toFixed(3));
-    root.style.setProperty("--feature-field-x", `${(-sway * 0.16).toFixed(2)}px`);
-    root.style.setProperty("--feature-field-y", `${(bass * 12).toFixed(2)}px`);
+    root.style.setProperty("--feature-video-opacity-a", (0.13 + energy * 0.12).toFixed(3));
+    root.style.setProperty("--feature-video-opacity-b", (0.08 + energy * 0.1).toFixed(3));
+  }
+
+  function resetBeatVars() {
+    setBeatVars(0, 0);
+    lastBeatPaintAt = 0;
   }
   function getContext() {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -326,6 +319,12 @@
     if (eqFrame || !eqBars.length) return;
 
     const render = () => {
+      if (document.hidden) {
+        eqFrame = 0;
+        resetBeatVars();
+        return;
+      }
+
       let average = 0;
       let bass = 0;
       let mid = 0;
@@ -361,7 +360,15 @@
       const idle = 0.1 + Math.sin(idlePhase) * 0.035;
       const energy = Math.max(average, idle, visualImpulse * 0.68);
       const trackIsLive = featureTrack && !featureTrack.paused && !featureTrack.ended;
-      setBeatVars(trackIsLive ? Math.min(1, average * 2.1) : 0, trackIsLive ? Math.min(1, bass * 1.7) : 0);
+      const nowMs = Date.now();
+      const shouldPaintFullPageBeat =
+        !trackIsLive ||
+        visualImpulse > 0.72 ||
+        nowMs - lastBeatPaintAt > 84;
+      if (shouldPaintFullPageBeat) {
+        setBeatVars(trackIsLive ? Math.min(1, average * 2.1) : 0, trackIsLive ? Math.min(1, bass * 1.7) : 0);
+        lastBeatPaintAt = nowMs;
+      }
       syncPlayerUi();
 
       eqBars.forEach((bar, index) => {
@@ -405,6 +412,11 @@
       });
 
       visualImpulse *= 0.93;
+      if (!trackIsLive && visualImpulse < 0.025) {
+        eqFrame = 0;
+        resetBeatVars();
+        return;
+      }
       eqFrame = window.requestAnimationFrame(render);
     };
 
@@ -482,6 +494,15 @@
   document.addEventListener("volumechange", (event) => {
     if (event.target instanceof HTMLMediaElement) connectPlayableMedia(event.target);
   }, true);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && eqFrame) {
+      window.cancelAnimationFrame(eqFrame);
+      eqFrame = 0;
+      resetBeatVars();
+      return;
+    }
+    if (featureTrack && !featureTrack.paused) startEqRender();
+  });
   const scanTimer = window.setInterval(scanPageMedia, 2200);
   startEqRender();
 
@@ -492,7 +513,7 @@
         await startFeatureTrack({ restart: featureTrack.ended || completedEntryLoops >= maxEntryLoops });
       } else {
         featureTrack.pause();
-        setBeatVars(0, 0);
+        resetBeatVars();
         setEqStatus("Paused");
         syncPlayerUi();
       }
@@ -519,7 +540,7 @@
 
     featureTrack.addEventListener("ended", () => {
       completedEntryLoops += 1;
-      setBeatVars(0, 0);
+      resetBeatVars();
       if (completedEntryLoops < maxEntryLoops) {
         try {
           featureTrack.currentTime = 0;
@@ -547,7 +568,7 @@
     });
     featureTrack.addEventListener("pause", () => {
       if (!featureTrack.ended) {
-        setBeatVars(0, 0);
+        resetBeatVars();
         setEqStatus("Paused");
         syncPlayerUi();
       }
