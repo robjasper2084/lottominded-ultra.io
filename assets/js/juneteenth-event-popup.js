@@ -5,7 +5,7 @@
 
   const eventUrl = "https://www.eventbrite.com/e/serengeti-galleries-presents-juneteenth-celebration-tickets-1989124716573";
   const bannerSrc = "./assets/events/serengeti-juneteenth-celebration.webp";
-  const popupDelay = 10000;
+  const popupDelay = 60000;
 
   const openExternal = (event) => {
     event.preventDefault();
@@ -86,7 +86,7 @@
         <button class="juneteenth-popup-close" type="button" data-juneteenth-close aria-label="Close Juneteenth event announcement">X</button>
         <div class="juneteenth-popup-head">
           <span>Special Event Announcement</span>
-          <small>Appears 10 seconds after page load</small>
+          <small>Appears after one minute on this page</small>
         </div>
         <img class="juneteenth-popup-image" src="${bannerSrc}" alt="Serengeti Galleries Juneteenth Celebration event banner" />
         <div class="juneteenth-popup-body">

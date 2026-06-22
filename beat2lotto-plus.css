@@ -890,7 +890,35 @@ button.is-copy-pulsed {
 }
 
 .beat2lotto-live-player.is-disabled {
-  opacity: 0.82;
+  opacity: 1;
+}
+
+body.beat2lotto-current-page #player.sphere-orb-live-player {
+  border-color: rgba(255, 200, 74, 0.9) !important;
+  background:
+    radial-gradient(circle at 31% 18%, rgba(255, 255, 255, 0.84), rgba(255, 246, 199, 0.34) 9%, transparent 21%),
+    radial-gradient(circle at 66% 72%, rgba(255, 105, 45, 0.46), transparent 28%),
+    radial-gradient(circle at 42% 42%, rgba(255, 224, 113, 0.88), rgba(255, 105, 45, 0.44) 29%, rgba(41, 247, 255, 0.24) 49%, rgba(13, 7, 25, 0.96) 76%),
+    linear-gradient(145deg, rgba(52, 25, 4, 0.98), rgba(5, 38, 48, 0.98)) !important;
+  box-shadow:
+    inset 0.72rem 0.55rem 1.15rem rgba(255, 255, 255, 0.22),
+    inset -1.25rem -1.55rem 2.25rem rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 200, 74, 0.46),
+    0 0 34px rgba(255, 105, 45, 0.46),
+    0 0 56px rgba(41, 247, 255, 0.2),
+    0 24px 74px rgba(0, 0, 0, 0.58) !important;
+}
+
+body.beat2lotto-current-page #player.sphere-orb-live-player .now-wave {
+  border-color: rgba(255, 200, 74, 0.34) !important;
+  background: linear-gradient(90deg, rgba(255, 200, 74, 0.18), rgba(41, 247, 255, 0.12), rgba(255, 105, 45, 0.2)) !important;
+}
+
+body.beat2lotto-current-page #player.sphere-orb-live-player .big {
+  border-color: rgba(255, 200, 74, 0.92) !important;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.3), transparent 30%),
+    linear-gradient(145deg, rgba(255, 200, 74, 0.3), rgba(255, 105, 45, 0.24)) !important;
 }
 
 .beat2lotto-live-player::before {

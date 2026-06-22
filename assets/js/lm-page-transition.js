@@ -119,7 +119,7 @@
   }
 
   function preloadCurrentArrival() {
-    preload(themeForPath(window.location.pathname), "close", true);
+    preload(themeForPath(window.location.pathname), "close", false);
   }
 
   function preloadLinkDestination(link) {
@@ -131,7 +131,7 @@
     try {
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin) return;
-      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open", true);
+      preload(normalizeTheme(link.dataset.transitionTheme || themeForPath(url.pathname)), "open", false);
     } catch (_) {}
   }
 

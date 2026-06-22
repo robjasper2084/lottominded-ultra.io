@@ -3,6 +3,8 @@
   if (!canvas) return;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ctx = canvas.getContext("2d");
+  let canvasInView = true;
+  let drawFrame = 0;
   const els = {
     score: document.getElementById("rayScore"),
     high: document.getElementById("rayHigh"),
@@ -148,7 +150,16 @@
     ctx.lineTo(x2, y2);
     ctx.stroke();
   }
-  function draw(now) {
+  function canDraw() {
+    return !reduceMotion && !document.hidden && canvasInView;
+  }
+  function scheduleDraw() {
+    if (drawFrame || !canDraw()) return;
+    drawFrame = requestAnimationFrame(draw);
+  }
+  function draw(now, force = false) {
+    drawFrame = 0;
+    if (!force && !canDraw()) return;
     const hitCount = state.targets.filter((t) => t.hit).length;
     if (els.score) els.score.textContent = Math.round(state.score).toLocaleString();
     if (els.high) els.high.textContent = Math.max(state.high, state.score).toLocaleString();
@@ -231,7 +242,7 @@
       state.targets.forEach((t) => { t.hit = false; });
       burst(state.emitter.x, state.emitter.y, 28, "#ffe071");
     }
-    if (!reduceMotion) requestAnimationFrame(draw);
+    scheduleDraw();
   }
   function rotateNearest(x, y) {
     let best = Infinity, nearest = null;
@@ -245,12 +256,31 @@
       burst(nearest.cx, nearest.cy, 10, "#29f7ff");
     }
   }
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => {
+    resize();
+    scheduleDraw();
+  }, { passive: true });
   window.addEventListener("pointermove", (event) => {
     state.pointer.x = event.clientX;
     state.pointer.y = event.clientY;
+    scheduleDraw();
   }, { passive: true });
   window.addEventListener("click", (event) => rotateNearest(event.clientX, event.clientY));
+  document.addEventListener("visibilitychange", scheduleDraw);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      canvasInView = entries.some((entry) => entry.isIntersecting);
+      scheduleDraw();
+    }, { rootMargin: "180px 0px", threshold: 0.01 });
+    observer.observe(canvas);
+  }
   resize();
-  draw(performance.now());
+  if (reduceMotion) {
+    const wasInView = canvasInView;
+    canvasInView = true;
+    draw(performance.now(), true);
+    canvasInView = wasInView;
+  } else {
+    scheduleDraw();
+  }
 })();

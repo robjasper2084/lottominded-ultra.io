@@ -1,7 +1,6 @@
 const merchRoot = document.documentElement;
 const merchHero = document.querySelector("[data-merch-tilt]");
 const bagDrawer = document.querySelector("[data-bag-drawer]");
-const bagCount = document.querySelector("[data-bag-count]");
 const bagItems = document.querySelector("[data-bag-items]");
 const bagTotal = document.querySelector("[data-bag-total]");
 const cartNote = document.querySelector("[data-cart-note]");
@@ -66,28 +65,31 @@ function getCartTotals() {
 }
 
 function updateBag() {
-  if (!bagCount || !bagItems) return;
   const totals = getCartTotals();
-  bagCount.textContent = String(totals.count);
+  document.querySelectorAll("[data-bag-count]").forEach((target) => {
+    target.textContent = String(totals.count);
+  });
   if (bagTotal) bagTotal.textContent = formatMoney(totals.subtotal);
 
-  bagItems.innerHTML = bag.length
-    ? bag.map((item) => `
-        <li class="cart-line">
-          <div>
-            <strong>${escapeHtml(item.name)}</strong>
-            <span>${formatMoney(item.price)} each</span>
-          </div>
-          <div class="cart-quantity" aria-label="${escapeHtml(item.name)} quantity">
-            <button type="button" data-cart-decrease="${escapeHtml(item.id)}" aria-label="Decrease ${escapeHtml(item.name)}">-</button>
-            <span>${item.quantity}</span>
-            <button type="button" data-cart-increase="${escapeHtml(item.id)}" aria-label="Increase ${escapeHtml(item.name)}">+</button>
-          </div>
-          <strong>${formatMoney(item.price * item.quantity)}</strong>
-          <button class="cart-remove" type="button" data-cart-remove="${escapeHtml(item.id)}">Remove</button>
-        </li>
-      `).join("")
-    : `<li class="cart-empty">Your cart is empty. Add a hoodie, cap, polo, or gallery piece.</li>`;
+  if (bagItems) {
+    bagItems.innerHTML = bag.length
+      ? bag.map((item) => `
+          <li class="cart-line">
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              <span>${formatMoney(item.price)} each</span>
+            </div>
+            <div class="cart-quantity" aria-label="${escapeHtml(item.name)} quantity">
+              <button type="button" data-cart-decrease="${escapeHtml(item.id)}" aria-label="Decrease ${escapeHtml(item.name)}">-</button>
+              <span>${item.quantity}</span>
+              <button type="button" data-cart-increase="${escapeHtml(item.id)}" aria-label="Increase ${escapeHtml(item.name)}">+</button>
+            </div>
+            <strong>${formatMoney(item.price * item.quantity)}</strong>
+            <button class="cart-remove" type="button" data-cart-remove="${escapeHtml(item.id)}">Remove</button>
+          </li>
+        `).join("")
+      : `<li class="cart-empty">Your cart is empty. Add a hoodie, cap, polo, or gallery piece.</li>`;
+  }
 
   if (cartNote) {
     cartNote.textContent = bag.length
@@ -394,6 +396,14 @@ merchSoundVideo?.addEventListener("volumechange", () => {
 window.addEventListener("load", () => {
   window.setTimeout(startMerchCapsuleOnPageOpen, 180);
 });
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startMerchCapsuleOnPageOpen, { once: true });
+} else {
+  startMerchCapsuleOnPageOpen();
+}
+
+window.addEventListener("pageshow", startMerchCapsuleOnPageOpen);
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {

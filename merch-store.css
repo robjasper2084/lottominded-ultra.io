@@ -2156,12 +2156,42 @@
     padding-top: 10rem;
   }
 
+  .merch-hero-glass {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .merch-hero h1 {
+    max-width: 100%;
+    font-size: clamp(2.9rem, 12.8vw, 4.35rem);
+    line-height: 0.98;
+    overflow-wrap: break-word;
+  }
+
   .merch-hero-product {
     justify-self: stretch;
   }
 
   .motion-frame {
     min-height: 18rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .merch-hero {
+    padding-top: 11rem;
+    padding-right: 1rem;
+    padding-left: 1.25rem;
+  }
+
+  .merch-hero h1 {
+    font-size: clamp(2.65rem, 12vw, 3.35rem);
+    line-height: 1;
+  }
+
+  .merch-hero-video-toggle {
+    top: calc(8rem + 0.5rem);
+    right: 1rem;
   }
 }
 

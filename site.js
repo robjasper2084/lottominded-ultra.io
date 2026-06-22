@@ -546,7 +546,7 @@ function initVideoPerformanceMode() {
   const videos = Array.from(document.querySelectorAll("video"));
   if (!videos.length) return;
 
-  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 2;
+  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 1;
   const visibleVideos = new Set();
   let transitionCooldownUntil = document.documentElement.classList.contains("lm-transition-arriving")
     ? performance.now() + 900
@@ -569,7 +569,7 @@ function initVideoPerformanceMode() {
   const managedVideos = videos.filter(canManageVideo);
   if (!managedVideos.length) return;
 
-  const isNearViewport = (video, margin = 520) => {
+  const isNearViewport = (video, margin = 360) => {
     const rect = video.getBoundingClientRect();
     return rect.bottom >= -margin && rect.top <= window.innerHeight + margin;
   };
@@ -601,7 +601,7 @@ function initVideoPerformanceMode() {
   };
 
   const unloadVideoSources = (video) => {
-    if (isSoundActive(video) || isNearViewport(video, 120)) return;
+    if (isSoundActive(video) || isNearViewport(video, 80)) return;
     let changed = false;
     if (video.dataset.lmLazySrc && video.hasAttribute("src")) {
       video.removeAttribute("src");
@@ -660,6 +660,8 @@ function initVideoPerformanceMode() {
       return;
     }
 
+    visibleVideos.forEach(restoreVideoSources);
+
     const candidates = Array.from(visibleVideos)
       .filter(isPlayableDecorativeVideo)
       .sort((a, b) => distanceFromViewportCenter(a) - distanceFromViewportCenter(b));
@@ -704,7 +706,7 @@ function initVideoPerformanceMode() {
     }
     video.dataset.lmVideoOptimized = "true";
     if (reducedMotionQuery.matches && video.autoplay && video.muted) pauseManagedVideo(video);
-    if (isNearViewport(video, 360)) {
+    if (isNearViewport(video, 220)) {
       restoreVideoSources(video);
     } else {
       unloadVideoSources(video);
@@ -724,7 +726,7 @@ function initVideoPerformanceMode() {
         }
       });
       scheduleVideoRefresh();
-    }, { rootMargin: "280px 0px", threshold: 0.02 });
+    }, { rootMargin: "180px 0px", threshold: 0.02 });
 
     managedVideos.forEach((video) => observer.observe(video));
   } else {
@@ -2222,6 +2224,11 @@ function setHeaderCollapsed(collapsed) {
 
 function syncHeroMotionPreference() {
   if (!heroMotion) return;
+  const startupOpen = startupVideoModal && !startupVideoModal.classList.contains("is-hidden");
+  if (startupOpen) {
+    heroMotion.pause();
+    return;
+  }
   if (reducedMotionQuery.matches) {
     heroMotion.pause();
     return;
@@ -2637,6 +2644,7 @@ async function closeStartupVideo(options = {}) {
   startupVideoModal?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("has-startup-modal");
   startupVideoPlayer?.pause();
+  syncHeroMotionPreference();
   if (options.playMusic === false) return;
   await playSiteSoundtrack({ fromPage: true, restart: true, volume: 0.5 });
 }
@@ -2651,6 +2659,7 @@ function showStartupVideo() {
   document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
   startupVideoModal.setAttribute("aria-hidden", "false");
+  syncHeroMotionPreference();
   rememberStartupVideoSeen();
   if (!reducedMotionQuery.matches) {
     startupVideoPlayer.muted = false;
@@ -2669,6 +2678,7 @@ function showStartupVideoReturn() {
   document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
   startupVideoModal.setAttribute("aria-hidden", "false");
+  syncHeroMotionPreference();
   if (!reducedMotionQuery.matches && startupVideoPlayer) {
     startupVideoPlayer.muted = false;
     startupVideoPlayer.defaultMuted = false;
@@ -2739,6 +2749,8 @@ function setupGuidePuckField() {
     active: false,
     lastMove: 0,
   };
+  let guideFieldInView = true;
+  let guideFrame = 0;
 
   const puckState = pucks.map((element, index) => {
     const columns = Math.min(3, pucks.length);
@@ -2783,9 +2795,21 @@ function setupGuidePuckField() {
     field.style.setProperty("--guide-field-y", `${(event.clientY / window.innerHeight - 0.5) * 18}px`);
     document.body.style.setProperty("--guide-pointer-x", `${event.clientX}px`);
     document.body.style.setProperty("--guide-pointer-y", `${event.clientY}px`);
+    scheduleGuideField();
+  }
+
+  function canRenderGuideField() {
+    return !reducedMotionQuery.matches && !document.hidden && guideFieldInView;
+  }
+
+  function scheduleGuideField() {
+    if (guideFrame || !canRenderGuideField()) return;
+    guideFrame = window.requestAnimationFrame(renderGuideField);
   }
 
   function renderGuideField(now) {
+    guideFrame = 0;
+    if (!canRenderGuideField()) return;
     const hot = pointer.active && now - pointer.lastMove < 1600;
     const driftScale = reducedMotionQuery.matches ? 0 : 1;
 
@@ -2817,13 +2841,24 @@ function setupGuidePuckField() {
       puck.element.style.transform = `translate3d(${puck.x}px, ${puck.y}px, 0) rotate(${puck.rotation}deg)`;
     });
 
-    window.requestAnimationFrame(renderGuideField);
+    scheduleGuideField();
   }
 
   resizeGuideField();
   document.addEventListener("pointermove", moveGuidePointer, { passive: true });
-  window.addEventListener("resize", resizeGuideField, { passive: true });
-  window.requestAnimationFrame(renderGuideField);
+  window.addEventListener("resize", () => {
+    resizeGuideField();
+    scheduleGuideField();
+  }, { passive: true });
+  document.addEventListener("visibilitychange", scheduleGuideField);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      guideFieldInView = entries.some((entry) => entry.isIntersecting);
+      scheduleGuideField();
+    }, { rootMargin: "220px 0px", threshold: 0.01 });
+    observer.observe(field);
+  }
+  scheduleGuideField();
 }
 
 setupGuidePuckField();
@@ -3039,6 +3074,8 @@ function setupPromptBallpassGame() {
   puck.src = "./assets/brand/lottomind-branded-puck.png";
 
   const pointer = { x: 0.72, y: 0.48, active: false, burst: 0 };
+  let ballpassInView = true;
+  let ballpassFrame = 0;
   const balls = Array.from({ length: 9 }, (_, index) => ({
     t: index / 9,
     speed: 0.00012 + index * 0.00001,
@@ -3056,11 +3093,22 @@ function setupPromptBallpassGame() {
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
+  function canDrawBallpass() {
+    return !reducedMotionQuery.matches && !document.hidden && ballpassInView;
+  }
+
+  function scheduleBallpass() {
+    if (ballpassFrame || !canDrawBallpass()) return;
+    ballpassFrame = window.requestAnimationFrame(drawBallpass);
+  }
+
   function drawBallpass(now) {
+    ballpassFrame = 0;
+    if (!canDrawBallpass()) return;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     if (!width || !height) {
-      window.requestAnimationFrame(drawBallpass);
+      scheduleBallpass();
       return;
     }
 
@@ -3129,7 +3177,7 @@ function setupPromptBallpassGame() {
     }
     context.restore();
 
-    window.requestAnimationFrame(drawBallpass);
+    scheduleBallpass();
   }
 
   game.addEventListener("pointermove", (event) => {
@@ -3137,127 +3185,36 @@ function setupPromptBallpassGame() {
     pointer.x = Math.max(0.08, Math.min(0.92, (event.clientX - rect.left) / rect.width));
     pointer.y = Math.max(0.12, Math.min(0.88, (event.clientY - rect.top) / rect.height));
     pointer.active = true;
+    scheduleBallpass();
   }, { passive: true });
   game.addEventListener("pointerleave", () => {
     pointer.active = false;
   });
   game.addEventListener("click", () => {
     pointer.burst = 1;
+    scheduleBallpass();
   });
-  window.addEventListener("resize", resizeBallpass, { passive: true });
-  puck.addEventListener("load", () => pointer.burst = 0.6);
+  window.addEventListener("resize", () => {
+    resizeBallpass();
+    scheduleBallpass();
+  }, { passive: true });
+  document.addEventListener("visibilitychange", scheduleBallpass);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      ballpassInView = entries.some((entry) => entry.isIntersecting);
+      scheduleBallpass();
+    }, { rootMargin: "180px 0px", threshold: 0.01 });
+    observer.observe(game);
+  }
+  puck.addEventListener("load", () => {
+    pointer.burst = 0.6;
+    scheduleBallpass();
+  });
   resizeBallpass();
-  window.requestAnimationFrame(drawBallpass);
+  scheduleBallpass();
 }
 
 setupPromptBallpassGame();
-
-// Use the mascot artwork as a lightweight mouse pointer without the old lens overlay.
-
-function setupMascotMotionCursor() {
-  if (window.matchMedia("(pointer: coarse)").matches || reducedMotionQuery.matches) return;
-
-  const cursor = document.createElement("div");
-  cursor.className = "mascot-motion-cursor";
-  cursor.setAttribute("aria-hidden", "true");
-  document.body.classList.add("has-mascot-motion-cursor");
-  document.body.append(cursor);
-
-  const position = { x: -120, y: -120 };
-  const last = { x: -120, y: -120, time: 0 };
-  let state = "idle";
-  let facing = 1;
-  let idleTimer = 0;
-  let heldScrollState = "";
-  let visible = false;
-
-  function setPose() {
-    cursor.classList.toggle("is-up", state === "up");
-    cursor.classList.toggle("is-down", state === "down");
-  }
-
-  function render() {
-    setPose();
-    const tilt = state === "up" ? -5 : state === "down" ? 3 : state === "right" ? 3 : state === "left" ? -3 : 0;
-    const x = Math.round(position.x + 1);
-    const y = Math.round(position.y + 1);
-    cursor.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${tilt}deg)`;
-    if (visible) cursor.classList.add("is-visible");
-    window.requestAnimationFrame(render);
-  }
-
-  document.addEventListener("pointermove", (event) => {
-    if (isEditableTarget(event.target)) {
-      cursor.classList.remove("is-visible");
-      visible = false;
-      return;
-    }
-
-    const now = performance.now();
-    const dx = last.time ? event.clientX - last.x : 0;
-    const dy = last.time ? event.clientY - last.y : 0;
-    const absX = Math.abs(dx);
-    const absY = Math.abs(dy);
-
-    position.x = event.clientX;
-    position.y = event.clientY;
-    visible = true;
-    window.clearTimeout(idleTimer);
-
-    if (absX >= 2 && absX >= absY * 0.35) {
-      state = dx < 0 ? "left" : "right";
-      facing = dx < 0 ? -1 : 1;
-      heldScrollState = "";
-    } else if (heldScrollState) {
-      state = heldScrollState;
-    } else if (absX < 2 && absY < 2) {
-      state = "idle";
-    } else {
-      state = facing < 0 ? "left" : "right";
-    }
-
-    last.x = event.clientX;
-    last.y = event.clientY;
-    last.time = now;
-    idleTimer = window.setTimeout(() => {
-      if (heldScrollState) return;
-      state = "idle";
-    }, 180);
-  }, { passive: true });
-
-  window.addEventListener("wheel", (event) => {
-    if (isEditableTarget(event.target)) return;
-    visible = true;
-    window.clearTimeout(idleTimer);
-
-    if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) > 2) {
-      state = event.deltaX < 0 ? "left" : "right";
-      facing = event.deltaX < 0 ? -1 : 1;
-      heldScrollState = "";
-    } else if (event.deltaY > 0) {
-      state = "down";
-      heldScrollState = "down";
-    } else if (event.deltaY < 0) {
-      state = "up";
-      heldScrollState = "up";
-    }
-
-  }, { passive: true });
-
-  document.addEventListener("pointerleave", () => {
-    visible = false;
-    cursor.classList.remove("is-visible");
-  }, { passive: true });
-
-  window.addEventListener("blur", () => {
-    visible = false;
-    cursor.classList.remove("is-visible");
-  });
-
-  window.requestAnimationFrame(render);
-}
-
-setupMascotMotionCursor();
 
 function showGamePip() {
   if (!gamePip) return;
@@ -3292,6 +3249,8 @@ function hideGamePip(options = {}) {
   if (!gamePip) return;
   gamePip.classList.remove("is-open");
   gamePip.setAttribute("aria-hidden", "true");
+  domainStrip?.classList.remove("is-active");
+  domainStrip?.setAttribute("aria-pressed", "false");
   if (gamePipFrame) gamePipFrame.removeAttribute("src");
   if (options.resumeSoundtrack) resumeGamePipSoundtrack();
   gamePipShouldResumeSoundtrack = false;
@@ -3409,19 +3368,30 @@ soundtrackButtons.forEach((button) => {
   });
 });
 
-domainStrip?.addEventListener("pointerenter", () => {
+function setDomainStripOpen(open) {
   if (gamePipDragState) return;
-  if (gamePip?.classList.contains("is-open")) {
-    if (Date.now() - gamePipOpenedAt > 400) {
-      hideGamePip({ resumeSoundtrack: true });
-    }
+  if (!domainStrip) return;
+  domainStrip.classList.toggle("is-active", open);
+  domainStrip.setAttribute("aria-pressed", String(open));
+  if (open) {
+    showGamePip();
     return;
   }
-  showGamePip();
+  hideGamePip({ resumeSoundtrack: true });
+}
+
+domainStrip?.addEventListener("click", () => {
+  setDomainStripOpen(!gamePip?.classList.contains("is-open"));
+});
+
+domainStrip?.addEventListener("keydown", (event) => {
+  if (event.code !== "Enter" && event.code !== "Space") return;
+  event.preventDefault();
+  setDomainStripOpen(!gamePip?.classList.contains("is-open"));
 });
 
 gamePip?.addEventListener("pointerenter", () => window.clearTimeout(gamePipHideTimer));
-gamePipClose?.addEventListener("click", () => hideGamePip({ resumeSoundtrack: true }));
+gamePipClose?.addEventListener("click", () => setDomainStripOpen(false));
 gamePipHead?.addEventListener("pointerdown", startGamePipDrag);
 document.addEventListener("pointermove", updateGamePipDrag);
 document.addEventListener("pointerup", endGamePipDrag);
@@ -3612,3 +3582,158 @@ document.addEventListener("click", (event) => {
 generateMiniSunoPrompt();
 generateMiniVideoPrompt();
 generateMiniNumberSignals();
+
+function setupMascotPointer() {
+  if (!document.body || document.querySelector(".lm-mascot-pointer")) return;
+
+  const frames = {
+    front: new URL("cursor/lm-mascot-front.png", SITE_ASSET_BASE_URL).href,
+    stepA: new URL("cursor/lm-mascot-step-a.png", SITE_ASSET_BASE_URL).href,
+    stepB: new URL("cursor/lm-mascot-step-b.png", SITE_ASSET_BASE_URL).href,
+    run: new URL("cursor/lm-mascot-run.png", SITE_ASSET_BASE_URL).href,
+    runA: new URL("cursor/lm-mascot-run-a.png", SITE_ASSET_BASE_URL).href,
+    runB: new URL("cursor/lm-mascot-run-b.png", SITE_ASSET_BASE_URL).href,
+    runC: new URL("cursor/lm-mascot-run-c.png", SITE_ASSET_BASE_URL).href,
+    runD: new URL("cursor/lm-mascot-run-d.png", SITE_ASSET_BASE_URL).href,
+  };
+
+  Object.values(frames).forEach((src) => {
+    const preload = new Image();
+    preload.src = src;
+  });
+
+  const pointer = document.createElement("div");
+  pointer.className = "lm-mascot-pointer";
+  pointer.setAttribute("aria-hidden", "true");
+  pointer.innerHTML = `
+    <span class="lm-mascot-pointer__shadow"></span>
+    <span class="lm-mascot-pointer__sprite">
+      <img src="${frames.front}" alt="" decoding="async" />
+    </span>
+  `;
+  document.body.appendChild(pointer);
+
+  const image = pointer.querySelector("img");
+  const reduceMotion = reducedMotionQuery.matches;
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const state = {
+    x: window.innerWidth * 0.82,
+    y: window.innerHeight * 0.42,
+    targetX: window.innerWidth * 0.82,
+    targetY: window.innerHeight * 0.42,
+    lastX: window.innerWidth * 0.82,
+    lastY: window.innerHeight * 0.42,
+    lastMove: 0,
+    lastType: finePointer ? "mouse" : "touch",
+    facing: 1,
+    frame: "front",
+    hasMoved: false,
+  };
+
+  function setFrame(name) {
+    if (state.frame === name || !frames[name]) return;
+    state.frame = name;
+    image.src = frames[name];
+  }
+
+  function setPointerClass(name, active) {
+    pointer.classList.toggle(name, Boolean(active));
+  }
+
+  function syncTarget(clientX, clientY, pointerType = "mouse") {
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+    state.targetX = clientX;
+    state.targetY = clientY;
+    state.lastMove = performance.now();
+    state.lastType = pointerType || "mouse";
+    state.hasMoved = true;
+
+    setPointerClass("is-touch", state.lastType === "touch");
+    if (state.lastType === "mouse") {
+      document.body.classList.add("has-mascot-pointer");
+    }
+    paintMascot(performance.now());
+  }
+
+  function syncFromPointer(event) {
+    if (event.pointerType === "pen") return;
+    syncTarget(event.clientX, event.clientY, event.pointerType || "mouse");
+  }
+
+  function syncFromTouch(event) {
+    const touch = event.touches?.[0] || event.changedTouches?.[0];
+    if (!touch) return;
+    syncTarget(touch.clientX, touch.clientY, "touch");
+  }
+
+  function updateFrame(speed, vx, vy, now) {
+    const moving = speed > 0.55;
+    const running = speed > 7.2;
+    const sideMotion = Math.abs(vx) > Math.abs(vy) * 0.72;
+    const runFrames = ["runA", "runB", "runC", "runD"];
+    setPointerClass("is-walking", moving && !reduceMotion);
+    setPointerClass("is-running", running && !reduceMotion);
+    setPointerClass("is-side", moving && sideMotion);
+    setPointerClass("is-forward", moving && !sideMotion && vy > 0);
+    setPointerClass("is-backward", moving && !sideMotion && vy < 0);
+
+    if (!moving) {
+      setFrame("front");
+      return;
+    }
+
+    if (sideMotion) {
+      if (vx < -0.25) state.facing = -1;
+      if (vx > 0.25) state.facing = 1;
+      pointer.style.setProperty("--lm-mascot-facing", String(state.facing));
+      if (running) {
+        setFrame(runFrames[Math.floor(now / 90) % runFrames.length]);
+      } else {
+        setFrame(Math.floor(now / 150) % 2 ? "stepB" : "stepA");
+      }
+      return;
+    }
+
+    if (running) {
+      setFrame(runFrames[Math.floor(now / 95) % runFrames.length]);
+    } else {
+      setFrame("front");
+    }
+  }
+
+  function paintMascot(now) {
+    const ease = state.lastType === "touch" ? 0.3 : 0.22;
+    state.x += (state.targetX - state.x) * ease;
+    state.y += (state.targetY - state.y) * ease;
+
+    const vx = state.x - state.lastX;
+    const vy = state.y - state.lastY;
+    const speed = Math.hypot(vx, vy);
+    const visible = state.hasMoved && (state.lastType !== "touch" || now - state.lastMove < 1800);
+
+    pointer.style.setProperty("--lm-mascot-x", `${state.x}px`);
+    pointer.style.setProperty("--lm-mascot-y", `${state.y}px`);
+    setPointerClass("is-visible", visible);
+    updateFrame(speed, vx, vy, now);
+
+    state.lastX = state.x;
+    state.lastY = state.y;
+  }
+
+  function tick(now) {
+    paintMascot(now);
+    window.requestAnimationFrame(tick);
+  }
+
+  document.addEventListener("pointermove", syncFromPointer, { passive: true });
+  document.addEventListener("pointerdown", syncFromPointer, { passive: true });
+  document.addEventListener("touchstart", syncFromTouch, { passive: true });
+  document.addEventListener("touchmove", syncFromTouch, { passive: true });
+  window.addEventListener("blur", () => {
+    pointer.classList.remove("is-visible", "is-walking", "is-running");
+  });
+
+  window.requestAnimationFrame(tick);
+}
+
+setupMascotPointer();

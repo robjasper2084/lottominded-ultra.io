@@ -12,6 +12,8 @@
   }
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let canvasInView = true;
+  let frameId = 0;
   const state = {
     width: 1,
     height: 1,
@@ -509,7 +511,18 @@
     canvas.dataset.raytracePointerMoves = String(state.pointerMoves);
   }
 
+  function canAnimate() {
+    return !reduceMotion && !document.hidden && canvasInView;
+  }
+
+  function scheduleFrame() {
+    if (frameId || !canAnimate()) return;
+    frameId = requestAnimationFrame(frame);
+  }
+
   function frame(now) {
+    frameId = 0;
+    if (!canAnimate()) return;
     if (!state.lastFrame) {
       state.lastFrame = now;
     }
@@ -518,7 +531,7 @@
     update(dt);
     draw();
     syncCanvasState();
-    requestAnimationFrame(frame);
+    scheduleFrame();
   }
 
   const controller = {
@@ -555,7 +568,10 @@
 
   canvas.dataset.raytraceReady = "true";
 
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener("resize", () => {
+    resize();
+    scheduleFrame();
+  }, { passive: true });
   window.addEventListener("pointermove", pointerFromEvent, { passive: true });
   window.addEventListener("pointerdown", pointerFromEvent, { passive: true });
   window.addEventListener("touchmove", pointerFromEvent, { passive: true });
@@ -563,8 +579,20 @@
     if (stage.scrollHeight > state.height + 20 || stage.scrollHeight < state.height - 80) {
       resize();
     }
+    scheduleFrame();
   }, { passive: true });
+  document.addEventListener("visibilitychange", scheduleFrame);
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      canvasInView = entries.some((entry) => entry.isIntersecting);
+      scheduleFrame();
+    }, { rootMargin: "220px 0px", threshold: 0.01 });
+    observer.observe(stage);
+  }
 
   resize();
-  requestAnimationFrame(frame);
+  draw();
+  syncCanvasState();
+  scheduleFrame();
 })();

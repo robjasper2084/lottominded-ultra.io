@@ -18,6 +18,8 @@
   if (!ctx) return;
 
   const reduceMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  let canvasInView = true;
+  let frameId = 0;
   const palette = {
     gold: "255, 224, 113",
     cyan: "41, 247, 255",
@@ -702,6 +704,15 @@
     drawCanvasHud();
   }
 
+  function canAnimate() {
+    return !reduceMotionQuery?.matches && !document.hidden && canvasInView;
+  }
+
+  function scheduleFrame() {
+    if (frameId || !canAnimate()) return;
+    frameId = window.requestAnimationFrame(frame);
+  }
+
   function syncDataset() {
     canvas.dataset.ballpassReady = "true";
     canvas.dataset.ballpassScore = String(Math.round(state.score));
@@ -713,6 +724,8 @@
   }
 
   function frame(now) {
+    frameId = 0;
+    if (!canAnimate()) return;
     if (!state.lastFrame) state.lastFrame = now;
     const reduced = reduceMotionQuery?.matches;
     const dt = clamp((now - state.lastFrame) / 1000, 0, reduced ? 0.024 : 0.034);
@@ -720,7 +733,7 @@
     update(dt);
     draw();
     syncDataset();
-    window.requestAnimationFrame(frame);
+    scheduleFrame();
   }
 
   const controller = {
@@ -758,14 +771,45 @@
     canvas.dataset.ballpassGlobal = "blocked";
   }
 
-  window.addEventListener("resize", resize, { passive: true });
-  window.addEventListener("pointermove", syncPointer, { passive: true });
-  window.addEventListener("pointerdown", syncPointer, { passive: true });
-  window.addEventListener("keydown", (event) => onKey(event, true));
-  window.addEventListener("keyup", (event) => onKey(event, false));
-  reduceMotionQuery?.addEventListener?.("change", resize);
+  window.addEventListener("resize", () => {
+    resize();
+    draw();
+    syncDataset();
+    scheduleFrame();
+  }, { passive: true });
+  window.addEventListener("pointermove", (event) => {
+    syncPointer(event);
+    scheduleFrame();
+  }, { passive: true });
+  window.addEventListener("pointerdown", (event) => {
+    syncPointer(event);
+    scheduleFrame();
+  }, { passive: true });
+  window.addEventListener("keydown", (event) => {
+    onKey(event, true);
+    scheduleFrame();
+  });
+  window.addEventListener("keyup", (event) => {
+    onKey(event, false);
+    scheduleFrame();
+  });
+  reduceMotionQuery?.addEventListener?.("change", () => {
+    resize();
+    draw();
+    syncDataset();
+    scheduleFrame();
+  });
+  document.addEventListener("visibilitychange", scheduleFrame);
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      canvasInView = entries.some((entry) => entry.isIntersecting);
+      scheduleFrame();
+    }, { rootMargin: "220px 0px", threshold: 0.01 });
+    observer.observe(canvas);
+  }
 
   resize();
   syncDataset();
-  window.requestAnimationFrame(frame);
+  draw();
+  scheduleFrame();
 })();
