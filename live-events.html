@@ -10,7 +10,7 @@
     <title>LOTTOMINDED ULTRA | Live Events</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=compositor-pass-1" />
+    <link rel="stylesheet" href="./styles.css?v=view-switch-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -19,7 +19,7 @@
       } catch (error) {}
     </script>
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-audio-reactive-1" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=shadow-ops-game-5" />
   </head>
   <body class="live-events-page lm-live-page">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
@@ -40,6 +40,27 @@
           <button class="secondary-action" type="button" data-stream-startup-close>Enter Muted</button>
         </div>
         <p class="stream-startup-status" data-stream-startup-status aria-live="polite"></p>
+      </div>
+    </aside>
+    <aside class="shadow-ops-modal" data-shadow-ops-modal aria-hidden="true">
+      <div class="shadow-ops-panel" role="dialog" aria-modal="true" aria-labelledby="shadowOpsTitle">
+        <button class="shadow-ops-close" type="button" data-shadow-ops-close aria-label="Close Shadow Ops">X</button>
+        <div class="shadow-ops-game-head">
+          <div>
+            <p class="eyebrow">Game Studio Event Drop</p>
+            <h2 id="shadowOpsTitle">Shadow Ops</h2>
+          </div>
+          <a class="live-btn shadow-ops-popout" href="http://127.0.0.1:8150/games/shadow-ops-canvas/index.html?bg=soul-location-1&amp;v=mission-higgsfield-assets-2" target="_blank" rel="noopener noreferrer">Full Screen</a>
+        </div>
+        <div class="shadow-ops-game-frame">
+          <iframe
+            title="Shadow Ops game"
+            data-shadow-ops-frame
+            data-src="http://127.0.0.1:8150/games/shadow-ops-canvas/index.html?bg=soul-location-1&amp;v=mission-higgsfield-assets-2"
+            loading="lazy"
+            allow="autoplay; fullscreen; gamepad"
+          ></iframe>
+        </div>
       </div>
     </aside>
     <header class="lm-live-topbar" data-live-shell>
@@ -121,6 +142,7 @@
             <a class="live-btn" href="#replays">Replays</a>
             <a class="live-btn" href="./beat2lotto-plus.html#beat2lotto">Beat2Lotto+</a>
             <a class="live-btn" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+            <button class="live-btn shadow-ops-trigger" type="button" data-shadow-ops-open>Shadow Ops</button>
           </div>
         </div>
         <article class="lm-stage-card">
@@ -153,7 +175,8 @@
         </div>
       </aside>
 
-      <section class="lm-section panel-glow" id="featured">
+      <section class="lm-section panel-glow live-ballpass-section" id="featured">
+        <canvas class="live-ballpass-field" data-live-ballpass-bg aria-hidden="true"></canvas>
         <header class="section-head"><h2>Featured Live Events</h2><a href="#featured">View All</a></header>
         <div class="event-card-row">
           <article class="event-card live">
@@ -307,8 +330,8 @@
 
     <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=perf-fixes-1" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=stream-open-verse-5" defer></script>
+    <script src="./site.js?v=view-switch-1" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=shadow-ops-game-5" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
   </body>
 </html>

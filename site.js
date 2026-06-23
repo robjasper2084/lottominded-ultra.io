@@ -56,6 +56,37 @@
 
 const SITE_SCRIPT_URL = document.currentScript?.src || new URL("./site.js", document.baseURI).href;
 const SITE_ASSET_BASE_URL = new URL("./assets/", SITE_SCRIPT_URL);
+const VIEW_MODE_KEY = "lm-ultra-view-mode";
+const VIEW_MODES = new Set(["auto", "desktop", "mobile"]);
+
+function getStoredViewMode() {
+  let stored = "auto";
+  try {
+    stored = localStorage.getItem(VIEW_MODE_KEY) || "auto";
+  } catch {
+    stored = "auto";
+  }
+  return VIEW_MODES.has(stored) ? stored : "auto";
+}
+
+function applyViewMode(mode = getStoredViewMode()) {
+  const nextMode = VIEW_MODES.has(mode) ? mode : "auto";
+  document.documentElement.dataset.lmViewMode = nextMode;
+  document.body.dataset.lmViewMode = nextMode;
+  try {
+    localStorage.setItem(VIEW_MODE_KEY, nextMode);
+  } catch {
+    // Ignore private browsing storage failures; the current page still updates.
+  }
+  document.querySelectorAll("[data-view-mode-choice]").forEach((button) => {
+    const isActive = button.dataset.viewModeChoice === nextMode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+  window.requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+}
+
+applyViewMode();
 
 const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
@@ -876,7 +907,7 @@ function setupUniversalFloatingMenu() {
     ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"]
   ];
 
-  const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle, .pl-floating");
+  const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle");
   const toggle = existingToggle || document.createElement("button");
   if (!existingToggle) {
     toggle.className = "universal-menu-toggle";
@@ -907,6 +938,11 @@ function setupUniversalFloatingMenu() {
         <span>Route online</span>
         <span data-hud-clock>00:00</span>
       </div>
+      <div class="universal-view-switch" role="group" aria-label="View mode">
+        <button type="button" data-view-mode-choice="auto">Auto</button>
+        <button type="button" data-view-mode-choice="desktop">Desktop</button>
+        <button type="button" data-view-mode-choice="mobile">Mobile</button>
+      </div>
       <nav class="universal-page-menu-links" aria-label="Page menu links">
         ${links.map(([label, href], index) => `<a href="${href}" data-hud-index="${String(index + 1).padStart(2, "0")}"><span>${label}</span><i aria-hidden="true"></i></a>`).join("")}
       </nav>
@@ -916,6 +952,7 @@ function setupUniversalFloatingMenu() {
 
   const panel = menu.querySelector("[data-hud-panel]");
   const menuLinks = Array.from(menu.querySelectorAll("a[href]"));
+  const viewModeButtons = Array.from(menu.querySelectorAll("[data-view-mode-choice]"));
   const hudClock = menu.querySelector("[data-hud-clock]");
   const hudReadout = menu.querySelector("[data-hud-readout]");
 
@@ -1006,6 +1043,11 @@ function setupUniversalFloatingMenu() {
     link.addEventListener("pointerup", () => link.classList.remove("is-launching"));
     link.addEventListener("pointercancel", () => link.classList.remove("is-launching"));
   });
+
+  viewModeButtons.forEach((button) => {
+    button.addEventListener("click", () => applyViewMode(button.dataset.viewModeChoice));
+  });
+  applyViewMode(getStoredViewMode());
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menu.classList.contains("is-open")) close();
@@ -2667,6 +2709,15 @@ function showStartupVideo() {
     startupVideoPlayer.removeAttribute("muted");
     startupVideoPlayer.volume = 0.86;
     startupVideoPlayer.autoplay = true;
+    startupVideoPlayer.loop = false;
+    startupVideoPlayer.removeAttribute("loop");
+    if (startupVideoPlayer.ended || startupVideoPlayer.currentTime > 0.25) {
+      try {
+        startupVideoPlayer.currentTime = 0;
+      } catch {
+        // Some browsers defer seeking until metadata is ready.
+      }
+    }
     startupVideoPlayer?.play().catch(() => {
       // Browsers may block autoplay until the first user gesture.
     });
@@ -3301,6 +3352,9 @@ startupVideoCloseButtons.forEach((button) => {
   button.addEventListener("click", () => closeStartupVideo());
 });
 startupMusicStart?.addEventListener("click", () => closeStartupVideo());
+startupVideoPlayer?.addEventListener("ended", () => {
+  closeStartupVideo({ playMusic: false });
+});
 startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo();
 });
@@ -3595,6 +3649,12 @@ function setupMascotPointer() {
     runB: new URL("cursor/lm-mascot-run-b.png", SITE_ASSET_BASE_URL).href,
     runC: new URL("cursor/lm-mascot-run-c.png", SITE_ASSET_BASE_URL).href,
     runD: new URL("cursor/lm-mascot-run-d.png", SITE_ASSET_BASE_URL).href,
+    climbUp: new URL("cursor/lm-mascot-climb-up.png", SITE_ASSET_BASE_URL).href,
+    climbDown: new URL("cursor/lm-mascot-climb-down.png", SITE_ASSET_BASE_URL).href,
+    fallA: new URL("cursor/lm-mascot-fall-a.png", SITE_ASSET_BASE_URL).href,
+    fallB: new URL("cursor/lm-mascot-fall-b.png", SITE_ASSET_BASE_URL).href,
+    fallC: new URL("cursor/lm-mascot-fall-c.png", SITE_ASSET_BASE_URL).href,
+    fallDown: new URL("cursor/lm-mascot-fall-down.png", SITE_ASSET_BASE_URL).href,
   };
 
   Object.values(frames).forEach((src) => {
@@ -3612,6 +3672,8 @@ function setupMascotPointer() {
     </span>
   `;
   document.body.appendChild(pointer);
+  document.documentElement.dataset.cursorMode = "mascot";
+  document.body.dataset.cursorMode = "mascot";
 
   const image = pointer.querySelector("img");
   const reduceMotion = reducedMotionQuery.matches;
@@ -3627,8 +3689,12 @@ function setupMascotPointer() {
     lastType: finePointer ? "mouse" : "touch",
     facing: 1,
     frame: "front",
+    scrollPose: "",
+    scrollPoseUntil: 0,
     hasMoved: false,
   };
+  let lastScrollY = window.scrollY || window.pageYOffset || 0;
+  let lastTouchY = null;
 
   function setFrame(name) {
     if (state.frame === name || !frames[name]) return;
@@ -3642,6 +3708,13 @@ function setupMascotPointer() {
 
   function syncTarget(clientX, clientY, pointerType = "mouse") {
     if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+    if (state.hasMoved) {
+      const deltaX = clientX - state.targetX;
+      const deltaY = clientY - state.targetY;
+      if (Math.abs(deltaY) > 8 && Math.abs(deltaY) > Math.abs(deltaX) * 0.72) {
+        setScrollPose(deltaY < 0 ? "up" : "down");
+      }
+    }
     state.targetX = clientX;
     state.targetY = clientY;
     state.lastMove = performance.now();
@@ -3663,14 +3736,79 @@ function setupMascotPointer() {
   function syncFromTouch(event) {
     const touch = event.touches?.[0] || event.changedTouches?.[0];
     if (!touch) return;
+    if (Number.isFinite(lastTouchY) && Math.abs(touch.clientY - lastTouchY) > 6) {
+      setScrollPose(touch.clientY < lastTouchY ? "up" : "down");
+    }
+    lastTouchY = touch.clientY;
     syncTarget(touch.clientX, touch.clientY, "touch");
+  }
+
+  function setScrollPose(direction) {
+    if (direction !== "up" && direction !== "down") return;
+    state.scrollPose = direction;
+    state.scrollPoseUntil = performance.now() + 840;
+    state.hasMoved = true;
+    document.body.classList.add("has-mascot-pointer");
+  }
+
+  function syncFromWheel(event) {
+    if (!Number.isFinite(event.deltaY) || Math.abs(event.deltaY) < 2) return;
+    if (Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
+      syncTarget(event.clientX, event.clientY, "mouse");
+    }
+    setScrollPose(event.deltaY < 0 ? "up" : "down");
+  }
+
+  function syncFromScroll() {
+    const nextScrollY = window.scrollY || window.pageYOffset || 0;
+    const delta = nextScrollY - lastScrollY;
+    lastScrollY = nextScrollY;
+    if (Math.abs(delta) < 2) return;
+    setScrollPose(delta < 0 ? "up" : "down");
   }
 
   function updateFrame(speed, vx, vy, now) {
     const moving = speed > 0.55;
     const running = speed > 7.2;
     const sideMotion = Math.abs(vx) > Math.abs(vy) * 0.72;
+    const verticalMotion = Math.abs(vy) > Math.abs(vx) * 0.72;
+    const upwardMotion = moving && verticalMotion && vy < -0.35;
+    const downwardMotion = moving && verticalMotion && vy > 0.35;
     const runFrames = ["runA", "runB", "runC", "runD"];
+    const fallFrames = ["fallA", "fallB", "fallC", "fallDown"];
+    const climbing = Boolean(state.scrollPose && now < state.scrollPoseUntil);
+    const scrollingUp = climbing && state.scrollPose === "up";
+    const scrollingDown = climbing && state.scrollPose === "down";
+
+    setPointerClass("is-climbing-up", scrollingUp);
+    setPointerClass("is-flying-up", scrollingUp);
+    setPointerClass("is-running-down", false);
+    setPointerClass("is-falling-down", scrollingDown);
+    if (climbing) {
+      setPointerClass("is-walking", !reduceMotion);
+      setPointerClass("is-running", false);
+      setPointerClass("is-side", false);
+      setPointerClass("is-forward", scrollingDown);
+      setPointerClass("is-backward", scrollingUp);
+      setFrame(scrollingUp ? "climbUp" : fallFrames[Math.floor(now / 112) % fallFrames.length]);
+      return;
+    }
+
+    setPointerClass("is-climbing-up", false);
+    setPointerClass("is-flying-up", upwardMotion);
+    setPointerClass("is-running-down", false);
+    setPointerClass("is-falling-down", downwardMotion);
+
+    if (upwardMotion || downwardMotion) {
+      setPointerClass("is-walking", !reduceMotion);
+      setPointerClass("is-running", false);
+      setPointerClass("is-side", false);
+      setPointerClass("is-forward", downwardMotion);
+      setPointerClass("is-backward", upwardMotion);
+      setFrame(upwardMotion ? "climbUp" : fallFrames[Math.floor(now / (running ? 86 : 118)) % fallFrames.length]);
+      return;
+    }
+
     setPointerClass("is-walking", moving && !reduceMotion);
     setPointerClass("is-running", running && !reduceMotion);
     setPointerClass("is-side", moving && sideMotion);
@@ -3729,8 +3867,13 @@ function setupMascotPointer() {
   document.addEventListener("pointerdown", syncFromPointer, { passive: true });
   document.addEventListener("touchstart", syncFromTouch, { passive: true });
   document.addEventListener("touchmove", syncFromTouch, { passive: true });
+  document.addEventListener("touchend", () => {
+    lastTouchY = null;
+  }, { passive: true });
+  window.addEventListener("wheel", syncFromWheel, { passive: true });
+  window.addEventListener("scroll", syncFromScroll, { passive: true });
   window.addEventListener("blur", () => {
-    pointer.classList.remove("is-visible", "is-walking", "is-running");
+    pointer.classList.remove("is-visible", "is-walking", "is-running", "is-climbing-up", "is-flying-up", "is-running-down", "is-falling-down");
   });
 
   window.requestAnimationFrame(tick);
