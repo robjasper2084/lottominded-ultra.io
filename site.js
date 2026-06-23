@@ -57,20 +57,21 @@
 const SITE_SCRIPT_URL = document.currentScript?.src || new URL("./site.js", document.baseURI).href;
 const SITE_ASSET_BASE_URL = new URL("./assets/", SITE_SCRIPT_URL);
 const VIEW_MODE_KEY = "lm-ultra-view-mode";
-const VIEW_MODES = new Set(["auto", "desktop", "mobile"]);
+const VIEW_DEFAULT_MODE = "desktop";
+const VIEW_MODES = new Set(["desktop", "mobile"]);
 
 function getStoredViewMode() {
-  let stored = "auto";
+  let stored = VIEW_DEFAULT_MODE;
   try {
-    stored = localStorage.getItem(VIEW_MODE_KEY) || "auto";
+    stored = localStorage.getItem(VIEW_MODE_KEY) || VIEW_DEFAULT_MODE;
   } catch {
-    stored = "auto";
+    stored = VIEW_DEFAULT_MODE;
   }
-  return VIEW_MODES.has(stored) ? stored : "auto";
+  return VIEW_MODES.has(stored) ? stored : VIEW_DEFAULT_MODE;
 }
 
 function applyViewMode(mode = getStoredViewMode()) {
-  const nextMode = VIEW_MODES.has(mode) ? mode : "auto";
+  const nextMode = VIEW_MODES.has(mode) ? mode : VIEW_DEFAULT_MODE;
   document.documentElement.dataset.lmViewMode = nextMode;
   document.body.dataset.lmViewMode = nextMode;
   try {
@@ -939,8 +940,7 @@ function setupUniversalFloatingMenu() {
         <span data-hud-clock>00:00</span>
       </div>
       <div class="universal-view-switch" role="group" aria-label="View mode">
-        <button type="button" data-view-mode-choice="auto">Auto</button>
-        <button type="button" data-view-mode-choice="desktop">Desktop</button>
+        <button type="button" data-view-mode-choice="desktop">Web</button>
         <button type="button" data-view-mode-choice="mobile">Mobile</button>
       </div>
       <nav class="universal-page-menu-links" aria-label="Page menu links">
@@ -1061,6 +1061,54 @@ function setupUniversalFloatingMenu() {
 }
 
 setupUniversalFloatingMenu();
+
+function setupDirectViewModeToggle() {
+  if (document.querySelector("[data-view-mode-toggle]")) return;
+  const toggle = document.createElement("div");
+  toggle.className = "site-view-mode-toggle";
+  toggle.dataset.viewModeToggle = "true";
+  toggle.setAttribute("role", "group");
+  toggle.setAttribute("aria-label", "View mode");
+  toggle.innerHTML = `
+    <button type="button" data-view-mode-choice="desktop">Web</button>
+    <button type="button" data-view-mode-choice="mobile">Mobile</button>
+  `;
+  toggle.querySelectorAll("[data-view-mode-choice]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyViewMode(button.dataset.viewModeChoice);
+      queuePosition();
+    });
+  });
+  document.body.append(toggle);
+
+  const positionToggle = () => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const gap = 16;
+    const lift = Math.min(104, Math.max(76, viewport.height * 0.11));
+    const rect = toggle.getBoundingClientRect();
+    toggle.style.left = `${Math.max(gap, viewport.offsetLeft + gap)}px`;
+    toggle.style.top = `${Math.max(gap, viewport.offsetTop + viewport.height - rect.height - lift)}px`;
+    toggle.style.right = "auto";
+    toggle.style.bottom = "auto";
+  };
+
+  let positionFrame = 0;
+  const queuePosition = () => {
+    window.cancelAnimationFrame(positionFrame);
+    positionFrame = window.requestAnimationFrame(positionToggle);
+  };
+
+  queuePosition();
+  window.visualViewport?.addEventListener("resize", queuePosition, { passive: true });
+  window.visualViewport?.addEventListener("scroll", queuePosition, { passive: true });
+  window.addEventListener("resize", queuePosition, { passive: true });
+  window.addEventListener("scroll", queuePosition, { passive: true });
+
+  applyViewMode(getStoredViewMode());
+}
+
+setupDirectViewModeToggle();
 
 function setupSharedLivePlayers() {
   if (document.body.classList.contains("lm-live-page")) return;
