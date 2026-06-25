@@ -44,5 +44,6 @@ export const STR = {
   forgePickupNote: "shard tuned",
   forgeWellNote: "well cracked",
   forgeClearNote: "sector sealed",
-  forgeStartNote: "run seed armed"
+  forgeStartNote: "run seed armed",
+  forgeClose: "Hide Number Forge"
 };

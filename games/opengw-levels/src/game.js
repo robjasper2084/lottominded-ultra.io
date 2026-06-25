@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=number-forge-1";
+import { STR } from "../strings.js?v=forge-close-title-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -7,6 +7,9 @@ const DPR_CAP = 1.5;
 const MAX_FRAME_STEPS = 5;
 const MAX_LIGHTS = 8;
 const TAU = Math.PI * 2;
+const WELL_GRAVITY_RADIUS = 382;
+const WELL_EVENT_RADIUS = 38;
+const WELL_CORE_RADIUS = 19;
 
 const COLORS = {
   cyan: "#29f7ff",
@@ -758,6 +761,7 @@ const forgeUi = {
     panel: $("forgeHud")
   }
 };
+const forgeHudClose = $("forgeHudClose");
 const playerChooser = $("playerChooser");
 const primaryAction = $("primaryAction");
 const soundAction = $("soundAction");
@@ -765,6 +769,7 @@ const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
 const devEl = $("dev");
 let selectedPlayerCount = loadPlayerCount();
+let forgeHudDismissed = false;
 
 document.title = STR.title;
 for (const node of document.querySelectorAll("[data-label]")) {
@@ -774,6 +779,9 @@ for (const node of document.querySelectorAll("[data-label]")) {
 pauseAction.textContent = "II";
 pauseAction.setAttribute("aria-label", STR.pauseButton);
 bombAction.setAttribute("aria-label", STR.bombButton);
+forgeHudClose.textContent = "X";
+forgeHudClose.setAttribute("aria-label", STR.forgeClose);
+forgeHudClose.setAttribute("title", STR.forgeClose);
 buildPlayerChooser();
 
 class Rng {
@@ -875,7 +883,7 @@ function updateForgePanels() {
     panel.note.textContent = state.forge.note;
     panel.panel.classList.toggle("is-hot", hot);
   }
-  forgeUi.hud.panel.hidden = state.status === "menu";
+  forgeUi.hud.panel.hidden = state.status === "menu" || forgeHudDismissed;
 }
 
 function renderForgeRows(node, text) {
@@ -1110,6 +1118,12 @@ canvas.addEventListener("pointerleave", (event) => {
 primaryAction.addEventListener("click", primary);
 soundAction.addEventListener("click", () => bus.toggle());
 pauseAction.addEventListener("click", togglePause);
+forgeHudClose.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  forgeHudDismissed = true;
+  updateForgePanels();
+});
 bombAction.addEventListener("pointerdown", (event) => {
   input.bombQueued.add(0);
   event.preventDefault();
@@ -1210,6 +1224,7 @@ function makePlayer(index, count = 1) {
 
 function startRun() {
   bus.unlock();
+  forgeHudDismissed = false;
   state = createState();
   state.status = "running";
   beginLevel(0);
@@ -1305,6 +1320,7 @@ function update(dt, commands) {
   updatePickups(dt);
   updateParticles(dt);
   resolveCollisions();
+  updateWellAbsorption();
   checkProgression(dt);
 }
 
@@ -1342,6 +1358,7 @@ function updateWells(dt) {
   for (const well of state.wells) {
     well.age += dt;
     well.spawn -= dt;
+    well.sinkPulse = Math.max(0, (well.sinkPulse ?? 0) - dt * 3.2);
     if (well.spawn <= 0 && state.spawned < currentLevel().quota && state.enemies.length < currentLevel().max + 4) {
       const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(currentLevel().mix);
       spawnEnemy(type, well.x + state.rng.range(-46, 46), well.y + state.rng.range(-46, 46));
@@ -1426,15 +1443,16 @@ function updatePickups(dt) {
   for (const pickup of state.pickups) {
     pickup.age += dt;
     pickup.life -= dt;
+    applyGravity(pickup, dt, 0.48);
     const player = nearestPlayer(pickup.x, pickup.y);
     if (player) {
       const dx = player.x - pickup.x;
       const dy = player.y - pickup.y;
       const d = Math.hypot(dx, dy) || 1;
       if (d < 140) {
-      const pull = (1 - d / 140) * 560;
-      pickup.vx += (dx / d) * pull * dt;
-      pickup.vy += (dy / d) * pull * dt;
+        const pull = (1 - d / 140) * 560;
+        pickup.vx += (dx / d) * pull * dt;
+        pickup.vy += (dy / d) * pull * dt;
       }
     }
     pickup.x += pickup.vx * dt;
@@ -1506,6 +1524,64 @@ function resolveCollisions() {
   compact(state.enemies);
 }
 
+function updateWellAbsorption() {
+  if (state.wells.length === 0) return;
+  let absorbedMatter = false;
+
+  for (const well of state.wells) {
+    if (well.dead) continue;
+
+    for (const bullet of state.bullets) {
+      if (bullet.dead) continue;
+      const limit = WELL_EVENT_RADIUS + bullet.r * 0.7;
+      if (distance2(bullet, well) <= limit ** 2) {
+        bullet.dead = true;
+        blackHoleSwallow(well, bullet, bullet.color ?? COLORS.flame, 4);
+      }
+    }
+
+    for (const enemy of state.enemies) {
+      if (enemy.dead) continue;
+      const spec = ENEMY[enemy.type];
+      const limit = WELL_EVENT_RADIUS + spec.r * 0.55;
+      if (distance2(enemy, well) <= limit ** 2) {
+        blackHoleSwallow(well, enemy, spec.color, enemy.type === "mayfly" ? 7 : 14);
+        killEnemy(enemy, true);
+        state.shake = Math.max(state.shake, enemy.type === "mayfly" ? 0.14 : 0.24);
+        absorbedMatter = true;
+      }
+    }
+
+    for (const pickup of state.pickups) {
+      if (pickup.dead) continue;
+      const limit = WELL_EVENT_RADIUS + pickup.r;
+      if (distance2(pickup, well) <= limit ** 2) {
+        pickup.dead = true;
+        blackHoleSwallow(well, pickup, COLORS.lime, 10);
+        absorbedMatter = true;
+      }
+    }
+
+    for (const player of state.players) {
+      if (!player.active || player.invuln > 0) continue;
+      const limit = WELL_CORE_RADIUS + player.r;
+      if (distance2(player, well) <= limit ** 2) {
+        blackHoleSwallow(well, player, player.color, 28);
+        addRing(well.x, well.y, player.color, 42, 260);
+        well.sinkPulse = 1;
+        state.shake = Math.max(state.shake, 1.35);
+        hurtPlayer(player);
+        absorbedMatter = true;
+      }
+    }
+  }
+
+  if (absorbedMatter) bus.play("repulsor", 0.07);
+  compact(state.bullets);
+  compact(state.enemies);
+  compact(state.pickups);
+}
+
 function checkProgression(dt) {
   if (state.transitionTimer > 0) {
     state.transitionTimer -= dt;
@@ -1532,12 +1608,18 @@ function checkProgression(dt) {
 function fireBullet(player, dir) {
   const spread = state.team.multiplier >= 6 ? 0.045 : 0;
   const shots = state.team.multiplier >= 8 ? [-spread, 0, spread] : [0];
-  for (const turn of shots) {
+  const nextSide = -(player.shotSide ?? 1);
+  player.shotSide = nextSide;
+  for (let shotIndex = 0; shotIndex < shots.length; shotIndex += 1) {
+    const turn = shots[shotIndex];
     const x = dir.x * Math.cos(turn) - dir.y * Math.sin(turn);
     const y = dir.x * Math.sin(turn) + dir.y * Math.cos(turn);
+    const side = { x: -y, y: x };
+    const lane = shots.length === 1 ? nextSide : shotIndex - (shots.length - 1) * 0.5;
+    const cannonOffset = lane * 8;
     state.bullets.push({
-      x: player.x + x * 20,
-      y: player.y + y * 20,
+      x: player.x + x * 26 + side.x * cannonOffset,
+      y: player.y + y * 26 + side.y * cannonOffset,
       vx: x * 760 + player.vx * 0.18,
       vy: y * 760 + player.vy * 0.18,
       r: 5,
@@ -1545,7 +1627,8 @@ function fireBullet(player, dir) {
       life: 1.15,
       maxLife: 1.15,
       owner: player.id,
-      color: player.color
+      color: player.color,
+      cannonLane: lane
     });
   }
   bus.playRandom(["playerFire1", "playerFire2", "playerFire3"], 0.045);
@@ -1625,7 +1708,8 @@ function spawnWell() {
     maxHp: 9 + state.levelIndex * 2,
     age: state.rng.range(0, TAU),
     spawn: state.rng.range(2.0, 4.2),
-    flash: 0
+    flash: 0,
+    sinkPulse: 0
   });
 }
 
@@ -1881,13 +1965,40 @@ function applyGravity(body, dt, factor) {
   const profile = currentLevel();
   if (profile.pull <= 0 || state.wells.length === 0) return;
   for (const well of state.wells) {
+    if (well.dead) continue;
     const dx = well.x - body.x;
     const dy = well.y - body.y;
     const dist = Math.hypot(dx, dy) || 1;
-    if (dist > 310) continue;
-    const power = (1 - dist / 310) * profile.pull * factor;
-    body.vx += (dx / dist) * power * dt;
-    body.vy += (dy / dist) * power * dt;
+    if (dist > WELL_GRAVITY_RADIUS) continue;
+    const t = 1 - clamp(dist / WELL_GRAVITY_RADIUS, 0, 1);
+    const sink = well.sinkPulse ?? 0;
+    const pull = profile.pull * factor * t * t * (0.55 + t * 2.15 + sink * 0.8);
+    const swirl = pull * (0.34 + t * 0.58 + sink * 0.28);
+    const nx = dx / dist;
+    const ny = dy / dist;
+    body.vx += (nx * pull - ny * swirl) * dt;
+    body.vy += (ny * pull + nx * swirl) * dt;
+  }
+}
+
+function blackHoleSwallow(well, body, color, count) {
+  const dx = well.x - body.x;
+  const dy = well.y - body.y;
+  const angle = Math.atan2(dy, dx);
+  well.sinkPulse = Math.min(1, (well.sinkPulse ?? 0) + 0.22);
+  for (let i = 0; i < count; i += 1) {
+    const a = angle + state.rng.range(-0.62, 0.62);
+    const speed = state.rng.range(130, 380);
+    addParticle(
+      body.x + state.rng.range(-6, 6),
+      body.y + state.rng.range(-6, 6),
+      Math.cos(a) * speed,
+      Math.sin(a) * speed,
+      color,
+      state.rng.range(0.18, 0.44),
+      state.rng.range(1.7, 4.8),
+      0.986
+    );
   }
 }
 
@@ -1968,7 +2079,14 @@ function buildLights() {
     lights.push({ x: player.x, y: player.y, radius: 240, intensity: 0.72, color: player.color });
   }
   for (const well of state.wells) {
-    lights.push({ x: well.x, y: well.y, radius: 330, intensity: 0.86 + Math.sin(state.time * 5 + well.age) * 0.12, color: well.flash > 0 ? COLORS.white : COLORS.violet });
+    const sink = well.sinkPulse ?? 0;
+    lights.push({
+      x: well.x,
+      y: well.y,
+      radius: WELL_GRAVITY_RADIUS + 28 + sink * 88,
+      intensity: 0.88 + sink * 0.5 + Math.sin(state.time * 5 + well.age) * 0.12,
+      color: well.flash > 0 ? COLORS.white : COLORS.violet
+    });
   }
   const bulletStride = Math.max(1, Math.ceil(state.bullets.length / 4));
   for (let i = 0; i < state.bullets.length && lights.length < MAX_LIGHTS - 1; i += bulletStride) {
@@ -2136,22 +2254,32 @@ function drawCircuitSilhouette() {
 function drawWells() {
   for (const well of state.wells) {
     const pulse = 0.5 + Math.sin(state.time * 4 + well.age) * 0.5;
+    const sink = well.sinkPulse ?? 0;
+    const spin = well.age + state.time * (0.92 + sink * 1.65);
     const color = well.flash > 0 ? COLORS.white : COLORS.violet;
     renderer.setBlend("add");
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 278 + pulse * 48, 278 + pulse * 48, 0, 0.25, { color: COLORS.violet });
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 182 + pulse * 24, 182 + pulse * 24, 0, 0.2, { color: COLORS.cyan });
-    renderer.drawWorldRing(well.x, well.y, 112 + pulse * 18, 3.2, color, 0.32);
-    renderer.drawWorldRing(well.x, well.y, 70 + pulse * 10, 1.4, COLORS.gold, 0.34, 8);
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, 0, 0.08 + sink * 0.1, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.23 + sink * 0.12, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.2 + sink * 0.08, { color: COLORS.cyan });
+    renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.04 + sink * 0.04, 96);
+    renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.32 + sink * 0.28);
+    renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + 11 + pulse * 5 + sink * 10, 2.6 + sink * 2.2, COLORS.gold, 0.34 + sink * 0.34, 28);
     renderer.setBlend("normal");
-    renderer.drawWorldCircle(well.x, well.y, 60 + pulse * 3, COLORS.ink, 0.58, 38);
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["gravity-well"], well.x, well.y, 112 + pulse * 8, 112 + pulse * 8, well.age + state.time * 0.9, well.flash > 0 ? 1 : 0.94, { normalStrength: 1.05 })) {
-      renderer.drawAtlas("gravity-well", well.x, well.y, 112 + pulse * 8, 112 + pulse * 8, well.age + state.time * 0.9, COLORS.white, well.flash > 0 ? 1 : 0.92);
+    renderer.drawWorldCircle(well.x, well.y, 62 + pulse * 3 + sink * 9, COLORS.ink, 0.62 + sink * 0.16, 42);
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["gravity-well"], well.x, well.y, 112 + pulse * 8 + sink * 8, 112 + pulse * 8 + sink * 8, spin, well.flash > 0 ? 1 : 0.94, { normalStrength: 1.05 + sink * 0.18 })) {
+      renderer.drawAtlas("gravity-well", well.x, well.y, 112 + pulse * 8 + sink * 8, 112 + pulse * 8 + sink * 8, spin, COLORS.white, well.flash > 0 ? 1 : 0.92);
     }
     renderer.setBlend("add");
-    for (let i = 0; i < 3; i += 1) {
-      renderer.drawWorldArc(well.x, well.y, well.r + i * 10 + pulse * 4, 0.4 + i * 2.1 + state.time * 0.6, Math.PI * 1.55 + i * 2.1 + state.time * 0.6, 3, i === 1 ? COLORS.cyan : COLORS.violet, 0.86);
+    for (let i = 0; i < 5; i += 1) {
+      const radius = WELL_CORE_RADIUS + 17 + i * 10 + pulse * 4 + sink * 7;
+      const start = spin + i * 1.18;
+      const end = start + Math.PI * (0.92 + i * 0.13);
+      renderer.drawWorldArc(well.x, well.y, radius, start, end, 2.4 + i * 0.3 + sink * 1.1, i % 2 ? COLORS.cyan : COLORS.violet, 0.76 + sink * 0.2);
     }
-    renderer.drawWorldCircle(well.x, well.y, 15 + pulse * 4, COLORS.cyan, 0.18, 26);
+    renderer.drawWorldCircle(well.x, well.y, WELL_EVENT_RADIUS + pulse * 3 + sink * 7, COLORS.ink, 0.34 + sink * 0.25, 42);
+    renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + pulse * 4 + sink * 8, 3 + sink * 2, COLORS.cyan, 0.48 + sink * 0.28, 44);
+    renderer.drawWorldCircle(well.x, well.y, WELL_CORE_RADIUS + pulse * 4 + sink * 5, COLORS.ink, 0.86, 32);
+    renderer.drawWorldCircle(well.x, well.y, 8 + pulse * 3 + sink * 5, COLORS.white, 0.12 + sink * 0.2, 24);
 
     const health = clamp(well.hp / well.maxHp, 0, 1);
     renderer.drawWorldRect(well.x - 32, well.y + 58, 64, 4, COLORS.white, 0.16);
@@ -2211,10 +2339,15 @@ function drawBullets() {
     const headY = bullet.y + v.y * 11;
     const tailX = bullet.x - v.x * 42;
     const tailY = bullet.y - v.y * 42;
+    const battleshipGlow = life * flicker;
 
     renderer.drawWorldImage(GL_IMAGES.glow, bullet.x - v.x * 8, bullet.y - v.y * 8, 128 * pulse, 82 * pulse, angle, 0.24 * flicker * life, { color: COLORS.flame });
     renderer.drawWorldImage(GL_IMAGES.glow, bullet.x - v.x * 2, bullet.y - v.y * 2, 78 * pulse, 48 * pulse, angle, 0.3 * life, { color: COLORS.orange });
     renderer.drawWorldImage(GL_IMAGES.glow, headX, headY, 42 * pulse, 34 * pulse, angle, 0.28 * flicker, { color: COLORS.heatBlue });
+    renderer.drawWorldImage(GL_IMAGES.glow, bullet.x - v.x * 18, bullet.y - v.y * 18, 118 * pulse, 32 * pulse, angle, 0.16 * battleshipGlow, { color: playerTint });
+    renderer.drawWorldLine(tailX - side.x * 7, tailY - side.y * 7, bullet.x + v.x * 17 - side.x * 2, bullet.y + v.y * 17 - side.y * 2, 3.4, COLORS.cyan, 0.35 * battleshipGlow);
+    renderer.drawWorldLine(tailX + side.x * 7, tailY + side.y * 7, bullet.x + v.x * 17 + side.x * 2, bullet.y + v.y * 17 + side.y * 2, 3.4, COLORS.gold, 0.34 * battleshipGlow);
+    renderer.drawWorldRing(bullet.x - v.x * 4, bullet.y - v.y * 4, 9.2 * pulse, 1.7, playerTint, 0.58 * battleshipGlow, 18);
     renderer.drawWorldLine(tailX, tailY, bullet.x + v.x * 18, bullet.y + v.y * 18, 12, COLORS.flame, 0.22 * flicker);
     renderer.drawWorldLine(bullet.x - v.x * 34, bullet.y - v.y * 34, bullet.x + v.x * 20, bullet.y + v.y * 20, 7.2, COLORS.orange, 0.52 * flicker);
     renderer.drawWorldLine(bullet.x - v.x * 22, bullet.y - v.y * 22, bullet.x + v.x * 18, bullet.y + v.y * 18, 4.4, COLORS.ember, 0.66);
@@ -2237,8 +2370,8 @@ function drawBullets() {
       playerTint,
       0.28
     );
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.missile, bullet.x, bullet.y, 43, 24, angle, 0.9, { color: COLORS.orange, normalStrength: 1.08 })) {
-      renderer.drawAtlas("missile", bullet.x, bullet.y, 38, 20, angle, COLORS.orange, 0.86);
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.missile, bullet.x, bullet.y, 52, 28, angle, 0.92, { color: COLORS.orange, normalStrength: 1.14 })) {
+      renderer.drawAtlas("missile", bullet.x, bullet.y, 46, 24, angle, COLORS.orange, 0.88);
     }
     renderer.drawWorldCircle(headX, headY, bullet.r + 2.4, COLORS.white, 0.72, 14);
     renderer.drawWorldCircle(bullet.x - v.x * 4, bullet.y - v.y * 4, bullet.r + 4.5, COLORS.flame, 0.34 * flicker, 14);
@@ -2356,6 +2489,8 @@ function drawPlayers() {
     const alpha = blink ? 0.38 : 1;
     const speed = Math.hypot(p.vx, p.vy);
     const thrust = clamp(speed / 260, 0, 1);
+    const shotWindow = Math.max(0.065, 0.115 - state.levelIndex * 0.004);
+    const fireFlash = p.shotTimer > 0 ? clamp(p.shotTimer / shotWindow, 0, 1) : 0;
     renderer.setBlend("add");
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 112, 112, p.angle, 0.22 * alpha, { color: p.color });
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 58, 58, -p.angle, 0.1 * alpha, { color: COLORS.white });
@@ -2366,11 +2501,69 @@ function drawPlayers() {
     if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.player, p.x, p.y, 62 * variant.sx, 62 * variant.sy, p.angle, alpha, { color: p.color, normalStrength: 1.18 })) {
       renderer.drawAtlas("player", p.x, p.y, 60 * variant.sx, 60 * variant.sy, p.angle, COLORS.white, alpha);
     }
+    drawLottoMindBattleshipHull(p, variant, alpha);
     renderer.setBlend("add");
     drawPlayerVariant(p, variant, alpha);
+    drawLottoMindBattleshipLights(p, variant, alpha, fireFlash);
     renderer.drawWorldArc(p.x, p.y, 26 + Math.sin(state.time * 8 + p.id) * 2, -0.9 + p.angle, 0.9 + p.angle, 2.2, p.color, 0.92 * alpha);
     renderer.setBlend("normal");
     state.entitiesDrawn += 1;
+  }
+}
+
+function drawLottoMindBattleshipHull(player, variant, alpha) {
+  const wing = 18 + variant.wing * 2.4;
+  const hull = [
+    { x: 37, y: 0 },
+    { x: 18, y: -10 },
+    { x: -2, y: -wing },
+    { x: -34, y: -14 },
+    { x: -28, y: -5 },
+    { x: -38, y: 0 },
+    { x: -28, y: 5 },
+    { x: -34, y: 14 },
+    { x: -2, y: wing },
+    { x: 18, y: 10 }
+  ];
+  drawRotatedPoly(player.x, player.y, player.angle, hull, COLORS.ink, 0.58 * alpha);
+  drawRotatedOutline(player.x, player.y, player.angle, hull, COLORS.white, 2.6, 0.58 * alpha, false);
+  drawRotatedOutline(player.x, player.y, player.angle, hull, player.color, 1.4, 0.7 * alpha, false);
+  drawRotatedLine(player.x, player.y, player.angle, -24, -7, 18, -4, 1.5, COLORS.gold, 0.36 * alpha);
+  drawRotatedLine(player.x, player.y, player.angle, -24, 7, 18, 4, 1.5, COLORS.gold, 0.36 * alpha);
+  drawRotatedLine(player.x, player.y, player.angle, -8, 0, 30, 0, 1.8, COLORS.white, 0.24 * alpha);
+}
+
+function drawLottoMindBattleshipLights(player, variant, alpha, fireFlash) {
+  const cannonY = 12 + variant.wing * 1.4;
+  const fire = clamp(fireFlash, 0, 1);
+  const flicker = 0.82 + Math.sin(state.time * 72 + player.id * 2.8) * 0.18;
+  const bridge = rotatePoint(2, 0, player.angle, player.x, player.y);
+  const nose = rotatePoint(36, 0, player.angle, player.x, player.y);
+
+  renderer.drawWorldRing(bridge.x, bridge.y, 12, 1.8, COLORS.gold, 0.56 * alpha, 18);
+  renderer.drawWorldCircle(bridge.x, bridge.y, 7.2, COLORS.ink, 0.42 * alpha, 18);
+  renderer.drawWorldCircle(bridge.x, bridge.y, 4.5, player.color, 0.54 * alpha, 16);
+  drawRotatedLine(player.x, player.y, player.angle, -3, 6, 8, -6, 2.4, COLORS.magenta, 0.82 * alpha);
+  drawRotatedLine(player.x, player.y, player.angle, 2, 7, 13, -6, 1.8, COLORS.cyan, 0.82 * alpha);
+  for (let i = 0; i < 4; i += 1) {
+    const port = rotatePoint(-16 + i * 6, -18, player.angle, player.x, player.y);
+    renderer.drawWorldCircle(port.x, port.y, 1.8, i % 2 ? COLORS.cyan : COLORS.gold, 0.62 * alpha, 8);
+  }
+
+  renderer.drawWorldImage(GL_IMAGES.glow, nose.x, nose.y, 46 + fire * 22, 32 + fire * 16, player.angle, (0.12 + fire * 0.22) * alpha, { color: COLORS.heatBlue });
+  renderer.drawWorldCircle(nose.x, nose.y, 3.5 + fire * 2, COLORS.white, (0.46 + fire * 0.34) * alpha, 12);
+
+  for (const sideSign of [-1, 1]) {
+    const color = sideSign < 0 ? COLORS.cyan : COLORS.gold;
+    drawRotatedLine(player.x, player.y, player.angle, 3, sideSign * cannonY, 40, sideSign * (cannonY * 0.7), 4.2, COLORS.ink, 0.46 * alpha);
+    drawRotatedLine(player.x, player.y, player.angle, 8, sideSign * cannonY, 39, sideSign * (cannonY * 0.7), 2.5, color, 0.78 * alpha);
+    const muzzle = rotatePoint(43, sideSign * (cannonY * 0.68), player.angle, player.x, player.y);
+    renderer.drawWorldCircle(muzzle.x, muzzle.y, 3.2 + fire * 4, COLORS.white, (0.34 + fire * 0.46) * alpha, 12);
+    renderer.drawWorldImage(GL_IMAGES.glow, muzzle.x, muzzle.y, 34 + fire * 42, 22 + fire * 22, player.angle, (0.12 + fire * 0.2) * flicker * alpha, { color });
+    if (fire > 0.05) {
+      drawRotatedLine(player.x, player.y, player.angle, 42, sideSign * (cannonY * 0.68), 82 + fire * 18, sideSign * (cannonY * 0.34), 8 * fire, color, 0.24 * fire * alpha);
+      drawRotatedLine(player.x, player.y, player.angle, 42, sideSign * (cannonY * 0.68), 68 + fire * 16, sideSign * (cannonY * 0.44), 3.4 * fire, COLORS.white, 0.5 * fire * alpha);
+    }
   }
 }
 
@@ -2639,6 +2832,17 @@ function resize() {
     view.camX = 0;
     view.camY = 0;
   }
+  syncArenaCssVars();
+}
+
+function syncArenaCssVars() {
+  shell.style.setProperty("--arena-left", `${view.x}px`);
+  shell.style.setProperty("--arena-top", `${view.y}px`);
+  shell.style.setProperty("--arena-right", `${view.x + view.w}px`);
+  shell.style.setProperty("--arena-bottom", `${view.y + view.h}px`);
+  shell.style.setProperty("--arena-width", `${view.w}px`);
+  shell.style.setProperty("--arena-height", `${view.h}px`);
+  shell.dataset.forgeDock = view.y >= 130 ? "full" : "tight";
 }
 
 function updateCamera() {
@@ -2712,6 +2916,12 @@ function rotatePoint(x, y, angle, originX, originY) {
 
 function drawRotatedPoly(x, y, angle, points, color, alpha) {
   renderer.drawWorldPolygon(points.map((point) => rotatePoint(point.x, point.y, angle, x, y)), color, alpha);
+}
+
+function drawRotatedLine(x, y, angle, ax, ay, bx, by, width, color, alpha) {
+  const a = rotatePoint(ax, ay, angle, x, y);
+  const b = rotatePoint(bx, by, angle, x, y);
+  renderer.drawWorldLine(a.x, a.y, b.x, b.y, width, color, alpha);
 }
 
 function drawRotatedOutline(x, y, angle, points, color, width, alpha, fill = false) {

@@ -19,6 +19,7 @@
   --violet: #8e44ff;
   --text: #f6fbff;
   --muted: #abc6d4;
+  --display-font: "Bahnschrift", "Agency FB", "Arial Black", "Segoe UI Black", Impact, sans-serif;
 }
 
 * {
@@ -430,8 +431,10 @@ button {
   content: "";
   position: absolute;
   inset: 1px;
+  z-index: 2;
   border-radius: 8px;
   background: linear-gradient(90deg, transparent, rgba(41, 247, 255, 0.28), transparent);
+  pointer-events: none;
   transform: translateX(-120%);
   animation: forge-sweep 620ms ease-out;
 }
@@ -439,16 +442,16 @@ button {
 .forge-hud {
   position: fixed;
   z-index: 4;
-  top: max(82px, calc(var(--safe-top) + 72px));
-  right: max(12px, var(--safe-right));
+  top: max(calc(var(--safe-top) + 8px), calc(var(--arena-top, 0px) - 154px));
+  right: max(12px, calc(100vw - var(--arena-right, 100vw) + 14px));
   bottom: auto;
   width: min(468px, calc(100vw - 24px));
   min-height: 148px;
-  padding: 15px 21px 14px 16px;
-  grid-template-columns: 46px minmax(0, 1fr);
+  padding: 15px 21px 14px 62px;
+  grid-template-columns: minmax(0, 1fr);
   opacity: 0.96;
   transform: translate3d(0, 0, 0);
-  animation: forge-float 4.8s ease-in-out infinite;
+  animation: none;
   filter: drop-shadow(0 0 16px rgba(41, 247, 255, 0.18)) drop-shadow(0 16px 24px rgba(0, 0, 0, 0.34));
 }
 
@@ -458,24 +461,119 @@ button {
 }
 
 .forge-hud::before {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 40px;
   height: 40px;
 }
 
+.forge-close {
+  position: absolute;
+  z-index: 3;
+  left: 19px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 1px solid rgba(255, 223, 117, 0.48);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 45, 170, 0.16), transparent 58%),
+    rgba(5, 7, 13, 0.52);
+  color: var(--warm-gold);
+  font: 950 15px/1 var(--display-font);
+  text-shadow: 0 0 10px rgba(255, 223, 117, 0.58);
+  box-shadow:
+    inset 0 0 12px rgba(41, 247, 255, 0.08),
+    0 0 14px rgba(255, 223, 117, 0.14);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.forge-close:hover,
+.forge-close:focus-visible {
+  border-color: rgba(246, 251, 255, 0.9);
+  color: var(--text);
+  outline: none;
+  box-shadow:
+    inset 0 0 14px rgba(41, 247, 255, 0.18),
+    0 0 18px rgba(41, 247, 255, 0.26);
+}
+
 .forge-hud > span {
+  grid-column: 1;
   font-size: 11px;
 }
 
 .forge-hud strong {
+  grid-column: 1;
   gap: 3.5px;
   font-size: clamp(14px, 1.12vw, 17px);
   line-height: 1.26;
 }
 
 .forge-hud small {
+  grid-column: 1;
   display: block;
   font-size: 9px;
   opacity: 0.86;
+}
+
+#shell[data-forge-dock="tight"] .forge-hud {
+  top: max(calc(var(--safe-top) + 6px), calc(var(--arena-top, 0px) - 52px));
+  right: max(10px, calc(100vw - var(--arena-right, 100vw) + 10px));
+  width: min(560px, calc(100vw - 20px));
+  min-height: 46px;
+  padding: 8px 12px 8px 48px;
+  opacity: 0.94;
+}
+
+#shell[data-forge-dock="tight"] .forge-hud::before {
+  left: 11px;
+  width: 28px;
+  height: 28px;
+}
+
+#shell[data-forge-dock="tight"] .forge-close {
+  left: 13px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+#shell[data-forge-dock="tight"] .forge-hud > span,
+#shell[data-forge-dock="tight"] .forge-hud small {
+  display: none;
+}
+
+#shell[data-forge-dock="tight"] .forge-hud strong {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 9px;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+#shell[data-forge-dock="tight"] .forge-row {
+  display: inline-flex;
+  grid-template-columns: none;
+  column-gap: 0;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+#shell[data-forge-dock="tight"] .forge-row b {
+  font-size: 0.78em;
 }
 
 #overlay {
@@ -712,12 +810,20 @@ button {
   grid-row: 3;
   max-width: min(860px, 90vw);
   margin: 0;
-  color: var(--text);
-  font-size: clamp(30px, 6vw, 76px);
+  color: #ecf8ff;
+  font-family: var(--display-font);
+  font-size: clamp(32px, 5.4vw, 72px);
   font-weight: 950;
-  line-height: 0.96;
+  font-stretch: condensed;
+  line-height: 0.88;
+  letter-spacing: 0.035em;
   text-align: center;
   text-transform: uppercase;
+  -webkit-text-stroke: 1px rgba(41, 247, 255, 0.28);
+  text-shadow:
+    0 3px 0 rgba(5, 7, 13, 0.9),
+    0 0 12px rgba(41, 247, 255, 0.54),
+    0 0 28px rgba(142, 68, 255, 0.42);
 }
 
 #overlayCopy {
@@ -763,14 +869,55 @@ button {
   clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
 }
 
+#overlay[data-state="menu"] .player-chooser {
+  position: fixed;
+  z-index: 4;
+  top: 50%;
+  right: max(22px, calc(var(--safe-right) + 18px));
+  transform: translateY(-50%);
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: 76px;
+  max-width: none;
+  padding: 10px 8px;
+  background:
+    linear-gradient(180deg, rgba(41, 247, 255, 0.14), transparent 32% 68%, rgba(255, 45, 170, 0.14)),
+    rgba(5, 7, 13, 0.62);
+  box-shadow:
+    inset 0 0 18px rgba(41, 247, 255, 0.08),
+    0 0 28px rgba(41, 247, 255, 0.1),
+    0 16px 32px rgba(0, 0, 0, 0.32);
+}
+
+#overlay[data-state="menu"] .player-chooser::before,
+#overlay[data-state="menu"] .player-chooser::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--warm-gold), var(--cyan), transparent);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+#overlay[data-state="menu"] .player-chooser::before {
+  top: 5px;
+}
+
+#overlay[data-state="menu"] .player-chooser::after {
+  bottom: 5px;
+}
+
 .player-chooser[hidden] {
   display: none;
 }
 
 .player-chooser button {
   position: relative;
-  width: 64px;
-  height: 44px;
+  width: 58px;
+  height: 40px;
   border: 1px solid rgba(41, 247, 255, 0.34);
   border: 1px solid color-mix(in srgb, var(--pilot-color, var(--cyan)) 55%, rgba(41, 247, 255, 0.32));
   border-radius: 6px;
@@ -1158,11 +1305,12 @@ button {
   }
 
   .forge-hud {
-    right: max(8px, var(--safe-right));
-    top: max(82px, calc(var(--safe-top) + 72px));
+    top: max(calc(var(--safe-top) + 8px), calc(var(--arena-top, 0px) - 138px));
+    right: max(8px, calc(100vw - var(--arena-right, 100vw) + 8px));
     bottom: auto;
     width: min(420px, calc(100vw - 16px));
-    min-height: 136px;
+    min-height: 126px;
+    padding: 12px 15px 11px 58px;
     opacity: 0.94;
   }
 
@@ -1177,6 +1325,34 @@ button {
     background:
       radial-gradient(circle, rgba(255, 45, 170, 0.2), rgba(5, 7, 13, 0.8) 62%),
       url("./assets/2084/ui/button-primary.png") center / 100% 100% no-repeat;
+  }
+}
+
+@media (max-width: 980px) {
+  #overlay[data-state="menu"] .player-chooser {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    grid-row: 4;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: auto;
+    max-width: min(360px, 84vw);
+    padding: 7px;
+    gap: 7px;
+    margin-top: -2px;
+  }
+
+  #overlay[data-state="menu"] .player-chooser::before,
+  #overlay[data-state="menu"] .player-chooser::after {
+    left: 10px;
+    right: 10px;
+  }
+
+  .player-chooser button {
+    width: 54px;
+    height: 38px;
   }
 }
 
@@ -1220,12 +1396,13 @@ button {
   }
 
   .forge-hud {
-    left: max(8px, var(--safe-left));
+    left: auto;
     right: max(8px, var(--safe-right));
-    top: max(100px, calc(var(--safe-top) + 86px));
+    top: max(calc(var(--safe-top) + 8px), calc(var(--arena-top, 0px) - 112px));
     bottom: auto;
-    width: auto;
-    min-height: 130px;
+    width: min(360px, calc(100vw - 16px));
+    min-height: 104px;
+    padding: 10px 12px 10px 52px;
   }
 
   .forge-panel {
@@ -1235,9 +1412,29 @@ button {
     column-gap: 10px;
   }
 
+  .forge-hud {
+    min-height: 104px;
+    padding: 10px 12px 10px 52px;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+  }
+
   .forge-panel::before {
     width: 34px;
     height: 34px;
+  }
+
+  .forge-hud::before {
+    left: 12px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .forge-close {
+    left: 14px;
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
   }
 
   .forge-panel small {
@@ -1245,8 +1442,8 @@ button {
   }
 
   .forge-hud strong {
-    font-size: 13.25px;
-    line-height: 1.22;
+    font-size: 11.5px;
+    line-height: 1.16;
   }
 
   .forge-row {
@@ -1282,12 +1479,25 @@ button {
 
 @media (max-height: 500px) and (pointer: coarse) {
   .forge-hud {
-    top: max(66px, calc(var(--safe-top) + 56px));
+    top: max(calc(var(--safe-top) + 6px), calc(var(--arena-top, 0px) - 96px));
     right: max(8px, var(--safe-right));
     left: auto;
-    width: min(360px, 46vw);
-    min-height: 104px;
-    padding: 8px 11px 8px 9px;
+    width: min(340px, 52vw);
+    min-height: 88px;
+    padding: 8px 10px 8px 46px;
+  }
+
+  .forge-hud::before {
+    left: 10px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .forge-close {
+    left: 12px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 
   .forge-hud strong {
