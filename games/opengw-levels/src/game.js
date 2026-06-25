@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=forge-close-title-1";
+import { STR } from "../strings.js?v=audio-rearm-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -126,15 +126,15 @@ const AUDIO = {
   startupMusic: { file: "digital-static-cover.mp3", volume: 0.36, loop: true },
   ambient: { file: "backgroundnoiseloop.wav", volume: 0.2, loop: true },
   wellHum: { file: "gravitywellhumloop.wav", volume: 0.16, loop: true },
-  bomb: { file: "bomb.wav", volume: 0.52 },
-  hit1: { file: "enemyhit.wav", volume: 0.2 },
-  hit2: { file: "enemyhit.wav", volume: 0.2 },
-  spawn1: { file: "enemyspawn1.wav", volume: 0.18 },
-  spawn2: { file: "enemyspawn2.wav", volume: 0.18 },
-  spawn3: { file: "enemyspawn3.wav", volume: 0.18 },
-  spawn4: { file: "enemyspawn4.wav", volume: 0.18 },
-  spawn5: { file: "enemyspawn5.wav", volume: 0.18 },
-  spawn6: { file: "enemyspawn6.wav", volume: 0.18 },
+  bomb: { file: "bomb.wav", volume: 0.58 },
+  hit1: { file: "enemyhit.wav", volume: 0.28 },
+  hit2: { file: "enemyhit.wav", volume: 0.28 },
+  spawn1: { file: "enemyspawn1.wav", volume: 0.22 },
+  spawn2: { file: "enemyspawn2.wav", volume: 0.22 },
+  spawn3: { file: "enemyspawn3.wav", volume: 0.22 },
+  spawn4: { file: "enemyspawn4.wav", volume: 0.22 },
+  spawn5: { file: "enemyspawn5.wav", volume: 0.22 },
+  spawn6: { file: "enemyspawn6.wav", volume: 0.22 },
   extraBomb: { file: "extrabomb.wav", volume: 0.35 },
   extraLife: { file: "extralife.wav", volume: 0.36 },
   gameOver: { file: "gameover.wav", volume: 0.4 },
@@ -148,9 +148,9 @@ const AUDIO = {
   multiplier: { file: "multiplieradvance.wav", volume: 0.28 },
   menuSelect: { file: "menuselect.wav", volume: 0.24 },
   playerDead: { file: "playerdead.wav", volume: 0.38 },
-  playerFire1: { file: "playerfire1.wav", volume: 0.08 },
-  playerFire2: { file: "playerfire2.wav", volume: 0.08 },
-  playerFire3: { file: "playerfire3.wav", volume: 0.08 },
+  playerFire1: { file: "playerfire1.wav", volume: 0.18 },
+  playerFire2: { file: "playerfire2.wav", volume: 0.18 },
+  playerFire3: { file: "playerfire3.wav", volume: 0.18 },
   playerHit: { file: "playerhit.wav", volume: 0.32 },
   playerSpawn: { file: "playerspawn.wav", volume: 0.26 },
   playerThrust: { file: "playerthrust.wav", volume: 0.12 },
@@ -911,6 +911,7 @@ function renderForgeRows(node, text) {
 const bus = {
   muted: loadMuted(),
   unlocked: false,
+  primePromise: null,
   nodes: new Map(),
   lastPlay: new Map(),
 
@@ -921,13 +922,43 @@ const bus = {
       node.preload = data.loop ? "auto" : "metadata";
       node.loop = Boolean(data.loop);
       node.volume = data.volume;
-      this.nodes.set(id, { node, data });
+      this.nodes.set(id, { node, data, url: url.href });
     }
   },
 
-  async unlock() {
+  unlock() {
+    if (this.unlocked) {
+      this.refreshLoops();
+      return;
+    }
     this.unlocked = true;
+    this.prime();
     this.refreshLoops();
+    updateOverlay();
+  },
+
+  prime() {
+    if (this.primePromise) return this.primePromise;
+    this.primePromise = Promise.allSettled([...this.nodes.values()].map(({ node }) => this.primeNode(node)))
+      .finally(() => this.refreshLoops());
+    return this.primePromise;
+  },
+
+  async primeNode(node) {
+    const originalVolume = node.volume;
+    const originalMuted = node.muted;
+    try {
+      node.muted = true;
+      node.volume = 0;
+      await node.play();
+      node.pause();
+      node.currentTime = 0;
+    } catch {
+      // Browsers can still defer individual clips; normal play calls retry after the gesture.
+    } finally {
+      node.muted = originalMuted;
+      node.volume = originalVolume;
+    }
   },
 
   setMuted(value) {
@@ -938,7 +969,12 @@ const bus = {
   },
 
   toggle() {
+    const wasMuted = this.muted;
     this.setMuted(!this.muted);
+    if (wasMuted) {
+      this.unlock();
+      this.play("menuSelect", 0.08);
+    }
   },
 
   play(id, cooldown = 0.04) {
@@ -1021,6 +1057,8 @@ requestAnimationFrame(frame);
 
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
+addEventListener("pointerdown", () => bus.unlock(), { once: true, passive: true });
+addEventListener("keydown", () => bus.unlock(), { once: true });
 addEventListener("blur", () => {
   pausedByBlur = true;
   if (state.status === "running") setPaused(true);
@@ -1139,6 +1177,7 @@ function buildPlayerChooser() {
     button.style.setProperty("--pilot-color", PLAYER_COLORS[count - 1] ?? COLORS.cyan);
     button.setAttribute("aria-pressed", String(count === selectedPlayerCount));
     button.addEventListener("click", () => {
+      bus.unlock();
       selectedPlayerCount = count;
       savePlayerCount(count);
       bus.play("menuSelect", 0.08);
@@ -1234,6 +1273,7 @@ function startRun() {
 }
 
 function primary() {
+  bus.unlock();
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
     startRun();
   } else if (state.status === "paused") {

@@ -870,19 +870,18 @@ button {
 }
 
 #overlay[data-state="menu"] .player-chooser {
-  position: fixed;
-  z-index: 4;
-  top: 50%;
-  right: max(22px, calc(var(--safe-right) + 18px));
-  transform: translateY(-50%);
-  flex-direction: column;
+  position: relative;
+  z-index: 3;
+  grid-row: 5;
+  flex-direction: row;
   flex-wrap: nowrap;
   gap: 8px;
-  width: 76px;
-  max-width: none;
-  padding: 10px 8px;
+  width: auto;
+  max-width: min(360px, 84vw);
+  padding: 8px;
+  margin-top: -2px;
   background:
-    linear-gradient(180deg, rgba(41, 247, 255, 0.14), transparent 32% 68%, rgba(255, 45, 170, 0.14)),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.14), transparent 32% 68%, rgba(255, 45, 170, 0.14)),
     rgba(5, 7, 13, 0.62);
   box-shadow:
     inset 0 0 18px rgba(41, 247, 255, 0.08),
@@ -1331,10 +1330,8 @@ button {
 @media (max-width: 980px) {
   #overlay[data-state="menu"] .player-chooser {
     position: relative;
-    top: auto;
-    right: auto;
     transform: none;
-    grid-row: 4;
+    grid-row: 5;
     flex-direction: row;
     flex-wrap: nowrap;
     width: auto;
