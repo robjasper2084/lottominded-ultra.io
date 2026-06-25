@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=black-hole-pull-1";
+import { STR } from "../strings.js?v=mix-bed-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -125,9 +125,9 @@ const GL_IMAGES = {
 const COLOR_VEC_CACHE = new Map();
 
 const AUDIO = {
-  startupMusic: { file: "digital-static-cover.mp3", volume: 0.36, loop: true },
-  ambient: { file: "backgroundnoiseloop.wav", volume: 0.2, loop: true },
-  wellHum: { file: "gravitywellhumloop.wav", volume: 0.16, loop: true },
+  startupMusic: { file: "digital-static-cover.mp3", volume: 0.28, loop: true },
+  ambient: { file: "backgroundnoiseloop.wav", volume: 0.14, loop: true },
+  wellHum: { file: "gravitywellhumloop.wav", volume: 0.12, loop: true },
   bomb: { file: "bomb.wav", volume: 0.58 },
   hit1: { file: "enemyhit.wav", volume: 0.28 },
   hit2: { file: "enemyhit.wav", volume: 0.28 },
@@ -1002,21 +1002,55 @@ const bus = {
     const record = this.nodes.get(id);
     const context = this.context;
     if (!record || !context || context.state !== "running") return;
+    const targetVolume = this.loopVolume(id, record);
+    if (targetVolume <= 0.001) return;
     this.loadBuffer(id).then((buffer) => {
       if (!buffer || this.muted || !this.unlocked || this.loops.has(id) || context.state !== "running") return;
       const source = context.createBufferSource();
       const gain = context.createGain();
       source.buffer = buffer;
       source.loop = true;
-      gain.gain.value = record.data.volume;
+      gain.gain.value = 0;
       source.connect(gain);
       gain.connect(context.destination);
       source.start();
-      this.loops.set(id, { source, gain });
+      const loop = { source, gain };
+      this.loops.set(id, loop);
+      this.setLoopGain(loop, this.loopVolume(id, record), 0.22);
       source.onended = () => {
         if (this.loops.get(id)?.source === source) this.loops.delete(id);
       };
     });
+  },
+
+  setLoopGain(loop, target, glide = 0.28) {
+    const context = this.context;
+    if (!context) {
+      loop.gain.gain.value = target;
+      return;
+    }
+    loop.gain.gain.cancelScheduledValues(context.currentTime);
+    loop.gain.gain.setTargetAtTime(target, context.currentTime, glide);
+  },
+
+  loopVolume(id, record) {
+    const mode = typeof state === "undefined" ? "menu" : state.status;
+    if (id === "startupMusic") {
+      if (mode === "running") return record.data.volume * 0.42;
+      if (mode === "paused") return record.data.volume * 0.34;
+      return record.data.volume;
+    }
+    if (id === "ambient") {
+      if (mode === "running") return record.data.volume * 0.58;
+      if (mode === "paused") return record.data.volume * 0.42;
+      return record.data.volume * 0.64;
+    }
+    if (id === "wellHum") {
+      const wellCount = typeof state === "undefined" ? 0 : state.wells?.length ?? 0;
+      if (mode !== "running" || wellCount <= 0) return 0;
+      return record.data.volume * clamp(0.42 + wellCount * 0.18, 0.42, 0.9);
+    }
+    return record.data.volume;
   },
 
   stopLoop(id) {
@@ -1091,8 +1125,15 @@ const bus = {
   refreshLoops() {
     for (const [id, { data }] of this.nodes.entries()) {
       if (!data.loop) continue;
-      if (!this.unlocked || this.muted) this.stopLoop(id);
-      else this.startLoop(id);
+      if (!this.unlocked || this.muted) {
+        this.stopLoop(id);
+        continue;
+      }
+      const record = this.nodes.get(id);
+      const loop = this.loops.get(id);
+      const target = this.loopVolume(id, record);
+      if (loop) this.setLoopGain(loop, target);
+      else if (target > 0.001) this.startLoop(id);
     }
   },
 
@@ -1366,6 +1407,7 @@ function startRun() {
   state = createState();
   state.status = "running";
   beginLevel(0);
+  bus.refreshLoops();
   refreshForge(STR.forgeStartNote, 0x2084, true);
   hideOverlay();
   updateHud();
@@ -1388,9 +1430,11 @@ function togglePause() {
 function setPaused(value) {
   if (value && state.status === "running") {
     state.status = "paused";
+    bus.refreshLoops();
     updateOverlay();
   } else if (!value && state.status === "paused") {
     state.status = "running";
+    bus.refreshLoops();
     hideOverlay();
     lastFrame = performance.now();
   }
@@ -1406,6 +1450,7 @@ function beginLevel(index) {
   state.wells.length = 0;
   const profile = currentLevel();
   for (let i = 0; i < profile.wells; i += 1) spawnWell();
+  bus.refreshLoops();
   refreshForge(STR.forgeRunNote, 0x4000 + index, true);
   bus.play("level", 0.6);
   if (profile.wells > 0) bus.play("wellAlert", 0.6);
@@ -1887,6 +1932,7 @@ function damageWell(well, damage) {
   burst(well.x, well.y, COLORS.violet, 8);
   if (well.hp <= 0) {
     well.dead = true;
+    bus.refreshLoops();
     const points = 1800 * state.team.multiplier;
     state.score += points;
     spawnScorePop(well.x, well.y - 32, `+${formatNumber(points)}`, COLORS.gold);
@@ -1967,6 +2013,7 @@ function finishRun(status) {
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
   state.banner.timer = 0;
+  bus.refreshLoops();
   if (status === "gameover") bus.play("gameOver", 0.4);
   else bus.play("level", 0.4);
   updateOverlay();
