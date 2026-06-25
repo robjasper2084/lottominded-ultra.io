@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=signal-lost-home-1";
+import { STR } from "../strings.js?v=no-aim-reticle-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -1470,8 +1470,6 @@ function makePlayer(index, count = 1) {
     shotTimer: 0,
     angle: spawn.angle,
     lastAim: { x: 0, y: -1 },
-    fireIntent: false,
-    aimIntent: false,
     active: true
   };
 }
@@ -1605,11 +1603,8 @@ function updatePlayers(dt, commands) {
   for (const player of state.players) {
     if (!player.active) continue;
     const command = commands[player.id] ?? emptyCommand();
-    const manualAim = Boolean(command.aim);
     player.vx = command.move.x * speed;
     player.vy = command.move.y * speed;
-    player.fireIntent = Boolean(command.fire);
-    player.aimIntent = manualAim || player.fireIntent;
     applyGravity(player, dt, 0.85);
     player.x += player.vx * dt;
     player.y += player.vy * dt;
@@ -2806,7 +2801,6 @@ function drawPlayers() {
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 112, 112, p.angle, 0.22 * alpha, { color: p.color });
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 58, 58, -p.angle, 0.1 * alpha, { color: COLORS.white });
     if (thrust > 0.05) drawPlayerEngineTrail(p, thrust, alpha);
-    drawAimAssist(p, alpha, shotWindow, fireFlash);
     renderer.setBlend("normal");
     const variant = PLAYER_VARIANTS[p.id % PLAYER_VARIANTS.length];
     renderer.drawWorldCircle(p.x + 2, p.y + 5, 31, COLORS.ink, 0.48 * alpha, 34);
@@ -2821,27 +2815,6 @@ function drawPlayers() {
     renderer.setBlend("normal");
     state.entitiesDrawn += 1;
   }
-}
-
-function drawAimAssist(player, alpha, shotWindow, fireFlash) {
-  if (!player.aimIntent) return;
-  const aim = player.lastAim ?? { x: Math.cos(player.angle), y: Math.sin(player.angle) };
-  const ready = clamp(1 - player.shotTimer / Math.max(0.001, shotWindow), 0, 1);
-  const firing = player.fireIntent ? 1 : 0;
-  const length = firing ? 188 : 126;
-  const startX = player.x + aim.x * 42;
-  const startY = player.y + aim.y * 42;
-  const endX = player.x + aim.x * length;
-  const endY = player.y + aim.y * length;
-  const wobble = 1 + Math.sin(state.time * 18 + player.id * 2.2) * 0.08;
-  const glow = (0.14 + firing * 0.28 + ready * 0.08) * alpha;
-  const reticle = (8 + ready * 5 + fireFlash * 6) * wobble;
-
-  renderer.drawWorldLine(startX, startY, endX, endY, firing ? 4.2 : 2.2, player.color, glow);
-  renderer.drawWorldLine(startX, startY, endX, endY, firing ? 1.5 : 0.9, COLORS.white, (0.08 + firing * 0.12) * alpha);
-  renderer.drawWorldRing(endX, endY, reticle, firing ? 2 : 1.3, firing ? COLORS.gold : player.color, (0.42 + ready * 0.26) * alpha, 24);
-  renderer.drawWorldLine(endX - aim.y * 10, endY + aim.x * 10, endX + aim.y * 10, endY - aim.x * 10, 1.3, COLORS.white, (0.22 + firing * 0.24) * alpha);
-  renderer.drawWorldCircle(endX, endY, 2.6 + ready * 1.4, COLORS.white, (0.28 + firing * 0.3) * alpha, 12);
 }
 
 function drawLottoMindBattleshipHull(player, variant, alpha) {
