@@ -12,6 +12,8 @@ export const STR = {
   restart: "Restart",
   mute: "Mute",
   unmute: "Sound",
+  soundOn: "Sound On",
+  soundOff: "Sound Off",
   score: "Score",
   level: "Sector",
   lives: "Lives",

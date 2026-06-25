@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=mix-bed-1";
+import { STR } from "../strings.js?v=audio-mixer-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -155,7 +155,7 @@ const AUDIO = {
   playerFire3: { file: "playerfire3.wav", volume: 0.18 },
   playerHit: { file: "playerhit.wav", volume: 0.32 },
   playerSpawn: { file: "playerspawn.wav", volume: 0.26 },
-  playerThrust: { file: "playerthrust.wav", volume: 0.12 },
+  playerThrust: { file: "playerthrust.wav", volume: 0.16, loop: true },
   repulsor: { file: "repulsor.wav", volume: 0.28 },
   shieldsDown: { file: "sheildsdown.wav", volume: 0.3 }
 };
@@ -918,6 +918,9 @@ const bus = {
   muted: loadMuted(),
   unlocked: false,
   context: null,
+  masterGain: null,
+  limiter: null,
+  categoryGains: new Map(),
   nodes: new Map(),
   loops: new Map(),
   lastPlay: new Map(),
@@ -933,7 +936,52 @@ const bus = {
   ensureContext() {
     if (!AudioContextCtor) return null;
     if (!this.context) this.context = new AudioContextCtor();
+    this.ensureMixer();
     return this.context;
+  },
+
+  ensureMixer() {
+    const context = this.context;
+    if (!context || this.masterGain) return;
+    this.masterGain = context.createGain();
+    this.masterGain.gain.value = 0.95;
+    this.limiter = context.createDynamicsCompressor();
+    this.limiter.threshold.value = -7;
+    this.limiter.knee.value = 18;
+    this.limiter.ratio.value = 8;
+    this.limiter.attack.value = 0.004;
+    this.limiter.release.value = 0.16;
+    this.masterGain.connect(this.limiter);
+    this.limiter.connect(context.destination);
+    for (const category of ["music", "ambience", "engine", "ui", "sfx"]) {
+      const gain = context.createGain();
+      gain.gain.value = this.categoryVolume(category);
+      gain.connect(this.masterGain);
+      this.categoryGains.set(category, gain);
+    }
+  },
+
+  categoryVolume(category) {
+    if (category === "music") return 0.68;
+    if (category === "ambience") return 0.7;
+    if (category === "engine") return 0.72;
+    if (category === "ui") return 0.86;
+    return 1;
+  },
+
+  audioCategory(id) {
+    if (id === "startupMusic") return "music";
+    if (id === "ambient" || id === "wellHum") return "ambience";
+    if (id === "playerThrust") return "engine";
+    if (id === "menuSelect") return "ui";
+    return "sfx";
+  },
+
+  outputFor(id) {
+    const context = this.context;
+    if (!context) return null;
+    this.ensureMixer();
+    return this.categoryGains.get(this.audioCategory(id)) ?? this.masterGain ?? context.destination;
   },
 
   async unlock() {
@@ -1012,7 +1060,7 @@ const bus = {
       source.loop = true;
       gain.gain.value = 0;
       source.connect(gain);
-      gain.connect(context.destination);
+      gain.connect(this.outputFor(id));
       source.start();
       const loop = { source, gain };
       this.loops.set(id, loop);
@@ -1049,6 +1097,10 @@ const bus = {
       const wellCount = typeof state === "undefined" ? 0 : state.wells?.length ?? 0;
       if (mode !== "running" || wellCount <= 0) return 0;
       return record.data.volume * clamp(0.42 + wellCount * 0.18, 0.42, 0.9);
+    }
+    if (id === "playerThrust") {
+      if (mode !== "running") return 0;
+      return record.data.volume * clamp(state.thrustMix ?? 0, 0, 1);
     }
     return record.data.volume;
   },
@@ -1107,7 +1159,7 @@ const bus = {
       source.buffer = buffer;
       gain.gain.value = record.data.volume;
       source.connect(gain);
-      gain.connect(context.destination);
+      gain.connect(this.outputFor(id));
       source.start();
       source.onended = () => {
         source.disconnect();
@@ -1142,6 +1194,10 @@ const bus = {
       muted: this.muted,
       unlocked: this.unlocked,
       context: this.context?.state ?? "none",
+      mixer: {
+        master: this.masterGain?.gain.value ?? null,
+        categories: Object.fromEntries([...this.categoryGains.entries()].map(([id, gain]) => [id, gain.gain.value]))
+      },
       loaded: [...this.nodes.entries()].filter(([, record]) => record.buffer).map(([id]) => id),
       loops: [...this.loops.keys()],
       errors: [...this.nodes.entries()].filter(([, record]) => record.error).map(([id, record]) => [id, String(record.error)])
@@ -1375,6 +1431,7 @@ function createState() {
     gridOffset: 0,
     bombWave: 0,
     bombOrigin: { x: WORLD.w / 2, y: WORLD.h / 2, color: COLORS.magenta },
+    thrustMix: 0,
     forge: createForgeState(playerCount, STR.forgeStartupNote, playerCount * 0x2084),
     entitiesDrawn: 0
   };
@@ -1497,6 +1554,7 @@ function update(dt, commands) {
   }
 
   updatePlayers(dt, commands);
+  updateAudioMix(commands, dt);
   updateWells(dt);
   updateSpawning(dt);
   updateBullets(dt);
@@ -1536,6 +1594,19 @@ function updatePlayers(dt, commands) {
     }
     if (command.bomb) triggerBomb(player);
   }
+}
+
+function updateAudioMix(commands, dt) {
+  let thrustTarget = 0;
+  for (const player of state.players) {
+    if (!player.active) continue;
+    const command = commands[player.id] ?? emptyCommand();
+    const move = command.move ? Math.hypot(command.move.x, command.move.y) : 0;
+    const drift = Math.hypot(player.vx, player.vy) / 310;
+    thrustTarget = Math.max(thrustTarget, move, drift * 0.45);
+  }
+  state.thrustMix += (clamp(thrustTarget, 0, 1) - state.thrustMix) * clamp(dt * 8.5, 0, 1);
+  if (bus.unlocked) bus.refreshLoops();
 }
 
 function updateWells(dt) {
@@ -2949,8 +3020,9 @@ function statusText() {
 }
 
 function updateOverlay() {
-  soundAction.textContent = bus.muted ? STR.unmute : STR.mute;
+  soundAction.textContent = bus.muted ? STR.soundOff : STR.soundOn;
   soundAction.setAttribute("aria-label", STR.muteButton);
+  soundAction.setAttribute("aria-pressed", String(!bus.muted));
   if (state.status === "running") {
     hideOverlay();
     return;
