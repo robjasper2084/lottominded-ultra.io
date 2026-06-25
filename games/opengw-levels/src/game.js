@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=startup-music-restore-2";
+import { STR } from "../strings.js?v=multiplayer-pressure-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -66,6 +66,13 @@ const LEVELS = [
   { name: "White Ring", quota: 96, max: 34, interval: 0.36, wells: 4, pull: 310, mix: [["seeker", 7], ["splitter", 5], ["lancer", 6], ["mayfly", 9]] },
   { name: "Last Well", quota: 112, max: 38, interval: 0.32, wells: 5, pull: 340, mix: [["wanderer", 2], ["seeker", 7], ["splitter", 5], ["lancer", 7], ["mayfly", 10]] }
 ];
+
+const MULTIPLAYER_PRESSURE = {
+  1: { quota: 1, max: 1, interval: 1, burst: 0, speed: 1, mix: [] },
+  2: { quota: 2.2, max: 1.9, interval: 0.48, burst: 0.3, speed: 1.18, mix: [["seeker", 4], ["splitter", 1], ["mayfly", 1]] },
+  3: { quota: 2.8, max: 2.45, interval: 0.38, burst: 0.44, speed: 1.28, mix: [["seeker", 6], ["splitter", 2], ["lancer", 1], ["mayfly", 2]] },
+  4: { quota: 3.35, max: 2.9, interval: 0.31, burst: 0.58, speed: 1.36, mix: [["seeker", 7], ["splitter", 3], ["lancer", 2], ["mayfly", 3]] }
+};
 
 const ENEMY = {
   wanderer: { r: 15, hp: 1, speed: 108, score: 110, color: COLORS.lime },
@@ -1553,7 +1560,7 @@ function beginLevel(index) {
   state.levelIndex = index;
   state.spawned = 0;
   state.killed = 0;
-  state.spawnTimer = 0.7;
+  state.spawnTimer = state.playerCount > 1 ? 0.18 : 0.7;
   state.transitionTimer = 0;
   state.banner = { text: `${STR.level} ${index + 1}`, timer: 1.8 };
   state.wells.length = 0;
@@ -1566,7 +1573,19 @@ function beginLevel(index) {
 }
 
 function currentLevel() {
-  return LEVELS[Math.min(state.levelIndex, LEVELS.length - 1)];
+  const base = LEVELS[Math.min(state.levelIndex, LEVELS.length - 1)];
+  const count = clamp(state?.playerCount ?? 1, 1, 4);
+  const pressure = MULTIPLAYER_PRESSURE[count] ?? MULTIPLAYER_PRESSURE[1];
+  if (count <= 1) return base;
+  return {
+    ...base,
+    quota: Math.ceil(base.quota * pressure.quota),
+    max: Math.ceil(base.max * pressure.max),
+    interval: Math.max(0.18, base.interval * pressure.interval),
+    burstBonus: pressure.burst,
+    speedScale: pressure.speed,
+    mix: [...base.mix, ...pressure.mix]
+  };
 }
 
 function frame(now) {
@@ -1662,12 +1681,13 @@ function updateAudioMix(commands, dt) {
 }
 
 function updateWells(dt) {
+  const profile = currentLevel();
   for (const well of state.wells) {
     well.age += dt;
     well.spawn -= dt;
     well.sinkPulse = Math.max(0, (well.sinkPulse ?? 0) - dt * 3.2);
-    if (well.spawn <= 0 && state.spawned < currentLevel().quota && state.enemies.length < currentLevel().max + 4) {
-      const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(currentLevel().mix);
+    if (well.spawn <= 0 && state.spawned < profile.quota && state.enemies.length < profile.max + 4) {
+      const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(profile.mix);
       spawnEnemy(type, well.x + state.rng.range(-46, 46), well.y + state.rng.range(-46, 46));
       well.spawn = state.rng.range(2.3, 4.6);
     }
@@ -1679,7 +1699,11 @@ function updateSpawning(dt) {
   if (state.spawned >= profile.quota || state.enemies.length >= profile.max) return;
   state.spawnTimer -= dt;
   if (state.spawnTimer <= 0) {
-    const burst = state.rng.chance(0.12 + state.levelIndex * 0.012) ? 2 : 1;
+    const burstChance = clamp(0.12 + state.levelIndex * 0.012 + (profile.burstBonus ?? 0), 0, 0.86);
+    const maxBurst = state.playerCount >= 4 ? 4 : state.playerCount >= 3 ? 3 : 2;
+    const burst = state.rng.chance(burstChance)
+      ? Math.min(maxBurst, 2 + (state.rng.chance((profile.burstBonus ?? 0) * 0.75) ? 1 : 0))
+      : 1;
     for (let i = 0; i < burst && state.spawned < profile.quota && state.enemies.length < profile.max; i += 1) {
       spawnEnemy(state.rng.pickWeighted(profile.mix));
     }
@@ -1708,16 +1732,17 @@ function updateEnemies(dt) {
     const player = nearestPlayer(enemy.x, enemy.y) ?? state.player;
     const toPlayer = normalize(player.x - enemy.x, player.y - enemy.y);
     const spec = ENEMY[enemy.type];
+    const speed = spec.speed * (enemy.speedScale ?? 1);
     if (enemy.type === "wanderer") {
       enemy.turn += dt * state.rng.range(-0.5, 0.5);
-      enemy.vx += (Math.cos(enemy.turn) * spec.speed * 0.45 + toPlayer.x * spec.speed * 0.35 - enemy.vx) * dt * 1.8;
-      enemy.vy += (Math.sin(enemy.turn) * spec.speed * 0.45 + toPlayer.y * spec.speed * 0.35 - enemy.vy) * dt * 1.8;
+      enemy.vx += (Math.cos(enemy.turn) * speed * 0.45 + toPlayer.x * speed * 0.35 - enemy.vx) * dt * 1.8;
+      enemy.vy += (Math.sin(enemy.turn) * speed * 0.45 + toPlayer.y * speed * 0.35 - enemy.vy) * dt * 1.8;
     } else if (enemy.type === "seeker") {
-      enemy.vx += (toPlayer.x * spec.speed - enemy.vx) * dt * 2.8;
-      enemy.vy += (toPlayer.y * spec.speed - enemy.vy) * dt * 2.8;
+      enemy.vx += (toPlayer.x * speed - enemy.vx) * dt * 2.8;
+      enemy.vy += (toPlayer.y * speed - enemy.vy) * dt * 2.8;
     } else if (enemy.type === "splitter") {
-      enemy.vx += (toPlayer.x * spec.speed + Math.sin(enemy.age * 3) * 38 - enemy.vx) * dt * 1.7;
-      enemy.vy += (toPlayer.y * spec.speed + Math.cos(enemy.age * 2.4) * 38 - enemy.vy) * dt * 1.7;
+      enemy.vx += (toPlayer.x * speed + Math.sin(enemy.age * 3) * 38 - enemy.vx) * dt * 1.7;
+      enemy.vy += (toPlayer.y * speed + Math.cos(enemy.age * 2.4) * 38 - enemy.vy) * dt * 1.7;
     } else if (enemy.type === "lancer") {
       enemy.charge -= dt;
       if (enemy.charge <= 0) {
@@ -1730,12 +1755,12 @@ function updateEnemies(dt) {
         enemy.vx += (enemy.chargeVector.x * 380 - enemy.vx) * dt * 5;
         enemy.vy += (enemy.chargeVector.y * 380 - enemy.vy) * dt * 5;
       } else {
-        enemy.vx += (toPlayer.x * spec.speed - enemy.vx) * dt * 1.2;
-        enemy.vy += (toPlayer.y * spec.speed - enemy.vy) * dt * 1.2;
+        enemy.vx += (toPlayer.x * speed - enemy.vx) * dt * 1.2;
+        enemy.vy += (toPlayer.y * speed - enemy.vy) * dt * 1.2;
       }
     } else {
-      enemy.vx += (toPlayer.x * spec.speed + Math.sin(enemy.age * 9 + enemy.seed) * 90 - enemy.vx) * dt * 3.8;
-      enemy.vy += (toPlayer.y * spec.speed + Math.cos(enemy.age * 8 + enemy.seed) * 90 - enemy.vy) * dt * 3.8;
+      enemy.vx += (toPlayer.x * speed + Math.sin(enemy.age * 9 + enemy.seed) * 90 - enemy.vx) * dt * 3.8;
+      enemy.vy += (toPlayer.y * speed + Math.cos(enemy.age * 8 + enemy.seed) * 90 - enemy.vy) * dt * 3.8;
     }
 
     applyGravity(enemy, dt, 0.58);
@@ -1963,6 +1988,7 @@ function triggerBomb(player) {
 
 function spawnEnemy(type, forcedX, forcedY) {
   const spec = ENEMY[type];
+  const profile = currentLevel();
   const edge = state.rng.int(0, 3);
   let x = forcedX;
   let y = forcedY;
@@ -1985,6 +2011,7 @@ function spawnEnemy(type, forcedX, forcedY) {
     charge: state.rng.range(0.7, 2.0),
     chargeTime: 0,
     chargeVector: { x: 0, y: 0 },
+    speedScale: profile.speedScale ?? 1,
     flash: 0
   };
   state.enemies.push(enemy);
