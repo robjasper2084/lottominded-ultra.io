@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=startup-music-restore-1";
+import { STR } from "../strings.js?v=startup-music-restore-2";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -3107,6 +3107,7 @@ function updateOverlay() {
 
   playerChooser.hidden = state.status !== "menu";
   if (!playerChooser.hidden) buildPlayerChooser();
+  if (menu && bus.unlocked && !bus.muted) bus.ensureStartupMusic();
 
   if (state.status === "gameover" || state.status === "victory") {
     overlayStats.hidden = false;
