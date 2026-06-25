@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "project": "2084 Static WAV",
+  "searchRoots": [
+    "/mnt/data/2084-static-wars-codex-package/assets/incoming/higgsfield",
+    "/mnt/data/2084-static-wars-codex-package",
+    "C:/Users/digit/Documents/phone/games/opengw-levels/source-number-forge/2084-static-wars-lottomind-lottery-codex",
+    "/mnt/data"
+  ],
+  "references": [
+    {
+      "filename": "app-icon-chatgpt-wav-source.png",
+      "role": "app-icon-brand-source",
+      "runtime": true,
+      "description": "ChatGPT-generated 2084 Static WAV premium app icon source used to derive branding/app-icon.png and the favicon ICO.",
+      "found": true
+    },
+    {
+      "filename": "2084-static-wars-lottomind-number-forge-codex.zip",
+      "role": "number-forge-package-source",
+      "runtime": false,
+      "description": "User-provided LottoMind Number Forge package used as source material for imported UI panel, forge-core atlas, and adapted number-generation code.",
+      "found": true
+    },
+    {
+      "filename": "ig_087144fe5c74e220016a3c46f3bc6881959ad8fed83c537d25.png",
+      "role": "startup-3d-generated-source",
+      "runtime": false,
+      "description": "ChatGPT-generated 2.5D neon arena source used to derive the layered startup background plates.",
+      "found": true
+    },
+    {
+      "filename": "991beecf-d9c3-4e8d-afb5-71bf6da1876e.png",
+      "role": "gameplay-style-concept",
+      "runtime": false,
+      "description": "LottoMind Vault Run gameplay/style concept with cyber-jungle, robots, HUD, and heart-energy visual direction. Do not ship the whole board as a runtime texture.",
+      "found": false
+    },
+    {
+      "filename": "e4e9a4eb-eac7-4dd5-8f12-297e9619836e.png",
+      "role": "hero-animation-sheet",
+      "runtime": true,
+      "description": "LottoMind hero action poses on green. The importer chroma-keys green, detects frames, and emits a normalized sprite atlas.",
+      "found": false
+    },
+    {
+      "filename": "ad4523f8-47c7-443c-9655-04017ee12346.png",
+      "role": "character-and-sprite-placement-board",
+      "runtime": false,
+      "description": "Character turnaround, gameplay poses, collectibles, hazards, and boss-stage placement reference.",
+      "found": false
+    },
+    {
+      "filename": "a893e17e-e3e4-4e30-b4e1-b6e926a76161.png",
+      "role": "character-enemy-design-board",
+      "runtime": false,
+      "description": "LottoMind Explorer, Cyber Croc, Scorpion, props, materials, and palette reference.",
+      "found": false
+    },
+    {
+      "filename": "747d200c-a2fd-4638-803a-6dd3b2803a28.png",
+      "role": "environment-gameplay-board-a",
+      "runtime": false,
+      "description": "Jungle Vault Run environment, platform, hazard, HUD, and VFX reference board.",
+      "found": false
+    },
+    {
+      "filename": "a8f2f4ef-e562-4d74-98e8-0d8400321a8b.png",
+      "role": "environment-gameplay-board-b",
+      "runtime": false,
+      "description": "Alternate Jungle Vault Run environment and gameplay asset board.",
+      "found": false
+    },
+    {
+      "filename": "736c38fc-fd57-45b9-8933-e48fd98e52a1.png",
+      "role": "environment-gameplay-board-c",
+      "runtime": false,
+      "description": "Jungle Vault Run modular platforms, climbables, interactables, HUD, hazards, and particles reference board.",
+      "found": false
+    }
+  ],
+  "slots": [
+    {
+      "slot": "logo-primary",
+      "target": "assets/generated/branding/logo-primary.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "logo-mark",
+      "target": "assets/generated/branding/logo-mark.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "marquee",
+      "target": "assets/generated/branding/marquee.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "sponsor-lockup",
+      "target": "assets/generated/branding/sponsor-lockup.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "hud-frame",
+      "target": "assets/generated/ui/hud-frame.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "menu-panel",
+      "target": "assets/generated/ui/menu-panel.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "number-forge-panel",
+      "target": "assets/2084/number-forge/ui-panel.png",
+      "source": "source-number-forge/2084-static-wars-lottomind-lottery-codex/brand/generated/branding/ui-panel.png",
+      "provenance": "user-package-import"
+    },
+    {
+      "slot": "number-forge-core",
+      "target": "assets/2084/number-forge/forge-core-atlas.png",
+      "source": "source-number-forge/2084-static-wars-lottomind-lottery-codex/brand/generated/sprites/hero-actions-atlas.png",
+      "provenance": "user-package-import"
+    },
+    {
+      "slot": "startup-3d-master",
+      "target": "assets/2084/startup-3d/startup-3d-master.png",
+      "source": "C:/Users/digit/.codex/generated_images/019efa43-5a54-7db0-a7bc-c6e22e53deac/ig_087144fe5c74e220016a3c46f3bc6881959ad8fed83c537d25.png",
+      "provenance": "chatgpt-image"
+    },
+    {
+      "slot": "startup-3d-far",
+      "target": "assets/2084/startup-3d/startup-3d-far.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "startup-3d-mid",
+      "target": "assets/2084/startup-3d/startup-3d-mid.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "startup-3d-emissive",
+      "target": "assets/2084/startup-3d/startup-3d-emissive.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "startup-3d-near-rails",
+      "target": "assets/2084/startup-3d/startup-3d-near-rails.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "startup-3d-fog-bands",
+      "target": "assets/2084/startup-3d/startup-3d-fog-bands.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "startup-3d-depth-mask",
+      "target": "assets/2084/startup-3d/startup-3d-depth-mask.webp",
+      "source": "assets/2084/startup-3d/startup-3d-master.png",
+      "provenance": "chatgpt-image-derived"
+    },
+    {
+      "slot": "button-primary",
+      "target": "assets/generated/ui/button-primary.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "button-secondary",
+      "target": "assets/generated/ui/button-secondary.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "player-sheet",
+      "target": "assets/generated/sprites/player-sheet.png",
+      "source": null,
+      "provenance": "missing"
+    },
+    {
+      "slot": "player",
+      "target": "assets/generated/sprites/player.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "enemy-grunt",
+      "target": "assets/generated/sprites/enemy-grunt.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "enemy-spinner",
+      "target": "assets/generated/sprites/enemy-spinner.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "enemy-wanderer",
+      "target": "assets/generated/sprites/enemy-wanderer.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "gravity-well",
+      "target": "assets/generated/sprites/gravity-well.png",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "parallax-far",
+      "target": "assets/generated/parallax/far.webp",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "parallax-mid",
+      "target": "assets/generated/parallax/mid.webp",
+      "source": null,
+      "provenance": "fallback"
+    },
+    {
+      "slot": "parallax-near",
+      "target": "assets/generated/parallax/near.webp",
+      "source": null,
+      "provenance": "fallback"
+    }
+  ],
+  "missingReleaseSlots": [
+    "logo-primary",
+    "logo-mark",
+    "marquee",
+    "sponsor-lockup",
+    "hud-frame",
+    "menu-panel",
+    "button-primary",
+    "button-secondary",
+    "player-sheet",
+    "enemy-grunt",
+    "enemy-spinner",
+    "enemy-wanderer",
+    "gravity-well",
+    "parallax-far",
+    "parallax-mid",
+    "parallax-near"
+  ]
+}
