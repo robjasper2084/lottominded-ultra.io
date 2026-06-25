@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=audio-rearm-1";
+import { STR } from "../strings.js?v=web-audio-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -157,6 +157,10 @@ const AUDIO = {
   repulsor: { file: "repulsor.wav", volume: 0.28 },
   shieldsDown: { file: "sheildsdown.wav", volume: 0.3 }
 };
+
+const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+const MUTE_STORAGE_KEY = "2084-static-wav-muted";
+const LEGACY_MUTE_STORAGE_KEY = "2084-static-wars-muted";
 
 class StaticWarsRenderer {
   constructor(targetCanvas) {
@@ -911,54 +915,128 @@ function renderForgeRows(node, text) {
 const bus = {
   muted: loadMuted(),
   unlocked: false,
-  primePromise: null,
+  context: null,
   nodes: new Map(),
+  loops: new Map(),
   lastPlay: new Map(),
 
   init() {
     for (const [id, data] of Object.entries(AUDIO)) {
       const url = new URL(`../assets/audio/${data.file}`, import.meta.url);
-      const node = new Audio(url.href);
-      node.preload = data.loop ? "auto" : "metadata";
-      node.loop = Boolean(data.loop);
-      node.volume = data.volume;
-      this.nodes.set(id, { node, data, url: url.href });
+      this.nodes.set(id, { data, url: url.href, buffer: null, loading: null, error: null });
     }
+    window.__staticWavAudio = this;
   },
 
-  unlock() {
-    if (this.unlocked) {
-      this.refreshLoops();
-      return;
-    }
+  ensureContext() {
+    if (!AudioContextCtor) return null;
+    if (!this.context) this.context = new AudioContextCtor();
+    return this.context;
+  },
+
+  async unlock() {
+    const context = this.ensureContext();
     this.unlocked = true;
-    this.prime();
+    if (context && context.state !== "running") {
+      await context.resume().catch(() => {});
+    }
+    this.primeContext();
+    this.loadAll();
     this.refreshLoops();
     updateOverlay();
   },
 
-  prime() {
-    if (this.primePromise) return this.primePromise;
-    this.primePromise = Promise.allSettled([...this.nodes.values()].map(({ node }) => this.primeNode(node)))
-      .finally(() => this.refreshLoops());
-    return this.primePromise;
+  primeContext() {
+    const context = this.context;
+    if (!context || context.state !== "running") return;
+    const source = context.createOscillator();
+    const gain = context.createGain();
+    gain.gain.value = 0.00001;
+    source.connect(gain);
+    gain.connect(context.destination);
+    source.start();
+    source.stop(context.currentTime + 0.035);
   },
 
-  async primeNode(node) {
-    const originalVolume = node.volume;
-    const originalMuted = node.muted;
+  loadAll() {
+    for (const id of this.nodes.keys()) this.loadBuffer(id);
+  },
+
+  loadBuffer(id) {
+    const record = this.nodes.get(id);
+    const context = this.ensureContext();
+    if (!record || !context) return Promise.resolve(null);
+    if (record.buffer) return Promise.resolve(record.buffer);
+    if (record.loading) return record.loading;
+    record.loading = fetch(record.url)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Audio ${id} failed: ${response.status}`);
+        return response.arrayBuffer();
+      })
+      .then((arrayBuffer) => this.decode(arrayBuffer))
+      .then((buffer) => {
+        record.buffer = buffer;
+        record.error = null;
+        return buffer;
+      })
+      .catch((error) => {
+        record.error = error;
+        return null;
+      });
+    return record.loading;
+  },
+
+  decode(arrayBuffer) {
+    const context = this.context;
+    if (!context) return Promise.resolve(null);
+    return new Promise((resolve, reject) => {
+      const result = context.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+      if (result && typeof result.then === "function") result.then(resolve, reject);
+    });
+  },
+
+  startLoop(id) {
+    if (this.loops.has(id)) return;
+    const record = this.nodes.get(id);
+    const context = this.context;
+    if (!record || !context || context.state !== "running") return;
+    this.loadBuffer(id).then((buffer) => {
+      if (!buffer || this.muted || !this.unlocked || this.loops.has(id) || context.state !== "running") return;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      source.loop = true;
+      gain.gain.value = record.data.volume;
+      source.connect(gain);
+      gain.connect(context.destination);
+      source.start();
+      this.loops.set(id, { source, gain });
+      source.onended = () => {
+        if (this.loops.get(id)?.source === source) this.loops.delete(id);
+      };
+    });
+  },
+
+  stopLoop(id) {
+    const loop = this.loops.get(id);
+    if (!loop) return;
+    this.loops.delete(id);
     try {
-      node.muted = true;
-      node.volume = 0;
-      await node.play();
-      node.pause();
-      node.currentTime = 0;
+      loop.source.stop();
     } catch {
-      // Browsers can still defer individual clips; normal play calls retry after the gesture.
-    } finally {
-      node.muted = originalMuted;
-      node.volume = originalVolume;
+      // Already stopped by the browser.
     }
+    loop.source.disconnect();
+    loop.gain.disconnect();
+  },
+
+  stopLoops() {
+    for (const id of [...this.loops.keys()]) this.stopLoop(id);
+  },
+
+  unlockSync() {
+    this.unlocked = true;
+    this.refreshLoops();
   },
 
   setMuted(value) {
@@ -985,9 +1063,21 @@ const bus = {
     const last = this.lastPlay.get(id) ?? -999;
     if (now - last < cooldown) return;
     this.lastPlay.set(id, now);
-    const clip = record.node.cloneNode(true);
-    clip.volume = record.data.volume;
-    clip.play().catch(() => {});
+    this.loadBuffer(id).then((buffer) => {
+      const context = this.context;
+      if (!buffer || !context || this.muted || !this.unlocked || context.state !== "running") return;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      gain.gain.value = record.data.volume;
+      source.connect(gain);
+      gain.connect(context.destination);
+      source.start();
+      source.onended = () => {
+        source.disconnect();
+        gain.disconnect();
+      };
+    });
   },
 
   playRandom(ids, cooldown = 0.04) {
@@ -997,15 +1087,22 @@ const bus = {
   },
 
   refreshLoops() {
-    for (const { node, data } of this.nodes.values()) {
+    for (const [id, { data }] of this.nodes.entries()) {
       if (!data.loop) continue;
-      node.volume = this.muted ? 0 : data.volume;
-      if (!this.unlocked || this.muted) {
-        node.pause();
-      } else {
-        node.play().catch(() => {});
-      }
+      if (!this.unlocked || this.muted) this.stopLoop(id);
+      else this.startLoop(id);
     }
+  },
+
+  status() {
+    return {
+      muted: this.muted,
+      unlocked: this.unlocked,
+      context: this.context?.state ?? "none",
+      loaded: [...this.nodes.entries()].filter(([, record]) => record.buffer).map(([id]) => id),
+      loops: [...this.loops.keys()],
+      errors: [...this.nodes.entries()].filter(([, record]) => record.error).map(([id, record]) => [id, String(record.error)])
+    };
   }
 };
 
@@ -3061,7 +3158,7 @@ function savePlayerCount(value) {
 
 function loadMuted() {
   try {
-    return localStorage.getItem("2084-static-wars-muted") === "1";
+    return localStorage.getItem(MUTE_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -3069,7 +3166,8 @@ function loadMuted() {
 
 function saveMuted(value) {
   try {
-    localStorage.setItem("2084-static-wars-muted", value ? "1" : "0");
+    localStorage.setItem(MUTE_STORAGE_KEY, value ? "1" : "0");
+    localStorage.removeItem(LEGACY_MUTE_STORAGE_KEY);
   } catch {
     // Muting is still applied in memory when storage is unavailable.
   }
