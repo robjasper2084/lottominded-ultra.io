@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=music-bed-boost-1";
+import { STR } from "../strings.js?v=startup-audio-priority-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -125,7 +125,7 @@ const GL_IMAGES = {
 const COLOR_VEC_CACHE = new Map();
 
 const AUDIO = {
-  startupMusic: { file: "startup-untitled-7.mp3", volume: 0.3, loop: true },
+  startupMusic: { file: "startup-untitled-7.mp3", volume: 0.42, loop: true },
   gameMusic: { file: "digital-static-cover.mp3", volume: 0.34, loop: true },
   ambient: { file: "backgroundnoiseloop.wav", volume: 0.14, loop: true },
   wellHum: { file: "gravitywellhumloop.wav", volume: 0.12, loop: true },
@@ -992,8 +992,8 @@ const bus = {
       await context.resume().catch(() => {});
     }
     this.primeContext();
-    this.loadAll();
     this.refreshLoops();
+    window.setTimeout(() => this.loadAll(), 450);
     updateOverlay();
   },
 
@@ -1355,7 +1355,14 @@ canvas.addEventListener("pointerleave", (event) => {
 });
 
 primaryAction.addEventListener("click", primary);
-soundAction.addEventListener("click", () => bus.toggle());
+soundAction.addEventListener("click", () => {
+  if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
+    bus.unlock();
+    bus.refreshLoops();
+    return;
+  }
+  bus.toggle();
+});
 pauseAction.addEventListener("click", togglePause);
 forgeHudClose.addEventListener("click", (event) => {
   event.preventDefault();
