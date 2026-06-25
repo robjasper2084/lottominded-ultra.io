@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=music-unmuted-1";
+import { STR } from "../strings.js?v=manual-fire-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -1593,7 +1593,7 @@ function updatePlayers(dt, commands) {
       player.lastAim = aim;
       player.angle = Math.atan2(aim.y, aim.x);
     }
-    if ((command.fire || aim) && player.shotTimer <= 0) {
+    if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
       player.shotTimer = Math.max(0.065, 0.115 - state.levelIndex * 0.004);
     }
