@@ -1,0 +1,53 @@
+id,role,type,description,size/ratio,style line ref,source
+marquee_2084,title/menu image,static 2D,2084 Static WAV marquee with LottoMind presenter line and GPL/no-warranty footer,16:9,2084 WebGL static-war neon grid formula,assets/2084/branding/marquee.png
+app_icon,app/favicon image,static 2D,ChatGPT-generated 2084 Static WAV app icon and compact brand mark,1:1,2084 WebGL static-war neon grid formula,assets/2084/branding/app-icon.png
+player_sprite,player avatar,atlas sprite plus WebGL geometry,Atlas-backed player ship with procedural LottoMind battleship hull plating, twin cannons, and player-color bridge mark,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+player_normal_map,player lighting,normal map,Generated normal map used by the WebGL lit sprite shader for player ships,512px,2084 WebGL static-war neon grid formula,assets/2084/sprites/player.normal.png
+arena_parallax_far,background parallax,webp texture,Deep static-field star layer locked to camera-relative movement only,16:9,2084 WebGL static-war neon grid formula,assets/2084/parallax/far.webp
+arena_parallax_mid,background parallax,webp texture,Mid-depth circuitry layer locked to camera-relative movement only,16:9,2084 WebGL static-war neon grid formula,assets/2084/parallax/mid.webp
+arena_parallax_near,background parallax,webp texture,Near foreground scan layer with additive glow locked to camera-relative movement only,16:9,2084 WebGL static-war neon grid formula,assets/2084/parallax/near.webp
+arena_grid,playfield background,WebGL geometry,Stationary OpenGL/WebGL emissive grid and arena border over 2.5D parallax,1280x720,2084 WebGL static-war neon grid formula,shader_geometry
+enemy_wanderer,basic enemy,atlas sprite plus WebGL geometry,Green/gold static enemy with preserved hit-shape outline,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+enemy_normal_maps,enemy lighting,normal maps,Generated normal maps used by the WebGL lit sprite shader for all enemy sprite roles,512px each,2084 WebGL static-war neon grid formula,assets/2084/sprites/*.normal.png
+enemy_seeker,chaser enemy,atlas sprite plus WebGL geometry,Magenta static chaser with preserved triangle outline,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+enemy_splitter,splitter enemy,atlas sprite plus WebGL geometry,Warm-gold spinner/square threat that splits into swarmers,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+enemy_lancer,charge enemy,atlas sprite plus WebGL geometry,Red charge threat with line-lance telegraph,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+enemy_mayfly,swarm enemy,atlas sprite plus WebGL geometry,Small yellow-white fast swarm speck with additive outline,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+gravity_well,level hazard,atlas sprite plus WebGL geometry,Violet/cyan gravity well sprite with additive rings and health strip,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+gravity_well_normal_map,hazard lighting,normal map,Generated normal map used by the WebGL lit sprite shader for gravity wells,512px,2084 WebGL static-war neon grid formula,assets/2084/sprites/gravity-well.normal.png
+bullet_stream,player weapon,atlas sprite plus WebGL geometry,Missile sprite with additive hot railgun stream, twin cannon lanes, player-color energy ring, and gold/cyan battleship muzzle trails,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+missile_normal_map,weapon lighting,normal map,Generated normal map used by the WebGL lit sprite shader for missiles,512px,2084 WebGL static-war neon grid formula,assets/2084/sprites/missile.normal.png
+bomb_pulse,bomb visual,atlas sprite plus WebGL geometry,Screen-clearing pulse sprite and expanding additive ring,512px cell,2084 WebGL static-war neon grid formula,assets/2084/sprites/sprite-atlas.png
+selective_bloom,post effect,WebGL additive pass,Glow-only overlay from bullets wells grid ships and bomb pulse while DOM HUD stays crisp,viewport,2084 WebGL static-war neon grid formula,shader_geometry+assets/2084/vfx/glow-disc.png
+depth_layers,playfield atmosphere,WebGL geometry and texture,Drifting scanlines fog bands foreground rails and circuit silhouettes for 2.5D depth,viewport,2084 WebGL static-war neon grid formula,shader_geometry+assets/2084/vfx/light-ray.png
+score_pickup,reward pickup,WebGL geometry,Acid-green multiplier shard with glow disc,18px,2084 WebGL static-war neon grid formula,shader_geometry
+hud_frame,HUD skin,static 2D,Generated 2084 HUD frame skin used by DOM score/status chips,wide strip,2084 WebGL static-war neon grid formula,assets/2084/ui/hud-frame.png
+menu_panel,menu skin,static 2D,Generated 2084 menu panel skin used by overlay stat panels,1000x700,2084 WebGL static-war neon grid formula,assets/2084/ui/menu-panel.png
+number_forge_panel,forge HUD skin,static 2D,Number Forge neon panel imported from the LottoMind Number Forge package for startup and gameplay readouts,1200x320,2084 WebGL static-war neon grid formula,assets/2084/number-forge/ui-panel.png
+number_forge_core,forge gameplay emblem,static 2D atlas,Transparent lightning core atlas imported from the LottoMind Number Forge package for shard/well/sector pulse feedback,922x922,2084 WebGL static-war neon grid formula,assets/2084/number-forge/forge-core-atlas.png
+number_forge_generator,forge readout code,ES module,Adapted unbiased number generation logic from the Number Forge package for entertainment-only signal readouts,n/a,2084 WebGL static-war neon grid formula,src/numberForge.js
+startup_3d_master,startup source art,generated 2D,ChatGPT-generated 2.5D neon arena source used to derive layered startup background plates,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-master.png
+startup_3d_far,startup background,webp texture,Darker far city and grid plate for the 3D startup scene,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-far.webp
+startup_3d_mid,startup glow layer,webp texture,High-contrast mid glow plate blended over the far startup arena,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-mid.webp
+startup_3d_emissive,startup glow layer,transparent WebP,Thresholded emissive neon lines and window glow for startup pulse animation,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-emissive.webp
+startup_3d_near_rails,startup foreground layer,transparent WebP,Foreground side rails and floor-edge glow extracted for parallax depth,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-near-rails.webp
+startup_3d_fog_bands,startup atmosphere,transparent WebP,Soft cyan-magenta fog bands for startup depth and motion,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-fog-bands.webp
+startup_3d_depth_mask,startup readability mask,transparent WebP,Dark center and edge mask keeping marquee controls and Number Forge readable over the generated scene,16:9,2084 WebGL static-war neon grid formula,assets/2084/startup-3d/startup-3d-depth-mask.webp
+startup_3d_webgl_scene,startup 3D renderer,WebGL runtime,Interactive perspective startup scene with pointer/touch parallax tap ripples floor grid angled city planes rail planes fog and emissive generated-asset layers,viewport,2084 WebGL static-war neon grid formula,src/startup3d.js
+ambient_loop,background audio,audio,Recovered low background noise loop,wav loop,2084 WebGL static-war neon grid formula,assets/audio/backgroundnoiseloop.wav
+gravity_hum,hazard audio,audio,Recovered gravity well hum loop,wav loop,2084 WebGL static-war neon grid formula,assets/audio/gravitywellhumloop.wav
+bomb_sfx,bomb audio,audio,Recovered screen-clearing bomb sound,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/bomb.wav
+enemy_hit_sfx,combat audio,audio,Recovered enemy hit impact variants,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/enemyhit.wav
+enemy_spawn_sfx,spawn audio,audio,Recovered enemy spawn variants,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/enemyspawn*.wav
+level_change_sfx,progress audio,audio,Recovered level change sting,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/levelchange.wav
+gravity_destroy_sfx,hazard audio,audio,Recovered gravity well destroyed and explosion sounds,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/gravitywell*.wav
+reward_sfx,reward audio,audio,Recovered extra bomb/life and multiplier sounds,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/extrabomb.wav
+player_fire_sfx,player weapon audio,audio,Recovered player fire variants from 4-player package,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/playerfire*.wav
+player_spawn_sfx,player state audio,audio,Recovered player spawn sound from 4-player package,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/playerspawn.wav
+player_hit_sfx,player state audio,audio,Recovered player hit and death sounds from 4-player package,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/playerhit.wav
+player_thrust_sfx,player movement audio,audio,Recovered player thrust sound from 4-player package,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/playerthrust.wav
+menu_select_sfx,menu audio,audio,Recovered menu select sound from 4-player package,wav one-shot,2084 WebGL static-war neon grid formula,assets/audio/menuselect.wav
+startup_music,title/gameplay music,audio,Digital Static cover used as looping startup music after the first player start gesture,mp3 loop,2084 WebGL static-war neon grid formula,assets/audio/digital-static-cover.mp3
+gameplay_static_grid,gameplay procedural VFX,WebGL drawing,Screen-locked neon perspective grid and rails that keep the playfield stable while objects move,viewport,2084 WebGL static-war neon grid formula,src/game.js
+gameplay_silhouette_polish,gameplay procedural VFX,WebGL drawing,Player thruster-fire plumes enemy signal plates stronger bullet wells pickup and bomb glows for faster readability,viewport,2084 WebGL static-war neon grid formula,src/game.js
+hud_menu_visual_polish,game UI styling,CSS,Sharper HUD chips docked Number Forge color-coded pilot buttons and tighter startup menu hierarchy,responsive viewport,2084 WebGL static-war neon grid formula,styles.css

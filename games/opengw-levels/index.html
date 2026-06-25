@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#05070d" />
+    <title>2084 Static WAV - LottoMind</title>
+    <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
+    <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
+    <link rel="preload" href="./assets/2084/branding/marquee.png?v=static-wav-marquee-1" as="image" />
+    <link rel="preload" href="./assets/2084/number-forge/ui-panel.png" as="image" />
+    <link rel="preload" href="./assets/2084/number-forge/forge-core-atlas.png" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-far.webp" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-mid.webp" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-emissive.webp" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-near-rails.webp" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-fog-bands.webp" as="image" />
+    <link rel="preload" href="./assets/2084/startup-3d/startup-3d-depth-mask.webp" as="image" />
+    <link rel="preload" href="./assets/audio/digital-static-cover.mp3" as="audio" type="audio/mpeg" />
+    <link rel="stylesheet" href="./styles.css?v=forge-close-title-1" />
+  </head>
+  <body>
+    <main id="shell" data-mode="menu" aria-label="2084 Static WAV game">
+      <canvas id="game" width="1280" height="720"></canvas>
+
+      <div id="startupScene" aria-hidden="true">
+        <canvas id="startup3dCanvas" width="1280" height="720"></canvas>
+        <div class="startup-scene-layer startup-scene-far"></div>
+        <div class="startup-scene-layer startup-scene-mid"></div>
+        <div class="startup-scene-layer startup-scene-emissive"></div>
+        <div class="startup-scene-layer startup-scene-fog"></div>
+        <div class="startup-scene-layer startup-scene-rails"></div>
+        <div class="startup-scene-layer startup-scene-mask"></div>
+      </div>
+
+      <section id="hud" aria-live="polite">
+        <div class="hud-cluster">
+          <div class="hud-chip">
+            <span data-label="score"></span>
+            <strong id="scoreValue">0</strong>
+          </div>
+          <div class="hud-chip compact">
+            <span data-label="level"></span>
+            <strong id="levelValue">1</strong>
+          </div>
+          <div class="hud-chip compact">
+            <span data-label="objective"></span>
+            <strong id="objectiveValue">0</strong>
+          </div>
+        </div>
+        <div class="hud-cluster right">
+          <div class="hud-chip compact">
+            <span data-label="lives"></span>
+            <strong id="livesValue">3</strong>
+          </div>
+          <div class="hud-chip compact">
+            <span data-label="bombs"></span>
+            <strong id="bombsValue">3</strong>
+          </div>
+          <div class="hud-chip compact">
+            <span data-label="multiplier"></span>
+            <strong id="multiplierValue">1</strong>
+          </div>
+        </div>
+      </section>
+
+      <div id="statusStrip">
+        <span id="statusText"></span>
+        <span id="bestText"></span>
+      </div>
+
+      <div id="forgeHud" class="forge-panel forge-hud" aria-live="polite">
+        <button id="forgeHudClose" class="forge-close" type="button" aria-label=""></button>
+        <span id="forgeHudLabel"></span>
+        <strong id="forgeHudLine"></strong>
+        <small id="forgeHudNote"></small>
+      </div>
+
+      <section id="overlay" data-state="menu" aria-labelledby="menuTitle">
+        <h1 id="menuTitle" class="sr-only">2084 STATIC WAV</h1>
+        <div id="startupBrand" aria-hidden="true">
+          <img id="startupMark" src="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" alt="" />
+        </div>
+        <div id="marqueeMotion" aria-hidden="true">
+          <canvas id="marqueeFx" width="1280" height="720"></canvas>
+          <img id="marquee" src="./assets/2084/branding/marquee.png?v=static-wav-marquee-1" alt="" />
+        </div>
+        <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
+          <span id="startupForgeLabel"></span>
+          <strong id="startupForgeLine"></strong>
+          <small id="startupForgeNote"></small>
+        </div>
+        <h1 id="overlayTitle"></h1>
+        <p id="overlayCopy"></p>
+        <div id="overlayStats" hidden></div>
+        <div id="playerChooser" class="player-chooser" aria-label="Player count"></div>
+        <div class="overlay-actions">
+          <button id="primaryAction" type="button"></button>
+          <button id="soundAction" type="button"></button>
+        </div>
+      </section>
+
+      <button id="pauseAction" class="icon-action top-action" type="button" aria-label=""></button>
+      <button id="bombAction" class="bomb-action" type="button" aria-label=""><span>B</span></button>
+
+      <div id="touchMarks" aria-hidden="true">
+        <div class="touch-zone left-zone"><span></span></div>
+        <div class="touch-zone right-zone"><span></span></div>
+      </div>
+
+      <div id="fxLayer" aria-hidden="true"></div>
+      <div id="bannerText" hidden></div>
+      <div id="dev"></div>
+    </main>
+    <script type="module" src="./src/startup3d.js?v=startup-3d-interactive-1"></script>
+    <script type="module" src="./src/marqueeMotion.js?v=thruster-fire-1"></script>
+    <script type="module" src="./src/game.js?v=forge-close-title-1"></script>
+  </body>
+</html>
