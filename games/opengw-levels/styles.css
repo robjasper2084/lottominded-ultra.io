@@ -1142,17 +1142,20 @@ button {
 .bomb-action {
   position: fixed;
   z-index: 5;
-  left: 50%;
-  bottom: max(56px, calc(var(--safe-bottom) + 48px));
-  width: 58px;
-  height: 58px;
-  transform: translateX(-50%);
+  right: max(14px, var(--safe-right));
+  bottom: max(110px, calc(var(--safe-bottom) + 104px));
+  width: 62px;
+  height: 62px;
   border-color: rgba(255, 66, 214, 0.5);
   color: var(--magenta);
-  display: none;
+  display: grid;
   place-items: center;
   font-size: 18px;
   font-weight: 950;
+}
+
+.bomb-action[hidden] {
+  display: none !important;
 }
 
 .bomb-action span {
@@ -1314,6 +1317,9 @@ button {
   }
 
   .bomb-action {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
     display: grid;
   }
 

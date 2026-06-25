@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=controls-music-boost-1";
+import { STR } from "../strings.js?v=fun-factor-fixes-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -6,6 +6,8 @@ const STEP = 1 / 60;
 const DPR_CAP = 1.5;
 const MAX_FRAME_STEPS = 5;
 const MAX_LIGHTS = 8;
+const PARTICLE_LIMIT = 240;
+const RING_PARTICLE_LIMIT = 268;
 const TAU = Math.PI * 2;
 const WELL_GRAVITY_RADIUS = 430;
 const WELL_CAPTURE_RADIUS = 112;
@@ -51,11 +53,11 @@ const PLAYER_KEYS = [
 ];
 
 const LEVELS = [
-  { name: "Signal Wake", quota: 18, max: 9, interval: 1.05, wells: 0, pull: 0, mix: [["wanderer", 8], ["seeker", 2]] },
-  { name: "Pink Static", quota: 24, max: 12, interval: 0.9, wells: 0, pull: 0, mix: [["wanderer", 5], ["seeker", 5]] },
-  { name: "Gravity Bloom", quota: 28, max: 13, interval: 0.86, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
-  { name: "Gold Break", quota: 34, max: 15, interval: 0.78, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
-  { name: "Needle Lane", quota: 38, max: 16, interval: 0.72, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
+  { name: "Signal Wake", quota: 12, max: 7, interval: 1.0, wells: 0, pull: 0, mix: [["wanderer", 8], ["seeker", 2]] },
+  { name: "Pink Static", quota: 18, max: 9, interval: 0.86, wells: 0, pull: 0, mix: [["wanderer", 5], ["seeker", 5]] },
+  { name: "Gravity Bloom", quota: 22, max: 10, interval: 0.82, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
+  { name: "Gold Break", quota: 28, max: 12, interval: 0.76, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
+  { name: "Needle Lane", quota: 32, max: 14, interval: 0.7, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
   { name: "Mayfly Crown", quota: 46, max: 20, interval: 0.66, wells: 2, pull: 205, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["mayfly", 5]] },
   { name: "Red Geometry", quota: 52, max: 22, interval: 0.58, wells: 2, pull: 220, mix: [["seeker", 5], ["splitter", 3], ["lancer", 3], ["mayfly", 4]] },
   { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, mix: [["wanderer", 2], ["seeker", 5], ["splitter", 3], ["lancer", 4], ["mayfly", 5]] },
@@ -1466,6 +1468,8 @@ function makePlayer(index, count = 1) {
     shotTimer: 0,
     angle: spawn.angle,
     lastAim: { x: 0, y: -1 },
+    fireIntent: false,
+    aimIntent: false,
     active: true
   };
 }
@@ -1583,8 +1587,11 @@ function updatePlayers(dt, commands) {
   for (const player of state.players) {
     if (!player.active) continue;
     const command = commands[player.id] ?? emptyCommand();
+    const manualAim = Boolean(command.aim);
     player.vx = command.move.x * speed;
     player.vy = command.move.y * speed;
+    player.fireIntent = Boolean(command.fire);
+    player.aimIntent = manualAim || player.fireIntent;
     applyGravity(player, dt, 0.85);
     player.x += player.vx * dt;
     player.y += player.vy * dt;
@@ -1743,7 +1750,7 @@ function updateParticles(dt) {
     if (p.life <= 0) p.dead = true;
   }
   compact(state.particles);
-  if (state.particles.length > 320) state.particles.splice(0, state.particles.length - 320);
+  if (state.particles.length > RING_PARTICLE_LIMIT) state.particles.splice(0, state.particles.length - RING_PARTICLE_LIMIT);
 }
 
 function resolveCollisions() {
@@ -2334,7 +2341,9 @@ function bounceInArena(body, r) {
 }
 
 function burst(x, y, color, count) {
-  for (let i = 0; i < count; i += 1) {
+  const budget = Math.max(0, PARTICLE_LIMIT - state.particles.length);
+  const burstCount = Math.min(count, budget);
+  for (let i = 0; i < burstCount; i += 1) {
     const a = state.rng.range(0, TAU);
     const speed = state.rng.range(45, 300);
     addParticle(x, y, Math.cos(a) * speed, Math.sin(a) * speed, color, state.rng.range(0.22, 0.58), state.rng.range(1.8, 4.5), 0.975);
@@ -2342,10 +2351,12 @@ function burst(x, y, color, count) {
 }
 
 function addRing(x, y, color, radius, speed) {
+  if (state.particles.length >= RING_PARTICLE_LIMIT) return;
   state.particles.push({ x, y, vx: 0, vy: 0, color, life: 0.72, maxLife: 0.72, age: 0, size: radius, ring: true, speed, drag: 1 });
 }
 
 function addParticle(x, y, vx, vy, color, life, size, drag) {
+  if (state.particles.length >= PARTICLE_LIMIT) return;
   state.particles.push({ x, y, vx, vy, color, life, maxLife: life, age: 0, size, drag });
 }
 
@@ -2688,7 +2699,11 @@ function drawEnemies() {
 
 function drawEnemyPlate(enemy, spec, color, angle) {
   const darkRadius = spec.r * (enemy.type === "mayfly" ? 1.75 : 2.2);
-  renderer.drawWorldCircle(enemy.x + 2, enemy.y + 4, darkRadius, COLORS.ink, enemy.type === "mayfly" ? 0.42 : 0.62, 34);
+  const flash = enemy.flash > 0 ? 1 : 0;
+  const edgeSegments = enemy.type === "splitter" ? 4 : enemy.type === "mayfly" ? 14 : 20;
+  renderer.drawWorldCircle(enemy.x + 2, enemy.y + 5, darkRadius + (enemy.type === "mayfly" ? 2 : 5), COLORS.ink, enemy.type === "mayfly" ? 0.68 : 0.82, 34);
+  renderer.drawWorldRing(enemy.x, enemy.y, darkRadius + 2, enemy.type === "mayfly" ? 2 : 3.2, COLORS.white, flash ? 0.72 : 0.24, edgeSegments);
+  renderer.drawWorldRing(enemy.x, enemy.y, darkRadius - 2, enemy.type === "mayfly" ? 1.6 : 2.4, color, enemy.type === "mayfly" ? 0.76 : 0.9, edgeSegments);
   renderer.setBlend("add");
   if (enemy.type === "lancer") {
     const v = normalize(enemy.vx, enemy.vy) ?? { x: Math.cos(angle), y: Math.sin(angle) };
@@ -2773,6 +2788,7 @@ function drawPlayers() {
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 112, 112, p.angle, 0.22 * alpha, { color: p.color });
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 58, 58, -p.angle, 0.1 * alpha, { color: COLORS.white });
     if (thrust > 0.05) drawPlayerEngineTrail(p, thrust, alpha);
+    drawAimAssist(p, alpha, shotWindow, fireFlash);
     renderer.setBlend("normal");
     const variant = PLAYER_VARIANTS[p.id % PLAYER_VARIANTS.length];
     renderer.drawWorldCircle(p.x + 2, p.y + 5, 31, COLORS.ink, 0.48 * alpha, 34);
@@ -2787,6 +2803,27 @@ function drawPlayers() {
     renderer.setBlend("normal");
     state.entitiesDrawn += 1;
   }
+}
+
+function drawAimAssist(player, alpha, shotWindow, fireFlash) {
+  if (!player.aimIntent) return;
+  const aim = player.lastAim ?? { x: Math.cos(player.angle), y: Math.sin(player.angle) };
+  const ready = clamp(1 - player.shotTimer / Math.max(0.001, shotWindow), 0, 1);
+  const firing = player.fireIntent ? 1 : 0;
+  const length = firing ? 188 : 126;
+  const startX = player.x + aim.x * 42;
+  const startY = player.y + aim.y * 42;
+  const endX = player.x + aim.x * length;
+  const endY = player.y + aim.y * length;
+  const wobble = 1 + Math.sin(state.time * 18 + player.id * 2.2) * 0.08;
+  const glow = (0.14 + firing * 0.28 + ready * 0.08) * alpha;
+  const reticle = (8 + ready * 5 + fireFlash * 6) * wobble;
+
+  renderer.drawWorldLine(startX, startY, endX, endY, firing ? 4.2 : 2.2, player.color, glow);
+  renderer.drawWorldLine(startX, startY, endX, endY, firing ? 1.5 : 0.9, COLORS.white, (0.08 + firing * 0.12) * alpha);
+  renderer.drawWorldRing(endX, endY, reticle, firing ? 2 : 1.3, firing ? COLORS.gold : player.color, (0.42 + ready * 0.26) * alpha, 24);
+  renderer.drawWorldLine(endX - aim.y * 10, endY + aim.x * 10, endX + aim.y * 10, endY - aim.x * 10, 1.3, COLORS.white, (0.22 + firing * 0.24) * alpha);
+  renderer.drawWorldCircle(endX, endY, 2.6 + ready * 1.4, COLORS.white, (0.28 + firing * 0.3) * alpha, 12);
 }
 
 function drawLottoMindBattleshipHull(player, variant, alpha) {
