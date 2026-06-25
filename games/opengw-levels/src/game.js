@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=manual-fire-1";
+import { STR } from "../strings.js?v=music-bed-boost-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -126,7 +126,7 @@ const COLOR_VEC_CACHE = new Map();
 
 const AUDIO = {
   startupMusic: { file: "startup-untitled-7.mp3", volume: 0.3, loop: true },
-  gameMusic: { file: "digital-static-cover.mp3", volume: 0.26, loop: true },
+  gameMusic: { file: "digital-static-cover.mp3", volume: 0.34, loop: true },
   ambient: { file: "backgroundnoiseloop.wav", volume: 0.14, loop: true },
   wellHum: { file: "gravitywellhumloop.wav", volume: 0.12, loop: true },
   bomb: { file: "bomb.wav", volume: 0.58 },
@@ -1088,9 +1088,9 @@ const bus = {
       return mode === "menu" ? record.data.volume : 0;
     }
     if (id === "gameMusic") {
-      if (mode === "running") return record.data.volume * 0.44;
-      if (mode === "paused") return record.data.volume * 0.28;
-      if (mode === "gameover" || mode === "victory") return record.data.volume * 0.22;
+      if (mode === "running") return record.data.volume * 0.58;
+      if (mode === "paused") return record.data.volume * 0.36;
+      if (mode === "gameover" || mode === "victory") return record.data.volume * 0.28;
       return 0;
     }
     if (id === "ambient") {
