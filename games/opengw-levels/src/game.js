@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=startup-audio-priority-1";
+import { STR } from "../strings.js?v=controls-music-boost-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -1088,7 +1088,7 @@ const bus = {
       return mode === "menu" ? record.data.volume : 0;
     }
     if (id === "gameMusic") {
-      if (mode === "running") return record.data.volume * 0.58;
+      if (mode === "running") return record.data.volume * 0.725;
       if (mode === "paused") return record.data.volume * 0.36;
       if (mode === "gameover" || mode === "victory") return record.data.volume * 0.28;
       return 0;

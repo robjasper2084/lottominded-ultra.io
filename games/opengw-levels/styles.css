@@ -980,12 +980,19 @@ button {
 #overlay[data-state="menu"] .overlay-actions {
   position: fixed;
   z-index: 7;
-  top: max(18px, calc(var(--safe-top) + 18px));
+  top: max(calc(var(--safe-top) + 86px), min(14vh, 150px));
   left: 50%;
-  width: min(430px, calc(100vw - 32px));
-  min-height: 58px;
-  padding: 7px;
+  width: min(560px, calc(100vw - 32px));
+  min-height: 76px;
+  padding: 10px;
   transform: translateX(-50%);
+}
+
+#overlay[data-state="menu"] .overlay-actions button {
+  min-width: 226px;
+  min-height: 58px;
+  padding: 0 28px;
+  font-size: 15px;
 }
 
 .overlay-actions::before,
@@ -1482,6 +1489,21 @@ button {
     flex: 1 1 0;
     padding: 0 12px;
     font-size: 12px;
+  }
+
+  #overlay[data-state="menu"] .overlay-actions {
+    top: max(calc(var(--safe-top) + 64px), 9vh);
+    width: min(94vw, 430px);
+    min-height: 64px;
+    padding: 7px;
+  }
+
+  #overlay[data-state="menu"] .overlay-actions button {
+    min-width: 0;
+    min-height: 50px;
+    flex: 1 1 0;
+    padding: 0 12px;
+    font-size: 12.5px;
   }
 }
 
