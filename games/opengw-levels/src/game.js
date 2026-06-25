@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=top-actions-music-1";
+import { STR } from "../strings.js?v=music-unmuted-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -162,8 +162,8 @@ const AUDIO = {
 };
 
 const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-const MUTE_STORAGE_KEY = "2084-static-wav-muted";
-const LEGACY_MUTE_STORAGE_KEY = "2084-static-wars-muted";
+const MUTE_STORAGE_KEY = "2084-static-wav-muted-v2";
+const LEGACY_MUTE_STORAGE_KEYS = ["2084-static-wav-muted", "2084-static-wars-muted"];
 
 class StaticWarsRenderer {
   constructor(targetCanvas) {
@@ -3028,6 +3028,7 @@ function updateOverlay() {
   soundAction.textContent = bus.muted ? STR.soundOff : STR.soundOn;
   soundAction.setAttribute("aria-label", STR.muteButton);
   soundAction.setAttribute("aria-pressed", String(!bus.muted));
+  soundAction.title = bus.muted ? "Sound is off. Click to turn sound on." : "Sound is on. Click to mute.";
   if (state.status === "running") {
     hideOverlay();
     return;
@@ -3302,7 +3303,9 @@ function loadMuted() {
 function saveMuted(value) {
   try {
     localStorage.setItem(MUTE_STORAGE_KEY, value ? "1" : "0");
-    localStorage.removeItem(LEGACY_MUTE_STORAGE_KEY);
+    for (const key of LEGACY_MUTE_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
   } catch {
     // Muting is still applied in memory when storage is unavailable.
   }
