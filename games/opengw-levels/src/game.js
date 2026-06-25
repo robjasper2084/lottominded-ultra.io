@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=audio-mixer-1";
+import { STR } from "../strings.js?v=top-actions-music-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -125,7 +125,8 @@ const GL_IMAGES = {
 const COLOR_VEC_CACHE = new Map();
 
 const AUDIO = {
-  startupMusic: { file: "digital-static-cover.mp3", volume: 0.28, loop: true },
+  startupMusic: { file: "startup-untitled-7.mp3", volume: 0.3, loop: true },
+  gameMusic: { file: "digital-static-cover.mp3", volume: 0.26, loop: true },
   ambient: { file: "backgroundnoiseloop.wav", volume: 0.14, loop: true },
   wellHum: { file: "gravitywellhumloop.wav", volume: 0.12, loop: true },
   bomb: { file: "bomb.wav", volume: 0.58 },
@@ -970,7 +971,7 @@ const bus = {
   },
 
   audioCategory(id) {
-    if (id === "startupMusic") return "music";
+    if (id === "startupMusic" || id === "gameMusic") return "music";
     if (id === "ambient" || id === "wellHum") return "ambience";
     if (id === "playerThrust") return "engine";
     if (id === "menuSelect") return "ui";
@@ -1084,9 +1085,13 @@ const bus = {
   loopVolume(id, record) {
     const mode = typeof state === "undefined" ? "menu" : state.status;
     if (id === "startupMusic") {
-      if (mode === "running") return record.data.volume * 0.42;
-      if (mode === "paused") return record.data.volume * 0.34;
-      return record.data.volume;
+      return mode === "menu" ? record.data.volume : 0;
+    }
+    if (id === "gameMusic") {
+      if (mode === "running") return record.data.volume * 0.44;
+      if (mode === "paused") return record.data.volume * 0.28;
+      if (mode === "gameover" || mode === "victory") return record.data.volume * 0.22;
+      return 0;
     }
     if (id === "ambient") {
       if (mode === "running") return record.data.volume * 0.58;

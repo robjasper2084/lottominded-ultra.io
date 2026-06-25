@@ -977,6 +977,17 @@ button {
   overflow: hidden;
 }
 
+#overlay[data-state="menu"] .overlay-actions {
+  position: fixed;
+  z-index: 7;
+  top: max(18px, calc(var(--safe-top) + 18px));
+  left: 50%;
+  width: min(430px, calc(100vw - 32px));
+  min-height: 58px;
+  padding: 7px;
+  transform: translateX(-50%);
+}
+
 .overlay-actions::before,
 .overlay-actions::after {
   content: "";
