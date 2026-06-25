@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=web-audio-1";
+import { STR } from "../strings.js?v=black-hole-pull-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -7,9 +7,11 @@ const DPR_CAP = 1.5;
 const MAX_FRAME_STEPS = 5;
 const MAX_LIGHTS = 8;
 const TAU = Math.PI * 2;
-const WELL_GRAVITY_RADIUS = 382;
+const WELL_GRAVITY_RADIUS = 430;
+const WELL_CAPTURE_RADIUS = 112;
 const WELL_EVENT_RADIUS = 38;
 const WELL_CORE_RADIUS = 19;
+const WELL_PLAYER_DANGER_RADIUS = 58;
 
 const COLORS = {
   cyan: "#29f7ff",
@@ -1605,6 +1607,7 @@ function updateParticles(dt) {
   for (const p of state.particles) {
     p.age += dt;
     p.life -= dt;
+    applyGravity(p, dt, 0.14);
     p.x += p.vx * dt;
     p.y += p.vy * dt;
     p.vx *= p.drag;
@@ -1670,17 +1673,18 @@ function updateWellAbsorption() {
 
     for (const bullet of state.bullets) {
       if (bullet.dead) continue;
-      const limit = WELL_EVENT_RADIUS + bullet.r * 0.7;
+      const limit = WELL_CAPTURE_RADIUS + bullet.r + (well.sinkPulse ?? 0) * 22;
       if (distance2(bullet, well) <= limit ** 2) {
         bullet.dead = true;
         blackHoleSwallow(well, bullet, bullet.color ?? COLORS.flame, 4);
+        absorbedMatter = true;
       }
     }
 
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
       const spec = ENEMY[enemy.type];
-      const limit = WELL_EVENT_RADIUS + spec.r * 0.55;
+      const limit = WELL_CAPTURE_RADIUS + spec.r * 0.9 + (well.sinkPulse ?? 0) * 26;
       if (distance2(enemy, well) <= limit ** 2) {
         blackHoleSwallow(well, enemy, spec.color, enemy.type === "mayfly" ? 7 : 14);
         killEnemy(enemy, true);
@@ -1691,7 +1695,7 @@ function updateWellAbsorption() {
 
     for (const pickup of state.pickups) {
       if (pickup.dead) continue;
-      const limit = WELL_EVENT_RADIUS + pickup.r;
+      const limit = WELL_CAPTURE_RADIUS + pickup.r + (well.sinkPulse ?? 0) * 22;
       if (distance2(pickup, well) <= limit ** 2) {
         pickup.dead = true;
         blackHoleSwallow(well, pickup, COLORS.lime, 10);
@@ -1701,7 +1705,7 @@ function updateWellAbsorption() {
 
     for (const player of state.players) {
       if (!player.active || player.invuln > 0) continue;
-      const limit = WELL_CORE_RADIUS + player.r;
+      const limit = WELL_PLAYER_DANGER_RADIUS + player.r;
       if (distance2(player, well) <= limit ** 2) {
         blackHoleSwallow(well, player, player.color, 28);
         addRing(well.x, well.y, player.color, 42, 260);
@@ -2108,13 +2112,19 @@ function applyGravity(body, dt, factor) {
     const dist = Math.hypot(dx, dy) || 1;
     if (dist > WELL_GRAVITY_RADIUS) continue;
     const t = 1 - clamp(dist / WELL_GRAVITY_RADIUS, 0, 1);
+    const capture = 1 - clamp(dist / WELL_CAPTURE_RADIUS, 0, 1);
     const sink = well.sinkPulse ?? 0;
-    const pull = profile.pull * factor * t * t * (0.55 + t * 2.15 + sink * 0.8);
-    const swirl = pull * (0.34 + t * 0.58 + sink * 0.28);
+    const pull = profile.pull * factor * (0.18 + t * t * (2.85 + sink * 0.8) + capture * capture * 8.2);
+    const swirl = pull * (0.38 + t * 0.76 + capture * 1.15 + sink * 0.32);
     const nx = dx / dist;
     const ny = dy / dist;
     body.vx += (nx * pull - ny * swirl) * dt;
     body.vy += (ny * pull + nx * swirl) * dt;
+    if (capture > 0) {
+      const drag = clamp(1 - dt * factor * (1.15 + capture * 3.85), 0.58, 1);
+      body.vx *= drag;
+      body.vy *= drag;
+    }
   }
 }
 
@@ -2399,6 +2409,7 @@ function drawWells() {
     renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.23 + sink * 0.12, { color: COLORS.violet });
     renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.2 + sink * 0.08, { color: COLORS.cyan });
     renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.04 + sink * 0.04, 96);
+    renderer.drawWorldRing(well.x, well.y, WELL_CAPTURE_RADIUS + pulse * 7 + sink * 18, 2.1 + sink * 1.2, COLORS.magenta, 0.2 + sink * 0.22, 72);
     renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.32 + sink * 0.28);
     renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + 11 + pulse * 5 + sink * 10, 2.6 + sink * 2.2, COLORS.gold, 0.34 + sink * 0.34, 28);
     renderer.setBlend("normal");
