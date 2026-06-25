@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=no-aim-reticle-1";
+import { STR } from "../strings.js?v=startup-music-restore-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -990,13 +990,15 @@ const bus = {
 
   async unlock() {
     const context = this.ensureContext();
+    const firstUnlock = !this.unlocked;
     this.unlocked = true;
     if (context && context.state !== "running") {
       await context.resume().catch(() => {});
     }
     this.primeContext();
     this.refreshLoops();
-    window.setTimeout(() => this.loadAll(), 450);
+    this.ensureStartupMusic();
+    if (firstUnlock) window.setTimeout(() => this.loadAll(), 450);
     updateOverlay();
   },
 
@@ -1031,6 +1033,7 @@ const bus = {
       .then((buffer) => {
         record.buffer = buffer;
         record.error = null;
+        if (record.data.loop && this.unlocked && !this.muted) queueMicrotask(() => this.refreshLoops());
         return buffer;
       })
       .catch((error) => {
@@ -1072,6 +1075,17 @@ const bus = {
       source.onended = () => {
         if (this.loops.get(id)?.source === source) this.loops.delete(id);
       };
+    });
+  },
+
+  ensureStartupMusic() {
+    if (this.muted || !this.unlocked || typeof state === "undefined" || state.status !== "menu") return;
+    const context = this.context;
+    if (!context || context.state !== "running") return;
+    this.loadBuffer("startupMusic").then((buffer) => {
+      if (!buffer || this.muted || !this.unlocked || state.status !== "menu") return;
+      if (!this.loops.has("startupMusic")) this.startLoop("startupMusic");
+      this.refreshLoops();
     });
   },
 
@@ -1261,8 +1275,13 @@ requestAnimationFrame(frame);
 
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
-addEventListener("pointerdown", () => bus.unlock(), { once: true, passive: true });
-addEventListener("keydown", () => bus.unlock(), { once: true });
+function armAudioFromGesture() {
+  bus.unlock();
+  if (state?.status === "menu") bus.ensureStartupMusic();
+}
+
+addEventListener("pointerdown", armAudioFromGesture, { passive: true });
+addEventListener("keydown", armAudioFromGesture);
 addEventListener("blur", () => {
   pausedByBlur = true;
   if (state.status === "running") setPaused(true);
@@ -1362,7 +1381,7 @@ homeAction.addEventListener("click", returnHome);
 soundAction.addEventListener("click", () => {
   if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
     bus.unlock();
-    bus.refreshLoops();
+    bus.ensureStartupMusic();
     return;
   }
   bus.toggle();
@@ -1506,6 +1525,7 @@ function returnHome() {
   state.status = "menu";
   bus.play("menuSelect", 0.08);
   bus.refreshLoops();
+  bus.ensureStartupMusic();
   updateOverlay();
   updateHud();
   lastFrame = performance.now();
