@@ -10,6 +10,7 @@ export const STR = {
   start: "Press start",
   resume: "Resume signal",
   restart: "Restart",
+  selectPilots: "Select pilots",
   mute: "Mute",
   unmute: "Sound",
   soundOn: "Sound On",

@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=fun-factor-fixes-1";
+import { STR } from "../strings.js?v=signal-lost-home-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -773,6 +773,7 @@ const forgeUi = {
 const forgeHudClose = $("forgeHudClose");
 const playerChooser = $("playerChooser");
 const primaryAction = $("primaryAction");
+const homeAction = $("homeAction");
 const soundAction = $("soundAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
@@ -1357,6 +1358,7 @@ canvas.addEventListener("pointerleave", (event) => {
 });
 
 primaryAction.addEventListener("click", primary);
+homeAction.addEventListener("click", returnHome);
 soundAction.addEventListener("click", () => {
   if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
     bus.unlock();
@@ -1493,6 +1495,22 @@ function primary() {
   } else if (state.status === "paused") {
     setPaused(false);
   }
+}
+
+function returnHome() {
+  bus.unlock();
+  input.pointers.clear();
+  input.bombQueued.clear();
+  input.aimPoint = null;
+  input.mouse.down = false;
+  forgeHudDismissed = false;
+  state = createState();
+  state.status = "menu";
+  bus.play("menuSelect", 0.08);
+  bus.refreshLoops();
+  updateOverlay();
+  updateHud();
+  lastFrame = performance.now();
 }
 
 function togglePause() {
@@ -3090,6 +3108,9 @@ function updateOverlay() {
       state.status === "victory" ? STR.overlayVictory : STR.overlayReady;
   primaryAction.textContent = state.status === "paused" ? STR.resume :
     state.status === "menu" ? STR.start : STR.restart;
+  homeAction.textContent = STR.selectPilots;
+  homeAction.hidden = !(state.status === "gameover" || state.status === "victory");
+  homeAction.setAttribute("aria-label", STR.selectPilots);
 
   playerChooser.hidden = state.status !== "menu";
   if (!playerChooser.hidden) buildPlayerChooser();
