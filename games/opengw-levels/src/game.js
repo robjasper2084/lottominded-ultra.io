@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=multiplayer-pressure-1";
+import { STR } from "../strings.js?v=touch-controls-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -784,6 +784,9 @@ const homeAction = $("homeAction");
 const soundAction = $("soundAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
+const touchMarks = $("touchMarks");
+const touchMoveZone = touchMarks?.querySelector(".left-zone");
+const touchAimZone = touchMarks?.querySelector(".right-zone");
 const devEl = $("dev");
 let selectedPlayerCount = loadPlayerCount();
 let forgeHudDismissed = false;
@@ -1258,11 +1261,14 @@ const input = {
   moveTouch: null,
   aimTouch: null,
   moveVector: { x: 0, y: 0 },
+  aimVector: null,
   aimPoint: null,
   bombQueued: new Set(),
   padBombHeld: [false, false, false, false],
   padPauseHeld: false
 };
+const touchCapable = Boolean(navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches);
+shell.dataset.touch = touchCapable ? "true" : "false";
 
 let state = createState();
 let lastFrame = performance.now();
@@ -1289,6 +1295,10 @@ function armAudioFromGesture() {
 
 addEventListener("pointerdown", armAudioFromGesture, { passive: true });
 addEventListener("keydown", armAudioFromGesture);
+addEventListener("touchmove", (event) => {
+  if (event.target?.closest?.("#shell")) event.preventDefault();
+}, { passive: false });
+addEventListener("gesturestart", (event) => event.preventDefault?.(), { passive: false });
 addEventListener("blur", () => {
   pausedByBlur = true;
   if (state.status === "running") setPaused(true);
@@ -1331,7 +1341,11 @@ addEventListener("keyup", (event) => {
 
 canvas.addEventListener("pointerdown", (event) => {
   if (state.status !== "running") return;
-  canvas.setPointerCapture(event.pointerId);
+  try {
+    canvas.setPointerCapture?.(event.pointerId);
+  } catch {
+    // Some mobile browsers can reject capture during fast multi-touch changes.
+  }
   const world = eventToWorld(event);
   if (event.pointerType === "mouse" || event.pointerType === "pen") {
     input.mouse.down = event.button === 0;
@@ -1523,9 +1537,8 @@ function primary() {
 
 function returnHome() {
   bus.unlock();
-  input.pointers.clear();
+  clearTouchInput();
   input.bombQueued.clear();
-  input.aimPoint = null;
   input.mouse.down = false;
   forgeHudDismissed = false;
   state = createState();
@@ -1545,10 +1558,12 @@ function togglePause() {
 
 function setPaused(value) {
   if (value && state.status === "running") {
+    clearTouchInput();
     state.status = "paused";
     bus.refreshLoops();
     updateOverlay();
   } else if (!value && state.status === "paused") {
+    clearTouchInput();
     state.status = "running";
     bus.refreshLoops();
     hideOverlay();
@@ -2159,6 +2174,7 @@ function hurtPlayer(player) {
 }
 
 function finishRun(status) {
+  clearTouchInput();
   state.status = status;
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
@@ -2173,6 +2189,7 @@ function collectCommands() {
   const commands = Array.from({ length: state.playerCount }, (_, id) => commandForKeyboard(id));
   applyGamepads(commands);
   if (commands[0]) applyPointerInput(commands[0]);
+  applyTouchSquadInput(commands);
   for (const id of input.bombQueued) {
     if (commands[id]) commands[id].bomb = true;
   }
@@ -2203,7 +2220,10 @@ function commandForKeyboard(id) {
 function applyPointerInput(command) {
   command.move = normalize(command.move.x + input.moveVector.x, command.move.y + input.moveVector.y) ?? { x: 0, y: 0 };
 
-  if (input.aimPoint) {
+  if (input.aimVector) {
+    command.aim = input.aimVector;
+    command.fire = true;
+  } else if (input.aimPoint) {
     command.aim = normalize(input.aimPoint.x - state.players[0].x, input.aimPoint.y - state.players[0].y);
     command.fire = true;
   } else if (input.mouse.active) {
@@ -2213,8 +2233,51 @@ function applyPointerInput(command) {
   }
 }
 
+function applyTouchSquadInput(commands) {
+  if (!input.aimVector && input.moveTouch === null && input.aimTouch === null) return;
+  if (commands.length <= 1) return;
+  const leader = state.players[0];
+  if (!leader) return;
+  for (let i = 1; i < commands.length; i += 1) {
+    const player = state.players[i];
+    const command = commands[i];
+    if (!player || !command) continue;
+    const slot = squadTouchSlot(i, commands.length);
+    const dx = leader.x + slot.x - player.x;
+    const dy = leader.y + slot.y - player.y;
+    const distance = Math.hypot(dx, dy);
+    const follow = distance > 20 ? normalize(dx, dy) : input.moveVector;
+    if (follow) command.move = normalize(command.move.x + follow.x, command.move.y + follow.y) ?? { x: 0, y: 0 };
+    if (input.aimVector) {
+      command.aim = input.aimVector;
+      command.fire = true;
+    }
+  }
+}
+
+function squadTouchSlot(index, count) {
+  const spread = 44;
+  const row = Math.floor((index - 1) / 2);
+  const side = index % 2 === 1 ? -1 : 1;
+  return {
+    x: side * spread * (1 + row * 0.35),
+    y: 42 + row * 32 + Math.max(0, count - 2) * 4
+  };
+}
+
 function emptyCommand() {
   return { move: { x: 0, y: 0 }, aim: null, fire: false, bomb: false };
+}
+
+function clearTouchInput() {
+  input.pointers.clear();
+  input.moveTouch = null;
+  input.aimTouch = null;
+  input.moveVector.x = 0;
+  input.moveVector.y = 0;
+  input.aimPoint = null;
+  input.aimVector = null;
+  updateTouchUi();
 }
 
 function applyGamepads(commands) {
@@ -2261,6 +2324,7 @@ function endPointer(event) {
   if (input.aimTouch === event.pointerId) {
     input.aimTouch = null;
     input.aimPoint = null;
+    input.aimVector = null;
   }
   input.pointers.delete(event.pointerId);
   updateTouchVectors();
@@ -2276,7 +2340,7 @@ function updateTouchVectors() {
     const dx = touch.x - touch.startX;
     const dy = touch.y - touch.startY;
     const len = Math.hypot(dx, dy);
-    const cap = 54;
+    const cap = 62;
     input.moveVector.x = len > 0 ? clamp(dx / cap, -1, 1) : 0;
     input.moveVector.y = len > 0 ? clamp(dy / cap, -1, 1) : 0;
     const mag = Math.hypot(input.moveVector.x, input.moveVector.y);
@@ -2286,7 +2350,37 @@ function updateTouchVectors() {
     }
   }
   const aimTouch = input.aimTouch !== null ? input.pointers.get(input.aimTouch) : null;
-  input.aimPoint = aimTouch ? aimTouch.world : null;
+  if (!aimTouch) {
+    input.aimPoint = null;
+    input.aimVector = null;
+  } else {
+    const dx = aimTouch.x - aimTouch.startX;
+    const dy = aimTouch.y - aimTouch.startY;
+    const stickAim = Math.hypot(dx, dy) > 8 ? normalize(dx, dy) : null;
+    const worldAim = pointInsideArena(aimTouch.x, aimTouch.y)
+      ? normalize(aimTouch.world.x - state.players[0].x, aimTouch.world.y - state.players[0].y)
+      : null;
+    input.aimPoint = null;
+    input.aimVector = stickAim ?? worldAim ?? state.players[0]?.lastAim ?? { x: 0, y: -1 };
+  }
+  updateTouchUi();
+}
+
+function pointInsideArena(x, y) {
+  return x >= view.x && x <= view.x + view.w && y >= view.y && y <= view.y + view.h;
+}
+
+function updateTouchUi() {
+  if (!touchMarks) return;
+  updateTouchZone(touchMoveZone, input.moveTouch !== null, input.moveVector);
+  updateTouchZone(touchAimZone, input.aimTouch !== null, input.aimVector ?? { x: 0, y: 0 });
+}
+
+function updateTouchZone(zone, active, vector) {
+  if (!zone) return;
+  zone.classList.toggle("is-active", active);
+  zone.style.setProperty("--stick-x", `${clamp(vector.x, -1, 1) * 34}px`);
+  zone.style.setProperty("--stick-y", `${clamp(vector.y, -1, 1) * 34}px`);
 }
 
 function eventToWorld(event) {

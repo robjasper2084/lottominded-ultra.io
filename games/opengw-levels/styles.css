@@ -35,6 +35,9 @@ body {
   background: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   overscroll-behavior: none;
 }
 
@@ -64,6 +67,7 @@ button {
     #05070d;
   isolation: isolate;
   touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #game {
@@ -76,6 +80,8 @@ button {
   z-index: 1;
   cursor: crosshair;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #startupScene {
@@ -1176,7 +1182,13 @@ button {
   pointer-events: none;
 }
 
+#shell[data-touch="true"] #touchMarks {
+  display: block;
+}
+
 .touch-zone {
+  --stick-x: 0px;
+  --stick-y: 0px;
   position: absolute;
   bottom: max(24px, calc(var(--safe-bottom) + 14px));
   width: 120px;
@@ -1188,6 +1200,37 @@ button {
     radial-gradient(circle, rgba(246, 251, 255, 0.04), transparent 36%),
     conic-gradient(from 45deg, rgba(41, 247, 255, 0.16), transparent 24%, rgba(142, 68, 255, 0.14), transparent 58%, rgba(212, 175, 55, 0.12), transparent);
   box-shadow: 0 0 28px rgba(41, 247, 255, 0.1);
+  transform: translateZ(0) scale(1);
+  transition: opacity 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  will-change: transform, opacity;
+}
+
+.touch-zone::before,
+.touch-zone::after {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.touch-zone::before {
+  border: 1px solid rgba(246, 251, 255, 0.12);
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(41, 247, 255, 0.22) 48% 52%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(41, 247, 255, 0.2) 48% 52%, transparent 53%);
+}
+
+.touch-zone::after {
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: currentColor;
+  box-shadow: 0 0 14px currentColor;
 }
 
 .touch-zone span {
@@ -1196,18 +1239,48 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.04);
+  transform: translate3d(var(--stick-x), var(--stick-y), 0);
+  transition: transform 54ms linear, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  will-change: transform;
 }
 
 .left-zone {
   left: max(18px, var(--safe-left));
+  color: var(--cyan);
 }
 
 .right-zone {
   right: max(18px, var(--safe-right));
+  color: var(--magenta);
   border-color: rgba(255, 45, 170, 0.28);
   background:
     radial-gradient(circle, rgba(246, 251, 255, 0.04), transparent 36%),
     conic-gradient(from 20deg, rgba(255, 45, 170, 0.18), transparent 30%, rgba(142, 68, 255, 0.14), transparent 60%, rgba(41, 247, 255, 0.12), transparent);
+}
+
+.right-zone::before {
+  border-color: rgba(255, 45, 170, 0.16);
+  background:
+    radial-gradient(circle, transparent 42%, rgba(255, 45, 170, 0.22) 43% 46%, transparent 47%),
+    linear-gradient(90deg, transparent 47%, rgba(255, 45, 170, 0.26) 48% 52%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(41, 247, 255, 0.16) 48% 52%, transparent 53%);
+}
+
+.touch-zone.is-active {
+  opacity: 0.98;
+  border-color: rgba(246, 251, 255, 0.58);
+  transform: translateZ(0) scale(1.04);
+  box-shadow:
+    0 0 32px color-mix(in srgb, currentColor 30%, transparent),
+    inset 0 0 24px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.touch-zone.is-active span {
+  border-color: rgba(246, 251, 255, 0.74);
+  background:
+    radial-gradient(circle, rgba(246, 251, 255, 0.28), transparent 36%),
+    color-mix(in srgb, currentColor 16%, rgba(255, 255, 255, 0.05));
+  box-shadow: 0 0 22px color-mix(in srgb, currentColor 45%, transparent);
 }
 
 #dev {
