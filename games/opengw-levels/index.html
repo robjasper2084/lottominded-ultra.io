@@ -16,9 +16,7 @@
     <link rel="preload" href="./assets/2084/startup-3d/startup-3d-near-rails.webp" as="image" />
     <link rel="preload" href="./assets/2084/startup-3d/startup-3d-fog-bands.webp" as="image" />
     <link rel="preload" href="./assets/2084/startup-3d/startup-3d-depth-mask.webp" as="image" />
-    <link rel="preload" href="./assets/audio/startup-untitled-7.mp3" as="audio" type="audio/mpeg" />
-    <link rel="preload" href="./assets/audio/digital-static-cover.mp3" as="audio" type="audio/mpeg" />
-    <link rel="stylesheet" href="./styles.css?v=press-start-font-1" />
+    <link rel="stylesheet" href="./styles.css?v=live-fixes-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static WAV game">
@@ -76,6 +74,7 @@
         <strong id="forgeHudLine"></strong>
         <small id="forgeHudNote"></small>
       </div>
+      <button id="forgeToggleAction" class="forge-toggle" type="button" hidden></button>
 
       <section id="overlay" data-state="menu" aria-labelledby="menuTitle">
         <h1 id="menuTitle" class="sr-only">2084 STATIC WAV</h1>
@@ -85,6 +84,7 @@
         <div id="marqueeMotion" aria-hidden="true">
           <canvas id="marqueeFx" width="1280" height="720"></canvas>
           <img id="marquee" src="./assets/2084/branding/marquee.png?v=static-wav-marquee-1" alt="" />
+          <span class="marquee-status">Signal Ready</span>
         </div>
         <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
           <span id="startupForgeLabel"></span>
@@ -95,6 +95,7 @@
         <p id="overlayCopy"></p>
         <div id="overlayStats" hidden></div>
         <div id="playerChooser" class="player-chooser" aria-label="Player count"></div>
+        <p id="controlsHint" class="controls-hint"></p>
         <div class="overlay-actions">
           <button id="primaryAction" type="button"></button>
           <button id="homeAction" type="button" hidden></button>
@@ -116,6 +117,6 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=startup-3d-interactive-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=thruster-fire-1"></script>
-    <script type="module" src="./src/game.js?v=touch-controls-1"></script>
+    <script type="module" src="./src/game.js?v=live-well-difficulty-1"></script>
   </body>
 </html>

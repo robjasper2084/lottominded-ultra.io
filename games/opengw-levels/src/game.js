@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=touch-controls-1";
+import { STR } from "../strings.js?v=live-well-difficulty-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -58,13 +58,13 @@ const LEVELS = [
   { name: "Gravity Bloom", quota: 22, max: 10, interval: 0.82, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
   { name: "Gold Break", quota: 28, max: 12, interval: 0.76, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
   { name: "Needle Lane", quota: 32, max: 14, interval: 0.7, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
-  { name: "Mayfly Crown", quota: 46, max: 20, interval: 0.66, wells: 2, pull: 205, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["mayfly", 5]] },
+  { name: "Mayfly Crown", quota: 46, max: 20, interval: 0.66, wells: 2, pull: 205, mix: [["wanderer", 2], ["seeker", 4], ["splitter", 3], ["lancer", 3], ["mayfly", 4]] },
   { name: "Red Geometry", quota: 52, max: 22, interval: 0.58, wells: 2, pull: 220, mix: [["seeker", 5], ["splitter", 3], ["lancer", 3], ["mayfly", 4]] },
-  { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, mix: [["wanderer", 2], ["seeker", 5], ["splitter", 3], ["lancer", 4], ["mayfly", 5]] },
-  { name: "Blue Collapse", quota: 70, max: 28, interval: 0.46, wells: 3, pull: 260, mix: [["seeker", 6], ["splitter", 3], ["lancer", 4], ["mayfly", 7]] },
-  { name: "Ninefold Static", quota: 84, max: 32, interval: 0.4, wells: 4, pull: 285, mix: [["wanderer", 2], ["seeker", 6], ["splitter", 4], ["lancer", 5], ["mayfly", 8]] },
-  { name: "White Ring", quota: 96, max: 34, interval: 0.36, wells: 4, pull: 310, mix: [["seeker", 7], ["splitter", 5], ["lancer", 6], ["mayfly", 9]] },
-  { name: "Last Well", quota: 112, max: 38, interval: 0.32, wells: 5, pull: 340, mix: [["wanderer", 2], ["seeker", 7], ["splitter", 5], ["lancer", 7], ["mayfly", 10]] }
+  { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, mix: [["wanderer", 1], ["seeker", 5], ["splitter", 4], ["lancer", 5], ["mayfly", 5]] },
+  { name: "Blue Collapse", quota: 70, max: 28, interval: 0.46, wells: 3, pull: 260, mix: [["seeker", 5], ["splitter", 4], ["lancer", 6], ["mayfly", 7]] },
+  { name: "Ninefold Static", quota: 84, max: 32, interval: 0.4, wells: 4, pull: 285, mix: [["wanderer", 1], ["seeker", 5], ["splitter", 5], ["lancer", 8], ["mayfly", 7]] },
+  { name: "White Ring", quota: 96, max: 34, interval: 0.36, wells: 4, pull: 310, mix: [["seeker", 6], ["splitter", 6], ["lancer", 8], ["mayfly", 8]] },
+  { name: "Last Well", quota: 112, max: 38, interval: 0.32, wells: 5, pull: 340, mix: [["seeker", 6], ["splitter", 7], ["lancer", 9], ["mayfly", 8]] }
 ];
 
 const MULTIPLAYER_PRESSURE = {
@@ -190,6 +190,15 @@ class StaticWarsRenderer {
     });
     if (!this.gl) throw new Error("WebGL/OpenGL renderer unavailable");
 
+    this.contextLost = false;
+    targetCanvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      this.contextLost = true;
+    });
+    targetCanvas.addEventListener("webglcontextrestored", () => {
+      location.reload();
+    });
+
     this.isWebGL2 = typeof WebGL2RenderingContext !== "undefined" && this.gl instanceof WebGL2RenderingContext;
     this.view = { cssW: 1, cssH: 1, dpr: 1, x: 0, y: 0, w: 1, h: 1, scale: 1, camX: 0, camY: 0 };
     this.shakeX = 0;
@@ -241,6 +250,10 @@ class StaticWarsRenderer {
     this.setBlend("normal");
   }
 
+  isContextLost() {
+    return this.contextLost || Boolean(this.gl.isContextLost?.());
+  }
+
   createProgram(vertexSource, fragmentSource) {
     const gl = this.gl;
     const vertex = this.createShader(gl.VERTEX_SHADER, vertexSource);
@@ -271,6 +284,7 @@ class StaticWarsRenderer {
   }
 
   beginFrame(nextView, shakeX, shakeY) {
+    if (this.isContextLost()) return false;
     this.view = { ...nextView };
     this.shakeX = shakeX;
     this.shakeY = shakeY;
@@ -283,6 +297,7 @@ class StaticWarsRenderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0.015, 0.022, 0.045, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    return true;
   }
 
   setLights(lights) {
@@ -566,13 +581,19 @@ class StaticWarsRenderer {
   }
 
   flush() {
+    if (this.isContextLost()) {
+      this.solidData.length = 0;
+      this.textureData.length = 0;
+      this.litData.length = 0;
+      return;
+    }
     this.flushSolid();
     this.flushTexture();
     this.flushLit();
   }
 
   flushSolid() {
-    if (!this.solidData.length) return;
+    if (!this.solidData.length || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.solidProgram);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.solidBuffer);
@@ -587,7 +608,7 @@ class StaticWarsRenderer {
   }
 
   flushTexture() {
-    if (!this.textureData.length || !this.currentTexture) return;
+    if (!this.textureData.length || !this.currentTexture || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.textureProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -607,7 +628,7 @@ class StaticWarsRenderer {
   }
 
   flushLit() {
-    if (!this.litData.length || !this.currentLit) return;
+    if (!this.litData.length || !this.currentLit || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.litProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -778,12 +799,14 @@ const forgeUi = {
   }
 };
 const forgeHudClose = $("forgeHudClose");
+const forgeToggleAction = $("forgeToggleAction");
 const playerChooser = $("playerChooser");
 const primaryAction = $("primaryAction");
 const homeAction = $("homeAction");
 const soundAction = $("soundAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
+const controlsHint = $("controlsHint");
 const touchMarks = $("touchMarks");
 const touchMoveZone = touchMarks?.querySelector(".left-zone");
 const touchAimZone = touchMarks?.querySelector(".right-zone");
@@ -798,10 +821,16 @@ for (const node of document.querySelectorAll("[data-label]")) {
 }
 pauseAction.textContent = "II";
 pauseAction.setAttribute("aria-label", STR.pauseButton);
+pauseAction.setAttribute("title", `${STR.pauseButton} (P or Esc)`);
 bombAction.setAttribute("aria-label", STR.bombButton);
+bombAction.setAttribute("title", `${STR.bombButton} (Space)`);
 forgeHudClose.textContent = "X";
 forgeHudClose.setAttribute("aria-label", STR.forgeClose);
 forgeHudClose.setAttribute("title", STR.forgeClose);
+forgeToggleAction.textContent = STR.forgeToggle;
+forgeToggleAction.setAttribute("aria-label", STR.forgeShow);
+forgeToggleAction.setAttribute("title", STR.forgeShow);
+controlsHint.textContent = STR.controlsHint;
 buildPlayerChooser();
 
 class Rng {
@@ -903,7 +932,13 @@ function updateForgePanels() {
     panel.note.textContent = state.forge.note;
     panel.panel.classList.toggle("is-hot", hot);
   }
-  forgeUi.hud.panel.hidden = state.status === "menu" || forgeHudDismissed;
+  const forgeAllowed = state.status === "running" || state.status === "paused";
+  const hudVisible = forgeAllowed && !forgeHudDismissed;
+  forgeUi.hud.panel.hidden = !hudVisible;
+  setControlAvailability(forgeHudClose, hudVisible);
+  const toggleVisible = forgeAllowed && forgeHudDismissed;
+  setControlAvailability(forgeToggleAction, toggleVisible, { hide: true });
+  setRegionAvailability(forgeUi.startup.panel, false, { hide: true });
 }
 
 function renderForgeRows(node, text) {
@@ -926,6 +961,27 @@ function renderForgeRows(node, text) {
     return row;
   });
   node.replaceChildren(...rows);
+}
+
+function setControlAvailability(control, active, options = {}) {
+  if (!control) return;
+  if (options.hide) control.hidden = !active;
+  control.disabled = !active;
+  control.tabIndex = active ? 0 : -1;
+  control.setAttribute("aria-hidden", String(!active));
+}
+
+function setRegionAvailability(region, active, options = {}) {
+  if (!region) return;
+  if (options.hide) region.hidden = !active;
+  region.inert = !active;
+  region.setAttribute("aria-hidden", String(!active));
+}
+
+function setElementAvailability(element, active, options = {}) {
+  if (!element) return;
+  if (options.hide) element.hidden = !active;
+  element.setAttribute("aria-hidden", String(!active));
 }
 
 const bus = {
@@ -1314,7 +1370,7 @@ addEventListener("keydown", (event) => {
     primary();
     return;
   }
-  if (event.code === "KeyP" && !event.repeat) {
+  if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) {
     event.preventDefault();
     togglePause();
     return;
@@ -1412,6 +1468,12 @@ forgeHudClose.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopPropagation();
   forgeHudDismissed = true;
+  updateForgePanels();
+});
+forgeToggleAction.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  forgeHudDismissed = false;
   updateForgePanels();
 });
 bombAction.addEventListener("pointerdown", (event) => {
@@ -1516,7 +1578,7 @@ function makePlayer(index, count = 1) {
 
 function startRun() {
   bus.unlock();
-  forgeHudDismissed = false;
+  forgeHudDismissed = true;
   state = createState();
   state.status = "running";
   beginLevel(0);
@@ -1885,9 +1947,13 @@ function updateWellAbsorption() {
       if (distance2(bullet, well) <= limit ** 2) {
         bullet.dead = true;
         blackHoleSwallow(well, bullet, bullet.color ?? COLORS.flame, 4);
+        damageWell(well, 1);
         absorbedMatter = true;
+        if (well.dead) break;
       }
     }
+
+    if (well.dead) continue;
 
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
@@ -2576,7 +2642,11 @@ function render() {
   const sx = shake ? state.rng.range(-shake, shake) : 0;
   const sy = shake ? state.rng.range(-shake, shake) : 0;
 
-  renderer.beginFrame(view, sx, sy);
+  if (!renderer.beginFrame(view, sx, sy)) {
+    bannerText.hidden = false;
+    bannerText.textContent = "Renderer paused. Reloading will restore the signal.";
+    return;
+  }
   renderer.setLights(buildLights());
   drawBackdrop();
   renderer.setWorldClip(true);
@@ -3188,8 +3258,8 @@ function updateHud() {
   hud.multiplier.textContent = `${STR.multiplier}${state.team.multiplier}`;
   hud.status.textContent = state.status === "running" ? `${currentLevel().name} - ${state.playerCount}P` : statusText();
   hud.best.textContent = `${STR.best}: ${formatNumber(state.best)}`;
-  pauseAction.hidden = state.status === "menu" || state.status === "gameover" || state.status === "victory";
-  bombAction.hidden = state.status !== "running";
+  setControlAvailability(pauseAction, state.status === "running" || state.status === "paused", { hide: true });
+  setControlAvailability(bombAction, state.status === "running", { hide: true });
   updateForgePanels();
 }
 
@@ -3209,7 +3279,7 @@ function updateOverlay() {
     hideOverlay();
     return;
   }
-  overlay.hidden = false;
+  setRegionAvailability(overlay, true, { hide: true });
   shell.dataset.mode = state.status;
   overlay.dataset.state = state.status;
   const menu = state.status === "menu";
@@ -3221,27 +3291,32 @@ function updateOverlay() {
     state.status === "gameover" ? STR.overlayGameOver :
       state.status === "victory" ? STR.overlayVictory : STR.overlayReady;
   primaryAction.textContent = state.status === "paused" ? STR.resume :
-    state.status === "menu" ? STR.start : STR.restart;
+    state.status === "menu" ? STR.startButton : STR.restart;
+  primaryAction.setAttribute("aria-label", primaryAction.textContent);
+  setControlAvailability(primaryAction, true);
+  setControlAvailability(soundAction, true);
   homeAction.textContent = STR.selectPilots;
-  homeAction.hidden = !(state.status === "gameover" || state.status === "victory");
   homeAction.setAttribute("aria-label", STR.selectPilots);
+  setControlAvailability(homeAction, state.status === "gameover" || state.status === "victory", { hide: true });
 
-  playerChooser.hidden = state.status !== "menu";
-  if (!playerChooser.hidden) buildPlayerChooser();
+  setElementAvailability(controlsHint, menu, { hide: true });
+  setRegionAvailability(playerChooser, menu, { hide: true });
+  if (menu) buildPlayerChooser();
   if (menu && bus.unlocked && !bus.muted) bus.ensureStartupMusic();
 
-  if (state.status === "gameover" || state.status === "victory") {
-    overlayStats.hidden = false;
+  const showingStats = state.status === "gameover" || state.status === "victory";
+  setElementAvailability(overlayStats, showingStats, { hide: true });
+  if (showingStats) {
     overlayStats.textContent = `${STR.finalScore}: ${formatNumber(state.score)}  /  ${STR.players}: ${state.playerCount}  /  ${STR.level}: ${Math.min(state.levelIndex + 1, LEVELS.length)}`;
   } else {
-    overlayStats.hidden = true;
     overlayStats.textContent = "";
   }
   updateForgePanels();
 }
 
 function hideOverlay() {
-  overlay.hidden = true;
+  setRegionAvailability(overlay, false, { hide: true });
+  overlay.dataset.state = "running";
   shell.dataset.mode = "running";
 }
 

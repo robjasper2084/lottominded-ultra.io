@@ -8,6 +8,7 @@ export const STR = {
   gameOver: "Signal lost",
   victory: "Static cleared",
   start: "Press start",
+  startButton: "Start Sector 1",
   resume: "Resume signal",
   restart: "Restart",
   selectPilots: "Select pilots",
@@ -29,6 +30,7 @@ export const STR = {
   overlayPaused: "The signal is holding.",
   overlayGameOver: "The static archive kept that run.",
   overlayVictory: "The last signal well broke open.",
+  controlsHint: "Move with WASD or arrows. Aim and fire with mouse, touch, IJKL, or keypad. Bomb with Space. Pause with P or Esc.",
   loading: "Loading assets",
   audioBlocked: "Tap start to arm sound",
   devLabel: "dev",
@@ -48,5 +50,7 @@ export const STR = {
   forgeWellNote: "well cracked",
   forgeClearNote: "sector sealed",
   forgeStartNote: "run seed armed",
-  forgeClose: "Hide Number Forge"
+  forgeClose: "Hide Number Forge",
+  forgeShow: "Show Number Forge",
+  forgeToggle: "Forge"
 };
