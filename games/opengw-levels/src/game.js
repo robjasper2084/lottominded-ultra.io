@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=live-well-difficulty-1";
+import { STR } from "../strings.js?v=live-well-difficulty-2";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
