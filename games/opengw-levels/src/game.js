@@ -11,6 +11,7 @@ const RING_PARTICLE_LIMIT = 268;
 const TAU = Math.PI * 2;
 const WELL_GRAVITY_RADIUS = 430;
 const WELL_CAPTURE_RADIUS = 112;
+const WELL_ACTIVATION_RADIUS = 124;
 const WELL_EVENT_RADIUS = 38;
 const WELL_CORE_RADIUS = 19;
 const WELL_PLAYER_DANGER_RADIUS = 58;
@@ -1765,6 +1766,9 @@ function updateWells(dt) {
     well.age += dt;
     well.spawn -= dt;
     well.sinkPulse = Math.max(0, (well.sinkPulse ?? 0) - dt * 3.2);
+    well.suction = isWellSuctionActive(well)
+      ? clamp((well.suction ?? 0) + dt * 1.85, 0, 1)
+      : 0;
     if (well.spawn <= 0 && state.spawned < profile.quota && state.enemies.length < profile.max + 4) {
       const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(profile.mix);
       spawnEnemy(type, well.x + state.rng.range(-46, 46), well.y + state.rng.range(-46, 46));
@@ -1945,7 +1949,9 @@ function updateWellAbsorption() {
 
     for (const bullet of state.bullets) {
       if (bullet.dead) continue;
-      const limit = WELL_CAPTURE_RADIUS + bullet.r + (well.sinkPulse ?? 0) * 22;
+      const active = isWellSuctionActive(well);
+      const baseRadius = active ? WELL_CAPTURE_RADIUS : WELL_ACTIVATION_RADIUS;
+      const limit = baseRadius + bullet.r + (well.sinkPulse ?? 0) * 22;
       if (distance2(bullet, well) <= limit ** 2) {
         bullet.dead = true;
         blackHoleSwallow(well, bullet, bullet.color ?? COLORS.flame, 4);
@@ -1955,7 +1961,7 @@ function updateWellAbsorption() {
       }
     }
 
-    if (well.dead) continue;
+    if (!isWellSuctionActive(well) || well.dead) continue;
 
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
@@ -2128,7 +2134,9 @@ function spawnWell() {
     age: state.rng.range(0, TAU),
     spawn: state.rng.range(2.0, 4.2),
     flash: 0,
-    sinkPulse: 0
+    sinkPulse: 0,
+    active: false,
+    suction: 0
   });
 }
 
@@ -2158,6 +2166,7 @@ function killEnemy(enemy, bomb = false) {
 }
 
 function damageWell(well, damage) {
+  activateWellSuction(well);
   well.hp -= damage;
   well.flash = 1;
   state.shake = Math.max(state.shake, 0.25);
@@ -2177,6 +2186,22 @@ function damageWell(well, damage) {
     bus.play("wellExplode", 0.25);
   }
   checkRewards();
+}
+
+function isWellSuctionActive(well) {
+  return well?.active === true && !well.dead;
+}
+
+function activateWellSuction(well, boost = 0.62) {
+  if (!well || well.dead) return;
+  const wasActive = isWellSuctionActive(well);
+  well.active = true;
+  well.suction = Math.max(well.suction ?? 0, boost);
+  well.sinkPulse = Math.min(1, (well.sinkPulse ?? 0) + (wasActive ? 0.16 : 0.42));
+  if (!wasActive) {
+    state.shake = Math.max(state.shake, 0.5);
+    addRing(well.x, well.y, COLORS.magenta, WELL_ACTIVATION_RADIUS, 340);
+  }
 }
 
 function spawnPickup(x, y) {
@@ -2465,15 +2490,16 @@ function applyGravity(body, dt, factor) {
   const profile = currentLevel();
   if (profile.pull <= 0 || state.wells.length === 0) return;
   for (const well of state.wells) {
-    if (well.dead) continue;
+    if (!isWellSuctionActive(well)) continue;
     const dx = well.x - body.x;
     const dy = well.y - body.y;
     const dist = Math.hypot(dx, dy) || 1;
     if (dist > WELL_GRAVITY_RADIUS) continue;
     const t = 1 - clamp(dist / WELL_GRAVITY_RADIUS, 0, 1);
     const capture = 1 - clamp(dist / WELL_CAPTURE_RADIUS, 0, 1);
-    const sink = well.sinkPulse ?? 0;
-    const pull = profile.pull * factor * (0.18 + t * t * (2.85 + sink * 0.8) + capture * capture * 8.2);
+    const suction = clamp(well.suction ?? 0, 0.25, 1);
+    const sink = (well.sinkPulse ?? 0) * suction;
+    const pull = profile.pull * factor * suction * (0.18 + t * t * (2.85 + sink * 0.8) + capture * capture * 8.2);
     const swirl = pull * (0.38 + t * 0.76 + capture * 1.15 + sink * 0.32);
     const nx = dx / dist;
     const ny = dy / dist;
@@ -2768,16 +2794,19 @@ function drawCircuitSilhouette() {
 function drawWells() {
   for (const well of state.wells) {
     const pulse = 0.5 + Math.sin(state.time * 4 + well.age) * 0.5;
-    const sink = well.sinkPulse ?? 0;
-    const spin = well.age + state.time * (0.92 + sink * 1.65);
+    const active = isWellSuctionActive(well);
+    const suction = active ? clamp(well.suction ?? 0, 0, 1) : 0;
+    const sink = (well.sinkPulse ?? 0) * (0.4 + suction * 0.6);
+    const danger = active ? 0.42 + suction * 0.58 : 0.18;
+    const spin = well.age + state.time * (0.62 + danger * 1.95 + sink * 1.65);
     const color = well.flash > 0 ? COLORS.white : COLORS.violet;
     renderer.setBlend("add");
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, 0, 0.08 + sink * 0.1, { color: COLORS.violet });
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.23 + sink * 0.12, { color: COLORS.violet });
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.2 + sink * 0.08, { color: COLORS.cyan });
-    renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.04 + sink * 0.04, 96);
-    renderer.drawWorldRing(well.x, well.y, WELL_CAPTURE_RADIUS + pulse * 7 + sink * 18, 2.1 + sink * 1.2, COLORS.magenta, 0.2 + sink * 0.22, 72);
-    renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.32 + sink * 0.28);
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, 0, 0.025 + danger * 0.08 + sink * 0.1, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.1 + danger * 0.2 + sink * 0.12, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.1 + danger * 0.16 + sink * 0.08, { color: COLORS.cyan });
+    renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.012 + danger * 0.05 + sink * 0.04, 96);
+    renderer.drawWorldRing(well.x, well.y, WELL_CAPTURE_RADIUS + pulse * 7 + sink * 18, 2.1 + sink * 1.2, COLORS.magenta, 0.08 + danger * 0.22 + sink * 0.22, 72);
+    renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.18 + danger * 0.28 + sink * 0.28);
     renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + 11 + pulse * 5 + sink * 10, 2.6 + sink * 2.2, COLORS.gold, 0.34 + sink * 0.34, 28);
     renderer.setBlend("normal");
     renderer.drawWorldCircle(well.x, well.y, 62 + pulse * 3 + sink * 9, COLORS.ink, 0.62 + sink * 0.16, 42);
