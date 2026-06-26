@@ -1624,11 +1624,13 @@ function setPaused(value) {
     state.status = "paused";
     bus.refreshLoops();
     updateOverlay();
+    updateHud();
   } else if (!value && state.status === "paused") {
     clearTouchInput();
     state.status = "running";
     bus.refreshLoops();
     hideOverlay();
+    updateHud();
     lastFrame = performance.now();
   }
 }
