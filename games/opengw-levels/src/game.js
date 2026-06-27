@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=live-well-difficulty-2";
+import { STR } from "../strings.js?v=level-advance-fix-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -1931,7 +1931,7 @@ function resolveCollisions() {
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
       if (distance2(player, enemy) <= (player.r + ENEMY[enemy.type].r) ** 2) {
-        enemy.dead = true;
+        neutralizeEnemyForProgress(enemy);
         hurtPlayer(player);
         break;
       }
@@ -2015,7 +2015,15 @@ function checkProgression(dt) {
     return;
   }
   const profile = currentLevel();
-  const cleared = state.spawned >= profile.quota && state.killed >= profile.quota && state.enemies.length === 0 && state.wells.length === 0;
+  compact(state.enemies);
+  compact(state.wells);
+  const liveEnemies = state.enemies.filter((enemy) => !enemy.dead).length;
+  const liveWells = state.wells.filter((well) => !well.dead).length;
+  const quotaSpent = state.spawned >= profile.quota;
+  if (quotaSpent && liveEnemies === 0 && liveWells === 0 && state.killed < profile.quota) {
+    state.killed = profile.quota;
+  }
+  const cleared = quotaSpent && state.killed >= profile.quota && liveEnemies === 0 && liveWells === 0;
   if (cleared) {
     state.transitionTimer = 2.1;
     state.banner = { text: STR.cleared, timer: 1.8 };
@@ -2026,6 +2034,13 @@ function checkProgression(dt) {
     pushForgePulse(WORLD.w / 2, WORLD.h / 2, COLORS.cyan, STR.forgeClearNote, 0x7000 + state.levelIndex);
     checkRewards();
   }
+}
+
+function neutralizeEnemyForProgress(enemy) {
+  if (!enemy || enemy.dead) return false;
+  enemy.dead = true;
+  state.killed += 1;
+  return true;
 }
 
 function fireBullet(player, dir) {
@@ -2262,7 +2277,11 @@ function hurtPlayer(player) {
   player.vy = 0;
   player.invuln = 2.1;
   player.respawn = 0.55;
-  state.enemies = state.enemies.filter((enemy) => Math.hypot(enemy.x - player.x, enemy.y - player.y) > 130);
+  state.enemies = state.enemies.filter((enemy) => {
+    const keep = Math.hypot(enemy.x - player.x, enemy.y - player.y) > 130;
+    if (!keep) neutralizeEnemyForProgress(enemy);
+    return keep;
+  });
   bus.play("playerSpawn", 0.3);
 }
 
@@ -3282,7 +3301,9 @@ function updateHud() {
   hud.score.textContent = formatNumber(state.score);
   hud.level.textContent = String(Math.min(state.levelIndex + 1, LEVELS.length));
   const profile = currentLevel();
-  const remaining = Math.max(0, profile.quota - state.killed) + state.wells.length;
+  const liveEnemies = state.enemies.filter((enemy) => !enemy.dead).length;
+  const liveWells = state.wells.filter((well) => !well.dead).length;
+  const remaining = Math.max(0, profile.quota - state.killed, liveEnemies) + liveWells;
   hud.objective.textContent = String(remaining);
   hud.lives.textContent = String(state.team.lives);
   hud.bombs.textContent = String(state.team.bombs);
