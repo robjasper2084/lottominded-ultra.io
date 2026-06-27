@@ -9,6 +9,10 @@ const MAX_LIGHTS = 8;
 const PARTICLE_LIMIT = 240;
 const RING_PARTICLE_LIMIT = 268;
 const TAU = Math.PI * 2;
+const PLAYER_MAX_SPEED = 318;
+const PLAYER_ACCEL_RATE = 12.5;
+const PLAYER_BRAKE_RATE = 7.4;
+const PLAYER_TURN_RATE = 15.5;
 const WELL_GRAVITY_RADIUS = 430;
 const WELL_CAPTURE_RADIUS = 112;
 const WELL_ACTIVATION_RADIUS = 124;
@@ -106,6 +110,7 @@ const SPRITE_FOR_ENEMY = {
   lancer: "enemy-grunt",
   mayfly: "enemy-spinner"
 };
+const SPRITE_PAIR_NAMES = ["bomb-pulse", "enemy-grunt", "enemy-spinner", "enemy-wanderer", "gravity-well", "missile", "player"];
 
 const PLAYER_VARIANTS = [
   { name: "arrow", sx: 1.05, sy: 0.92, wing: 1, glyph: "dot" },
@@ -116,16 +121,46 @@ const PLAYER_VARIANTS = [
 
 const GL_IMAGES = {
   atlas: loadImage(ASSETS.atlas),
-  parallaxFar: loadImage(ASSETS.parallaxFar),
-  parallaxMid: loadImage(ASSETS.parallaxMid),
-  parallaxNear: loadImage(ASSETS.parallaxNear),
-  glow: loadImage(ASSETS.glow),
-  lightRay: loadImage(ASSETS.lightRay),
-  forgeCore: loadImage(ASSETS.forgeCore),
-  sprites: loadSpritePairs(["bomb-pulse", "enemy-grunt", "enemy-spinner", "enemy-wanderer", "gravity-well", "missile", "player"])
+  parallaxFar: null,
+  parallaxMid: null,
+  parallaxNear: null,
+  glow: null,
+  lightRay: null,
+  forgeCore: null,
+  sprites: {}
 };
+const GAMEPLAY_IMAGE_PATHS = {
+  parallaxFar: ASSETS.parallaxFar,
+  parallaxMid: ASSETS.parallaxMid,
+  parallaxNear: ASSETS.parallaxNear,
+  glow: ASSETS.glow,
+  lightRay: ASSETS.lightRay,
+  forgeCore: ASSETS.forgeCore
+};
+let gameplayImagesQueued = false;
+let spritePairsQueued = false;
+let visualPrewarmScheduled = false;
 
 const COLOR_VEC_CACHE = new Map();
+const AUDIO_BASE_PATH = "../assets/audio/";
+const AUDIO_WAV_BASE_PATH = `${AUDIO_BASE_PATH}wav/`;
+const HUD_UPDATE_INTERVAL = 100;
+const LOW_POWER_MEDIA = window.matchMedia("(pointer: coarse), (max-width: 820px)");
+
+function audioAssetPaths(file) {
+  const fileName = String(file || "");
+  const basePath = `${AUDIO_BASE_PATH}${fileName}`;
+  if (!fileName.toLowerCase().endsWith(".wav")) return [basePath];
+  return [basePath, `${AUDIO_WAV_BASE_PATH}${fileName}`];
+}
+
+function runWhenIdle(callback, timeout = 800) {
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(callback, { timeout });
+    return;
+  }
+  window.setTimeout(callback, timeout);
+}
 
 const AUDIO = {
   startupMusic: { file: "startup-untitled-7.mp3", volume: 0.42, loop: true },
@@ -163,6 +198,31 @@ const AUDIO = {
   repulsor: { file: "repulsor.wav", volume: 0.28 },
   shieldsDown: { file: "sheildsdown.wav", volume: 0.3 }
 };
+const RUN_AUDIO_PRELOAD = [
+  "gameMusic",
+  "ambient",
+  "playerThrust",
+  "level",
+  "spawn1",
+  "spawn2",
+  "spawn3",
+  "spawn4",
+  "spawn5",
+  "spawn6",
+  "hit1",
+  "hit2",
+  "playerFire1",
+  "playerFire2",
+  "playerFire3",
+  "bomb",
+  "playerHit",
+  "playerSpawn",
+  "wall",
+  "repulsor",
+  "multiplier",
+  "wellAlert",
+  "wellHum"
+];
 
 const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
 const MUTE_STORAGE_KEY = "2084-static-wav-muted-v2";
@@ -988,11 +1048,12 @@ const bus = {
   nodes: new Map(),
   loops: new Map(),
   lastPlay: new Map(),
+  backgroundLoadScheduled: false,
 
   init() {
     for (const [id, data] of Object.entries(AUDIO)) {
-      const url = new URL(`../assets/audio/${data.file}`, import.meta.url);
-      this.nodes.set(id, { data, url: url.href, buffer: null, loading: null, error: null });
+      const urls = audioAssetPaths(data.file).map((file) => new URL(file, import.meta.url).href);
+      this.nodes.set(id, { data, url: urls[0], urls, buffer: null, loading: null, error: null });
     }
     window.__staticWavAudio = this;
   },
@@ -1048,7 +1109,7 @@ const bus = {
     return this.categoryGains.get(this.audioCategory(id)) ?? this.masterGain ?? context.destination;
   },
 
-  async unlock() {
+  async unlock(options = {}) {
     const context = this.ensureContext();
     const firstUnlock = !this.unlocked;
     this.unlocked = true;
@@ -1056,9 +1117,9 @@ const bus = {
       await context.resume().catch(() => {});
     }
     this.primeContext();
-    this.refreshLoops();
-    this.ensureStartupMusic();
-    if (firstUnlock) window.setTimeout(() => this.loadAll(), 450);
+    if (options.refreshLoops !== false) this.refreshLoops();
+    if (options.preloadMenuMusic) this.ensureStartupMusic();
+    if (firstUnlock && options.allowBackgroundLoad !== false) this.scheduleBackgroundLoad();
     updateOverlay();
   },
 
@@ -1074,8 +1135,31 @@ const bus = {
     source.stop(context.currentTime + 0.035);
   },
 
-  loadAll() {
-    for (const id of this.nodes.keys()) this.loadBuffer(id);
+  scheduleBackgroundLoad() {
+    if (this.backgroundLoadScheduled) return;
+    this.backgroundLoadScheduled = true;
+    const delay = LOW_POWER_MEDIA.matches ? 2200 : 1200;
+    const batchSize = LOW_POWER_MEDIA.matches ? 1 : 2;
+    window.setTimeout(() => {
+      if (state?.status === "running") {
+        this.backgroundLoadScheduled = false;
+        return;
+      }
+      this.loadAll({ batchSize });
+    }, delay);
+  },
+
+  loadAll(options = {}) {
+    const batchSize = Math.max(1, Number(options.batchSize) || 2);
+    const pending = [...this.nodes.keys()].filter((id) => {
+      const record = this.nodes.get(id);
+      return record && !record.buffer && !record.loading;
+    });
+    const pump = () => {
+      for (const id of pending.splice(0, batchSize)) this.loadBuffer(id);
+      if (pending.length) runWhenIdle(pump, 700);
+    };
+    runWhenIdle(pump, 500);
   },
 
   loadBuffer(id) {
@@ -1084,11 +1168,7 @@ const bus = {
     if (!record || !context) return Promise.resolve(null);
     if (record.buffer) return Promise.resolve(record.buffer);
     if (record.loading) return record.loading;
-    record.loading = fetch(record.url)
-      .then((response) => {
-        if (!response.ok) throw new Error(`Audio ${id} failed: ${response.status}`);
-        return response.arrayBuffer();
-      })
+    record.loading = this.fetchAudioBuffer(record, id)
       .then((arrayBuffer) => this.decode(arrayBuffer))
       .then((buffer) => {
         record.buffer = buffer;
@@ -1101,6 +1181,21 @@ const bus = {
         return null;
       });
     return record.loading;
+  },
+
+  async fetchAudioBuffer(record, id) {
+    let lastError = null;
+    for (const url of record.urls || [record.url]) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Audio ${id} failed: ${response.status}`);
+        record.url = url;
+        return await response.arrayBuffer();
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError ?? new Error(`Audio ${id} failed`);
   },
 
   decode(arrayBuffer) {
@@ -1150,6 +1245,8 @@ const bus = {
   },
 
   setLoopGain(loop, target, glide = 0.28) {
+    if (Math.abs((loop.targetGain ?? -999) - target) < 0.012) return;
+    loop.targetGain = target;
     const context = this.context;
     if (!context) {
       loop.gain.gain.value = target;
@@ -1271,6 +1368,18 @@ const bus = {
     }
   },
 
+  refreshActiveLoopLevels(ids) {
+    if (!this.unlocked || this.muted) return;
+    for (const id of ids) {
+      const record = this.nodes.get(id);
+      if (!record?.data.loop) continue;
+      const target = this.loopVolume(id, record);
+      const loop = this.loops.get(id);
+      if (loop) this.setLoopGain(loop, target);
+      else if (target > 0.01) this.startLoop(id);
+    }
+  },
+
   status() {
     return {
       muted: this.muted,
@@ -1327,6 +1436,9 @@ let fpsFrames = 0;
 let fpsAt = lastFrame;
 let fps = 0;
 let pausedByBlur = false;
+let staticFrameDirty = true;
+let lastHudUpdate = 0;
+let startPending = false;
 const devEnabled = new URLSearchParams(location.search).has("dev");
 
 if (devEnabled) devEl.style.display = "block";
@@ -1335,12 +1447,13 @@ resize();
 updateOverlay();
 updateHud();
 requestAnimationFrame(frame);
+scheduleVisualPrewarm();
 
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
-function armAudioFromGesture() {
+function armAudioFromGesture(event) {
+  if (event?.target?.closest?.("#playerChooser, #primaryAction")) return;
   bus.unlock();
-  if (state?.status === "menu") bus.ensureStartupMusic();
 }
 
 addEventListener("pointerdown", armAudioFromGesture, { passive: true });
@@ -1451,7 +1564,7 @@ primaryAction.addEventListener("click", primary);
 homeAction.addEventListener("click", returnHome);
 soundAction.addEventListener("click", () => {
   if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
-    bus.unlock();
+    bus.unlock({ preloadMenuMusic: true });
     bus.ensureStartupMusic();
     return;
   }
@@ -1477,15 +1590,18 @@ bombAction.addEventListener("pointerdown", (event) => {
 }, { passive: false });
 
 function buildPlayerChooser() {
+  if (playerChooser.childElementCount === 4) {
+    syncPlayerChooser();
+    return;
+  }
   playerChooser.replaceChildren();
   for (let count = 1; count <= 4; count += 1) {
     const button = document.createElement("button");
     button.type = "button";
+    button.dataset.playerCount = String(count);
     button.textContent = STR[`playerOption${count}`];
     button.style.setProperty("--pilot-color", PLAYER_COLORS[count - 1] ?? COLORS.cyan);
-    button.setAttribute("aria-pressed", String(count === selectedPlayerCount));
     button.addEventListener("click", () => {
-      bus.unlock();
       selectedPlayerCount = count;
       savePlayerCount(count);
       bus.play("menuSelect", 0.08);
@@ -1494,9 +1610,17 @@ function buildPlayerChooser() {
         state.forge = createForgeState(count, STR.forgeStartupNote, count * 0x2084);
         updateForgePanels();
       }
-      buildPlayerChooser();
+      syncPlayerChooser();
+      requestStaticFrame();
     });
     playerChooser.append(button);
+  }
+  syncPlayerChooser();
+}
+
+function syncPlayerChooser() {
+  for (const button of playerChooser.querySelectorAll("button[data-player-count]")) {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.playerCount) === selectedPlayerCount));
   }
 }
 
@@ -1571,22 +1695,30 @@ function makePlayer(index, count = 1) {
 }
 
 function startRun() {
-  bus.unlock();
   forgeHudDismissed = true;
   state = createState();
   state.status = "running";
   beginLevel(0);
-  bus.refreshLoops();
+  bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
+  window.setTimeout(() => bus.refreshLoops(), LOW_POWER_MEDIA.matches ? 1200 : 250);
   refreshForge(STR.forgeStartNote, 0x2084, true);
+  queueGameplayImageLoad();
+  queueSpritePairLoad();
   hideOverlay();
   updateHud();
 }
 
-function primary() {
-  bus.unlock();
+async function primary() {
+  if (startPending) return;
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
+    startPending = true;
+    updateOverlay();
+    await bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
+    await Promise.all([ensureVisualAssetsReady(), ensureRunAudioReady()]);
+    startPending = false;
     startRun();
   } else if (state.status === "paused") {
+    bus.unlock();
     setPaused(false);
   }
 }
@@ -1649,6 +1781,10 @@ function currentLevel() {
   return LEVELS[Math.min(state.levelIndex, LEVELS.length - 1)];
 }
 
+function requestStaticFrame() {
+  staticFrameDirty = true;
+}
+
 function frame(now) {
   requestAnimationFrame(frame);
   const delta = Math.min(0.08, (now - lastFrame) / 1000);
@@ -1664,10 +1800,18 @@ function frame(now) {
       steps += 1;
     }
     if (steps === MAX_FRAME_STEPS) accumulator = 0;
+    render(accumulator / STEP);
+    if (now - lastHudUpdate >= HUD_UPDATE_INTERVAL) {
+      updateHud();
+      lastHudUpdate = now;
+    }
+  } else if (staticFrameDirty) {
+    accumulator = 0;
+    render(0);
+    updateHud();
+    lastHudUpdate = now;
+    staticFrameDirty = false;
   }
-
-  render(accumulator / STEP);
-  updateHud();
   updateDev(now);
 }
 
@@ -1699,12 +1843,15 @@ function update(dt, commands) {
 }
 
 function updatePlayers(dt, commands) {
-  const speed = 310;
   for (const player of state.players) {
     if (!player.active) continue;
     const command = commands[player.id] ?? emptyCommand();
-    player.vx = command.move.x * speed;
-    player.vy = command.move.y * speed;
+    const moveAmount = Math.hypot(command.move.x, command.move.y);
+    const targetVx = command.move.x * PLAYER_MAX_SPEED;
+    const targetVy = command.move.y * PLAYER_MAX_SPEED;
+    const response = smoothStep(moveAmount > 0.001 ? PLAYER_ACCEL_RATE : PLAYER_BRAKE_RATE, dt);
+    player.vx += (targetVx - player.vx) * response;
+    player.vy += (targetVy - player.vy) * response;
     applyGravity(player, dt, 0.85);
     player.x += player.vx * dt;
     player.y += player.vy * dt;
@@ -1718,7 +1865,7 @@ function updatePlayers(dt, commands) {
     }
     if (aim) {
       player.lastAim = aim;
-      player.angle = Math.atan2(aim.y, aim.x);
+      player.angle = turnTowardAngle(player.angle, Math.atan2(aim.y, aim.x), PLAYER_TURN_RATE, dt);
     }
     if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
@@ -1734,11 +1881,11 @@ function updateAudioMix(commands, dt) {
     if (!player.active) continue;
     const command = commands[player.id] ?? emptyCommand();
     const move = command.move ? Math.hypot(command.move.x, command.move.y) : 0;
-    const drift = Math.hypot(player.vx, player.vy) / 310;
+    const drift = Math.hypot(player.vx, player.vy) / PLAYER_MAX_SPEED;
     thrustTarget = Math.max(thrustTarget, move, drift * 0.45);
   }
   state.thrustMix += (clamp(thrustTarget, 0, 1) - state.thrustMix) * clamp(dt * 8.5, 0, 1);
-  if (bus.unlocked) bus.refreshLoops();
+  if (bus.unlocked) bus.refreshActiveLoopLevels(["playerThrust", "wellHum"]);
 }
 
 function updateWells(dt) {
@@ -3301,8 +3448,14 @@ function updateHud() {
   hud.score.textContent = formatNumber(state.score);
   hud.level.textContent = String(Math.min(state.levelIndex + 1, LEVELS.length));
   const profile = currentLevel();
-  const liveEnemies = state.enemies.filter((enemy) => !enemy.dead).length;
-  const liveWells = state.wells.filter((well) => !well.dead).length;
+  let liveEnemies = 0;
+  let liveWells = 0;
+  for (const enemy of state.enemies) {
+    if (!enemy.dead) liveEnemies += 1;
+  }
+  for (const well of state.wells) {
+    if (!well.dead) liveWells += 1;
+  }
   const remaining = Math.max(0, profile.quota - state.killed, liveEnemies) + liveWells;
   hud.objective.textContent = String(remaining);
   hud.lives.textContent = String(state.team.lives);
@@ -3323,6 +3476,7 @@ function statusText() {
 }
 
 function updateOverlay() {
+  requestStaticFrame();
   soundAction.textContent = bus.muted ? STR.soundOff : STR.soundOn;
   soundAction.setAttribute("aria-label", STR.muteButton);
   soundAction.setAttribute("aria-pressed", String(!bus.muted));
@@ -3342,10 +3496,15 @@ function updateOverlay() {
   overlayCopy.textContent = state.status === "paused" ? STR.overlayPaused :
     state.status === "gameover" ? STR.overlayGameOver :
       state.status === "victory" ? STR.overlayVictory : STR.overlayReady;
-  primaryAction.textContent = state.status === "paused" ? STR.resume :
+  primaryAction.textContent = startPending ? STR.loading :
+    state.status === "paused" ? STR.resume :
     state.status === "menu" ? STR.startButton : STR.restart;
   primaryAction.setAttribute("aria-label", primaryAction.textContent);
   setControlAvailability(primaryAction, true);
+  primaryAction.disabled = startPending;
+  primaryAction.tabIndex = startPending ? -1 : 0;
+  if (startPending) primaryAction.setAttribute("aria-busy", "true");
+  else primaryAction.removeAttribute("aria-busy");
   setControlAvailability(soundAction, true);
   homeAction.textContent = STR.selectPilots;
   homeAction.setAttribute("aria-label", STR.selectPilots);
@@ -3413,6 +3572,7 @@ function resize() {
     view.camY = 0;
   }
   syncArenaCssVars();
+  requestStaticFrame();
 }
 
 function syncArenaCssVars() {
@@ -3443,15 +3603,113 @@ function loadImage(path) {
   return image;
 }
 
-function loadSpritePairs(names) {
-  const out = {};
-  for (const name of names) {
-    out[name] = {
-      diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`),
-      normal: loadImage(`${ASSETS.spriteBase}${name}.normal.png`)
+function scheduleVisualPrewarm() {
+  if (visualPrewarmScheduled) return;
+  visualPrewarmScheduled = true;
+  window.setTimeout(() => {
+    queueGameplayImageLoad({ initialDelay: 0, stepDelay: LOW_POWER_MEDIA.matches ? 360 : 160 });
+    queueSpritePairLoad({ initialDelay: LOW_POWER_MEDIA.matches ? 900 : 360, stepDelay: LOW_POWER_MEDIA.matches ? 420 : 190 });
+  }, LOW_POWER_MEDIA.matches ? 1800 : 700);
+}
+
+function ensureVisualAssetsReady() {
+  loadMissingVisualAssetsNow();
+  const timeout = LOW_POWER_MEDIA.matches ? 9000 : 5000;
+  const started = performance.now();
+  return new Promise((resolve) => {
+    const tick = () => {
+      if (visualAssetsReady() || performance.now() - started >= timeout) {
+        if (visualAssetsReady()) prewarmVisualTextures();
+        resolve(visualAssetsReady());
+        return;
+      }
+      window.setTimeout(tick, 90);
     };
+    tick();
+  });
+}
+
+function ensureRunAudioReady() {
+  if (bus.muted) return Promise.resolve([]);
+  return Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id)));
+}
+
+function visualAssetsReady() {
+  const gameplayReady = Object.keys(GAMEPLAY_IMAGE_PATHS).every((key) => imageReady(GL_IMAGES[key]));
+  const spritesReady = SPRITE_PAIR_NAMES.every((name) => {
+    const pair = GL_IMAGES.sprites[name];
+    return imageReady(pair?.diffuse) && imageReady(pair?.normal);
+  });
+  return imageReady(GL_IMAGES.atlas) && gameplayReady && spritesReady;
+}
+
+function prewarmVisualTextures() {
+  renderer.textureFor(GL_IMAGES.atlas, false);
+  renderer.textureFor(GL_IMAGES.parallaxFar, true);
+  renderer.textureFor(GL_IMAGES.parallaxMid, true);
+  renderer.textureFor(GL_IMAGES.parallaxNear, true);
+  renderer.textureFor(GL_IMAGES.glow, false);
+  renderer.textureFor(GL_IMAGES.lightRay, false);
+  renderer.textureFor(GL_IMAGES.forgeCore, false);
+  for (const name of SPRITE_PAIR_NAMES) {
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair) continue;
+    renderer.textureFor(pair.diffuse, false);
+    renderer.textureFor(pair.normal, false);
   }
-  return out;
+}
+
+function loadMissingVisualAssetsNow() {
+  for (const [key, path] of Object.entries(GAMEPLAY_IMAGE_PATHS)) {
+    if (!GL_IMAGES[key]) GL_IMAGES[key] = loadImage(path);
+  }
+  for (const name of SPRITE_PAIR_NAMES) {
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair?.diffuse || !pair?.normal) {
+      GL_IMAGES.sprites[name] = loadSpritePair(name);
+    }
+  }
+}
+
+function queueGameplayImageLoad(options = {}) {
+  if (gameplayImagesQueued) return;
+  gameplayImagesQueued = true;
+  const pending = Object.entries(GAMEPLAY_IMAGE_PATHS);
+  const initialDelay = Number(options.initialDelay) || 120;
+  const stepDelay = Number(options.stepDelay) || 450;
+  const pump = () => {
+    const next = pending.shift();
+    if (!next) return;
+    const [key, path] = next;
+    if (!GL_IMAGES[key]) GL_IMAGES[key] = loadImage(path);
+    if (pending.length) runWhenIdle(pump, stepDelay);
+  };
+  runWhenIdle(pump, initialDelay);
+}
+
+function queueSpritePairLoad(options = {}) {
+  if (spritePairsQueued) return;
+  spritePairsQueued = true;
+  const pending = [...SPRITE_PAIR_NAMES];
+  const initialDelay = Number(options.initialDelay) || 1200;
+  const stepDelay = Number(options.stepDelay) || 650;
+  const pump = () => {
+    const name = pending.shift();
+    if (!name) return;
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair?.diffuse || !pair?.normal) {
+      GL_IMAGES.sprites[name] = loadSpritePair(name);
+    }
+    if (pending.length) runWhenIdle(pump, stepDelay);
+  };
+  runWhenIdle(pump, initialDelay);
+}
+
+function loadSpritePair(name) {
+  return {
+    diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`),
+    normal: loadImage(`${ASSETS.spriteBase}${name}.normal.png`)
+  };
 }
 
 function imageReady(image) {
@@ -3537,6 +3795,15 @@ function deadzone(value) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function smoothStep(rate, dt) {
+  return 1 - Math.exp(-Math.max(0, rate) * dt);
+}
+
+function turnTowardAngle(current, target, rate, dt) {
+  const delta = Math.atan2(Math.sin(target - current), Math.cos(target - current));
+  return current + delta * smoothStep(rate, dt);
 }
 
 function distance2(a, b) {

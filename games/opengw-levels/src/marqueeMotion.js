@@ -10,6 +10,8 @@ if (wrapper && canvas) {
     wrapper.dataset.motion = "fallback";
   } else {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const coarseMotion = window.matchMedia("(pointer: coarse), (max-width: 820px)");
+  const targetFrameMs = () => coarseMotion.matches ? 1000 / 24 : 1000 / 45;
   const state = {
     w: 1,
     h: 1,
@@ -22,6 +24,7 @@ if (wrapper && canvas) {
     targetX: 0,
     targetY: 0,
     pointerEnergy: 0,
+    lastRenderAt: 0,
     resizedAt: 0
   };
 
@@ -31,7 +34,7 @@ if (wrapper && canvas) {
     return seed / 4294967296;
   };
 
-  const particles = Array.from({ length: 88 }, (_, i) => ({
+  const particles = Array.from({ length: coarseMotion.matches ? 28 : 72 }, (_, i) => ({
     x: rand(),
     y: rand(),
     z: 0.28 + rand() * 1.6,
@@ -49,7 +52,7 @@ if (wrapper && canvas) {
 
   const resize = () => {
     const rect = canvas.getBoundingClientRect();
-    state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    state.dpr = Math.min(window.devicePixelRatio || 1, coarseMotion.matches ? 1 : 1.5);
     state.w = Math.max(1, rect.width);
     state.h = Math.max(1, rect.height);
     const pxW = Math.round(state.w * state.dpr);
@@ -311,6 +314,11 @@ if (wrapper && canvas) {
       updateMotionState();
       return;
     }
+    if (now - state.lastRenderAt < targetFrameMs()) {
+      state.rafId = requestAnimationFrame(loop);
+      return;
+    }
+    state.lastRenderAt = now;
     if (performance.now() - state.resizedAt > 1500) resize();
     render(now);
     state.rafId = requestAnimationFrame(loop);
@@ -318,6 +326,10 @@ if (wrapper && canvas) {
 
   reducedMotion.addEventListener("change", () => {
     state.frame = 0;
+    syncLoop();
+  });
+  coarseMotion.addEventListener("change", () => {
+    resize();
     syncLoop();
   });
 

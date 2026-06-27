@@ -149,6 +149,7 @@ button[hidden],
 
 #startupScene.is-webgl-ready .startup-scene-layer {
   opacity: 0;
+  animation: none;
 }
 
 .startup-scene-layer {
@@ -1752,10 +1753,10 @@ button[hidden],
   }
 
   #overlay[data-state="menu"] .overlay-actions {
-    top: max(calc(var(--safe-top) + 64px), 9vh);
     width: min(94vw, 430px);
     min-height: 64px;
     padding: 7px;
+    margin-top: 0;
   }
 
   #overlay[data-state="menu"] .overlay-actions button {
@@ -1764,6 +1765,36 @@ button[hidden],
     flex: 1 1 0;
     padding: 0 12px;
     font-size: 12.5px;
+  }
+}
+
+@media (pointer: coarse), (max-width: 820px) {
+  #startupScene::before,
+  #overlay::before,
+  #marqueeMotion,
+  #marqueeMotion::before,
+  #marqueeMotion::after,
+  .startup-scene-layer,
+  .overlay-actions::after {
+    animation: none;
+  }
+
+  #startupScene {
+    background:
+      radial-gradient(ellipse at 50% 38%, rgba(41, 247, 255, 0.16), transparent 48%),
+      linear-gradient(180deg, #05070d, #09111b 46%, #05070d);
+  }
+
+  .startup-scene-layer {
+    background-image: none !important;
+    filter: none;
+    mix-blend-mode: normal;
+    will-change: auto;
+  }
+
+  #marqueeMotion,
+  #marquee {
+    filter: none;
   }
 }
 

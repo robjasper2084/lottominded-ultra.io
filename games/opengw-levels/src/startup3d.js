@@ -1,6 +1,7 @@
 const canvas = document.getElementById("startup3dCanvas");
 const sceneEl = document.getElementById("startupScene");
 const shell = document.getElementById("shell");
+const lowPowerStartup = window.matchMedia("(pointer: coarse), (max-width: 820px)");
 
 const debug = {
   active: false,
@@ -24,7 +25,7 @@ async function initStartupScene() {
       antialias: true,
       depth: false,
       premultipliedAlpha: false,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: false,
       stencil: false
     }) ||
     canvas.getContext("experimental-webgl", {
@@ -32,7 +33,7 @@ async function initStartupScene() {
       antialias: true,
       depth: false,
       premultipliedAlpha: false,
-      preserveDrawingBuffer: true,
+      preserveDrawingBuffer: false,
       stencil: false
     });
 
@@ -121,16 +122,14 @@ function render(state, timeMs) {
   state.lastTime = time;
   debug.active = isMenu;
   debug.frame += 1;
-  canvas.dataset.active = String(isMenu);
-  canvas.dataset.frame = String(debug.frame);
+  if (debug.frame % 60 === 0) {
+    canvas.dataset.active = String(isMenu);
+    canvas.dataset.frame = String(debug.frame);
+  }
 
   if (isMenu) {
-    resize(gl);
     updateInteraction(state.interaction, dt);
     renderScene(state, state.reducedMotion.matches ? 0 : time);
-    if (debug.frame % 45 === 0) {
-      sampleCanvasEnergy(gl);
-    }
   }
 
   requestAnimationFrame((time) => render(state, time));
@@ -290,7 +289,6 @@ function attachInteraction(interaction) {
     interaction.pointer.targetY = y;
     interaction.pointer.targetActivity = Math.max(interaction.pointer.targetActivity, strength);
     interaction.pointer.lastInput = "pointer";
-    canvas.dataset.pointerTarget = `${x.toFixed(3)},${y.toFixed(3)}`;
   };
 
   const addRipple = (clientX, clientY) => {
@@ -304,7 +302,6 @@ function attachInteraction(interaction) {
     ripple.life = 1.45;
     ripple.strength = 1;
     interaction.pointer.targetBoost = 1;
-    canvas.dataset.lastRipple = `${ripple.x.toFixed(2)},${ripple.z.toFixed(2)}`;
   };
 
   window.addEventListener("pointermove", (event) => {
@@ -356,10 +353,11 @@ function updateInteraction(interaction, dt) {
 
   debug.pointerX = pointer.x;
   debug.pointerY = pointer.y;
-  canvas.dataset.pointer = `${pointer.x.toFixed(3)},${pointer.y.toFixed(3)}`;
-  canvas.dataset.pointerActivity = pointer.activity.toFixed(3);
-  canvas.dataset.pointerBoost = pointer.boost.toFixed(3);
-  canvas.dataset.rippleCount = String(interaction.ripples.filter((ripple) => ripple.strength > 0).length);
+  if (debug.frame % 60 === 0) {
+    canvas.dataset.pointer = `${pointer.x.toFixed(3)},${pointer.y.toFixed(3)}`;
+    canvas.dataset.pointerActivity = pointer.activity.toFixed(3);
+    canvas.dataset.pointerBoost = pointer.boost.toFixed(3);
+  }
 }
 
 function screenToGrid(x, y) {
@@ -706,10 +704,12 @@ void main() {
   gl_FragColor = vec4(color, alpha);
 }`;
 
-if (canvas && sceneEl && shell) {
+if (canvas && sceneEl && shell && !lowPowerStartup.matches) {
   initStartupScene().catch((error) => {
     debug.error = error?.message || String(error);
     sceneEl.classList.remove("is-webgl-ready");
     console.warn("Startup 3D scene fell back to layered images.", error);
   });
+} else if (sceneEl) {
+  sceneEl.dataset.renderer = "layered-mobile";
 }
