@@ -4,14 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#05070d" />
-    <title>2084 Static WAV - LottoMind</title>
+    <title>2084 Static Wave - LottoMind</title>
     <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
     <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
-    <link rel="preload" href="./assets/2084/branding/marquee.png?v=static-wav-marquee-1" as="image" />
-    <link rel="stylesheet" href="./styles.css?v=smooth-play-1" />
+    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" as="image" />
+    <link rel="stylesheet" href="./styles.css?v=fullscreen-button-1" />
   </head>
   <body>
-    <main id="shell" data-mode="menu" aria-label="2084 Static WAV game">
+    <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
       <canvas id="game" width="1280" height="720"></canvas>
 
       <div id="startupScene" aria-hidden="true">
@@ -69,13 +69,13 @@
       <button id="forgeToggleAction" class="forge-toggle" type="button" hidden></button>
 
       <section id="overlay" data-state="menu" aria-labelledby="menuTitle">
-        <h1 id="menuTitle" class="sr-only">2084 STATIC WAV</h1>
+        <h1 id="menuTitle" class="sr-only">2084 Static Wave gameplay portal</h1>
         <div id="startupBrand" aria-hidden="true">
           <img id="startupMark" src="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" alt="" />
         </div>
         <div id="marqueeMotion" aria-hidden="true">
           <canvas id="marqueeFx" width="1280" height="720"></canvas>
-          <img id="marquee" src="./assets/2084/branding/marquee.png?v=static-wav-marquee-1" alt="" />
+          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" alt="" />
           <span class="marquee-status">Signal Ready</span>
         </div>
         <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
@@ -92,6 +92,7 @@
           <button id="primaryAction" type="button"></button>
           <button id="homeAction" type="button" hidden></button>
           <button id="soundAction" type="button"></button>
+          <button id="fullscreenAction" type="button" aria-pressed="false">Full Screen</button>
         </div>
       </section>
 
@@ -107,8 +108,42 @@
       <div id="bannerText" hidden></div>
       <div id="dev"></div>
     </main>
-    <script type="module" src="./src/startup3d.js?v=smooth-play-1"></script>
-    <script type="module" src="./src/marqueeMotion.js?v=smooth-play-1"></script>
-    <script type="module" src="./src/game.js?v=smooth-play-1"></script>
+    <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
+    <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
+    <script type="module" src="./src/game.js?v=fullscreen-button-1"></script>
+    <script>
+      (() => {
+        const fullscreenButton = document.getElementById("fullscreenAction");
+        const focusGame = () => {
+          const canvas = document.getElementById("game");
+          canvas?.setAttribute("tabindex", "-1");
+          canvas?.focus({ preventScroll: true });
+        };
+
+        if (!fullscreenButton) return;
+
+        const sync = () => {
+          const fullscreen = Boolean(document.fullscreenElement);
+          fullscreenButton.textContent = fullscreen ? "Exit Full" : "Full Screen";
+          fullscreenButton.setAttribute("aria-pressed", String(fullscreen));
+        };
+
+        fullscreenButton.addEventListener("click", async () => {
+          try {
+            if (document.fullscreenElement) {
+              await document.exitFullscreen();
+            } else {
+              await (document.getElementById("shell") || document.documentElement).requestFullscreen();
+            }
+          } catch {
+            fullscreenButton.textContent = "Full Screen";
+          }
+          sync();
+          focusGame();
+        });
+        document.addEventListener("fullscreenchange", sync);
+        sync();
+      })();
+    </script>
   </body>
 </html>

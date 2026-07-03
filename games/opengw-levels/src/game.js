@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=player-mode-reset-1";
+import { STR } from "../strings.js?v=fullscreen-button-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -81,7 +81,7 @@ const ENEMY = {
 };
 
 const ASSETS = {
-  marquee: "../assets/2084/branding/marquee.png",
+  marquee: "../assets/2084/branding/marquee-gameplay-keyart.png",
   icon: "../assets/2084/branding/app-icon.png",
   atlas: "../assets/2084/sprites/sprite-atlas.png",
   parallaxFar: "../assets/2084/parallax/far.webp",

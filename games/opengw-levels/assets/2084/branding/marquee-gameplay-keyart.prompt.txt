@@ -1,0 +1,6 @@
+Higgsfield-style production prompt for 2084 STATIC WAV marquee key art:
+
+Create a cinematic 16:9 arcade-game startup billboard for "2084 STATIC WAV" by LottoMind. Base the direction on the actual gameplay: dark cyan grid arena, angular wireframe player ship, hot plasma bullet streaks, green rotating gravity-well pucks, HUD glass panels, and a black-hole spiral pulling lottery numbers and debris inward. Keep the title large and readable with exact text: "2084 STATIC WAV", "A LOTTOMIND PRESENTATION", "ENTER THE SIGNAL. SURVIVE THE GRID.", and "PRESS START". Use cyan, magenta, violet, yellow-gold, and radioactive green. Add scanlines, bloom, crisp arcade-cabinet energy, and a clean composition that still reads when scaled down inside the startup screen. Avoid misspellings, extra logos, watermarks, generic website hero styling, and text covering the gameplay elements.
+
+Reference captured from live gameplay:
+screenshots/static-wav-gameplay-reference.png

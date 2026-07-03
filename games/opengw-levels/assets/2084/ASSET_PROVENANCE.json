@@ -94,9 +94,9 @@
     },
     {
       "slot": "marquee",
-      "target": "assets/generated/branding/marquee.png",
-      "source": null,
-      "provenance": "fallback"
+      "target": "assets/2084/branding/marquee-gameplay-keyart.png",
+      "source": "screenshots/static-wav-gameplay-reference.png and generated_images/019efa43-5a54-7db0-a7bc-c6e22e53deac/ig_08ebb29faeeb2daa016a47de7af27c81979001c842025bc098.png",
+      "provenance": "gameplay-reference-generated-keyart"
     },
     {
       "slot": "sponsor-lockup",

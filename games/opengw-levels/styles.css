@@ -1116,7 +1116,7 @@ button[hidden],
   z-index: 7;
   top: auto;
   left: auto;
-  width: min(470px, calc(100vw - 32px));
+  width: min(610px, calc(100vw - 32px));
   min-height: 76px;
   padding: 10px;
   transform: none;
@@ -1753,16 +1753,23 @@ button[hidden],
   }
 
   #overlay[data-state="menu"] .overlay-actions {
-    width: min(94vw, 430px);
-    min-height: 64px;
+    width: min(94vw, 460px);
+    min-height: 118px;
     padding: 7px;
     margin-top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #overlay[data-state="menu"] #primaryAction {
+    grid-column: 1 / -1;
   }
 
   #overlay[data-state="menu"] .overlay-actions button {
     min-width: 0;
     min-height: 50px;
-    flex: 1 1 0;
+    width: 100%;
+    flex: initial;
     padding: 0 12px;
     font-size: 12.5px;
   }
