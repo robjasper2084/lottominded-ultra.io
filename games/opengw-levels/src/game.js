@@ -2506,10 +2506,6 @@ function applySquadFallback(commands) {
     const dy = leader.y + slot.y - player.y;
     const follow = Math.hypot(dx, dy) > 16 ? normalize(dx, dy) : null;
     if (follow) command.move = follow;
-    if (leadCommand.fire || leadCommand.aim) {
-      command.aim = leadCommand.aim ?? leader.lastAim;
-      command.fire = leadCommand.fire;
-    }
   }
 }
 
@@ -2623,7 +2619,7 @@ function updateTouchVectors() {
       ? normalize(aimTouch.world.x - state.players[0].x, aimTouch.world.y - state.players[0].y)
       : null;
     input.aimPoint = null;
-    input.aimVector = stickAim ?? worldAim ?? state.players[0]?.lastAim ?? { x: 0, y: -1 };
+    input.aimVector = stickAim ?? worldAim;
   }
   updateTouchUi();
 }
