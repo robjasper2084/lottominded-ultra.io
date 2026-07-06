@@ -35,11 +35,19 @@ body {
   background: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-text-size-adjust: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
   overscroll-behavior: none;
 }
 
 button {
   font: inherit;
+}
+
+button[hidden],
+[hidden] {
+  display: none !important;
 }
 
 .sr-only {
@@ -64,6 +72,7 @@ button {
     #05070d;
   isolation: isolate;
   touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #game {
@@ -76,6 +85,8 @@ button {
   z-index: 1;
   cursor: crosshair;
   touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #startupScene {
@@ -138,6 +149,7 @@ button {
 
 #startupScene.is-webgl-ready .startup-scene-layer {
   opacity: 0;
+  animation: none;
 }
 
 .startup-scene-layer {
@@ -445,9 +457,9 @@ button {
   top: max(calc(var(--safe-top) + 8px), calc(var(--arena-top, 0px) - 154px));
   right: max(12px, calc(100vw - var(--arena-right, 100vw) + 14px));
   bottom: auto;
-  width: min(468px, calc(100vw - 24px));
-  min-height: 148px;
-  padding: 15px 21px 14px 62px;
+  width: min(420px, calc(100vw - 24px));
+  min-height: 112px;
+  padding: 13px 18px 13px 68px;
   grid-template-columns: minmax(0, 1fr);
   opacity: 0.96;
   transform: translate3d(0, 0, 0);
@@ -462,7 +474,7 @@ button {
 
 .forge-hud::before {
   position: absolute;
-  left: 16px;
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
   width: 40px;
@@ -472,12 +484,12 @@ button {
 .forge-close {
   position: absolute;
   z-index: 3;
-  left: 19px;
+  left: 16px;
   top: 50%;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   transform: translateY(-50%);
   border: 1px solid rgba(255, 223, 117, 0.48);
@@ -500,10 +512,12 @@ button {
 .forge-close:focus-visible {
   border-color: rgba(246, 251, 255, 0.9);
   color: var(--text);
-  outline: none;
+  outline: 3px solid rgba(255, 223, 117, 0.92);
+  outline-offset: 3px;
   box-shadow:
     inset 0 0 14px rgba(41, 247, 255, 0.18),
-    0 0 18px rgba(41, 247, 255, 0.26);
+    0 0 0 5px rgba(5, 7, 13, 0.78),
+    0 0 22px rgba(41, 247, 255, 0.42);
 }
 
 .forge-hud > span {
@@ -529,22 +543,22 @@ button {
   top: max(calc(var(--safe-top) + 6px), calc(var(--arena-top, 0px) - 52px));
   right: max(10px, calc(100vw - var(--arena-right, 100vw) + 10px));
   width: min(560px, calc(100vw - 20px));
-  min-height: 46px;
-  padding: 8px 12px 8px 48px;
+  min-height: 52px;
+  padding: 8px 12px 8px 64px;
   opacity: 0.94;
 }
 
 #shell[data-forge-dock="tight"] .forge-hud::before {
-  left: 11px;
-  width: 28px;
-  height: 28px;
+  left: 18px;
+  width: 34px;
+  height: 34px;
 }
 
 #shell[data-forge-dock="tight"] .forge-close {
   left: 13px;
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
+  width: 44px;
+  height: 44px;
+  font-size: 13px;
 }
 
 #shell[data-forge-dock="tight"] .forge-hud > span,
@@ -772,6 +786,49 @@ button {
   transform: rotateX(calc(var(--marquee-tilt-y, 0) * -2deg)) rotateY(calc(var(--marquee-tilt-x, 0) * 2.6deg)) translateZ(1px);
 }
 
+.marquee-status {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: -10px;
+  display: grid;
+  min-width: min(240px, 42%);
+  min-height: 30px;
+  place-items: center;
+  padding: 4px 18px;
+  transform: translate(-50%, -100%);
+  border: 1px solid rgba(255, 223, 117, 0.58);
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, rgba(8, 10, 24, 0.9), rgba(8, 10, 24, 0.98) 15% 85%, rgba(8, 10, 24, 0.9)),
+    linear-gradient(180deg, rgba(41, 247, 255, 0.18), rgba(255, 45, 170, 0.12));
+  box-shadow:
+    inset 0 0 18px rgba(41, 247, 255, 0.18),
+    0 0 18px rgba(255, 223, 117, 0.2);
+  backdrop-filter: blur(3px);
+  color: #ffdf75;
+  font-family: var(--display-font);
+  font-size: clamp(11px, 1.05vw, 15px);
+  font-weight: 950;
+  font-stretch: condensed;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(255, 45, 170, 0.6), 0 0 18px rgba(41, 247, 255, 0.42);
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .marquee-status {
+    top: -6px;
+    min-width: min(190px, 58%);
+    min-height: 28px;
+    padding: 3px 14px;
+    font-size: clamp(10px, 3.2vw, 13px);
+  }
+}
+
 #overlay[data-state="menu"] #marqueeMotion {
   grid-row: 3;
   width: min(820px, 86vw);
@@ -784,6 +841,58 @@ button {
   max-height: min(24vh, 220px);
   opacity: 0.82;
   filter: drop-shadow(0 0 24px rgba(41, 247, 255, 0.18));
+}
+
+#overlay:not([data-state="menu"]) .marquee-status {
+  display: none;
+}
+
+#overlay[data-state="paused"] {
+  grid-template-rows: minmax(110px, 1fr) auto auto auto minmax(90px, 1fr);
+  gap: 12px;
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(41, 247, 255, 0.13), transparent 42%),
+    linear-gradient(180deg, rgba(5, 7, 13, 0.86), rgba(5, 7, 13, 0.58));
+}
+
+#overlay[data-state="paused"] #marqueeMotion,
+#overlay[data-state="paused"] .startup-forge,
+#overlay[data-state="paused"] #overlayStats,
+#overlay[data-state="paused"] .controls-hint {
+  display: none;
+}
+
+#overlay[data-state="paused"] #overlayTitle {
+  grid-row: 2;
+  max-width: min(620px, 88vw);
+  padding: 22px 24px 8px;
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.14), transparent 34% 66%, rgba(255, 45, 170, 0.14)),
+    rgba(5, 7, 13, 0.78);
+  box-shadow:
+    inset 0 0 28px rgba(41, 247, 255, 0.1),
+    0 0 36px rgba(41, 247, 255, 0.12);
+  font-size: clamp(34px, 6vw, 70px);
+  letter-spacing: 0;
+}
+
+#overlay[data-state="paused"] #overlayCopy {
+  grid-row: 3;
+  width: min(620px, 88vw);
+  max-width: none;
+  padding: 0 24px 22px;
+  border: 1px solid rgba(41, 247, 255, 0.34);
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  background: rgba(5, 7, 13, 0.78);
+  color: var(--text);
+}
+
+#overlay[data-state="paused"] .overlay-actions {
+  grid-row: 4;
 }
 
 #overlay[data-state="menu"] .startup-forge {
@@ -800,6 +909,10 @@ button {
   opacity: 0.96;
   animation: forge-float 5.4s ease-in-out infinite;
   filter: drop-shadow(0 0 18px rgba(41, 247, 255, 0.18)) drop-shadow(0 16px 24px rgba(0, 0, 0, 0.34));
+}
+
+#overlay[data-state="menu"] .startup-forge {
+  display: none;
 }
 
 #overlay:not([data-state="menu"]) .startup-forge {
@@ -837,6 +950,27 @@ button {
   text-align: center;
 }
 
+.controls-hint {
+  grid-row: 6;
+  max-width: min(720px, 88vw);
+  margin: 0;
+  padding: 9px 13px;
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 6px;
+  background: rgba(3, 5, 12, 0.54);
+  color: var(--muted);
+  font-size: clamp(11px, 1.35vw, 13px);
+  font-weight: 850;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(41, 247, 255, 0.22);
+}
+
+.controls-hint[hidden] {
+  display: none;
+}
+
 #overlayStats {
   grid-row: 5;
   max-width: min(520px, 90vw);
@@ -870,19 +1004,18 @@ button {
 }
 
 #overlay[data-state="menu"] .player-chooser {
-  position: fixed;
-  z-index: 4;
-  top: 50%;
-  right: max(22px, calc(var(--safe-right) + 18px));
-  transform: translateY(-50%);
-  flex-direction: column;
+  position: relative;
+  z-index: 3;
+  grid-row: 5;
+  flex-direction: row;
   flex-wrap: nowrap;
   gap: 8px;
-  width: 76px;
-  max-width: none;
-  padding: 10px 8px;
+  width: auto;
+  max-width: min(360px, 84vw);
+  padding: 8px;
+  margin-top: -2px;
   background:
-    linear-gradient(180deg, rgba(41, 247, 255, 0.14), transparent 32% 68%, rgba(255, 45, 170, 0.14)),
+    linear-gradient(90deg, rgba(41, 247, 255, 0.14), transparent 32% 68%, rgba(255, 45, 170, 0.14)),
     rgba(5, 7, 13, 0.62);
   box-shadow:
     inset 0 0 18px rgba(41, 247, 255, 0.08),
@@ -955,7 +1088,7 @@ button {
 }
 
 .overlay-actions {
-  grid-row: 6;
+  grid-row: 7;
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
@@ -976,6 +1109,25 @@ button {
     0 18px 34px rgba(0, 0, 0, 0.42);
   clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
   overflow: hidden;
+}
+
+#overlay[data-state="menu"] .overlay-actions {
+  position: relative;
+  z-index: 7;
+  top: auto;
+  left: auto;
+  width: min(610px, calc(100vw - 32px));
+  min-height: 76px;
+  padding: 10px;
+  transform: none;
+}
+
+#overlay[data-state="menu"] .overlay-actions button {
+  min-width: 0;
+  flex: 1 1 0;
+  min-height: 58px;
+  padding: 0 18px;
+  font-size: 15px;
 }
 
 .overlay-actions::before,
@@ -1084,6 +1236,13 @@ button {
   box-shadow: 0 0 12px rgba(255, 223, 117, 0.72);
 }
 
+#primaryAction {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .overlay-actions button:hover,
 .icon-action:hover,
 .bomb-action:hover {
@@ -1098,9 +1257,19 @@ button {
   transform: translateX(100%);
 }
 
-.overlay-actions button:focus-visible {
-  outline: 2px solid rgba(255, 223, 117, 0.86);
-  outline-offset: 3px;
+.overlay-actions button:focus-visible,
+.player-chooser button:focus-visible,
+.icon-action:focus-visible,
+.bomb-action:focus-visible,
+.forge-toggle:focus-visible {
+  outline: 3px solid rgba(255, 223, 117, 0.94);
+  outline-offset: 4px;
+  border-color: rgba(246, 251, 255, 0.95);
+  color: var(--text);
+  box-shadow:
+    inset 0 0 18px rgba(255, 223, 117, 0.18),
+    0 0 0 5px rgba(5, 7, 13, 0.8),
+    0 0 26px rgba(41, 247, 255, 0.42);
 }
 
 .overlay-actions button:active {
@@ -1122,20 +1291,59 @@ button {
   font-weight: 950;
 }
 
+.forge-toggle {
+  position: fixed;
+  z-index: 5;
+  right: max(12px, var(--safe-right));
+  top: max(calc(var(--safe-top) + 72px), calc(var(--arena-top, 0px) + 8px));
+  min-width: 58px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 223, 117, 0.48);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(255, 223, 117, 0.14), transparent 44% 56%, rgba(41, 247, 255, 0.14)),
+    linear-gradient(180deg, rgba(13, 32, 48, 0.86), rgba(5, 7, 13, 0.82)),
+    url("./assets/2084/ui/button-secondary.png") center / 100% 100% no-repeat;
+  color: var(--warm-gold);
+  box-shadow:
+    inset 0 0 16px rgba(41, 247, 255, 0.1),
+    0 10px 28px rgba(0, 0, 0, 0.34);
+  font: 950 11px/1 var(--display-font);
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.forge-toggle[hidden] {
+  display: none !important;
+}
+
+.forge-toggle:hover {
+  border-color: rgba(255, 223, 117, 0.78);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
 .bomb-action {
   position: fixed;
   z-index: 5;
-  left: 50%;
-  bottom: max(56px, calc(var(--safe-bottom) + 48px));
-  width: 58px;
-  height: 58px;
-  transform: translateX(-50%);
+  right: max(14px, var(--safe-right));
+  bottom: max(110px, calc(var(--safe-bottom) + 104px));
+  width: 62px;
+  height: 62px;
   border-color: rgba(255, 66, 214, 0.5);
   color: var(--magenta);
-  display: none;
+  display: grid;
   place-items: center;
   font-size: 18px;
   font-weight: 950;
+}
+
+.bomb-action[hidden] {
+  display: none !important;
 }
 
 .bomb-action span {
@@ -1156,7 +1364,13 @@ button {
   pointer-events: none;
 }
 
+#shell[data-touch="true"] #touchMarks {
+  display: block;
+}
+
 .touch-zone {
+  --stick-x: 0px;
+  --stick-y: 0px;
   position: absolute;
   bottom: max(24px, calc(var(--safe-bottom) + 14px));
   width: 120px;
@@ -1168,6 +1382,37 @@ button {
     radial-gradient(circle, rgba(246, 251, 255, 0.04), transparent 36%),
     conic-gradient(from 45deg, rgba(41, 247, 255, 0.16), transparent 24%, rgba(142, 68, 255, 0.14), transparent 58%, rgba(212, 175, 55, 0.12), transparent);
   box-shadow: 0 0 28px rgba(41, 247, 255, 0.1);
+  transform: translateZ(0) scale(1);
+  transition: opacity 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  will-change: transform, opacity;
+}
+
+.touch-zone::before,
+.touch-zone::after {
+  content: "";
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.touch-zone::before {
+  border: 1px solid rgba(246, 251, 255, 0.12);
+  background:
+    linear-gradient(90deg, transparent 47%, rgba(41, 247, 255, 0.22) 48% 52%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(41, 247, 255, 0.2) 48% 52%, transparent 53%);
+}
+
+.touch-zone::after {
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: currentColor;
+  box-shadow: 0 0 14px currentColor;
 }
 
 .touch-zone span {
@@ -1176,18 +1421,48 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.04);
+  transform: translate3d(var(--stick-x), var(--stick-y), 0);
+  transition: transform 54ms linear, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+  will-change: transform;
 }
 
 .left-zone {
   left: max(18px, var(--safe-left));
+  color: var(--cyan);
 }
 
 .right-zone {
   right: max(18px, var(--safe-right));
+  color: var(--magenta);
   border-color: rgba(255, 45, 170, 0.28);
   background:
     radial-gradient(circle, rgba(246, 251, 255, 0.04), transparent 36%),
     conic-gradient(from 20deg, rgba(255, 45, 170, 0.18), transparent 30%, rgba(142, 68, 255, 0.14), transparent 60%, rgba(41, 247, 255, 0.12), transparent);
+}
+
+.right-zone::before {
+  border-color: rgba(255, 45, 170, 0.16);
+  background:
+    radial-gradient(circle, transparent 42%, rgba(255, 45, 170, 0.22) 43% 46%, transparent 47%),
+    linear-gradient(90deg, transparent 47%, rgba(255, 45, 170, 0.26) 48% 52%, transparent 53%),
+    linear-gradient(0deg, transparent 47%, rgba(41, 247, 255, 0.16) 48% 52%, transparent 53%);
+}
+
+.touch-zone.is-active {
+  opacity: 0.98;
+  border-color: rgba(246, 251, 255, 0.58);
+  transform: translateZ(0) scale(1.04);
+  box-shadow:
+    0 0 32px color-mix(in srgb, currentColor 30%, transparent),
+    inset 0 0 24px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.touch-zone.is-active span {
+  border-color: rgba(246, 251, 255, 0.74);
+  background:
+    radial-gradient(circle, rgba(246, 251, 255, 0.28), transparent 36%),
+    color-mix(in srgb, currentColor 16%, rgba(255, 255, 255, 0.05));
+  box-shadow: 0 0 22px color-mix(in srgb, currentColor 45%, transparent);
 }
 
 #dev {
@@ -1297,6 +1572,9 @@ button {
   }
 
   .bomb-action {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
     display: grid;
   }
 
@@ -1331,10 +1609,8 @@ button {
 @media (max-width: 980px) {
   #overlay[data-state="menu"] .player-chooser {
     position: relative;
-    top: auto;
-    right: auto;
     transform: none;
-    grid-row: 4;
+    grid-row: 5;
     flex-direction: row;
     flex-wrap: nowrap;
     width: auto;
@@ -1474,6 +1750,58 @@ button {
     flex: 1 1 0;
     padding: 0 12px;
     font-size: 12px;
+  }
+
+  #overlay[data-state="menu"] .overlay-actions {
+    width: min(94vw, 460px);
+    min-height: 118px;
+    padding: 7px;
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #overlay[data-state="menu"] #primaryAction {
+    grid-column: 1 / -1;
+  }
+
+  #overlay[data-state="menu"] .overlay-actions button {
+    min-width: 0;
+    min-height: 50px;
+    width: 100%;
+    flex: initial;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+}
+
+@media (pointer: coarse), (max-width: 820px) {
+  #startupScene::before,
+  #overlay::before,
+  #marqueeMotion,
+  #marqueeMotion::before,
+  #marqueeMotion::after,
+  .startup-scene-layer,
+  .overlay-actions::after {
+    animation: none;
+  }
+
+  #startupScene {
+    background:
+      radial-gradient(ellipse at 50% 38%, rgba(41, 247, 255, 0.16), transparent 48%),
+      linear-gradient(180deg, #05070d, #09111b 46%, #05070d);
+  }
+
+  .startup-scene-layer {
+    background-image: none !important;
+    filter: none;
+    mix-blend-mode: normal;
+    will-change: auto;
+  }
+
+  #marqueeMotion,
+  #marquee {
+    filter: none;
   }
 }
 
@@ -1681,10 +2009,14 @@ button {
 @media (prefers-reduced-motion: reduce) {
   #startupScene,
   #startupScene::before,
+  #startupScene::after,
   #startup3dCanvas,
   #overlay::before,
   #startupBrand,
   #startupBrand::before,
+  #startupForge,
+  #overlay[data-state="menu"] #startupForge,
+  #overlay[data-state="menu"] .startup-forge,
   #marqueeMotion,
   #marqueeMotion::before,
   #marqueeMotion::after,
@@ -1700,7 +2032,12 @@ button {
 
   .overlay-actions button,
   .icon-action,
-  .bomb-action {
+  .bomb-action,
+  #startupScene,
+  #startup3dCanvas,
+  #startupForge,
+  #overlay[data-state="menu"] #startupForge,
+  #overlay[data-state="menu"] .startup-forge {
     transition: none;
   }
 }

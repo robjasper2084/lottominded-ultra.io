@@ -37,7 +37,7 @@
     "root": "assets/generated",
     "logoPrimary": "branding/logo-primary.png",
     "logoMark": "branding/logo-mark.png",
-    "marquee": "branding/marquee.png",
+    "marquee": "branding/marquee-gameplay-keyart.png",
     "appIcon": "branding/app-icon.png?v=chatgpt-wav-icon-1",
     "sponsorLockup": "branding/sponsor-lockup.png",
     "hudFrame": "ui/hud-frame.png",

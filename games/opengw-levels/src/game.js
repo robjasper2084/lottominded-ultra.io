@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=forge-close-title-1";
+import { STR } from "../strings.js?v=fullscreen-button-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -6,10 +6,19 @@ const STEP = 1 / 60;
 const DPR_CAP = 1.5;
 const MAX_FRAME_STEPS = 5;
 const MAX_LIGHTS = 8;
+const PARTICLE_LIMIT = 240;
+const RING_PARTICLE_LIMIT = 268;
 const TAU = Math.PI * 2;
-const WELL_GRAVITY_RADIUS = 382;
+const PLAYER_MAX_SPEED = 318;
+const PLAYER_ACCEL_RATE = 12.5;
+const PLAYER_BRAKE_RATE = 7.4;
+const PLAYER_TURN_RATE = 15.5;
+const WELL_GRAVITY_RADIUS = 430;
+const WELL_CAPTURE_RADIUS = 112;
+const WELL_ACTIVATION_RADIUS = 124;
 const WELL_EVENT_RADIUS = 38;
 const WELL_CORE_RADIUS = 19;
+const WELL_PLAYER_DANGER_RADIUS = 58;
 
 const COLORS = {
   cyan: "#29f7ff",
@@ -49,11 +58,11 @@ const PLAYER_KEYS = [
 ];
 
 const LEVELS = [
-  { name: "Signal Wake", quota: 18, max: 9, interval: 1.05, wells: 0, pull: 0, mix: [["wanderer", 8], ["seeker", 2]] },
-  { name: "Pink Static", quota: 24, max: 12, interval: 0.9, wells: 0, pull: 0, mix: [["wanderer", 5], ["seeker", 5]] },
-  { name: "Gravity Bloom", quota: 28, max: 13, interval: 0.86, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
-  { name: "Gold Break", quota: 34, max: 15, interval: 0.78, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
-  { name: "Needle Lane", quota: 38, max: 16, interval: 0.72, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
+  { name: "Signal Wake", quota: 12, max: 7, interval: 1.0, wells: 0, pull: 0, mix: [["wanderer", 8], ["seeker", 2]] },
+  { name: "Pink Static", quota: 18, max: 9, interval: 0.86, wells: 0, pull: 0, mix: [["wanderer", 5], ["seeker", 5]] },
+  { name: "Gravity Bloom", quota: 22, max: 10, interval: 0.82, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
+  { name: "Gold Break", quota: 28, max: 12, interval: 0.76, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
+  { name: "Needle Lane", quota: 32, max: 14, interval: 0.7, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
   { name: "Mayfly Crown", quota: 46, max: 20, interval: 0.66, wells: 2, pull: 205, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["mayfly", 5]] },
   { name: "Red Geometry", quota: 52, max: 22, interval: 0.58, wells: 2, pull: 220, mix: [["seeker", 5], ["splitter", 3], ["lancer", 3], ["mayfly", 4]] },
   { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, mix: [["wanderer", 2], ["seeker", 5], ["splitter", 3], ["lancer", 4], ["mayfly", 5]] },
@@ -72,7 +81,7 @@ const ENEMY = {
 };
 
 const ASSETS = {
-  marquee: "../assets/2084/branding/marquee.png",
+  marquee: "../assets/2084/branding/marquee-gameplay-keyart.png",
   icon: "../assets/2084/branding/app-icon.png",
   atlas: "../assets/2084/sprites/sprite-atlas.png",
   parallaxFar: "../assets/2084/parallax/far.webp",
@@ -101,6 +110,7 @@ const SPRITE_FOR_ENEMY = {
   lancer: "enemy-grunt",
   mayfly: "enemy-spinner"
 };
+const SPRITE_PAIR_NAMES = ["bomb-pulse", "enemy-grunt", "enemy-spinner", "enemy-wanderer", "gravity-well", "missile", "player"];
 
 const PLAYER_VARIANTS = [
   { name: "arrow", sx: 1.05, sy: 0.92, wing: 1, glyph: "dot" },
@@ -111,30 +121,61 @@ const PLAYER_VARIANTS = [
 
 const GL_IMAGES = {
   atlas: loadImage(ASSETS.atlas),
-  parallaxFar: loadImage(ASSETS.parallaxFar),
-  parallaxMid: loadImage(ASSETS.parallaxMid),
-  parallaxNear: loadImage(ASSETS.parallaxNear),
-  glow: loadImage(ASSETS.glow),
-  lightRay: loadImage(ASSETS.lightRay),
-  forgeCore: loadImage(ASSETS.forgeCore),
-  sprites: loadSpritePairs(["bomb-pulse", "enemy-grunt", "enemy-spinner", "enemy-wanderer", "gravity-well", "missile", "player"])
+  parallaxFar: null,
+  parallaxMid: null,
+  parallaxNear: null,
+  glow: null,
+  lightRay: null,
+  forgeCore: null,
+  sprites: {}
 };
+const GAMEPLAY_IMAGE_PATHS = {
+  parallaxFar: ASSETS.parallaxFar,
+  parallaxMid: ASSETS.parallaxMid,
+  parallaxNear: ASSETS.parallaxNear,
+  glow: ASSETS.glow,
+  lightRay: ASSETS.lightRay,
+  forgeCore: ASSETS.forgeCore
+};
+let gameplayImagesQueued = false;
+let spritePairsQueued = false;
+let visualPrewarmScheduled = false;
 
 const COLOR_VEC_CACHE = new Map();
+const AUDIO_BASE_PATH = "../assets/audio/";
+const AUDIO_WAV_BASE_PATH = `${AUDIO_BASE_PATH}wav/`;
+const HUD_UPDATE_INTERVAL = 100;
+const LOW_POWER_MEDIA = window.matchMedia("(pointer: coarse), (max-width: 820px)");
+
+function audioAssetPaths(file) {
+  const fileName = String(file || "");
+  const basePath = `${AUDIO_BASE_PATH}${fileName}`;
+  if (!fileName.toLowerCase().endsWith(".wav")) return [basePath];
+  return [basePath, `${AUDIO_WAV_BASE_PATH}${fileName}`];
+}
+
+function runWhenIdle(callback, timeout = 800) {
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(callback, { timeout });
+    return;
+  }
+  window.setTimeout(callback, timeout);
+}
 
 const AUDIO = {
-  startupMusic: { file: "digital-static-cover.mp3", volume: 0.36, loop: true },
-  ambient: { file: "backgroundnoiseloop.wav", volume: 0.2, loop: true },
-  wellHum: { file: "gravitywellhumloop.wav", volume: 0.16, loop: true },
-  bomb: { file: "bomb.wav", volume: 0.52 },
-  hit1: { file: "enemyhit.wav", volume: 0.2 },
-  hit2: { file: "enemyhit.wav", volume: 0.2 },
-  spawn1: { file: "enemyspawn1.wav", volume: 0.18 },
-  spawn2: { file: "enemyspawn2.wav", volume: 0.18 },
-  spawn3: { file: "enemyspawn3.wav", volume: 0.18 },
-  spawn4: { file: "enemyspawn4.wav", volume: 0.18 },
-  spawn5: { file: "enemyspawn5.wav", volume: 0.18 },
-  spawn6: { file: "enemyspawn6.wav", volume: 0.18 },
+  startupMusic: { file: "startup-untitled-7.mp3", volume: 0.42, loop: true },
+  gameMusic: { file: "digital-static-cover.mp3", volume: 0.34, loop: true },
+  ambient: { file: "backgroundnoiseloop.wav", volume: 0.14, loop: true },
+  wellHum: { file: "gravitywellhumloop.wav", volume: 0.12, loop: true },
+  bomb: { file: "bomb.wav", volume: 0.58 },
+  hit1: { file: "enemyhit.wav", volume: 0.28 },
+  hit2: { file: "enemyhit.wav", volume: 0.28 },
+  spawn1: { file: "enemyspawn1.wav", volume: 0.22 },
+  spawn2: { file: "enemyspawn2.wav", volume: 0.22 },
+  spawn3: { file: "enemyspawn3.wav", volume: 0.22 },
+  spawn4: { file: "enemyspawn4.wav", volume: 0.22 },
+  spawn5: { file: "enemyspawn5.wav", volume: 0.22 },
+  spawn6: { file: "enemyspawn6.wav", volume: 0.22 },
   extraBomb: { file: "extrabomb.wav", volume: 0.35 },
   extraLife: { file: "extralife.wav", volume: 0.36 },
   gameOver: { file: "gameover.wav", volume: 0.4 },
@@ -148,15 +189,44 @@ const AUDIO = {
   multiplier: { file: "multiplieradvance.wav", volume: 0.28 },
   menuSelect: { file: "menuselect.wav", volume: 0.24 },
   playerDead: { file: "playerdead.wav", volume: 0.38 },
-  playerFire1: { file: "playerfire1.wav", volume: 0.08 },
-  playerFire2: { file: "playerfire2.wav", volume: 0.08 },
-  playerFire3: { file: "playerfire3.wav", volume: 0.08 },
+  playerFire1: { file: "playerfire1.wav", volume: 0.18 },
+  playerFire2: { file: "playerfire2.wav", volume: 0.18 },
+  playerFire3: { file: "playerfire3.wav", volume: 0.18 },
   playerHit: { file: "playerhit.wav", volume: 0.32 },
   playerSpawn: { file: "playerspawn.wav", volume: 0.26 },
-  playerThrust: { file: "playerthrust.wav", volume: 0.12 },
+  playerThrust: { file: "playerthrust.wav", volume: 0.16, loop: true },
   repulsor: { file: "repulsor.wav", volume: 0.28 },
   shieldsDown: { file: "sheildsdown.wav", volume: 0.3 }
 };
+const RUN_AUDIO_PRELOAD = [
+  "gameMusic",
+  "ambient",
+  "playerThrust",
+  "level",
+  "spawn1",
+  "spawn2",
+  "spawn3",
+  "spawn4",
+  "spawn5",
+  "spawn6",
+  "hit1",
+  "hit2",
+  "playerFire1",
+  "playerFire2",
+  "playerFire3",
+  "bomb",
+  "playerHit",
+  "playerSpawn",
+  "wall",
+  "repulsor",
+  "multiplier",
+  "wellAlert",
+  "wellHum"
+];
+
+const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+const MUTE_STORAGE_KEY = "2084-static-wav-muted-v2";
+const LEGACY_MUTE_STORAGE_KEYS = ["2084-static-wav-muted", "2084-static-wars-muted"];
 
 class StaticWarsRenderer {
   constructor(targetCanvas) {
@@ -173,6 +243,15 @@ class StaticWarsRenderer {
       premultipliedAlpha: true
     });
     if (!this.gl) throw new Error("WebGL/OpenGL renderer unavailable");
+
+    this.contextLost = false;
+    targetCanvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      this.contextLost = true;
+    });
+    targetCanvas.addEventListener("webglcontextrestored", () => {
+      location.reload();
+    });
 
     this.isWebGL2 = typeof WebGL2RenderingContext !== "undefined" && this.gl instanceof WebGL2RenderingContext;
     this.view = { cssW: 1, cssH: 1, dpr: 1, x: 0, y: 0, w: 1, h: 1, scale: 1, camX: 0, camY: 0 };
@@ -225,6 +304,10 @@ class StaticWarsRenderer {
     this.setBlend("normal");
   }
 
+  isContextLost() {
+    return this.contextLost || Boolean(this.gl.isContextLost?.());
+  }
+
   createProgram(vertexSource, fragmentSource) {
     const gl = this.gl;
     const vertex = this.createShader(gl.VERTEX_SHADER, vertexSource);
@@ -255,6 +338,7 @@ class StaticWarsRenderer {
   }
 
   beginFrame(nextView, shakeX, shakeY) {
+    if (this.isContextLost()) return false;
     this.view = { ...nextView };
     this.shakeX = shakeX;
     this.shakeY = shakeY;
@@ -267,6 +351,7 @@ class StaticWarsRenderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0.015, 0.022, 0.045, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    return true;
   }
 
   setLights(lights) {
@@ -550,13 +635,19 @@ class StaticWarsRenderer {
   }
 
   flush() {
+    if (this.isContextLost()) {
+      this.solidData.length = 0;
+      this.textureData.length = 0;
+      this.litData.length = 0;
+      return;
+    }
     this.flushSolid();
     this.flushTexture();
     this.flushLit();
   }
 
   flushSolid() {
-    if (!this.solidData.length) return;
+    if (!this.solidData.length || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.solidProgram);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.solidBuffer);
@@ -571,7 +662,7 @@ class StaticWarsRenderer {
   }
 
   flushTexture() {
-    if (!this.textureData.length || !this.currentTexture) return;
+    if (!this.textureData.length || !this.currentTexture || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.textureProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -591,7 +682,7 @@ class StaticWarsRenderer {
   }
 
   flushLit() {
-    if (!this.litData.length || !this.currentLit) return;
+    if (!this.litData.length || !this.currentLit || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.litProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -762,11 +853,17 @@ const forgeUi = {
   }
 };
 const forgeHudClose = $("forgeHudClose");
+const forgeToggleAction = $("forgeToggleAction");
 const playerChooser = $("playerChooser");
 const primaryAction = $("primaryAction");
+const homeAction = $("homeAction");
 const soundAction = $("soundAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
+const controlsHint = $("controlsHint");
+const touchMarks = $("touchMarks");
+const touchMoveZone = touchMarks?.querySelector(".left-zone");
+const touchAimZone = touchMarks?.querySelector(".right-zone");
 const devEl = $("dev");
 let selectedPlayerCount = loadPlayerCount();
 let forgeHudDismissed = false;
@@ -778,10 +875,16 @@ for (const node of document.querySelectorAll("[data-label]")) {
 }
 pauseAction.textContent = "II";
 pauseAction.setAttribute("aria-label", STR.pauseButton);
+pauseAction.setAttribute("title", `${STR.pauseButton} (P or Esc)`);
 bombAction.setAttribute("aria-label", STR.bombButton);
+bombAction.setAttribute("title", `${STR.bombButton} (Space)`);
 forgeHudClose.textContent = "X";
 forgeHudClose.setAttribute("aria-label", STR.forgeClose);
 forgeHudClose.setAttribute("title", STR.forgeClose);
+forgeToggleAction.textContent = STR.forgeToggle;
+forgeToggleAction.setAttribute("aria-label", STR.forgeShow);
+forgeToggleAction.setAttribute("title", STR.forgeShow);
+controlsHint.textContent = STR.controlsHint;
 buildPlayerChooser();
 
 class Rng {
@@ -883,7 +986,13 @@ function updateForgePanels() {
     panel.note.textContent = state.forge.note;
     panel.panel.classList.toggle("is-hot", hot);
   }
-  forgeUi.hud.panel.hidden = state.status === "menu" || forgeHudDismissed;
+  const forgeAllowed = state.status === "running" || state.status === "paused";
+  const hudVisible = forgeAllowed && !forgeHudDismissed;
+  forgeUi.hud.panel.hidden = !hudVisible;
+  setControlAvailability(forgeHudClose, hudVisible);
+  const toggleVisible = forgeAllowed && forgeHudDismissed;
+  setControlAvailability(forgeToggleAction, toggleVisible, { hide: true });
+  setRegionAvailability(forgeUi.startup.panel, false, { hide: true });
 }
 
 function renderForgeRows(node, text) {
@@ -908,24 +1017,291 @@ function renderForgeRows(node, text) {
   node.replaceChildren(...rows);
 }
 
+function setControlAvailability(control, active, options = {}) {
+  if (!control) return;
+  if (options.hide) control.hidden = !active;
+  control.disabled = !active;
+  control.tabIndex = active ? 0 : -1;
+  control.setAttribute("aria-hidden", String(!active));
+}
+
+function setRegionAvailability(region, active, options = {}) {
+  if (!region) return;
+  if (options.hide) region.hidden = !active;
+  region.inert = !active;
+  region.setAttribute("aria-hidden", String(!active));
+}
+
+function setElementAvailability(element, active, options = {}) {
+  if (!element) return;
+  if (options.hide) element.hidden = !active;
+  element.setAttribute("aria-hidden", String(!active));
+}
+
 const bus = {
   muted: loadMuted(),
   unlocked: false,
+  context: null,
+  masterGain: null,
+  limiter: null,
+  categoryGains: new Map(),
   nodes: new Map(),
+  loops: new Map(),
   lastPlay: new Map(),
+  backgroundLoadScheduled: false,
 
   init() {
     for (const [id, data] of Object.entries(AUDIO)) {
-      const url = new URL(`../assets/audio/${data.file}`, import.meta.url);
-      const node = new Audio(url.href);
-      node.preload = data.loop ? "auto" : "metadata";
-      node.loop = Boolean(data.loop);
-      node.volume = data.volume;
-      this.nodes.set(id, { node, data });
+      const urls = audioAssetPaths(data.file).map((file) => new URL(file, import.meta.url).href);
+      this.nodes.set(id, { data, url: urls[0], urls, buffer: null, loading: null, error: null });
+    }
+    window.__staticWavAudio = this;
+  },
+
+  ensureContext() {
+    if (!AudioContextCtor) return null;
+    if (!this.context) this.context = new AudioContextCtor();
+    this.ensureMixer();
+    return this.context;
+  },
+
+  ensureMixer() {
+    const context = this.context;
+    if (!context || this.masterGain) return;
+    this.masterGain = context.createGain();
+    this.masterGain.gain.value = 0.95;
+    this.limiter = context.createDynamicsCompressor();
+    this.limiter.threshold.value = -7;
+    this.limiter.knee.value = 18;
+    this.limiter.ratio.value = 8;
+    this.limiter.attack.value = 0.004;
+    this.limiter.release.value = 0.16;
+    this.masterGain.connect(this.limiter);
+    this.limiter.connect(context.destination);
+    for (const category of ["music", "ambience", "engine", "ui", "sfx"]) {
+      const gain = context.createGain();
+      gain.gain.value = this.categoryVolume(category);
+      gain.connect(this.masterGain);
+      this.categoryGains.set(category, gain);
     }
   },
 
-  async unlock() {
+  categoryVolume(category) {
+    if (category === "music") return 0.68;
+    if (category === "ambience") return 0.7;
+    if (category === "engine") return 0.72;
+    if (category === "ui") return 0.86;
+    return 1;
+  },
+
+  audioCategory(id) {
+    if (id === "startupMusic" || id === "gameMusic") return "music";
+    if (id === "ambient" || id === "wellHum") return "ambience";
+    if (id === "playerThrust") return "engine";
+    if (id === "menuSelect") return "ui";
+    return "sfx";
+  },
+
+  outputFor(id) {
+    const context = this.context;
+    if (!context) return null;
+    this.ensureMixer();
+    return this.categoryGains.get(this.audioCategory(id)) ?? this.masterGain ?? context.destination;
+  },
+
+  async unlock(options = {}) {
+    const context = this.ensureContext();
+    const firstUnlock = !this.unlocked;
+    this.unlocked = true;
+    if (context && context.state !== "running") {
+      await context.resume().catch(() => {});
+    }
+    this.primeContext();
+    if (options.refreshLoops !== false) this.refreshLoops();
+    if (options.preloadMenuMusic) this.ensureStartupMusic();
+    if (firstUnlock && options.allowBackgroundLoad !== false) this.scheduleBackgroundLoad();
+    updateOverlay();
+  },
+
+  primeContext() {
+    const context = this.context;
+    if (!context || context.state !== "running") return;
+    const source = context.createOscillator();
+    const gain = context.createGain();
+    gain.gain.value = 0.00001;
+    source.connect(gain);
+    gain.connect(context.destination);
+    source.start();
+    source.stop(context.currentTime + 0.035);
+  },
+
+  scheduleBackgroundLoad() {
+    if (this.backgroundLoadScheduled) return;
+    this.backgroundLoadScheduled = true;
+    const delay = LOW_POWER_MEDIA.matches ? 2200 : 1200;
+    const batchSize = LOW_POWER_MEDIA.matches ? 1 : 2;
+    window.setTimeout(() => {
+      if (state?.status === "running") {
+        this.backgroundLoadScheduled = false;
+        return;
+      }
+      this.loadAll({ batchSize });
+    }, delay);
+  },
+
+  loadAll(options = {}) {
+    const batchSize = Math.max(1, Number(options.batchSize) || 2);
+    const pending = [...this.nodes.keys()].filter((id) => {
+      const record = this.nodes.get(id);
+      return record && !record.buffer && !record.loading;
+    });
+    const pump = () => {
+      for (const id of pending.splice(0, batchSize)) this.loadBuffer(id);
+      if (pending.length) runWhenIdle(pump, 700);
+    };
+    runWhenIdle(pump, 500);
+  },
+
+  loadBuffer(id) {
+    const record = this.nodes.get(id);
+    const context = this.ensureContext();
+    if (!record || !context) return Promise.resolve(null);
+    if (record.buffer) return Promise.resolve(record.buffer);
+    if (record.loading) return record.loading;
+    record.loading = this.fetchAudioBuffer(record, id)
+      .then((arrayBuffer) => this.decode(arrayBuffer))
+      .then((buffer) => {
+        record.buffer = buffer;
+        record.error = null;
+        if (record.data.loop && this.unlocked && !this.muted) queueMicrotask(() => this.refreshLoops());
+        return buffer;
+      })
+      .catch((error) => {
+        record.error = error;
+        return null;
+      });
+    return record.loading;
+  },
+
+  async fetchAudioBuffer(record, id) {
+    let lastError = null;
+    for (const url of record.urls || [record.url]) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Audio ${id} failed: ${response.status}`);
+        record.url = url;
+        return await response.arrayBuffer();
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError ?? new Error(`Audio ${id} failed`);
+  },
+
+  decode(arrayBuffer) {
+    const context = this.context;
+    if (!context) return Promise.resolve(null);
+    return new Promise((resolve, reject) => {
+      const result = context.decodeAudioData(arrayBuffer.slice(0), resolve, reject);
+      if (result && typeof result.then === "function") result.then(resolve, reject);
+    });
+  },
+
+  startLoop(id) {
+    if (this.loops.has(id)) return;
+    const record = this.nodes.get(id);
+    const context = this.context;
+    if (!record || !context || context.state !== "running") return;
+    const targetVolume = this.loopVolume(id, record);
+    if (targetVolume <= 0.001) return;
+    this.loadBuffer(id).then((buffer) => {
+      if (!buffer || this.muted || !this.unlocked || this.loops.has(id) || context.state !== "running") return;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      source.loop = true;
+      gain.gain.value = 0;
+      source.connect(gain);
+      gain.connect(this.outputFor(id));
+      source.start();
+      const loop = { source, gain };
+      this.loops.set(id, loop);
+      this.setLoopGain(loop, this.loopVolume(id, record), 0.22);
+      source.onended = () => {
+        if (this.loops.get(id)?.source === source) this.loops.delete(id);
+      };
+    });
+  },
+
+  ensureStartupMusic() {
+    if (this.muted || !this.unlocked || typeof state === "undefined" || state.status !== "menu") return;
+    const context = this.context;
+    if (!context || context.state !== "running") return;
+    this.loadBuffer("startupMusic").then((buffer) => {
+      if (!buffer || this.muted || !this.unlocked || state.status !== "menu") return;
+      if (!this.loops.has("startupMusic")) this.startLoop("startupMusic");
+      this.refreshLoops();
+    });
+  },
+
+  setLoopGain(loop, target, glide = 0.28) {
+    if (Math.abs((loop.targetGain ?? -999) - target) < 0.012) return;
+    loop.targetGain = target;
+    const context = this.context;
+    if (!context) {
+      loop.gain.gain.value = target;
+      return;
+    }
+    loop.gain.gain.cancelScheduledValues(context.currentTime);
+    loop.gain.gain.setTargetAtTime(target, context.currentTime, glide);
+  },
+
+  loopVolume(id, record) {
+    const mode = typeof state === "undefined" ? "menu" : state.status;
+    if (id === "startupMusic") {
+      return mode === "menu" ? record.data.volume : 0;
+    }
+    if (id === "gameMusic") {
+      if (mode === "running") return record.data.volume * 0.725;
+      if (mode === "paused") return record.data.volume * 0.36;
+      if (mode === "gameover" || mode === "victory") return record.data.volume * 0.28;
+      return 0;
+    }
+    if (id === "ambient") {
+      if (mode === "running") return record.data.volume * 0.58;
+      if (mode === "paused") return record.data.volume * 0.42;
+      return record.data.volume * 0.64;
+    }
+    if (id === "wellHum") {
+      const wellCount = typeof state === "undefined" ? 0 : state.wells?.length ?? 0;
+      if (mode !== "running" || wellCount <= 0) return 0;
+      return record.data.volume * clamp(0.42 + wellCount * 0.18, 0.42, 0.9);
+    }
+    if (id === "playerThrust") {
+      if (mode !== "running") return 0;
+      return record.data.volume * clamp(state.thrustMix ?? 0, 0, 1);
+    }
+    return record.data.volume;
+  },
+
+  stopLoop(id) {
+    const loop = this.loops.get(id);
+    if (!loop) return;
+    this.loops.delete(id);
+    try {
+      loop.source.stop();
+    } catch {
+      // Already stopped by the browser.
+    }
+    loop.source.disconnect();
+    loop.gain.disconnect();
+  },
+
+  stopLoops() {
+    for (const id of [...this.loops.keys()]) this.stopLoop(id);
+  },
+
+  unlockSync() {
     this.unlocked = true;
     this.refreshLoops();
   },
@@ -938,7 +1314,12 @@ const bus = {
   },
 
   toggle() {
+    const wasMuted = this.muted;
     this.setMuted(!this.muted);
+    if (wasMuted) {
+      this.unlock();
+      this.play("menuSelect", 0.08);
+    }
   },
 
   play(id, cooldown = 0.04) {
@@ -949,9 +1330,21 @@ const bus = {
     const last = this.lastPlay.get(id) ?? -999;
     if (now - last < cooldown) return;
     this.lastPlay.set(id, now);
-    const clip = record.node.cloneNode(true);
-    clip.volume = record.data.volume;
-    clip.play().catch(() => {});
+    this.loadBuffer(id).then((buffer) => {
+      const context = this.context;
+      if (!buffer || !context || this.muted || !this.unlocked || context.state !== "running") return;
+      const source = context.createBufferSource();
+      const gain = context.createGain();
+      source.buffer = buffer;
+      gain.gain.value = record.data.volume;
+      source.connect(gain);
+      gain.connect(this.outputFor(id));
+      source.start();
+      source.onended = () => {
+        source.disconnect();
+        gain.disconnect();
+      };
+    });
   },
 
   playRandom(ids, cooldown = 0.04) {
@@ -961,15 +1354,45 @@ const bus = {
   },
 
   refreshLoops() {
-    for (const { node, data } of this.nodes.values()) {
+    for (const [id, { data }] of this.nodes.entries()) {
       if (!data.loop) continue;
-      node.volume = this.muted ? 0 : data.volume;
       if (!this.unlocked || this.muted) {
-        node.pause();
-      } else {
-        node.play().catch(() => {});
+        this.stopLoop(id);
+        continue;
       }
+      const record = this.nodes.get(id);
+      const loop = this.loops.get(id);
+      const target = this.loopVolume(id, record);
+      if (loop) this.setLoopGain(loop, target);
+      else if (target > 0.001) this.startLoop(id);
     }
+  },
+
+  refreshActiveLoopLevels(ids) {
+    if (!this.unlocked || this.muted) return;
+    for (const id of ids) {
+      const record = this.nodes.get(id);
+      if (!record?.data.loop) continue;
+      const target = this.loopVolume(id, record);
+      const loop = this.loops.get(id);
+      if (loop) this.setLoopGain(loop, target);
+      else if (target > 0.01) this.startLoop(id);
+    }
+  },
+
+  status() {
+    return {
+      muted: this.muted,
+      unlocked: this.unlocked,
+      context: this.context?.state ?? "none",
+      mixer: {
+        master: this.masterGain?.gain.value ?? null,
+        categories: Object.fromEntries([...this.categoryGains.entries()].map(([id, gain]) => [id, gain.gain.value]))
+      },
+      loaded: [...this.nodes.entries()].filter(([, record]) => record.buffer).map(([id]) => id),
+      loops: [...this.loops.keys()],
+      errors: [...this.nodes.entries()].filter(([, record]) => record.error).map(([id, record]) => [id, String(record.error)])
+    };
   }
 };
 
@@ -997,11 +1420,14 @@ const input = {
   moveTouch: null,
   aimTouch: null,
   moveVector: { x: 0, y: 0 },
+  aimVector: null,
   aimPoint: null,
   bombQueued: new Set(),
   padBombHeld: [false, false, false, false],
   padPauseHeld: false
 };
+const touchCapable = Boolean(navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches);
+shell.dataset.touch = touchCapable ? "true" : "false";
 
 let state = createState();
 let lastFrame = performance.now();
@@ -1010,6 +1436,9 @@ let fpsFrames = 0;
 let fpsAt = lastFrame;
 let fps = 0;
 let pausedByBlur = false;
+let staticFrameDirty = true;
+let lastHudUpdate = 0;
+let startPending = false;
 const devEnabled = new URLSearchParams(location.search).has("dev");
 
 if (devEnabled) devEl.style.display = "block";
@@ -1018,9 +1447,21 @@ resize();
 updateOverlay();
 updateHud();
 requestAnimationFrame(frame);
+scheduleVisualPrewarm();
 
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
+function armAudioFromGesture(event) {
+  if (event?.target?.closest?.("#playerChooser, #primaryAction")) return;
+  bus.unlock();
+}
+
+addEventListener("pointerdown", armAudioFromGesture, { passive: true });
+addEventListener("keydown", armAudioFromGesture);
+addEventListener("touchmove", (event) => {
+  if (event.target?.closest?.("#shell")) event.preventDefault();
+}, { passive: false });
+addEventListener("gesturestart", (event) => event.preventDefault?.(), { passive: false });
 addEventListener("blur", () => {
   pausedByBlur = true;
   if (state.status === "running") setPaused(true);
@@ -1036,7 +1477,7 @@ addEventListener("keydown", (event) => {
     primary();
     return;
   }
-  if (event.code === "KeyP" && !event.repeat) {
+  if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) {
     event.preventDefault();
     togglePause();
     return;
@@ -1063,7 +1504,11 @@ addEventListener("keyup", (event) => {
 
 canvas.addEventListener("pointerdown", (event) => {
   if (state.status !== "running") return;
-  canvas.setPointerCapture(event.pointerId);
+  try {
+    canvas.setPointerCapture?.(event.pointerId);
+  } catch {
+    // Some mobile browsers can reject capture during fast multi-touch changes.
+  }
   const world = eventToWorld(event);
   if (event.pointerType === "mouse" || event.pointerType === "pen") {
     input.mouse.down = event.button === 0;
@@ -1116,12 +1561,26 @@ canvas.addEventListener("pointerleave", (event) => {
 });
 
 primaryAction.addEventListener("click", primary);
-soundAction.addEventListener("click", () => bus.toggle());
+homeAction.addEventListener("click", returnHome);
+soundAction.addEventListener("click", () => {
+  if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
+    bus.unlock({ preloadMenuMusic: true });
+    bus.ensureStartupMusic();
+    return;
+  }
+  bus.toggle();
+});
 pauseAction.addEventListener("click", togglePause);
 forgeHudClose.addEventListener("click", (event) => {
   event.preventDefault();
   event.stopPropagation();
   forgeHudDismissed = true;
+  updateForgePanels();
+});
+forgeToggleAction.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  forgeHudDismissed = false;
   updateForgePanels();
 });
 bombAction.addEventListener("pointerdown", (event) => {
@@ -1131,13 +1590,17 @@ bombAction.addEventListener("pointerdown", (event) => {
 }, { passive: false });
 
 function buildPlayerChooser() {
+  if (playerChooser.childElementCount === 4) {
+    syncPlayerChooser();
+    return;
+  }
   playerChooser.replaceChildren();
   for (let count = 1; count <= 4; count += 1) {
     const button = document.createElement("button");
     button.type = "button";
+    button.dataset.playerCount = String(count);
     button.textContent = STR[`playerOption${count}`];
     button.style.setProperty("--pilot-color", PLAYER_COLORS[count - 1] ?? COLORS.cyan);
-    button.setAttribute("aria-pressed", String(count === selectedPlayerCount));
     button.addEventListener("click", () => {
       selectedPlayerCount = count;
       savePlayerCount(count);
@@ -1147,9 +1610,17 @@ function buildPlayerChooser() {
         state.forge = createForgeState(count, STR.forgeStartupNote, count * 0x2084);
         updateForgePanels();
       }
-      buildPlayerChooser();
+      syncPlayerChooser();
+      requestStaticFrame();
     });
     playerChooser.append(button);
+  }
+  syncPlayerChooser();
+}
+
+function syncPlayerChooser() {
+  for (const button of playerChooser.querySelectorAll("button[data-player-count]")) {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.playerCount) === selectedPlayerCount));
   }
 }
 
@@ -1196,6 +1667,7 @@ function createState() {
     gridOffset: 0,
     bombWave: 0,
     bombOrigin: { x: WORLD.w / 2, y: WORLD.h / 2, color: COLORS.magenta },
+    thrustMix: 0,
     forge: createForgeState(playerCount, STR.forgeStartupNote, playerCount * 0x2084),
     entitiesDrawn: 0
   };
@@ -1223,22 +1695,56 @@ function makePlayer(index, count = 1) {
 }
 
 function startRun() {
-  bus.unlock();
-  forgeHudDismissed = false;
+  forgeHudDismissed = true;
   state = createState();
   state.status = "running";
   beginLevel(0);
+  bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
+  window.setTimeout(() => bus.refreshLoops(), LOW_POWER_MEDIA.matches ? 1200 : 250);
   refreshForge(STR.forgeStartNote, 0x2084, true);
+  queueGameplayImageLoad();
+  queueSpritePairLoad();
   hideOverlay();
   updateHud();
 }
 
-function primary() {
+async function primary() {
+  if (startPending) return;
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
-    startRun();
+    startPending = true;
+    updateOverlay();
+    try {
+      await Promise.race([
+        bus.unlock({ refreshLoops: false, allowBackgroundLoad: false }),
+        new Promise((resolve) => window.setTimeout(resolve, 700))
+      ]);
+      await ensureStartupAssetsReady();
+    } catch {
+      // Slow or unsupported media should never trap the player on the launch button.
+    } finally {
+      startPending = false;
+      startRun();
+    }
   } else if (state.status === "paused") {
+    bus.unlock();
     setPaused(false);
   }
+}
+
+function returnHome() {
+  bus.unlock();
+  clearTouchInput();
+  input.bombQueued.clear();
+  input.mouse.down = false;
+  forgeHudDismissed = false;
+  state = createState();
+  state.status = "menu";
+  bus.play("menuSelect", 0.08);
+  bus.refreshLoops();
+  bus.ensureStartupMusic();
+  updateOverlay();
+  updateHud();
+  lastFrame = performance.now();
 }
 
 function togglePause() {
@@ -1248,11 +1754,17 @@ function togglePause() {
 
 function setPaused(value) {
   if (value && state.status === "running") {
+    clearTouchInput();
     state.status = "paused";
+    bus.refreshLoops();
     updateOverlay();
+    updateHud();
   } else if (!value && state.status === "paused") {
+    clearTouchInput();
     state.status = "running";
+    bus.refreshLoops();
     hideOverlay();
+    updateHud();
     lastFrame = performance.now();
   }
 }
@@ -1267,6 +1779,7 @@ function beginLevel(index) {
   state.wells.length = 0;
   const profile = currentLevel();
   for (let i = 0; i < profile.wells; i += 1) spawnWell();
+  bus.refreshLoops();
   refreshForge(STR.forgeRunNote, 0x4000 + index, true);
   bus.play("level", 0.6);
   if (profile.wells > 0) bus.play("wellAlert", 0.6);
@@ -1274,6 +1787,10 @@ function beginLevel(index) {
 
 function currentLevel() {
   return LEVELS[Math.min(state.levelIndex, LEVELS.length - 1)];
+}
+
+function requestStaticFrame() {
+  staticFrameDirty = true;
 }
 
 function frame(now) {
@@ -1291,10 +1808,18 @@ function frame(now) {
       steps += 1;
     }
     if (steps === MAX_FRAME_STEPS) accumulator = 0;
+    render(accumulator / STEP);
+    if (now - lastHudUpdate >= HUD_UPDATE_INTERVAL) {
+      updateHud();
+      lastHudUpdate = now;
+    }
+  } else if (staticFrameDirty) {
+    accumulator = 0;
+    render(0);
+    updateHud();
+    lastHudUpdate = now;
+    staticFrameDirty = false;
   }
-
-  render(accumulator / STEP);
-  updateHud();
   updateDev(now);
 }
 
@@ -1313,6 +1838,7 @@ function update(dt, commands) {
   }
 
   updatePlayers(dt, commands);
+  updateAudioMix(commands, dt);
   updateWells(dt);
   updateSpawning(dt);
   updateBullets(dt);
@@ -1325,12 +1851,15 @@ function update(dt, commands) {
 }
 
 function updatePlayers(dt, commands) {
-  const speed = 310;
   for (const player of state.players) {
     if (!player.active) continue;
     const command = commands[player.id] ?? emptyCommand();
-    player.vx = command.move.x * speed;
-    player.vy = command.move.y * speed;
+    const moveAmount = Math.hypot(command.move.x, command.move.y);
+    const targetVx = command.move.x * PLAYER_MAX_SPEED;
+    const targetVy = command.move.y * PLAYER_MAX_SPEED;
+    const response = smoothStep(moveAmount > 0.001 ? PLAYER_ACCEL_RATE : PLAYER_BRAKE_RATE, dt);
+    player.vx += (targetVx - player.vx) * response;
+    player.vy += (targetVy - player.vy) * response;
     applyGravity(player, dt, 0.85);
     player.x += player.vx * dt;
     player.y += player.vy * dt;
@@ -1339,7 +1868,7 @@ function updatePlayers(dt, commands) {
 
     if (command.aim) {
       player.lastAim = command.aim;
-      player.angle = Math.atan2(command.aim.y, command.aim.x);
+      player.angle = turnTowardAngle(player.angle, Math.atan2(command.aim.y, command.aim.x), PLAYER_TURN_RATE, dt);
     }
     if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
@@ -1349,13 +1878,30 @@ function updatePlayers(dt, commands) {
   }
 }
 
+function updateAudioMix(commands, dt) {
+  let thrustTarget = 0;
+  for (const player of state.players) {
+    if (!player.active) continue;
+    const command = commands[player.id] ?? emptyCommand();
+    const move = command.move ? Math.hypot(command.move.x, command.move.y) : 0;
+    const drift = Math.hypot(player.vx, player.vy) / PLAYER_MAX_SPEED;
+    thrustTarget = Math.max(thrustTarget, move, drift * 0.45);
+  }
+  state.thrustMix += (clamp(thrustTarget, 0, 1) - state.thrustMix) * clamp(dt * 8.5, 0, 1);
+  if (bus.unlocked) bus.refreshActiveLoopLevels(["playerThrust", "wellHum"]);
+}
+
 function updateWells(dt) {
+  const profile = currentLevel();
   for (const well of state.wells) {
     well.age += dt;
     well.spawn -= dt;
     well.sinkPulse = Math.max(0, (well.sinkPulse ?? 0) - dt * 3.2);
-    if (well.spawn <= 0 && state.spawned < currentLevel().quota && state.enemies.length < currentLevel().max + 4) {
-      const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(currentLevel().mix);
+    well.suction = isWellSuctionActive(well)
+      ? clamp((well.suction ?? 0) + dt * 1.85, 0, 1)
+      : 0;
+    if (well.spawn <= 0 && state.spawned < profile.quota && state.enemies.length < profile.max + 4) {
+      const type = state.rng.chance(0.25) ? "mayfly" : state.rng.pickWeighted(profile.mix);
       spawnEnemy(type, well.x + state.rng.range(-46, 46), well.y + state.rng.range(-46, 46));
       well.spawn = state.rng.range(2.3, 4.6);
     }
@@ -1463,6 +2009,7 @@ function updateParticles(dt) {
   for (const p of state.particles) {
     p.age += dt;
     p.life -= dt;
+    applyGravity(p, dt, 0.14);
     p.x += p.vx * dt;
     p.y += p.vy * dt;
     p.vx *= p.drag;
@@ -1470,7 +2017,7 @@ function updateParticles(dt) {
     if (p.life <= 0) p.dead = true;
   }
   compact(state.particles);
-  if (state.particles.length > 320) state.particles.splice(0, state.particles.length - 320);
+  if (state.particles.length > RING_PARTICLE_LIMIT) state.particles.splice(0, state.particles.length - RING_PARTICLE_LIMIT);
 }
 
 function resolveCollisions() {
@@ -1510,7 +2057,7 @@ function resolveCollisions() {
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
       if (distance2(player, enemy) <= (player.r + ENEMY[enemy.type].r) ** 2) {
-        enemy.dead = true;
+        neutralizeEnemyForProgress(enemy);
         hurtPlayer(player);
         break;
       }
@@ -1528,17 +2075,24 @@ function updateWellAbsorption() {
 
     for (const bullet of state.bullets) {
       if (bullet.dead) continue;
-      const limit = WELL_EVENT_RADIUS + bullet.r * 0.7;
+      const active = isWellSuctionActive(well);
+      const baseRadius = active ? WELL_CAPTURE_RADIUS : WELL_ACTIVATION_RADIUS;
+      const limit = baseRadius + bullet.r + (well.sinkPulse ?? 0) * 22;
       if (distance2(bullet, well) <= limit ** 2) {
         bullet.dead = true;
         blackHoleSwallow(well, bullet, bullet.color ?? COLORS.flame, 4);
+        damageWell(well, 1);
+        absorbedMatter = true;
+        if (well.dead) break;
       }
     }
+
+    if (!isWellSuctionActive(well) || well.dead) continue;
 
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
       const spec = ENEMY[enemy.type];
-      const limit = WELL_EVENT_RADIUS + spec.r * 0.55;
+      const limit = WELL_CAPTURE_RADIUS + spec.r * 0.9 + (well.sinkPulse ?? 0) * 26;
       if (distance2(enemy, well) <= limit ** 2) {
         blackHoleSwallow(well, enemy, spec.color, enemy.type === "mayfly" ? 7 : 14);
         killEnemy(enemy, true);
@@ -1549,7 +2103,7 @@ function updateWellAbsorption() {
 
     for (const pickup of state.pickups) {
       if (pickup.dead) continue;
-      const limit = WELL_EVENT_RADIUS + pickup.r;
+      const limit = WELL_CAPTURE_RADIUS + pickup.r + (well.sinkPulse ?? 0) * 22;
       if (distance2(pickup, well) <= limit ** 2) {
         pickup.dead = true;
         blackHoleSwallow(well, pickup, COLORS.lime, 10);
@@ -1559,7 +2113,7 @@ function updateWellAbsorption() {
 
     for (const player of state.players) {
       if (!player.active || player.invuln > 0) continue;
-      const limit = WELL_CORE_RADIUS + player.r;
+      const limit = WELL_PLAYER_DANGER_RADIUS + player.r;
       if (distance2(player, well) <= limit ** 2) {
         blackHoleSwallow(well, player, player.color, 28);
         addRing(well.x, well.y, player.color, 42, 260);
@@ -1587,7 +2141,15 @@ function checkProgression(dt) {
     return;
   }
   const profile = currentLevel();
-  const cleared = state.spawned >= profile.quota && state.killed >= profile.quota && state.enemies.length === 0 && state.wells.length === 0;
+  compact(state.enemies);
+  compact(state.wells);
+  const liveEnemies = state.enemies.filter((enemy) => !enemy.dead).length;
+  const liveWells = state.wells.filter((well) => !well.dead).length;
+  const quotaSpent = state.spawned >= profile.quota;
+  if (quotaSpent && liveEnemies === 0 && liveWells === 0 && state.killed < profile.quota) {
+    state.killed = profile.quota;
+  }
+  const cleared = quotaSpent && state.killed >= profile.quota && liveEnemies === 0 && liveWells === 0;
   if (cleared) {
     state.transitionTimer = 2.1;
     state.banner = { text: STR.cleared, timer: 1.8 };
@@ -1598,6 +2160,13 @@ function checkProgression(dt) {
     pushForgePulse(WORLD.w / 2, WORLD.h / 2, COLORS.cyan, STR.forgeClearNote, 0x7000 + state.levelIndex);
     checkRewards();
   }
+}
+
+function neutralizeEnemyForProgress(enemy) {
+  if (!enemy || enemy.dead) return false;
+  enemy.dead = true;
+  state.killed += 1;
+  return true;
 }
 
 function fireBullet(player, dir) {
@@ -1704,7 +2273,9 @@ function spawnWell() {
     age: state.rng.range(0, TAU),
     spawn: state.rng.range(2.0, 4.2),
     flash: 0,
-    sinkPulse: 0
+    sinkPulse: 0,
+    active: false,
+    suction: 0
   });
 }
 
@@ -1734,6 +2305,7 @@ function killEnemy(enemy, bomb = false) {
 }
 
 function damageWell(well, damage) {
+  activateWellSuction(well);
   well.hp -= damage;
   well.flash = 1;
   state.shake = Math.max(state.shake, 0.25);
@@ -1741,6 +2313,7 @@ function damageWell(well, damage) {
   burst(well.x, well.y, COLORS.violet, 8);
   if (well.hp <= 0) {
     well.dead = true;
+    bus.refreshLoops();
     const points = 1800 * state.team.multiplier;
     state.score += points;
     spawnScorePop(well.x, well.y - 32, `+${formatNumber(points)}`, COLORS.gold);
@@ -1752,6 +2325,22 @@ function damageWell(well, damage) {
     bus.play("wellExplode", 0.25);
   }
   checkRewards();
+}
+
+function isWellSuctionActive(well) {
+  return well?.active === true && !well.dead;
+}
+
+function activateWellSuction(well, boost = 0.62) {
+  if (!well || well.dead) return;
+  const wasActive = isWellSuctionActive(well);
+  well.active = true;
+  well.suction = Math.max(well.suction ?? 0, boost);
+  well.sinkPulse = Math.min(1, (well.sinkPulse ?? 0) + (wasActive ? 0.16 : 0.42));
+  if (!wasActive) {
+    state.shake = Math.max(state.shake, 0.5);
+    addRing(well.x, well.y, COLORS.magenta, WELL_ACTIVATION_RADIUS, 340);
+  }
 }
 
 function spawnPickup(x, y) {
@@ -1812,15 +2401,21 @@ function hurtPlayer(player) {
   player.vy = 0;
   player.invuln = 2.1;
   player.respawn = 0.55;
-  state.enemies = state.enemies.filter((enemy) => Math.hypot(enemy.x - player.x, enemy.y - player.y) > 130);
+  state.enemies = state.enemies.filter((enemy) => {
+    const keep = Math.hypot(enemy.x - player.x, enemy.y - player.y) > 130;
+    if (!keep) neutralizeEnemyForProgress(enemy);
+    return keep;
+  });
   bus.play("playerSpawn", 0.3);
 }
 
 function finishRun(status) {
+  clearTouchInput();
   state.status = status;
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
   state.banner.timer = 0;
+  bus.refreshLoops();
   if (status === "gameover") bus.play("gameOver", 0.4);
   else bus.play("level", 0.4);
   updateOverlay();
@@ -1830,6 +2425,8 @@ function collectCommands() {
   const commands = Array.from({ length: state.playerCount }, (_, id) => commandForKeyboard(id));
   applyGamepads(commands);
   if (commands[0]) applyPointerInput(commands[0]);
+  applyTouchSquadInput(commands);
+  applySquadFallback(commands);
   for (const id of input.bombQueued) {
     if (commands[id]) commands[id].bomb = true;
   }
@@ -1860,7 +2457,10 @@ function commandForKeyboard(id) {
 function applyPointerInput(command) {
   command.move = normalize(command.move.x + input.moveVector.x, command.move.y + input.moveVector.y) ?? { x: 0, y: 0 };
 
-  if (input.aimPoint) {
+  if (input.aimVector) {
+    command.aim = input.aimVector;
+    command.fire = true;
+  } else if (input.aimPoint) {
     command.aim = normalize(input.aimPoint.x - state.players[0].x, input.aimPoint.y - state.players[0].y);
     command.fire = true;
   } else if (input.mouse.active) {
@@ -1870,8 +2470,76 @@ function applyPointerInput(command) {
   }
 }
 
+function applyTouchSquadInput(commands) {
+  if (!input.aimVector && input.moveTouch === null && input.aimTouch === null) return;
+  if (commands.length <= 1) return;
+  const leader = state.players[0];
+  if (!leader) return;
+  for (let i = 1; i < commands.length; i += 1) {
+    const player = state.players[i];
+    const command = commands[i];
+    if (!player || !command) continue;
+    const slot = squadTouchSlot(i, commands.length);
+    const dx = leader.x + slot.x - player.x;
+    const dy = leader.y + slot.y - player.y;
+    const distance = Math.hypot(dx, dy);
+    const follow = distance > 20 ? normalize(dx, dy) : input.moveVector;
+    if (follow) command.move = normalize(command.move.x + follow.x, command.move.y + follow.y) ?? { x: 0, y: 0 };
+    if (input.aimVector) {
+      command.aim = input.aimVector;
+      command.fire = true;
+    }
+  }
+}
+
+function applySquadFallback(commands) {
+  if (commands.length <= PLAYER_KEYS.length) return;
+  const leader = state.players[0];
+  const leadCommand = commands[0];
+  if (!leader || !leadCommand) return;
+  for (let i = PLAYER_KEYS.length; i < commands.length; i += 1) {
+    const player = state.players[i];
+    const command = commands[i];
+    if (!player || !command || hasCommandInput(command)) continue;
+    const slot = squadTouchSlot(i, commands.length);
+    const dx = leader.x + slot.x - player.x;
+    const dy = leader.y + slot.y - player.y;
+    const follow = Math.hypot(dx, dy) > 16 ? normalize(dx, dy) : null;
+    if (follow) command.move = follow;
+    if (leadCommand.fire || leadCommand.aim) {
+      command.aim = leadCommand.aim ?? leader.lastAim;
+      command.fire = leadCommand.fire;
+    }
+  }
+}
+
+function hasCommandInput(command) {
+  return Math.hypot(command.move.x, command.move.y) > 0.001 || Boolean(command.aim || command.fire || command.bomb);
+}
+
+function squadTouchSlot(index, count) {
+  const spread = 44;
+  const row = Math.floor((index - 1) / 2);
+  const side = index % 2 === 1 ? -1 : 1;
+  return {
+    x: side * spread * (1 + row * 0.35),
+    y: 42 + row * 32 + Math.max(0, count - 2) * 4
+  };
+}
+
 function emptyCommand() {
   return { move: { x: 0, y: 0 }, aim: null, fire: false, bomb: false };
+}
+
+function clearTouchInput() {
+  input.pointers.clear();
+  input.moveTouch = null;
+  input.aimTouch = null;
+  input.moveVector.x = 0;
+  input.moveVector.y = 0;
+  input.aimPoint = null;
+  input.aimVector = null;
+  updateTouchUi();
 }
 
 function applyGamepads(commands) {
@@ -1918,6 +2586,7 @@ function endPointer(event) {
   if (input.aimTouch === event.pointerId) {
     input.aimTouch = null;
     input.aimPoint = null;
+    input.aimVector = null;
   }
   input.pointers.delete(event.pointerId);
   updateTouchVectors();
@@ -1933,7 +2602,7 @@ function updateTouchVectors() {
     const dx = touch.x - touch.startX;
     const dy = touch.y - touch.startY;
     const len = Math.hypot(dx, dy);
-    const cap = 54;
+    const cap = 62;
     input.moveVector.x = len > 0 ? clamp(dx / cap, -1, 1) : 0;
     input.moveVector.y = len > 0 ? clamp(dy / cap, -1, 1) : 0;
     const mag = Math.hypot(input.moveVector.x, input.moveVector.y);
@@ -1943,7 +2612,37 @@ function updateTouchVectors() {
     }
   }
   const aimTouch = input.aimTouch !== null ? input.pointers.get(input.aimTouch) : null;
-  input.aimPoint = aimTouch ? aimTouch.world : null;
+  if (!aimTouch) {
+    input.aimPoint = null;
+    input.aimVector = null;
+  } else {
+    const dx = aimTouch.x - aimTouch.startX;
+    const dy = aimTouch.y - aimTouch.startY;
+    const stickAim = Math.hypot(dx, dy) > 8 ? normalize(dx, dy) : null;
+    const worldAim = pointInsideArena(aimTouch.x, aimTouch.y)
+      ? normalize(aimTouch.world.x - state.players[0].x, aimTouch.world.y - state.players[0].y)
+      : null;
+    input.aimPoint = null;
+    input.aimVector = stickAim ?? worldAim ?? state.players[0]?.lastAim ?? { x: 0, y: -1 };
+  }
+  updateTouchUi();
+}
+
+function pointInsideArena(x, y) {
+  return x >= view.x && x <= view.x + view.w && y >= view.y && y <= view.y + view.h;
+}
+
+function updateTouchUi() {
+  if (!touchMarks) return;
+  updateTouchZone(touchMoveZone, input.moveTouch !== null, input.moveVector);
+  updateTouchZone(touchAimZone, input.aimTouch !== null, input.aimVector ?? { x: 0, y: 0 });
+}
+
+function updateTouchZone(zone, active, vector) {
+  if (!zone) return;
+  zone.classList.toggle("is-active", active);
+  zone.style.setProperty("--stick-x", `${clamp(vector.x, -1, 1) * 34}px`);
+  zone.style.setProperty("--stick-y", `${clamp(vector.y, -1, 1) * 34}px`);
 }
 
 function eventToWorld(event) {
@@ -1960,19 +2659,26 @@ function applyGravity(body, dt, factor) {
   const profile = currentLevel();
   if (profile.pull <= 0 || state.wells.length === 0) return;
   for (const well of state.wells) {
-    if (well.dead) continue;
+    if (!isWellSuctionActive(well)) continue;
     const dx = well.x - body.x;
     const dy = well.y - body.y;
     const dist = Math.hypot(dx, dy) || 1;
     if (dist > WELL_GRAVITY_RADIUS) continue;
     const t = 1 - clamp(dist / WELL_GRAVITY_RADIUS, 0, 1);
-    const sink = well.sinkPulse ?? 0;
-    const pull = profile.pull * factor * t * t * (0.55 + t * 2.15 + sink * 0.8);
-    const swirl = pull * (0.34 + t * 0.58 + sink * 0.28);
+    const capture = 1 - clamp(dist / WELL_CAPTURE_RADIUS, 0, 1);
+    const suction = clamp(well.suction ?? 0, 0.25, 1);
+    const sink = (well.sinkPulse ?? 0) * suction;
+    const pull = profile.pull * factor * suction * (0.18 + t * t * (2.85 + sink * 0.8) + capture * capture * 8.2);
+    const swirl = pull * (0.38 + t * 0.76 + capture * 1.15 + sink * 0.32);
     const nx = dx / dist;
     const ny = dy / dist;
     body.vx += (nx * pull - ny * swirl) * dt;
     body.vy += (ny * pull + nx * swirl) * dt;
+    if (capture > 0) {
+      const drag = clamp(1 - dt * factor * (1.15 + capture * 3.85), 0.58, 1);
+      body.vx *= drag;
+      body.vy *= drag;
+    }
   }
 }
 
@@ -2032,7 +2738,9 @@ function bounceInArena(body, r) {
 }
 
 function burst(x, y, color, count) {
-  for (let i = 0; i < count; i += 1) {
+  const budget = Math.max(0, PARTICLE_LIMIT - state.particles.length);
+  const burstCount = Math.min(count, budget);
+  for (let i = 0; i < burstCount; i += 1) {
     const a = state.rng.range(0, TAU);
     const speed = state.rng.range(45, 300);
     addParticle(x, y, Math.cos(a) * speed, Math.sin(a) * speed, color, state.rng.range(0.22, 0.58), state.rng.range(1.8, 4.5), 0.975);
@@ -2040,10 +2748,12 @@ function burst(x, y, color, count) {
 }
 
 function addRing(x, y, color, radius, speed) {
+  if (state.particles.length >= RING_PARTICLE_LIMIT) return;
   state.particles.push({ x, y, vx: 0, vy: 0, color, life: 0.72, maxLife: 0.72, age: 0, size: radius, ring: true, speed, drag: 1 });
 }
 
 function addParticle(x, y, vx, vy, color, life, size, drag) {
+  if (state.particles.length >= PARTICLE_LIMIT) return;
   state.particles.push({ x, y, vx, vy, color, life, maxLife: life, age: 0, size, drag });
 }
 
@@ -2109,7 +2819,11 @@ function render() {
   const sx = shake ? state.rng.range(-shake, shake) : 0;
   const sy = shake ? state.rng.range(-shake, shake) : 0;
 
-  renderer.beginFrame(view, sx, sy);
+  if (!renderer.beginFrame(view, sx, sy)) {
+    bannerText.hidden = false;
+    bannerText.textContent = "Renderer paused. Reloading will restore the signal.";
+    return;
+  }
   renderer.setLights(buildLights());
   drawBackdrop();
   renderer.setWorldClip(true);
@@ -2229,15 +2943,19 @@ function drawCircuitSilhouette() {
 function drawWells() {
   for (const well of state.wells) {
     const pulse = 0.5 + Math.sin(state.time * 4 + well.age) * 0.5;
-    const sink = well.sinkPulse ?? 0;
-    const spin = well.age + state.time * (0.92 + sink * 1.65);
+    const active = isWellSuctionActive(well);
+    const suction = active ? clamp(well.suction ?? 0, 0, 1) : 0;
+    const sink = (well.sinkPulse ?? 0) * (0.4 + suction * 0.6);
+    const danger = active ? 0.42 + suction * 0.58 : 0.18;
+    const spin = well.age + state.time * (0.62 + danger * 1.95 + sink * 1.65);
     const color = well.flash > 0 ? COLORS.white : COLORS.violet;
     renderer.setBlend("add");
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, 0, 0.08 + sink * 0.1, { color: COLORS.violet });
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.23 + sink * 0.12, { color: COLORS.violet });
-    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.2 + sink * 0.08, { color: COLORS.cyan });
-    renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.04 + sink * 0.04, 96);
-    renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.32 + sink * 0.28);
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, WELL_GRAVITY_RADIUS * 1.16 + pulse * 36 + sink * 82, 0, 0.025 + danger * 0.08 + sink * 0.1, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 304 + pulse * 58 + sink * 54, 304 + pulse * 58 + sink * 54, 0, 0.1 + danger * 0.2 + sink * 0.12, { color: COLORS.violet });
+    renderer.drawWorldImage(GL_IMAGES.glow, well.x, well.y, 188 + pulse * 24 + sink * 30, 188 + pulse * 24 + sink * 30, 0, 0.1 + danger * 0.16 + sink * 0.08, { color: COLORS.cyan });
+    renderer.drawWorldRing(well.x, well.y, WELL_GRAVITY_RADIUS + pulse * 10, 1.2, COLORS.violet, 0.012 + danger * 0.05 + sink * 0.04, 96);
+    renderer.drawWorldRing(well.x, well.y, WELL_CAPTURE_RADIUS + pulse * 7 + sink * 18, 2.1 + sink * 1.2, COLORS.magenta, 0.08 + danger * 0.22 + sink * 0.22, 72);
+    renderer.drawWorldRing(well.x, well.y, 118 + pulse * 18 + sink * 14, 3.2 + sink * 1.4, color, 0.18 + danger * 0.28 + sink * 0.28);
     renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + 11 + pulse * 5 + sink * 10, 2.6 + sink * 2.2, COLORS.gold, 0.34 + sink * 0.34, 28);
     renderer.setBlend("normal");
     renderer.drawWorldCircle(well.x, well.y, 62 + pulse * 3 + sink * 9, COLORS.ink, 0.62 + sink * 0.16, 42);
@@ -2385,7 +3103,11 @@ function drawEnemies() {
 
 function drawEnemyPlate(enemy, spec, color, angle) {
   const darkRadius = spec.r * (enemy.type === "mayfly" ? 1.75 : 2.2);
-  renderer.drawWorldCircle(enemy.x + 2, enemy.y + 4, darkRadius, COLORS.ink, enemy.type === "mayfly" ? 0.42 : 0.62, 34);
+  const flash = enemy.flash > 0 ? 1 : 0;
+  const edgeSegments = enemy.type === "splitter" ? 4 : enemy.type === "mayfly" ? 14 : 20;
+  renderer.drawWorldCircle(enemy.x + 2, enemy.y + 5, darkRadius + (enemy.type === "mayfly" ? 2 : 5), COLORS.ink, enemy.type === "mayfly" ? 0.68 : 0.82, 34);
+  renderer.drawWorldRing(enemy.x, enemy.y, darkRadius + 2, enemy.type === "mayfly" ? 2 : 3.2, COLORS.white, flash ? 0.72 : 0.24, edgeSegments);
+  renderer.drawWorldRing(enemy.x, enemy.y, darkRadius - 2, enemy.type === "mayfly" ? 1.6 : 2.4, color, enemy.type === "mayfly" ? 0.76 : 0.9, edgeSegments);
   renderer.setBlend("add");
   if (enemy.type === "lancer") {
     const v = normalize(enemy.vx, enemy.vy) ?? { x: Math.cos(angle), y: Math.sin(angle) };
@@ -2709,15 +3431,23 @@ function updateHud() {
   hud.score.textContent = formatNumber(state.score);
   hud.level.textContent = String(Math.min(state.levelIndex + 1, LEVELS.length));
   const profile = currentLevel();
-  const remaining = Math.max(0, profile.quota - state.killed) + state.wells.length;
+  let liveEnemies = 0;
+  let liveWells = 0;
+  for (const enemy of state.enemies) {
+    if (!enemy.dead) liveEnemies += 1;
+  }
+  for (const well of state.wells) {
+    if (!well.dead) liveWells += 1;
+  }
+  const remaining = Math.max(0, profile.quota - state.killed, liveEnemies) + liveWells;
   hud.objective.textContent = String(remaining);
   hud.lives.textContent = String(state.team.lives);
   hud.bombs.textContent = String(state.team.bombs);
   hud.multiplier.textContent = `${STR.multiplier}${state.team.multiplier}`;
   hud.status.textContent = state.status === "running" ? `${currentLevel().name} - ${state.playerCount}P` : statusText();
   hud.best.textContent = `${STR.best}: ${formatNumber(state.best)}`;
-  pauseAction.hidden = state.status === "menu" || state.status === "gameover" || state.status === "victory";
-  bombAction.hidden = state.status !== "running";
+  setControlAvailability(pauseAction, state.status === "running" || state.status === "paused", { hide: true });
+  setControlAvailability(bombAction, state.status === "running", { hide: true });
   updateForgePanels();
 }
 
@@ -2729,13 +3459,16 @@ function statusText() {
 }
 
 function updateOverlay() {
-  soundAction.textContent = bus.muted ? STR.unmute : STR.mute;
+  requestStaticFrame();
+  soundAction.textContent = bus.muted ? STR.soundOff : STR.soundOn;
   soundAction.setAttribute("aria-label", STR.muteButton);
+  soundAction.setAttribute("aria-pressed", String(!bus.muted));
+  soundAction.title = bus.muted ? "Sound is off. Click to turn sound on." : "Sound is on. Click to mute.";
   if (state.status === "running") {
     hideOverlay();
     return;
   }
-  overlay.hidden = false;
+  setRegionAvailability(overlay, true, { hide: true });
   shell.dataset.mode = state.status;
   overlay.dataset.state = state.status;
   const menu = state.status === "menu";
@@ -2746,24 +3479,38 @@ function updateOverlay() {
   overlayCopy.textContent = state.status === "paused" ? STR.overlayPaused :
     state.status === "gameover" ? STR.overlayGameOver :
       state.status === "victory" ? STR.overlayVictory : STR.overlayReady;
-  primaryAction.textContent = state.status === "paused" ? STR.resume :
-    state.status === "menu" ? STR.start : STR.restart;
+  primaryAction.textContent = startPending ? STR.loading :
+    state.status === "paused" ? STR.resume :
+    state.status === "menu" ? STR.startButton : STR.restart;
+  primaryAction.setAttribute("aria-label", primaryAction.textContent);
+  setControlAvailability(primaryAction, true);
+  primaryAction.disabled = startPending;
+  primaryAction.tabIndex = startPending ? -1 : 0;
+  if (startPending) primaryAction.setAttribute("aria-busy", "true");
+  else primaryAction.removeAttribute("aria-busy");
+  setControlAvailability(soundAction, true);
+  homeAction.textContent = STR.selectPilots;
+  homeAction.setAttribute("aria-label", STR.selectPilots);
+  setControlAvailability(homeAction, state.status === "gameover" || state.status === "victory", { hide: true });
 
-  playerChooser.hidden = state.status !== "menu";
-  if (!playerChooser.hidden) buildPlayerChooser();
+  setElementAvailability(controlsHint, menu, { hide: true });
+  setRegionAvailability(playerChooser, menu, { hide: true });
+  if (menu) buildPlayerChooser();
+  if (menu && bus.unlocked && !bus.muted) bus.ensureStartupMusic();
 
-  if (state.status === "gameover" || state.status === "victory") {
-    overlayStats.hidden = false;
+  const showingStats = state.status === "gameover" || state.status === "victory";
+  setElementAvailability(overlayStats, showingStats, { hide: true });
+  if (showingStats) {
     overlayStats.textContent = `${STR.finalScore}: ${formatNumber(state.score)}  /  ${STR.players}: ${state.playerCount}  /  ${STR.level}: ${Math.min(state.levelIndex + 1, LEVELS.length)}`;
   } else {
-    overlayStats.hidden = true;
     overlayStats.textContent = "";
   }
   updateForgePanels();
 }
 
 function hideOverlay() {
-  overlay.hidden = true;
+  setRegionAvailability(overlay, false, { hide: true });
+  overlay.dataset.state = "running";
   shell.dataset.mode = "running";
 }
 
@@ -2808,6 +3555,7 @@ function resize() {
     view.camY = 0;
   }
   syncArenaCssVars();
+  requestStaticFrame();
 }
 
 function syncArenaCssVars() {
@@ -2838,15 +3586,125 @@ function loadImage(path) {
   return image;
 }
 
-function loadSpritePairs(names) {
-  const out = {};
-  for (const name of names) {
-    out[name] = {
-      diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`),
-      normal: loadImage(`${ASSETS.spriteBase}${name}.normal.png`)
+function scheduleVisualPrewarm() {
+  if (visualPrewarmScheduled) return;
+  visualPrewarmScheduled = true;
+  window.setTimeout(() => {
+    queueGameplayImageLoad({ initialDelay: 0, stepDelay: LOW_POWER_MEDIA.matches ? 360 : 160 });
+    queueSpritePairLoad({ initialDelay: LOW_POWER_MEDIA.matches ? 900 : 360, stepDelay: LOW_POWER_MEDIA.matches ? 420 : 190 });
+  }, LOW_POWER_MEDIA.matches ? 1800 : 700);
+}
+
+function ensureVisualAssetsReady() {
+  loadMissingVisualAssetsNow();
+  const timeout = LOW_POWER_MEDIA.matches ? 9000 : 5000;
+  const started = performance.now();
+  return new Promise((resolve) => {
+    const tick = () => {
+      if (visualAssetsReady() || performance.now() - started >= timeout) {
+        if (visualAssetsReady()) prewarmVisualTextures();
+        resolve(visualAssetsReady());
+        return;
+      }
+      window.setTimeout(tick, 90);
     };
+    tick();
+  });
+}
+
+function ensureStartupAssetsReady() {
+  const timeout = LOW_POWER_MEDIA.matches ? 5200 : 3200;
+  return Promise.race([
+    Promise.allSettled([ensureVisualAssetsReady(), ensureRunAudioReady()]),
+    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
+  ]);
+}
+
+function ensureRunAudioReady() {
+  if (bus.muted) return Promise.resolve([]);
+  const timeout = LOW_POWER_MEDIA.matches ? 4500 : 2400;
+  return Promise.race([
+    Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id))),
+    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
+  ]);
+}
+
+function visualAssetsReady() {
+  const gameplayReady = Object.keys(GAMEPLAY_IMAGE_PATHS).every((key) => imageReady(GL_IMAGES[key]));
+  const spritesReady = SPRITE_PAIR_NAMES.every((name) => {
+    const pair = GL_IMAGES.sprites[name];
+    return imageReady(pair?.diffuse) && imageReady(pair?.normal);
+  });
+  return imageReady(GL_IMAGES.atlas) && gameplayReady && spritesReady;
+}
+
+function prewarmVisualTextures() {
+  renderer.textureFor(GL_IMAGES.atlas, false);
+  renderer.textureFor(GL_IMAGES.parallaxFar, true);
+  renderer.textureFor(GL_IMAGES.parallaxMid, true);
+  renderer.textureFor(GL_IMAGES.parallaxNear, true);
+  renderer.textureFor(GL_IMAGES.glow, false);
+  renderer.textureFor(GL_IMAGES.lightRay, false);
+  renderer.textureFor(GL_IMAGES.forgeCore, false);
+  for (const name of SPRITE_PAIR_NAMES) {
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair) continue;
+    renderer.textureFor(pair.diffuse, false);
+    renderer.textureFor(pair.normal, false);
   }
-  return out;
+}
+
+function loadMissingVisualAssetsNow() {
+  for (const [key, path] of Object.entries(GAMEPLAY_IMAGE_PATHS)) {
+    if (!GL_IMAGES[key]) GL_IMAGES[key] = loadImage(path);
+  }
+  for (const name of SPRITE_PAIR_NAMES) {
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair?.diffuse || !pair?.normal) {
+      GL_IMAGES.sprites[name] = loadSpritePair(name);
+    }
+  }
+}
+
+function queueGameplayImageLoad(options = {}) {
+  if (gameplayImagesQueued) return;
+  gameplayImagesQueued = true;
+  const pending = Object.entries(GAMEPLAY_IMAGE_PATHS);
+  const initialDelay = Number(options.initialDelay) || 120;
+  const stepDelay = Number(options.stepDelay) || 450;
+  const pump = () => {
+    const next = pending.shift();
+    if (!next) return;
+    const [key, path] = next;
+    if (!GL_IMAGES[key]) GL_IMAGES[key] = loadImage(path);
+    if (pending.length) runWhenIdle(pump, stepDelay);
+  };
+  runWhenIdle(pump, initialDelay);
+}
+
+function queueSpritePairLoad(options = {}) {
+  if (spritePairsQueued) return;
+  spritePairsQueued = true;
+  const pending = [...SPRITE_PAIR_NAMES];
+  const initialDelay = Number(options.initialDelay) || 1200;
+  const stepDelay = Number(options.stepDelay) || 650;
+  const pump = () => {
+    const name = pending.shift();
+    if (!name) return;
+    const pair = GL_IMAGES.sprites[name];
+    if (!pair?.diffuse || !pair?.normal) {
+      GL_IMAGES.sprites[name] = loadSpritePair(name);
+    }
+    if (pending.length) runWhenIdle(pump, stepDelay);
+  };
+  runWhenIdle(pump, initialDelay);
+}
+
+function loadSpritePair(name) {
+  return {
+    diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`),
+    normal: loadImage(`${ASSETS.spriteBase}${name}.normal.png`)
+  };
 }
 
 function imageReady(image) {
@@ -2934,6 +3792,15 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function smoothStep(rate, dt) {
+  return 1 - Math.exp(-Math.max(0, rate) * dt);
+}
+
+function turnTowardAngle(current, target, rate, dt) {
+  const delta = Math.atan2(Math.sin(target - current), Math.cos(target - current));
+  return current + delta * smoothStep(rate, dt);
+}
+
 function distance2(a, b) {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
@@ -2996,7 +3863,7 @@ function savePlayerCount(value) {
 
 function loadMuted() {
   try {
-    return localStorage.getItem("2084-static-wars-muted") === "1";
+    return localStorage.getItem(MUTE_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -3004,7 +3871,10 @@ function loadMuted() {
 
 function saveMuted(value) {
   try {
-    localStorage.setItem("2084-static-wars-muted", value ? "1" : "0");
+    localStorage.setItem(MUTE_STORAGE_KEY, value ? "1" : "0");
+    for (const key of LEGACY_MUTE_STORAGE_KEYS) {
+      localStorage.removeItem(key);
+    }
   } catch {
     // Muting is still applied in memory when storage is unavailable.
   }
