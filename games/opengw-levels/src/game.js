@@ -1713,10 +1713,18 @@ async function primary() {
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
     startPending = true;
     updateOverlay();
-    await bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
-    await Promise.all([ensureVisualAssetsReady(), ensureRunAudioReady()]);
-    startPending = false;
-    startRun();
+    try {
+      await Promise.race([
+        bus.unlock({ refreshLoops: false, allowBackgroundLoad: false }),
+        new Promise((resolve) => window.setTimeout(resolve, 700))
+      ]);
+      await ensureStartupAssetsReady();
+    } catch {
+      // Slow or unsupported media should never trap the player on the launch button.
+    } finally {
+      startPending = false;
+      startRun();
+    }
   } else if (state.status === "paused") {
     bus.unlock();
     setPaused(false);
@@ -1858,14 +1866,9 @@ function updatePlayers(dt, commands) {
     player.x = clamp(player.x, 28, WORLD.w - 28);
     player.y = clamp(player.y, 28, WORLD.h - 28);
 
-    let aim = command.aim;
-    if (!aim) {
-      const target = nearestThreat(player.x, player.y);
-      if (target) aim = normalize(target.x - player.x, target.y - player.y);
-    }
-    if (aim) {
-      player.lastAim = aim;
-      player.angle = turnTowardAngle(player.angle, Math.atan2(aim.y, aim.x), PLAYER_TURN_RATE, dt);
+    if (command.aim) {
+      player.lastAim = command.aim;
+      player.angle = turnTowardAngle(player.angle, Math.atan2(command.aim.y, command.aim.x), PLAYER_TURN_RATE, dt);
     }
     if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
@@ -2698,26 +2701,6 @@ function blackHoleSwallow(well, body, color, count) {
       0.986
     );
   }
-}
-
-function nearestThreat(x, y) {
-  let best = null;
-  let bestD = Infinity;
-  for (const enemy of state.enemies) {
-    const d = distance2({ x, y }, enemy);
-    if (d < bestD) {
-      bestD = d;
-      best = enemy;
-    }
-  }
-  for (const well of state.wells) {
-    const d = distance2({ x, y }, well) * 0.8;
-    if (d < bestD) {
-      bestD = d;
-      best = well;
-    }
-  }
-  return best;
 }
 
 function nearestPlayer(x, y) {
@@ -3629,9 +3612,21 @@ function ensureVisualAssetsReady() {
   });
 }
 
+function ensureStartupAssetsReady() {
+  const timeout = LOW_POWER_MEDIA.matches ? 5200 : 3200;
+  return Promise.race([
+    Promise.allSettled([ensureVisualAssetsReady(), ensureRunAudioReady()]),
+    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
+  ]);
+}
+
 function ensureRunAudioReady() {
   if (bus.muted) return Promise.resolve([]);
-  return Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id)));
+  const timeout = LOW_POWER_MEDIA.matches ? 4500 : 2400;
+  return Promise.race([
+    Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id))),
+    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
+  ]);
 }
 
 function visualAssetsReady() {
