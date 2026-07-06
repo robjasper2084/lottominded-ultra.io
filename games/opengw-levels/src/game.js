@@ -1337,16 +1337,11 @@ function updatePlayers(dt, commands) {
     player.x = clamp(player.x, 28, WORLD.w - 28);
     player.y = clamp(player.y, 28, WORLD.h - 28);
 
-    let aim = command.aim;
-    if (!aim) {
-      const target = nearestThreat(player.x, player.y);
-      if (target) aim = normalize(target.x - player.x, target.y - player.y);
+    if (command.aim) {
+      player.lastAim = command.aim;
+      player.angle = Math.atan2(command.aim.y, command.aim.x);
     }
-    if (aim) {
-      player.lastAim = aim;
-      player.angle = Math.atan2(aim.y, aim.x);
-    }
-    if ((command.fire || aim) && player.shotTimer <= 0) {
+    if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
       player.shotTimer = Math.max(0.065, 0.115 - state.levelIndex * 0.004);
     }
@@ -2000,26 +1995,6 @@ function blackHoleSwallow(well, body, color, count) {
       0.986
     );
   }
-}
-
-function nearestThreat(x, y) {
-  let best = null;
-  let bestD = Infinity;
-  for (const enemy of state.enemies) {
-    const d = distance2({ x, y }, enemy);
-    if (d < bestD) {
-      bestD = d;
-      best = enemy;
-    }
-  }
-  for (const well of state.wells) {
-    const d = distance2({ x, y }, well) * 0.8;
-    if (d < bestD) {
-      bestD = d;
-      best = well;
-    }
-  }
-  return best;
 }
 
 function nearestPlayer(x, y) {
