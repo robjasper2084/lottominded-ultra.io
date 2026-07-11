@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=top-scores-1";
+import { STR } from "../strings.js?v=share-result-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -229,6 +229,7 @@ const MUTE_STORAGE_KEY = "2084-static-wav-muted-v2";
 const LEGACY_MUTE_STORAGE_KEYS = ["2084-static-wav-muted", "2084-static-wars-muted"];
 const HIGH_SCORE_STORAGE_KEY = "2084-static-wav-top-scores-v1";
 const HIGH_SCORE_LIMIT = 5;
+const SHARE_URL = "https://robjasper2084.github.io/lottominded-ultra.io/games/opengw-levels/";
 
 class StaticWarsRenderer {
   constructor(targetCanvas) {
@@ -844,6 +845,15 @@ const scoreboard = {
   note: $("scoreboardNote"),
   list: $("scoreboardList")
 };
+const shareResult = {
+  panel: $("shareResultPanel"),
+  toggle: $("shareResultToggle"),
+  options: $("shareResultOptions"),
+  facebook: $("shareFacebookAction"),
+  instagram: $("shareInstagramAction"),
+  x: $("shareXAction"),
+  status: $("shareResultStatus")
+};
 const bannerText = $("bannerText");
 const fxLayer = $("fxLayer");
 const forgeUi = {
@@ -875,6 +885,8 @@ const touchAimZone = touchMarks?.querySelector(".right-zone");
 const devEl = $("dev");
 let selectedPlayerCount = loadPlayerCount();
 let forgeHudDismissed = false;
+let shareResultExpanded = false;
+let shareStatusTimer = 0;
 
 document.title = STR.title;
 for (const node of document.querySelectorAll("[data-label]")) {
@@ -888,6 +900,13 @@ bombAction.setAttribute("aria-label", STR.bombButton);
 bombAction.setAttribute("title", `${STR.bombButton} (Space)`);
 forgeHudClose.textContent = "X";
 forgeHudClose.setAttribute("aria-label", STR.forgeClose);
+if (shareResult.toggle) {
+  shareResult.toggle.textContent = STR.shareResult;
+  shareResult.toggle.setAttribute("aria-label", STR.shareResult);
+}
+if (shareResult.facebook) shareResult.facebook.textContent = STR.shareFacebook;
+if (shareResult.instagram) shareResult.instagram.textContent = STR.shareInstagram;
+if (shareResult.x) shareResult.x.textContent = STR.shareX;
 forgeHudClose.setAttribute("title", STR.forgeClose);
 forgeToggleAction.textContent = STR.forgeToggle;
 forgeToggleAction.setAttribute("aria-label", STR.forgeShow);
@@ -1480,6 +1499,7 @@ addEventListener("focus", () => {
 });
 
 addEventListener("keydown", (event) => {
+  if (event.target?.closest?.("#shareResultPanel")) return;
   if (event.code === "Enter" && !event.repeat) {
     event.preventDefault();
     primary();
@@ -1578,6 +1598,13 @@ soundAction.addEventListener("click", () => {
   }
   bus.toggle();
 });
+shareResult.toggle?.addEventListener("click", () => {
+  bus.play("menuSelect", 0.08);
+  setShareResultExpanded(!shareResultExpanded);
+});
+shareResult.facebook?.addEventListener("click", () => openShareResult("facebook"));
+shareResult.instagram?.addEventListener("click", copyInstagramResultCaption);
+shareResult.x?.addEventListener("click", () => openShareResult("x"));
 pauseAction.addEventListener("click", togglePause);
 forgeHudClose.addEventListener("click", (event) => {
   event.preventDefault();
@@ -1705,6 +1732,7 @@ function makePlayer(index, count = 1) {
 
 function startRun() {
   forgeHudDismissed = true;
+  setShareResultExpanded(false);
   state = createState();
   state.status = "running";
   beginLevel(0);
@@ -1746,6 +1774,7 @@ function returnHome() {
   input.bombQueued.clear();
   input.mouse.down = false;
   forgeHudDismissed = false;
+  setShareResultExpanded(false);
   state = createState();
   state.status = "menu";
   bus.play("menuSelect", 0.08);
@@ -3511,6 +3540,7 @@ function updateOverlay() {
   } else {
     overlayStats.textContent = "";
   }
+  renderShareResult(showingStats);
   renderScoreboard();
   updateForgePanels();
 }
@@ -3920,6 +3950,104 @@ function saveRunScore(status) {
   });
   savedScores.sort(compareHighScores);
   saveHighScores(savedScores);
+}
+
+function resultLevel() {
+  return Math.min(state.levelIndex + 1, LEVELS.length);
+}
+
+function resultCaption(includeUrl = false) {
+  const outcome = state.status === "victory" ? STR.victory : STR.gameOver;
+  const caption = `${STR.shortTitle}: ${formatNumber(state.score)} ${STR.score}. ${outcome} / ${state.playerCount}P / ${STR.level} ${resultLevel()}. Can you survive the grid?`;
+  return includeUrl ? `${caption} ${SHARE_URL}` : caption;
+}
+
+function openShareResult(platform) {
+  if (!state || (state.status !== "gameover" && state.status !== "victory")) return;
+  const caption = resultCaption(false);
+  const encodedCaption = encodeURIComponent(caption);
+  const encodedUrl = encodeURIComponent(SHARE_URL);
+  const href = platform === "facebook"
+    ? `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedCaption}`
+    : `https://x.com/intent/tweet?text=${encodedCaption}&url=${encodedUrl}`;
+  window.open(href, "_blank", "noopener,noreferrer,width=720,height=640");
+  bus.play("menuSelect", 0.08);
+}
+
+async function copyInstagramResultCaption() {
+  if (!state || (state.status !== "gameover" && state.status !== "victory")) return;
+  const caption = resultCaption(true);
+  let copied = false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(caption);
+      copied = true;
+    }
+  } catch {
+    copied = false;
+  }
+  if (!copied) copied = copyTextFallback(caption);
+  setShareStatus(copied ? STR.shareCopied : STR.shareCopyFailed);
+  if (copied) bus.play("menuSelect", 0.08);
+}
+
+function copyTextFallback(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.append(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  let copied = false;
+  try {
+    copied = document.execCommand("copy");
+  } catch {
+    copied = false;
+  }
+  textarea.remove();
+  return copied;
+}
+
+function setShareStatus(message) {
+  if (!shareResult.status) return;
+  shareResult.status.textContent = message;
+  if (shareStatusTimer) window.clearTimeout(shareStatusTimer);
+  if (message) {
+    shareStatusTimer = window.setTimeout(() => {
+      if (shareResult.status) shareResult.status.textContent = "";
+      shareStatusTimer = 0;
+    }, 2600);
+  }
+}
+
+function setShareResultExpanded(expanded) {
+  shareResultExpanded = Boolean(expanded);
+  if (shareResult.toggle) shareResult.toggle.setAttribute("aria-expanded", String(shareResultExpanded));
+  if (shareResult.options) {
+    shareResult.options.hidden = !shareResultExpanded;
+    shareResult.options.setAttribute("aria-hidden", String(!shareResultExpanded));
+  }
+  if (!shareResultExpanded) setShareStatus("");
+}
+
+function renderShareResult(active) {
+  if (!shareResult.panel) return;
+  setRegionAvailability(shareResult.panel, active, { hide: true });
+  if (!active) {
+    setShareResultExpanded(false);
+    return;
+  }
+  if (shareResult.toggle) {
+    shareResult.toggle.textContent = STR.shareResult;
+    shareResult.toggle.setAttribute("aria-label", STR.shareResult);
+  }
+  if (shareResult.facebook) shareResult.facebook.textContent = STR.shareFacebook;
+  if (shareResult.instagram) shareResult.instagram.textContent = STR.shareInstagram;
+  if (shareResult.x) shareResult.x.textContent = STR.shareX;
+  setShareResultExpanded(shareResultExpanded);
 }
 
 function formatScoreDate(timestamp) {

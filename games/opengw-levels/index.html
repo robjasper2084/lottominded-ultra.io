@@ -8,7 +8,7 @@
     <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
     <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
     <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" as="image" />
-    <link rel="stylesheet" href="./styles.css?v=top-scores-center-1" />
+    <link rel="stylesheet" href="./styles.css?v=share-result-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -86,6 +86,15 @@
         <h1 id="overlayTitle"></h1>
         <p id="overlayCopy"></p>
         <div id="overlayStats" hidden></div>
+        <div id="shareResultPanel" class="share-result-panel" hidden>
+          <button id="shareResultToggle" class="share-result-toggle" type="button" aria-expanded="false"></button>
+          <div id="shareResultOptions" class="share-result-options" hidden>
+            <button id="shareFacebookAction" type="button"></button>
+            <button id="shareInstagramAction" type="button"></button>
+            <button id="shareXAction" type="button"></button>
+          </div>
+          <p id="shareResultStatus" class="share-result-status" aria-live="polite"></p>
+        </div>
         <section id="scoreboardPanel" class="scoreboard-panel" aria-labelledby="scoreboardTitle" hidden>
           <div class="scoreboard-header">
             <span id="scoreboardTitle"></span>
@@ -117,7 +126,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=top-scores-1"></script>
+    <script type="module" src="./src/game.js?v=share-result-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");
