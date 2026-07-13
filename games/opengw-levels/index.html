@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#05070d" />
+    <meta name="static-wave-leaderboard-endpoint" content="" />
     <title>2084 Static Wave - LottoMind</title>
     <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
     <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
     <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" as="image" />
     <link rel="preload" href="./assets/audio/startup-untitled-7.mp3" as="audio" type="audio/mpeg" />
-    <link rel="stylesheet" href="./styles.css?v=audio-unlock-1" />
+    <link rel="stylesheet" href="./styles.css?v=evolution-pass-3" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -60,6 +61,10 @@
         <span id="statusText"></span>
         <span id="bestText"></span>
       </div>
+      <div id="bossMeter" class="boss-meter" hidden aria-live="polite">
+        <span id="bossName">CROWN SIGNAL</span>
+        <div><i id="bossMeterFill"></i></div>
+      </div>
 
       <div id="forgeHud" class="forge-panel forge-hud" aria-live="polite">
         <button id="forgeHudClose" class="forge-close" type="button" aria-label=""></button>
@@ -87,6 +92,11 @@
         <h1 id="overlayTitle"></h1>
         <p id="overlayCopy"></p>
         <div id="overlayStats" hidden></div>
+        <section id="rewardPanel" class="reward-panel" hidden aria-live="polite">
+          <strong id="rewardGrade"></strong>
+          <div><span id="rewardMedal"></span><span id="rewardXp"></span></div>
+          <p id="rewardUnlocks"></p>
+        </section>
         <div id="shareResultPanel" class="share-result-panel" hidden>
           <button id="shareResultToggle" class="share-result-toggle" type="button" aria-expanded="false"></button>
           <div id="shareResultOptions" class="share-result-options" hidden>
@@ -101,16 +111,77 @@
             <span id="scoreboardTitle"></span>
             <small id="scoreboardNote"></small>
           </div>
+          <div class="scoreboard-tabs" role="tablist" aria-label="Scoreboard source">
+            <button id="localScoresAction" type="button" role="tab" aria-selected="true">Local</button>
+            <button id="communityScoresAction" type="button" role="tab" aria-selected="false">Community</button>
+          </div>
           <ol id="scoreboardList" class="scoreboard-list"></ol>
         </section>
         <div id="playerChooser" class="player-chooser" aria-label="Player count"></div>
+        <section id="preflightPanel" class="preflight-panel" aria-label="Mission setup">
+          <div class="preflight-group">
+            <span>Mode</span>
+            <div id="modeChooser" class="segmented-control"></div>
+          </div>
+          <div class="preflight-group">
+            <span>Difficulty</span>
+            <div id="difficultyChooser" class="segmented-control"></div>
+          </div>
+          <div class="pilot-briefing">
+            <strong id="pilotBriefingTitle"></strong>
+            <span id="pilotBriefingText"></span>
+          </div>
+          <div id="profileSummary" class="profile-summary"></div>
+        </section>
         <p id="controlsHint" class="controls-hint"></p>
+        <div id="loadingProgress" class="loading-progress" hidden aria-live="polite">
+          <span id="loadingProgressLabel">Arming signal 0%</span>
+          <div><i id="loadingProgressFill"></i></div>
+        </div>
         <div class="overlay-actions">
           <button id="primaryAction" type="button"></button>
           <button id="homeAction" type="button" hidden></button>
           <button id="soundAction" type="button"></button>
+          <button id="settingsAction" type="button">Settings</button>
           <button id="fullscreenAction" type="button" aria-pressed="false">Full Screen</button>
         </div>
+      </section>
+
+      <section id="settingsPanel" class="settings-panel" hidden aria-labelledby="settingsTitle">
+        <div class="settings-header">
+          <h2 id="settingsTitle">Signal Settings</h2>
+          <button id="settingsCloseAction" class="icon-action" type="button" aria-label="Close settings">X</button>
+        </div>
+        <label>Music <input id="musicVolumeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Sound effects <input id="sfxVolumeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Effects intensity <input id="effectsInput" type="range" min="0.25" max="1" step="0.05" /></label>
+        <label>Camera shake <input id="shakeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Color mode
+          <select id="colorModeInput">
+            <option value="standard">Standard</option>
+            <option value="contrast">High contrast</option>
+            <option value="deuteranopia">Green-safe</option>
+          </select>
+        </label>
+        <label>Controls
+          <select id="controlPresetInput">
+            <option value="classic">WASD + IJKL</option>
+            <option value="arrows">Arrows + IJKL</option>
+            <option value="lefty">IJKL + WASD</option>
+          </select>
+        </label>
+        <label class="toggle-setting"><input id="hapticsInput" type="checkbox" /> Haptics</label>
+        <label class="toggle-setting"><input id="tutorialInput" type="checkbox" /> Tutorial prompts</label>
+        <div class="settings-actions">
+          <button id="tutorialResetAction" type="button">Replay Tutorial</button>
+          <button id="settingsDoneAction" type="button">Done</button>
+        </div>
+      </section>
+
+      <section id="tutorialPanel" class="tutorial-panel" hidden aria-live="polite">
+        <small id="tutorialStep"></small>
+        <strong id="tutorialMessage"></strong>
+        <button id="tutorialSkipAction" type="button">Skip</button>
       </section>
 
       <button id="pauseAction" class="icon-action top-action" type="button" aria-label=""></button>
@@ -127,7 +198,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=audio-unlock-1"></script>
+    <script type="module" src="./src/game.js?v=evolution-pass-2"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

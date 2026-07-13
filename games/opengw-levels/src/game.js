@@ -1,5 +1,22 @@
-import { STR } from "../strings.js?v=audio-unlock-1";
+import { STR } from "../strings.js?v=evolution-pass-2";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
+import {
+  ACHIEVEMENTS,
+  DEFAULT_SETTINGS,
+  DIFFICULTIES,
+  GAME_MODES,
+  awardRun,
+  createLeaderboardService,
+  dailySeed,
+  loadDifficulty,
+  loadMode,
+  loadProfile,
+  loadSettings,
+  saveDifficulty,
+  saveMode,
+  saveProfile,
+  saveSettings
+} from "./metaSystems.js?v=evolution-pass-2";
 
 const WORLD = { w: 1280, h: 720 };
 const STEP = 1 / 60;
@@ -57,19 +74,25 @@ const PLAYER_KEYS = [
   }
 ];
 
+const CONTROL_PRESETS = {
+  classic: { move: { left: "KeyA", right: "KeyD", up: "KeyW", down: "KeyS" }, aim: { left: "KeyJ", right: "KeyL", up: "KeyI", down: "KeyK" }, bomb: "Space" },
+  arrows: { move: { left: "ArrowLeft", right: "ArrowRight", up: "ArrowUp", down: "ArrowDown" }, aim: { left: "KeyJ", right: "KeyL", up: "KeyI", down: "KeyK" }, bomb: "Space" },
+  lefty: { move: { left: "KeyJ", right: "KeyL", up: "KeyI", down: "KeyK" }, aim: { left: "KeyA", right: "KeyD", up: "KeyW", down: "KeyS" }, bomb: "Space" }
+};
+
 const LEVELS = [
   { name: "Signal Wake", quota: 12, max: 7, interval: 1.0, wells: 0, pull: 0, mix: [["wanderer", 8], ["seeker", 2]] },
   { name: "Pink Static", quota: 18, max: 9, interval: 0.86, wells: 0, pull: 0, mix: [["wanderer", 5], ["seeker", 5]] },
   { name: "Gravity Bloom", quota: 22, max: 10, interval: 0.82, wells: 1, pull: 160, mix: [["wanderer", 5], ["seeker", 4], ["splitter", 1]] },
-  { name: "Gold Break", quota: 28, max: 12, interval: 0.76, wells: 1, pull: 180, mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
+  { name: "Gold Break", quota: 28, max: 12, interval: 0.76, wells: 1, pull: 180, boss: "Crown Sentinel", mix: [["wanderer", 4], ["seeker", 4], ["splitter", 3]] },
   { name: "Needle Lane", quota: 32, max: 14, interval: 0.7, wells: 1, pull: 190, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["lancer", 2]] },
   { name: "Mayfly Crown", quota: 46, max: 20, interval: 0.66, wells: 2, pull: 205, mix: [["wanderer", 3], ["seeker", 4], ["splitter", 2], ["mayfly", 5]] },
   { name: "Red Geometry", quota: 52, max: 22, interval: 0.58, wells: 2, pull: 220, mix: [["seeker", 5], ["splitter", 3], ["lancer", 3], ["mayfly", 4]] },
-  { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, mix: [["wanderer", 2], ["seeker", 5], ["splitter", 3], ["lancer", 4], ["mayfly", 5]] },
+  { name: "Crush Field", quota: 60, max: 25, interval: 0.52, wells: 3, pull: 240, boss: "Static Harvester", mix: [["wanderer", 2], ["seeker", 5], ["splitter", 3], ["lancer", 4], ["mayfly", 5]] },
   { name: "Blue Collapse", quota: 70, max: 28, interval: 0.46, wells: 3, pull: 260, mix: [["seeker", 6], ["splitter", 3], ["lancer", 4], ["mayfly", 7]] },
   { name: "Ninefold Static", quota: 84, max: 32, interval: 0.4, wells: 4, pull: 285, mix: [["wanderer", 2], ["seeker", 6], ["splitter", 4], ["lancer", 5], ["mayfly", 8]] },
   { name: "White Ring", quota: 96, max: 34, interval: 0.36, wells: 4, pull: 310, mix: [["seeker", 7], ["splitter", 5], ["lancer", 6], ["mayfly", 9]] },
-  { name: "Last Well", quota: 112, max: 38, interval: 0.32, wells: 5, pull: 340, mix: [["wanderer", 2], ["seeker", 7], ["splitter", 5], ["lancer", 7], ["mayfly", 10]] }
+  { name: "Last Well", quota: 112, max: 38, interval: 0.32, wells: 5, pull: 340, boss: "The Number Eater", mix: [["wanderer", 2], ["seeker", 7], ["splitter", 5], ["lancer", 7], ["mayfly", 10]] }
 ];
 
 const ENEMY = {
@@ -77,7 +100,8 @@ const ENEMY = {
   seeker: { r: 17, hp: 1, speed: 148, score: 160, color: COLORS.magenta },
   splitter: { r: 20, hp: 2, speed: 92, score: 260, color: COLORS.orange },
   lancer: { r: 18, hp: 2, speed: 90, score: 330, color: COLORS.red },
-  mayfly: { r: 8, hp: 1, speed: 228, score: 80, color: COLORS.yellow }
+  mayfly: { r: 8, hp: 1, speed: 228, score: 80, color: COLORS.yellow },
+  boss: { r: 46, hp: 42, speed: 76, score: 6200, color: COLORS.violet }
 };
 
 const ASSETS = {
@@ -843,7 +867,16 @@ const scoreboard = {
   panel: $("scoreboardPanel"),
   title: $("scoreboardTitle"),
   note: $("scoreboardNote"),
-  list: $("scoreboardList")
+  list: $("scoreboardList"),
+  local: $("localScoresAction"),
+  community: $("communityScoresAction")
+};
+const rewardsUi = {
+  panel: $("rewardPanel"),
+  grade: $("rewardGrade"),
+  medal: $("rewardMedal"),
+  xp: $("rewardXp"),
+  unlocks: $("rewardUnlocks")
 };
 const shareResult = {
   panel: $("shareResultPanel"),
@@ -856,6 +889,7 @@ const shareResult = {
 };
 const bannerText = $("bannerText");
 const fxLayer = $("fxLayer");
+const bossUi = { panel: $("bossMeter"), name: $("bossName"), fill: $("bossMeterFill") };
 const forgeUi = {
   startup: {
     label: $("startupForgeLabel"),
@@ -873,17 +907,58 @@ const forgeUi = {
 const forgeHudClose = $("forgeHudClose");
 const forgeToggleAction = $("forgeToggleAction");
 const playerChooser = $("playerChooser");
+const modeChooser = $("modeChooser");
+const difficultyChooser = $("difficultyChooser");
+const pilotBriefingTitle = $("pilotBriefingTitle");
+const pilotBriefingText = $("pilotBriefingText");
+const profileSummary = $("profileSummary");
 const primaryAction = $("primaryAction");
 const homeAction = $("homeAction");
 const soundAction = $("soundAction");
+const settingsAction = $("settingsAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
 const controlsHint = $("controlsHint");
 const touchMarks = $("touchMarks");
 const touchMoveZone = touchMarks?.querySelector(".left-zone");
 const touchAimZone = touchMarks?.querySelector(".right-zone");
+const loadingUi = {
+  panel: $("loadingProgress"),
+  label: $("loadingProgressLabel"),
+  fill: $("loadingProgressFill")
+};
+const tutorialUi = {
+  panel: $("tutorialPanel"),
+  step: $("tutorialStep"),
+  message: $("tutorialMessage"),
+  skip: $("tutorialSkipAction")
+};
+const settingsUi = {
+  panel: $("settingsPanel"),
+  close: $("settingsCloseAction"),
+  done: $("settingsDoneAction"),
+  resetTutorial: $("tutorialResetAction"),
+  music: $("musicVolumeInput"),
+  sfx: $("sfxVolumeInput"),
+  effects: $("effectsInput"),
+  shake: $("shakeInput"),
+  colorMode: $("colorModeInput"),
+  controlPreset: $("controlPresetInput"),
+  haptics: $("hapticsInput"),
+  tutorial: $("tutorialInput")
+};
 const devEl = $("dev");
 let selectedPlayerCount = loadPlayerCount();
+let selectedMode = loadMode();
+let selectedDifficulty = loadDifficulty();
+let playerProfile = loadProfile();
+let gameSettings = loadSettings();
+let settingsOpen = false;
+let scoreboardSource = "local";
+let communityScores = [];
+let communityScoresState = "idle";
+const leaderboardEndpoint = document.querySelector('meta[name="static-wave-leaderboard-endpoint"]')?.content || "";
+const leaderboard = createLeaderboardService(leaderboardEndpoint);
 let forgeHudDismissed = false;
 let shareResultExpanded = false;
 let shareStatusTimer = 0;
@@ -913,6 +988,8 @@ forgeToggleAction.setAttribute("aria-label", STR.forgeShow);
 forgeToggleAction.setAttribute("title", STR.forgeShow);
 controlsHint.textContent = STR.controlsHint;
 buildPlayerChooser();
+buildMissionSetup();
+syncSettingsUi();
 
 class Rng {
   constructor(seed) {
@@ -1118,11 +1195,17 @@ const bus = {
   },
 
   categoryVolume(category) {
-    if (category === "music") return 0.68;
-    if (category === "ambience") return 0.7;
-    if (category === "engine") return 0.72;
-    if (category === "ui") return 0.86;
-    return 1;
+    const music = clamp(Number(gameSettings?.music) || 0, 0, 1);
+    const sfx = clamp(Number(gameSettings?.sfx) || 0, 0, 1);
+    if (category === "music") return 0.68 * music;
+    if (category === "ambience") return 0.7 * sfx;
+    if (category === "engine") return 0.72 * sfx;
+    if (category === "ui") return 0.86 * sfx;
+    return sfx;
+  },
+
+  applyCategoryLevels() {
+    for (const [category, gain] of this.categoryGains) gain.gain.value = this.categoryVolume(category);
   },
 
   audioCategory(id) {
@@ -1467,6 +1550,7 @@ const touchCapable = Boolean(navigator.maxTouchPoints > 0 || matchMedia("(pointe
 shell.dataset.touch = touchCapable ? "true" : "false";
 
 let state = createState();
+applySettings();
 let lastFrame = performance.now();
 let accumulator = 0;
 let fpsFrames = 0;
@@ -1477,6 +1561,9 @@ let staticFrameDirty = true;
 let lastHudUpdate = 0;
 let startPending = false;
 const devEnabled = new URLSearchParams(location.search).has("dev");
+const devStartLevel = devEnabled ? Math.max(0, Number(new URLSearchParams(location.search).get("level") || 1) - 1) : 0;
+const devQuick = devEnabled && new URLSearchParams(location.search).has("quick");
+const devResult = devEnabled && new URLSearchParams(location.search).has("result");
 
 if (devEnabled) devEl.style.display = "block";
 
@@ -1510,6 +1597,13 @@ addEventListener("focus", () => {
 
 addEventListener("keydown", (event) => {
   if (event.target?.closest?.("#shareResultPanel")) return;
+  if (settingsOpen) {
+    if (event.code === "Escape") {
+      event.preventDefault();
+      setSettingsOpen(false);
+    }
+    return;
+  }
   if (event.code === "Enter" && !event.repeat) {
     event.preventDefault();
     primary();
@@ -1616,6 +1710,27 @@ soundAction.addEventListener("click", () => {
   }
   bus.toggle();
 });
+settingsAction?.addEventListener("click", () => setSettingsOpen(true));
+settingsUi.close?.addEventListener("click", () => setSettingsOpen(false));
+settingsUi.done?.addEventListener("click", () => {
+  readSettingsUi();
+  setSettingsOpen(false);
+});
+for (const control of [settingsUi.music, settingsUi.sfx, settingsUi.effects, settingsUi.shake, settingsUi.colorMode, settingsUi.controlPreset, settingsUi.haptics, settingsUi.tutorial]) {
+  control?.addEventListener("input", readSettingsUi);
+  control?.addEventListener("change", readSettingsUi);
+}
+settingsUi.resetTutorial?.addEventListener("click", () => {
+  playerProfile.tutorialComplete = false;
+  saveProfile(playerProfile);
+  gameSettings.tutorial = true;
+  saveSettings(gameSettings);
+  syncSettingsUi();
+  if (state.status === "menu") state.tutorial = { active: true, step: 0, moved: false, fired: false, bombed: false };
+});
+tutorialUi.skip?.addEventListener("click", completeTutorial);
+scoreboard.local?.addEventListener("click", () => setScoreboardSource("local"));
+scoreboard.community?.addEventListener("click", () => setScoreboardSource("community"));
 shareResult.toggle?.addEventListener("click", () => {
   bus.play("menuSelect", 0.08);
   setShareResultExpanded(!shareResultExpanded);
@@ -1664,6 +1779,7 @@ function buildPlayerChooser() {
         updateForgePanels();
       }
       syncPlayerChooser();
+      updateOverlay();
       requestStaticFrame();
     });
     playerChooser.append(button);
@@ -1675,6 +1791,7 @@ function syncPlayerChooser() {
   for (const button of playerChooser.querySelectorAll("button[data-player-count]")) {
     button.setAttribute("aria-pressed", String(Number(button.dataset.playerCount) === selectedPlayerCount));
   }
+  syncMissionSetup();
 }
 
 function bombPlayerForCode(code) {
@@ -1685,7 +1802,9 @@ function bombPlayerForCode(code) {
 }
 
 function createState() {
-  const rng = new Rng(0x0f9e42);
+  const mode = GAME_MODES[selectedMode] ? selectedMode : "campaign";
+  const difficulty = DIFFICULTIES[selectedDifficulty] ? selectedDifficulty : "normal";
+  const rng = new Rng(mode === "daily" ? dailySeed() : 0x0f9e42);
   const playerCount = selectedPlayerCount;
   const players = Array.from({ length: playerCount }, (_, index) => makePlayer(index, playerCount));
   return {
@@ -1696,14 +1815,24 @@ function createState() {
     score: 0,
     best: loadBest(),
     scoreSaved: false,
+    mode,
+    difficulty,
+    settings: { ...gameSettings },
+    timeLeft: GAME_MODES[mode].timeLimit ?? 0,
+    bossesDefeated: 0,
+    bombsUsed: 0,
+    weaponTier: Math.min(2, Math.floor(Math.max(1, playerProfile.rank) / 2)),
+    hullAura: playerProfile.rank >= 6,
+    resultRewards: null,
     playerCount,
     players,
     team: {
-      lives: 2 + playerCount,
+      lives: Math.max(1, 2 + playerCount + DIFFICULTIES[difficulty].lives),
       bombs: 1 + playerCount,
       multiplier: 1
     },
     levelIndex: 0,
+    levelProfile: null,
     spawned: 0,
     killed: 0,
     player: players[0],
@@ -1723,7 +1852,14 @@ function createState() {
     bombOrigin: { x: WORLD.w / 2, y: WORLD.h / 2, color: COLORS.magenta },
     thrustMix: 0,
     forge: createForgeState(playerCount, STR.forgeStartupNote, playerCount * 0x2084),
-    entitiesDrawn: 0
+    entitiesDrawn: 0,
+    tutorial: {
+      active: Boolean(gameSettings.tutorial && !playerProfile.tutorialComplete),
+      step: 0,
+      moved: false,
+      fired: false,
+      bombed: false
+    }
   };
 }
 
@@ -1753,20 +1889,28 @@ function startRun() {
   setShareResultExpanded(false);
   state = createState();
   state.status = "running";
-  beginLevel(0);
+  beginLevel(devStartLevel);
   bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
   window.setTimeout(() => bus.refreshLoops(), LOW_POWER_MEDIA.matches ? 1200 : 250);
   refreshForge(STR.forgeStartNote, 0x2084, true);
   queueGameplayImageLoad();
   queueSpritePairLoad();
   hideOverlay();
+  setLoadingProgress(false, 1);
   updateHud();
+  if (devResult) {
+    state.score = 68420;
+    state.bossesDefeated = 2;
+    state.team.lives = Math.max(1, state.team.lives);
+    window.setTimeout(() => finishRun("victory"), 420);
+  }
 }
 
 async function primary() {
   if (startPending) return;
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
     startPending = true;
+    setLoadingProgress(true, 0.04);
     updateOverlay();
     try {
       await Promise.race([
@@ -1778,6 +1922,7 @@ async function primary() {
       // Slow or unsupported media should never trap the player on the launch button.
     } finally {
       startPending = false;
+      setLoadingProgress(true, 1);
       startRun();
     }
   } else if (state.status === "paused") {
@@ -1827,6 +1972,7 @@ function setPaused(value) {
 
 function beginLevel(index) {
   state.levelIndex = index;
+  state.levelProfile = buildLevelProfile(index);
   state.spawned = 0;
   state.killed = 0;
   state.spawnTimer = 0.7;
@@ -1835,6 +1981,7 @@ function beginLevel(index) {
   state.wells.length = 0;
   const profile = currentLevel();
   for (let i = 0; i < profile.wells; i += 1) spawnWell();
+  if (profile.boss) spawnBoss(profile.boss);
   bus.refreshLoops();
   refreshForge(STR.forgeRunNote, 0x4000 + index, true);
   bus.play("level", 0.6);
@@ -1842,7 +1989,34 @@ function beginLevel(index) {
 }
 
 function currentLevel() {
-  return LEVELS[Math.min(state.levelIndex, LEVELS.length - 1)];
+  return state.levelProfile ?? buildLevelProfile(state.levelIndex);
+}
+
+function buildLevelProfile(index) {
+  const base = LEVELS[Math.min(index, LEVELS.length - 1)];
+  const difficulty = DIFFICULTIES[state?.difficulty ?? selectedDifficulty] ?? DIFFICULTIES.normal;
+  const endlessTier = Math.max(0, index - LEVELS.length + 1);
+  const modeScale = state?.mode === "timeAttack" ? 0.72 : 1;
+  const scale = 1 + endlessTier * 0.11;
+  const boss = index < LEVELS.length
+    ? base.boss
+    : ((index + 1) % 4 === 0 ? `Infinite Crown ${index + 1}` : null);
+  const profile = {
+    ...base,
+    name: index < LEVELS.length ? base.name : `Infinite Signal ${index + 1}`,
+    quota: Math.max(8, Math.round(base.quota * difficulty.quota * modeScale * scale)),
+    max: Math.max(6, Math.round(base.max * Math.min(1.6, scale))),
+    interval: Math.max(0.24, base.interval / Math.min(1.8, scale)),
+    wells: Math.min(6, base.wells + Math.floor(endlessTier / 3)),
+    pull: base.pull * Math.min(1.5, scale),
+    boss
+  };
+  if (devQuick) {
+    profile.quota = 1;
+    profile.max = 2;
+    profile.interval = 0.18;
+  }
+  return profile;
 }
 
 function requestStaticFrame() {
@@ -1882,6 +2056,13 @@ function frame(now) {
 function update(dt, commands) {
   state.time += dt;
   state.runTime += dt;
+  if (state.mode === "timeAttack") {
+    state.timeLeft = Math.max(0, state.timeLeft - dt);
+    if (state.timeLeft <= 0) {
+      finishRun("victory");
+      return;
+    }
+  }
   state.gridOffset = 0;
   state.shake = Math.max(0, state.shake - dt * 9);
   state.bombWave = Math.max(0, state.bombWave - dt * 1.6);
@@ -1894,6 +2075,7 @@ function update(dt, commands) {
   }
 
   updatePlayers(dt, commands);
+  updateTutorial(commands, dt);
   updateAudioMix(commands, dt);
   updateWells(dt);
   updateSpawning(dt);
@@ -1928,7 +2110,7 @@ function updatePlayers(dt, commands) {
     }
     if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
-      player.shotTimer = Math.max(0.065, 0.115 - state.levelIndex * 0.004);
+      player.shotTimer = Math.max(0.06, 0.115 - state.levelIndex * 0.004 - state.weaponTier * 0.008);
     }
     if (command.bomb) triggerBomb(player);
   }
@@ -1998,16 +2180,29 @@ function updateEnemies(dt) {
     const player = nearestPlayer(enemy.x, enemy.y) ?? state.player;
     const toPlayer = normalize(player.x - enemy.x, player.y - enemy.y);
     const spec = ENEMY[enemy.type];
-    if (enemy.type === "wanderer") {
+    const speed = spec.speed * (DIFFICULTIES[state.difficulty]?.speed ?? 1);
+    if (enemy.type === "boss") {
+      enemy.summon -= dt;
+      enemy.turn += dt * 0.72;
+      const orbitX = player.x + Math.cos(enemy.turn) * 220;
+      const orbitY = player.y + Math.sin(enemy.turn * 1.14) * 150;
+      enemy.vx += ((orbitX - enemy.x) * 0.72 - enemy.vx) * dt * 1.4;
+      enemy.vy += ((orbitY - enemy.y) * 0.72 - enemy.vy) * dt * 1.4;
+      if (enemy.summon <= 0 && state.enemies.length < currentLevel().max + 6) {
+        enemy.summon = state.rng.range(3.2, 4.8);
+        for (let i = 0; i < 3; i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-56, 56), enemy.y + state.rng.range(-56, 56), { countQuota: false });
+        state.banner = { text: "BOSS SIGNAL SURGE", timer: 0.9 };
+      }
+    } else if (enemy.type === "wanderer") {
       enemy.turn += dt * state.rng.range(-0.5, 0.5);
-      enemy.vx += (Math.cos(enemy.turn) * spec.speed * 0.45 + toPlayer.x * spec.speed * 0.35 - enemy.vx) * dt * 1.8;
-      enemy.vy += (Math.sin(enemy.turn) * spec.speed * 0.45 + toPlayer.y * spec.speed * 0.35 - enemy.vy) * dt * 1.8;
+      enemy.vx += (Math.cos(enemy.turn) * speed * 0.45 + toPlayer.x * speed * 0.35 - enemy.vx) * dt * 1.8;
+      enemy.vy += (Math.sin(enemy.turn) * speed * 0.45 + toPlayer.y * speed * 0.35 - enemy.vy) * dt * 1.8;
     } else if (enemy.type === "seeker") {
-      enemy.vx += (toPlayer.x * spec.speed - enemy.vx) * dt * 2.8;
-      enemy.vy += (toPlayer.y * spec.speed - enemy.vy) * dt * 2.8;
+      enemy.vx += (toPlayer.x * speed - enemy.vx) * dt * 2.8;
+      enemy.vy += (toPlayer.y * speed - enemy.vy) * dt * 2.8;
     } else if (enemy.type === "splitter") {
-      enemy.vx += (toPlayer.x * spec.speed + Math.sin(enemy.age * 3) * 38 - enemy.vx) * dt * 1.7;
-      enemy.vy += (toPlayer.y * spec.speed + Math.cos(enemy.age * 2.4) * 38 - enemy.vy) * dt * 1.7;
+      enemy.vx += (toPlayer.x * speed + Math.sin(enemy.age * 3) * 38 - enemy.vx) * dt * 1.7;
+      enemy.vy += (toPlayer.y * speed + Math.cos(enemy.age * 2.4) * 38 - enemy.vy) * dt * 1.7;
     } else if (enemy.type === "lancer") {
       enemy.charge -= dt;
       if (enemy.charge <= 0) {
@@ -2020,12 +2215,12 @@ function updateEnemies(dt) {
         enemy.vx += (enemy.chargeVector.x * 380 - enemy.vx) * dt * 5;
         enemy.vy += (enemy.chargeVector.y * 380 - enemy.vy) * dt * 5;
       } else {
-        enemy.vx += (toPlayer.x * spec.speed - enemy.vx) * dt * 1.2;
-        enemy.vy += (toPlayer.y * spec.speed - enemy.vy) * dt * 1.2;
+        enemy.vx += (toPlayer.x * speed - enemy.vx) * dt * 1.2;
+        enemy.vy += (toPlayer.y * speed - enemy.vy) * dt * 1.2;
       }
     } else {
-      enemy.vx += (toPlayer.x * spec.speed + Math.sin(enemy.age * 9 + enemy.seed) * 90 - enemy.vx) * dt * 3.8;
-      enemy.vy += (toPlayer.y * spec.speed + Math.cos(enemy.age * 8 + enemy.seed) * 90 - enemy.vy) * dt * 3.8;
+      enemy.vx += (toPlayer.x * speed + Math.sin(enemy.age * 9 + enemy.seed) * 90 - enemy.vx) * dt * 3.8;
+      enemy.vy += (toPlayer.y * speed + Math.cos(enemy.age * 8 + enemy.seed) * 90 - enemy.vy) * dt * 3.8;
     }
 
     applyGravity(enemy, dt, 0.58);
@@ -2082,14 +2277,14 @@ function resolveCollisions() {
       if (enemy.dead || bullet.dead) continue;
       if (distance2(bullet, enemy) <= (bullet.r + ENEMY[enemy.type].r) ** 2) {
         bullet.dead = true;
-        damageEnemy(enemy, 1);
+        damageEnemy(enemy, bullet.damage ?? 1);
       }
     }
     for (const well of state.wells) {
       if (well.dead || bullet.dead) continue;
       if (distance2(bullet, well) <= (bullet.r + well.r) ** 2) {
         bullet.dead = true;
-        damageWell(well, 1);
+        damageWell(well, bullet.damage ?? 1);
       }
     }
   }
@@ -2113,7 +2308,12 @@ function resolveCollisions() {
     for (const enemy of state.enemies) {
       if (enemy.dead) continue;
       if (distance2(player, enemy) <= (player.r + ENEMY[enemy.type].r) ** 2) {
-        neutralizeEnemyForProgress(enemy);
+        if (enemy.type !== "boss") neutralizeEnemyForProgress(enemy);
+        else {
+          const away = normalize(enemy.x - player.x, enemy.y - player.y) ?? { x: 0, y: -1 };
+          enemy.vx += away.x * 220;
+          enemy.vy += away.y * 220;
+        }
         hurtPlayer(player);
         break;
       }
@@ -2191,7 +2391,8 @@ function checkProgression(dt) {
   if (state.transitionTimer > 0) {
     state.transitionTimer -= dt;
     if (state.transitionTimer <= 0) {
-      if (state.levelIndex + 1 >= LEVELS.length) finishRun("victory");
+      const continuous = state.mode === "endless" || state.mode === "timeAttack";
+      if (!continuous && state.levelIndex + 1 >= LEVELS.length) finishRun("victory");
       else beginLevel(state.levelIndex + 1);
     }
     return;
@@ -2209,7 +2410,7 @@ function checkProgression(dt) {
   if (cleared) {
     state.transitionTimer = 2.1;
     state.banner = { text: STR.cleared, timer: 1.8 };
-    state.score += (state.levelIndex + 1) * 1000 * state.team.multiplier;
+    state.score += Math.round((state.levelIndex + 1) * 1000 * state.team.multiplier * (GAME_MODES[state.mode]?.scoreScale ?? 1));
     state.shake = 0.7;
     bus.play("level", 1);
     addRing(WORLD.w / 2, WORLD.h / 2, COLORS.cyan, 60, 420);
@@ -2226,8 +2427,8 @@ function neutralizeEnemyForProgress(enemy) {
 }
 
 function fireBullet(player, dir) {
-  const spread = state.team.multiplier >= 6 ? 0.045 : 0;
-  const shots = state.team.multiplier >= 8 ? [-spread, 0, spread] : [0];
+  const spread = state.team.multiplier >= 6 || state.weaponTier >= 2 ? 0.045 : 0;
+  const shots = state.team.multiplier >= 8 || state.weaponTier >= 2 ? [-spread, 0, spread] : [0];
   const nextSide = -(player.shotSide ?? 1);
   player.shotSide = nextSide;
   for (let shotIndex = 0; shotIndex < shots.length; shotIndex += 1) {
@@ -2248,6 +2449,7 @@ function fireBullet(player, dir) {
       maxLife: 1.15,
       owner: player.id,
       color: player.color,
+      damage: state.weaponTier >= 1 ? 1.35 : 1,
       cannonLane: lane
     });
   }
@@ -2257,10 +2459,12 @@ function fireBullet(player, dir) {
 function triggerBomb(player) {
   if (state.team.bombs <= 0) return;
   state.team.bombs -= 1;
+  state.bombsUsed += 1;
   state.bombWave = 1;
   state.bombOrigin = { x: player.x, y: player.y, color: player.color };
   state.shake = 1.4;
   bus.play("bomb", 0.25);
+  haptic([24, 18, 36]);
   for (const enemy of state.enemies) damageEnemy(enemy, 9, true);
   for (const well of state.wells) damageWell(well, 8);
   compact(state.enemies);
@@ -2272,7 +2476,7 @@ function triggerBomb(player) {
   }
 }
 
-function spawnEnemy(type, forcedX, forcedY) {
+function spawnEnemy(type, forcedX, forcedY, options = {}) {
   const spec = ENEMY[type];
   const edge = state.rng.int(0, 3);
   let x = forcedX;
@@ -2289,7 +2493,7 @@ function spawnEnemy(type, forcedX, forcedY) {
     y: clamp(y, 20, WORLD.h - 20),
     vx: state.rng.range(-80, 80),
     vy: state.rng.range(-80, 80),
-    hp: spec.hp,
+    hp: Math.max(1, Math.ceil(spec.hp * (DIFFICULTIES[state.difficulty]?.hp ?? 1))),
     age: 0,
     seed: state.rng.range(0, TAU),
     turn: state.rng.range(0, TAU),
@@ -2299,13 +2503,186 @@ function spawnEnemy(type, forcedX, forcedY) {
     flash: 0
   };
   state.enemies.push(enemy);
-  state.spawned += 1;
+  if (options.countQuota !== false) state.spawned += 1;
   if (type === "mayfly") bus.play("mayflies", 0.35);
   else bus.playRandom(["spawn1", "spawn2", "spawn3", "spawn4", "spawn5", "spawn6"], 0.08);
   for (let i = 0; i < 10; i += 1) {
     const a = state.rng.range(0, TAU);
     addParticle(enemy.x, enemy.y, Math.cos(a) * state.rng.range(40, 160), Math.sin(a) * state.rng.range(40, 160), spec.color, 0.38, 2.3, 0.975);
   }
+}
+
+function updateTutorial(commands, dt) {
+  const tutorial = state.tutorial;
+  if (!tutorial?.active || state.status !== "running") return;
+  const moved = commands.some((command) => Math.hypot(command.move.x, command.move.y) > 0.12);
+  const fired = commands.some((command) => command.fire);
+  const bombed = commands.some((command) => command.bomb);
+  if (tutorial.step === 0 && moved) tutorial.step = 1;
+  else if (tutorial.step === 1 && fired) tutorial.step = 2;
+  else if (tutorial.step === 2 && bombed) {
+    tutorial.step = 3;
+    tutorial.timer = 4.5;
+  } else if (tutorial.step === 3) {
+    tutorial.timer = (tutorial.timer ?? 4.5) - dt;
+    if (tutorial.timer <= 0) completeTutorial();
+  }
+}
+
+function renderTutorial() {
+  if (!tutorialUi.panel) return;
+  const tutorial = state.tutorial;
+  const active = state.status === "running" && Boolean(tutorial?.active);
+  tutorialUi.panel.hidden = !active;
+  if (!active) return;
+  const touch = touchCapable;
+  const messages = touch ? [
+    "Drag the left control to move the ship.",
+    "Drag the right control to aim and fire.",
+    "Tap B to detonate a screen-clearing bomb.",
+    "Collect green shards. Shoot gravity wells before their pull reaches you."
+  ] : [
+    "Move with your selected movement keys.",
+    "Aim with IJKL, mouse, or the right gamepad stick. Fire is manual.",
+    "Press Space to detonate a screen-clearing bomb.",
+    "Collect green shards. Shoot gravity wells before their pull reaches you."
+  ];
+  tutorialUi.step.textContent = `Training ${Math.min(4, tutorial.step + 1)}/4`;
+  tutorialUi.message.textContent = messages[tutorial.step] ?? messages[3];
+}
+
+function completeTutorial() {
+  if (state?.tutorial) state.tutorial.active = false;
+  playerProfile.tutorialComplete = true;
+  saveProfile(playerProfile);
+  if (tutorialUi.panel) tutorialUi.panel.hidden = true;
+}
+
+function buildMissionSetup() {
+  buildSegmentedButtons(modeChooser, GAME_MODES, selectedMode, (value) => {
+    selectedMode = value;
+    saveMode(value);
+    syncMissionSetup();
+    updateOverlay();
+    bus.play("menuSelect", 0.08);
+  });
+  buildSegmentedButtons(difficultyChooser, DIFFICULTIES, selectedDifficulty, (value) => {
+    selectedDifficulty = value;
+    saveDifficulty(value);
+    syncMissionSetup();
+    updateOverlay();
+    bus.play("menuSelect", 0.08);
+  });
+  syncMissionSetup();
+}
+
+function buildSegmentedButtons(container, entries, selected, onSelect) {
+  if (!container) return;
+  const buttons = Object.entries(entries).map(([value, data]) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.value = value;
+    button.textContent = data.label;
+    button.title = data.note ?? data.label;
+    button.setAttribute("aria-pressed", String(value === selected));
+    button.addEventListener("click", () => onSelect(value));
+    return button;
+  });
+  container.replaceChildren(...buttons);
+}
+
+function syncMissionSetup() {
+  for (const button of modeChooser?.querySelectorAll("button") ?? []) button.setAttribute("aria-pressed", String(button.dataset.value === selectedMode));
+  for (const button of difficultyChooser?.querySelectorAll("button") ?? []) button.setAttribute("aria-pressed", String(button.dataset.value === selectedDifficulty));
+  if (pilotBriefingTitle) pilotBriefingTitle.textContent = `${selectedPlayerCount} PILOT${selectedPlayerCount === 1 ? "" : "S"} READY`;
+  if (pilotBriefingText) pilotBriefingText.textContent = pilotControlSummary(selectedPlayerCount);
+  if (profileSummary) profileSummary.innerHTML = `<strong>Rank ${playerProfile.rank}</strong><span>${playerProfile.xp} XP / ${playerProfile.medals} medals / ${playerProfile.achievements.length} achievements</span>`;
+}
+
+function pilotControlSummary(count) {
+  const touchDevice = Boolean(navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches);
+  if (touchDevice) return count > 1 ? "Left stick moves the squad. Right stick aims every active pilot. Tap B for a bomb." : "Left stick moves. Right stick aims and fires. Tap B for a bomb.";
+  if (count === 1) return gameSettings.controlPreset === "classic" ? "P1 move WASD, aim IJKL or mouse, bomb Space." : "P1 uses the selected control preset, mouse aim, and Space bomb.";
+  if (count === 2) return "P1 WASD + IJKL. P2 Arrows + Numpad. Gamepads override either pilot.";
+  return "P1 and P2 use keyboard. Extra pilots use connected gamepads or squad formation assist.";
+}
+
+function syncSettingsUi() {
+  if (!settingsUi.panel) return;
+  settingsUi.music.value = String(gameSettings.music);
+  settingsUi.sfx.value = String(gameSettings.sfx);
+  settingsUi.effects.value = String(gameSettings.effects);
+  settingsUi.shake.value = String(gameSettings.shake);
+  settingsUi.colorMode.value = gameSettings.colorMode;
+  settingsUi.controlPreset.value = gameSettings.controlPreset;
+  settingsUi.haptics.checked = Boolean(gameSettings.haptics);
+  settingsUi.tutorial.checked = Boolean(gameSettings.tutorial);
+}
+
+function readSettingsUi() {
+  gameSettings = {
+    ...DEFAULT_SETTINGS,
+    music: Number(settingsUi.music.value),
+    sfx: Number(settingsUi.sfx.value),
+    effects: Number(settingsUi.effects.value),
+    shake: Number(settingsUi.shake.value),
+    colorMode: settingsUi.colorMode.value,
+    controlPreset: settingsUi.controlPreset.value,
+    haptics: settingsUi.haptics.checked,
+    tutorial: settingsUi.tutorial.checked
+  };
+  saveSettings(gameSettings);
+  applySettings();
+  syncMissionSetup();
+}
+
+function applySettings() {
+  shell.dataset.colorMode = gameSettings.colorMode;
+  shell.dataset.effects = Number(gameSettings.effects) < 0.55 ? "low" : "full";
+  bus.applyCategoryLevels();
+  if (typeof state !== "undefined" && state?.settings) state.settings = { ...gameSettings };
+}
+
+function setSettingsOpen(value) {
+  settingsOpen = Boolean(value);
+  settingsUi.panel.hidden = !settingsOpen;
+  settingsUi.panel.inert = !settingsOpen;
+  settingsUi.panel.setAttribute("aria-hidden", String(!settingsOpen));
+  if (settingsOpen && state.status === "running") setPaused(true);
+  if (settingsOpen) {
+    syncSettingsUi();
+    settingsUi.close.focus();
+  } else {
+    settingsAction?.focus();
+  }
+}
+
+function spawnBoss(name) {
+  const spec = ENEMY.boss;
+  const hpScale = DIFFICULTIES[state.difficulty]?.hp ?? 1;
+  const hp = Math.ceil((spec.hp + state.levelIndex * 8) * hpScale * Math.max(1, state.playerCount * 0.72));
+  state.bossName = name;
+  state.enemies.push({
+    type: "boss",
+    name,
+    x: WORLD.w * 0.5,
+    y: 112,
+    vx: 0,
+    vy: 0,
+    hp,
+    maxHp: hp,
+    age: 0,
+    seed: state.rng.range(0, TAU),
+    turn: state.rng.range(0, TAU),
+    charge: 0,
+    chargeTime: 0,
+    chargeVector: { x: 0, y: 0 },
+    summon: 3.6,
+    flash: 0
+  });
+  state.banner = { text: `BOSS: ${name}`, timer: 2.2 };
+  state.shake = Math.max(state.shake, 0.9);
+  bus.play("wellAlert", 0.2);
 }
 
 function spawnWell() {
@@ -2318,14 +2695,15 @@ function spawnWell() {
     const nearest = nearestPlayer(x, y);
     if (!nearest || Math.hypot(x - nearest.x, y - nearest.y) > 260) break;
   }
+  const wellHp = Math.ceil((9 + state.levelIndex * 2) * (DIFFICULTIES[state.difficulty]?.hp ?? 1));
   state.wells.push({
     x,
     y,
     vx: 0,
     vy: 0,
     r: 45,
-    hp: 9 + state.levelIndex * 2,
-    maxHp: 9 + state.levelIndex * 2,
+    hp: wellHp,
+    maxHp: wellHp,
     age: state.rng.range(0, TAU),
     spawn: state.rng.range(2.0, 4.2),
     flash: 0,
@@ -2348,14 +2726,20 @@ function killEnemy(enemy, bomb = false) {
   enemy.dead = true;
   const spec = ENEMY[enemy.type];
   state.killed += 1;
-  const points = spec.score * state.team.multiplier;
+  const scoreScale = (DIFFICULTIES[state.difficulty]?.score ?? 1) * (GAME_MODES[state.mode]?.scoreScale ?? 1);
+  const points = Math.round(spec.score * state.team.multiplier * scoreScale);
   state.score += points;
   spawnScorePop(enemy.x, enemy.y, `+${formatNumber(points)}`, spec.color);
-  if (!bomb && (state.killed % 6 === 0 || state.rng.chance(0.12))) spawnPickup(enemy.x, enemy.y);
+  if (enemy.type === "boss") {
+    state.bossesDefeated += 1;
+    state.team.multiplier = Math.min(9, state.team.multiplier + 2);
+    state.banner = { text: `${enemy.name || "CROWN SIGNAL"} BROKEN`, timer: 2 };
+    addRing(enemy.x, enemy.y, COLORS.gold, 110, 520);
+  } else if (!bomb && (state.killed % 6 === 0 || state.rng.chance(0.12))) spawnPickup(enemy.x, enemy.y);
   if (enemy.type === "splitter" && !bomb) {
     for (let i = 0; i < 3; i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-22, 22), enemy.y + state.rng.range(-22, 22));
   }
-  burst(enemy.x, enemy.y, spec.color, enemy.type === "mayfly" ? 10 : 22);
+  burst(enemy.x, enemy.y, spec.color, enemy.type === "boss" ? 72 : enemy.type === "mayfly" ? 10 : 22);
   bus.playRandom(["hit1", "hit2"], 0.035);
   checkRewards();
 }
@@ -2370,7 +2754,7 @@ function damageWell(well, damage) {
   if (well.hp <= 0) {
     well.dead = true;
     bus.refreshLoops();
-    const points = 1800 * state.team.multiplier;
+    const points = Math.round(1800 * state.team.multiplier * (DIFFICULTIES[state.difficulty]?.score ?? 1) * (GAME_MODES[state.mode]?.scoreScale ?? 1));
     state.score += points;
     spawnScorePop(well.x, well.y - 32, `+${formatNumber(points)}`, COLORS.gold);
     state.team.multiplier = Math.min(9, state.team.multiplier + 1);
@@ -2445,6 +2829,7 @@ function hurtPlayer(player) {
   state.bombOrigin = { x: player.x, y: player.y, color: COLORS.white };
   burst(player.x, player.y, COLORS.white, 52);
   bus.play("playerHit", 0.16);
+  haptic([48, 24, 48]);
   if (state.team.lives <= 0) {
     bus.play("playerDead", 0.16);
     finishRun("gameover");
@@ -2470,7 +2855,21 @@ function finishRun(status) {
   state.status = status;
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
+  state.resultRewards = awardRun(playerProfile, {
+    score: Math.floor(state.score),
+    level: state.levelIndex + 1,
+    players: state.playerCount,
+    mode: state.mode,
+    difficulty: state.difficulty,
+    victory: status === "victory",
+    bosses: state.bossesDefeated,
+    bombsUsed: state.bombsUsed,
+    lives: state.team.lives
+  });
+  playerProfile = state.resultRewards.profile;
   saveRunScore(status);
+  submitCommunityScore(status);
+  syncMissionSetup();
   state.banner.timer = 0;
   bus.refreshLoops();
   if (status === "gameover") bus.play("gameOver", 0.4);
@@ -2492,7 +2891,7 @@ function collectCommands() {
 }
 
 function commandForKeyboard(id) {
-  const config = PLAYER_KEYS[id];
+  const config = id === 0 ? (CONTROL_PRESETS[gameSettings.controlPreset] ?? PLAYER_KEYS[0]) : PLAYER_KEYS[id];
   const command = emptyCommand();
   if (!config) return command;
   const move = { x: 0, y: 0 };
@@ -2622,7 +3021,8 @@ function applyGamepads(commands) {
 }
 
 function isBoundKey(code) {
-  for (const config of PLAYER_KEYS) {
+  const configs = [CONTROL_PRESETS[gameSettings.controlPreset] ?? PLAYER_KEYS[0], ...PLAYER_KEYS.slice(1)];
+  for (const config of configs) {
     if (Object.values(config.move).includes(code) || Object.values(config.aim).includes(code) || config.bomb === code) return true;
   }
   return false;
@@ -2792,7 +3192,7 @@ function bounceInArena(body, r) {
 
 function burst(x, y, color, count) {
   const budget = Math.max(0, PARTICLE_LIMIT - state.particles.length);
-  const burstCount = Math.min(count, budget);
+  const burstCount = Math.min(Math.max(1, Math.round(count * clamp(Number(state.settings?.effects) || 0.25, 0.25, 1))), budget);
   for (let i = 0; i < burstCount; i += 1) {
     const a = state.rng.range(0, TAU);
     const speed = state.rng.range(45, 300);
@@ -2868,7 +3268,7 @@ function worldToUiPoint(x, y) {
 function render() {
   state.entitiesDrawn = 0;
   updateCamera();
-  const shake = state.shake > 0 ? state.shake * 7 : 0;
+  const shake = state.shake > 0 ? state.shake * 7 * clamp(Number(state.settings?.shake) || 0, 0, 1) : 0;
   const sx = shake ? state.rng.range(-shake, shake) : 0;
   const sy = shake ? state.rng.range(-shake, shake) : 0;
 
@@ -3131,7 +3531,7 @@ function drawEnemies() {
     const spec = ENEMY[enemy.type];
     const color = enemy.flash > 0 ? COLORS.white : spec.color;
     const angle = enemy.age * (enemy.type === "lancer" ? 1.8 : 2.6) + enemy.seed;
-    const scale = enemy.type === "mayfly" ? 2.9 : enemy.type === "lancer" ? 4.4 : 3.45;
+    const scale = enemy.type === "boss" ? 3.15 : enemy.type === "mayfly" ? 2.9 : enemy.type === "lancer" ? 4.4 : 3.45;
     const sprite = SPRITE_FOR_ENEMY[enemy.type] ?? "enemy-grunt";
     renderer.setBlend("add");
     renderer.drawWorldImage(GL_IMAGES.glow, enemy.x, enemy.y, spec.r * scale * 1.72, spec.r * scale * 1.72, angle, enemy.type === "mayfly" ? 0.14 : 0.22, { color });
@@ -3144,7 +3544,8 @@ function drawEnemies() {
     renderer.setBlend("add");
     renderer.drawWorldRing(enemy.x, enemy.y, spec.r * (enemy.type === "mayfly" ? 1.45 : 1.92), enemy.type === "mayfly" ? 1.2 : 2.6, color, enemy.type === "mayfly" ? 0.54 : 0.72, enemy.type === "splitter" ? 4 : 34);
     renderer.drawWorldRing(enemy.x, enemy.y, spec.r * (enemy.type === "mayfly" ? 0.9 : 1.2), 1.2, COLORS.white, enemy.flash > 0 ? 0.8 : 0.22, 20);
-    if (enemy.type === "wanderer") drawDiamond(enemy, spec.r, color);
+    if (enemy.type === "boss") drawBoss(enemy, spec.r, color, angle);
+    else if (enemy.type === "wanderer") drawDiamond(enemy, spec.r, color);
     else if (enemy.type === "seeker") drawTriangle(enemy, spec.r + 2, color, angle);
     else if (enemy.type === "splitter") drawSquare(enemy, spec.r, color, angle);
     else if (enemy.type === "lancer") drawLancer(enemy, color);
@@ -3244,6 +3645,7 @@ function drawPlayers() {
     renderer.setBlend("add");
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 112, 112, p.angle, 0.22 * alpha, { color: p.color });
     renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, 58, 58, -p.angle, 0.1 * alpha, { color: COLORS.white });
+    if (state.hullAura) renderer.drawWorldRing(p.x, p.y, 40 + Math.sin(state.time * 4 + p.id) * 3, 2.2, COLORS.gold, 0.48 * alpha, 24);
     if (thrust > 0.05) drawPlayerEngineTrail(p, thrust, alpha);
     renderer.setBlend("normal");
     const variant = PLAYER_VARIANTS[p.id % PLAYER_VARIANTS.length];
@@ -3482,7 +3884,7 @@ function drawLetterbox() {
 
 function updateHud() {
   hud.score.textContent = formatNumber(state.score);
-  hud.level.textContent = String(Math.min(state.levelIndex + 1, LEVELS.length));
+  hud.level.textContent = String(state.levelIndex + 1);
   const profile = currentLevel();
   let liveEnemies = 0;
   let liveWells = 0;
@@ -3493,15 +3895,43 @@ function updateHud() {
     if (!well.dead) liveWells += 1;
   }
   const remaining = Math.max(0, profile.quota - state.killed, liveEnemies) + liveWells;
-  hud.objective.textContent = String(remaining);
+  hud.objective.textContent = state.mode === "timeAttack" ? `${Math.ceil(state.timeLeft)}s` : String(remaining);
   hud.lives.textContent = String(state.team.lives);
   hud.bombs.textContent = String(state.team.bombs);
   hud.multiplier.textContent = `${STR.multiplier}${state.team.multiplier}`;
-  hud.status.textContent = state.status === "running" ? `${currentLevel().name} - ${state.playerCount}P` : statusText();
+  hud.status.textContent = state.status === "running" ? `${currentLevel().name} - ${GAME_MODES[state.mode].label} - ${state.playerCount}P` : statusText();
   hud.best.textContent = `${STR.best}: ${formatNumber(state.best)}`;
   setControlAvailability(pauseAction, state.status === "running" || state.status === "paused", { hide: true });
   setControlAvailability(bombAction, state.status === "running", { hide: true });
+  updateBossMeter();
+  renderTutorial();
   updateForgePanels();
+}
+
+function haptic(pattern) {
+  if (!gameSettings.haptics || typeof navigator.vibrate !== "function") return;
+  navigator.vibrate(pattern);
+}
+
+function drawBoss(enemy, r, color, angle) {
+  renderer.drawWorldRing(enemy.x, enemy.y, r * 1.72, 5, COLORS.gold, 0.82, 8);
+  renderer.drawWorldRing(enemy.x, enemy.y, r * 1.28, 3, color, 0.94, 6);
+  drawRotatedOutline(enemy.x, enemy.y, angle, [
+    { x: r * 1.4, y: 0 }, { x: r * 0.55, y: -r }, { x: -r * 0.78, y: -r * 0.82 },
+    { x: -r * 1.32, y: 0 }, { x: -r * 0.78, y: r * 0.82 }, { x: r * 0.55, y: r }
+  ], color, 4.2, 0.82, true);
+  renderer.drawWorldCircle(enemy.x, enemy.y, r * 0.42, COLORS.ink, 0.9, 24);
+  renderer.drawWorldRing(enemy.x, enemy.y, r * 0.48, 3, COLORS.white, 0.72, 24);
+}
+
+function updateBossMeter() {
+  if (!bossUi.panel) return;
+  const boss = state.enemies.find((enemy) => enemy.type === "boss" && !enemy.dead);
+  const active = state.status === "running" && Boolean(boss);
+  bossUi.panel.hidden = !active;
+  if (!active) return;
+  bossUi.name.textContent = boss.name || state.bossName || "CROWN SIGNAL";
+  bossUi.fill.style.setProperty("--meter-value", `${clamp(boss.hp / boss.maxHp, 0, 1) * 100}%`);
 }
 
 function statusText() {
@@ -3536,7 +3966,7 @@ function updateOverlay() {
       state.status === "victory" ? STR.overlayVictory : STR.overlayReady;
   primaryAction.textContent = startPending ? STR.loading :
     state.status === "paused" ? STR.resume :
-    state.status === "menu" ? STR.startButton : STR.restart;
+    state.status === "menu" ? `${STR.startButton} - ${GAME_MODES[selectedMode].label}` : STR.restart;
   primaryAction.setAttribute("aria-label", primaryAction.textContent);
   setControlAvailability(primaryAction, true);
   primaryAction.disabled = startPending;
@@ -3544,22 +3974,27 @@ function updateOverlay() {
   if (startPending) primaryAction.setAttribute("aria-busy", "true");
   else primaryAction.removeAttribute("aria-busy");
   setControlAvailability(soundAction, true);
+  setControlAvailability(settingsAction, state.status === "menu" || state.status === "paused", { hide: true });
   homeAction.textContent = STR.selectPilots;
   homeAction.setAttribute("aria-label", STR.selectPilots);
   setControlAvailability(homeAction, state.status === "gameover" || state.status === "victory", { hide: true });
 
   setElementAvailability(controlsHint, menu, { hide: true });
   setRegionAvailability(playerChooser, menu, { hide: true });
-  if (menu) buildPlayerChooser();
+  if (menu) {
+    buildPlayerChooser();
+    syncMissionSetup();
+  }
   if (menu && bus.unlocked && !bus.muted) bus.ensureStartupMusic();
 
   const showingStats = state.status === "gameover" || state.status === "victory";
   setElementAvailability(overlayStats, showingStats, { hide: true });
   if (showingStats) {
-    overlayStats.textContent = `${STR.finalScore}: ${formatNumber(state.score)}  /  ${STR.players}: ${state.playerCount}  /  ${STR.level}: ${Math.min(state.levelIndex + 1, LEVELS.length)}`;
+    overlayStats.textContent = `${STR.finalScore}: ${formatNumber(state.score)} / ${GAME_MODES[state.mode].label} / ${DIFFICULTIES[state.difficulty].label} / ${STR.players}: ${state.playerCount} / ${STR.level}: ${state.levelIndex + 1}`;
   } else {
     overlayStats.textContent = "";
   }
+  renderRewards(showingStats);
   renderShareResult(showingStats);
   renderScoreboard();
   updateForgePanels();
@@ -3671,10 +4106,33 @@ function ensureVisualAssetsReady() {
 
 function ensureStartupAssetsReady() {
   const timeout = LOW_POWER_MEDIA.matches ? 5200 : 3200;
+  const progressTimer = window.setInterval(() => setLoadingProgress(true, loadingProgressValue()), 100);
   return Promise.race([
     Promise.allSettled([ensureVisualAssetsReady(), ensureRunAudioReady()]),
     new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
-  ]);
+  ]).finally(() => {
+    window.clearInterval(progressTimer);
+    setLoadingProgress(true, 1);
+  });
+}
+
+function loadingProgressValue() {
+  const visuals = [GL_IMAGES.atlas, ...Object.keys(GAMEPLAY_IMAGE_PATHS).map((key) => GL_IMAGES[key])];
+  for (const name of SPRITE_PAIR_NAMES) {
+    visuals.push(GL_IMAGES.sprites[name]?.diffuse, GL_IMAGES.sprites[name]?.normal);
+  }
+  const visualReady = visuals.filter(imageReady).length;
+  const visualProgress = visuals.length ? visualReady / visuals.length : 1;
+  const audioProgress = bus.muted ? 1 : RUN_AUDIO_PRELOAD.filter((id) => bus.nodes.get(id)?.buffer).length / RUN_AUDIO_PRELOAD.length;
+  return clamp(0.08 + visualProgress * 0.64 + audioProgress * 0.28, 0.08, 0.98);
+}
+
+function setLoadingProgress(visible, value) {
+  if (!loadingUi.panel) return;
+  const progress = clamp(Number(value) || 0, 0, 1);
+  loadingUi.panel.hidden = !visible;
+  loadingUi.fill.style.setProperty("--meter-value", `${Math.round(progress * 100)}%`);
+  loadingUi.label.textContent = `Arming signal ${Math.round(progress * 100)}%`;
 }
 
 function ensureRunAudioReady() {
@@ -3906,12 +4364,14 @@ function normalizeHighScore(entry) {
   const score = Number(entry.score);
   if (!Number.isFinite(score) || score <= 0) return null;
   const players = Math.round(clamp(Number(entry.players) || 1, 1, 4));
-  const level = Math.round(clamp(Number(entry.level) || 1, 1, LEVELS.length));
+  const level = Math.round(clamp(Number(entry.level) || 1, 1, 999));
   const timestamp = Number(entry.timestamp);
   return {
     score: Math.floor(score),
     players,
     level,
+    mode: GAME_MODES[entry.mode] ? entry.mode : "campaign",
+    grade: /^[SABC]$/.test(entry.grade) ? entry.grade : "C",
     status: typeof entry.status === "string" ? entry.status : "run",
     timestamp: Number.isFinite(timestamp) ? timestamp : Date.now(),
     legacy: Boolean(entry.legacy)
@@ -3966,6 +4426,8 @@ function saveRunScore(status) {
     players: state.playerCount,
     level: Math.min(state.levelIndex + 1, LEVELS.length),
     status,
+    mode: state.mode,
+    grade: state.resultRewards?.grade ?? "C",
     timestamp: Date.now()
   });
   savedScores.sort(compareHighScores);
@@ -3973,12 +4435,25 @@ function saveRunScore(status) {
 }
 
 function resultLevel() {
-  return Math.min(state.levelIndex + 1, LEVELS.length);
+  return state.levelIndex + 1;
+}
+
+function renderRewards(active) {
+  if (!rewardsUi.panel) return;
+  const rewards = state.resultRewards;
+  const visible = active && Boolean(rewards);
+  rewardsUi.panel.hidden = !visible;
+  if (!visible) return;
+  rewardsUi.grade.textContent = `GRADE ${rewards.grade}`;
+  rewardsUi.medal.textContent = `${rewards.medal} medal${rewards.medal === 1 ? "" : "s"}`;
+  rewardsUi.xp.textContent = `+${rewards.xp} XP`;
+  const achievementNames = rewards.achievements.map((id) => ACHIEVEMENTS[id]?.label).filter(Boolean);
+  rewardsUi.unlocks.textContent = [...achievementNames, ...rewards.unlocked].join(" / ") || `Rank ${rewards.profile.rank} signal secured`;
 }
 
 function resultCaption(includeUrl = false) {
   const outcome = state.status === "victory" ? STR.victory : STR.gameOver;
-  const caption = `${STR.shortTitle}: ${formatNumber(state.score)} ${STR.score}. ${outcome} / ${state.playerCount}P / ${STR.level} ${resultLevel()}. Can you survive the grid?`;
+  const caption = `${STR.shortTitle}: ${formatNumber(state.score)} ${STR.score}. Grade ${state.resultRewards?.grade ?? "C"} / ${GAME_MODES[state.mode].label} / ${state.playerCount}P / ${STR.level} ${resultLevel()}. Can you survive the grid?`;
   return includeUrl ? `${caption} ${SHARE_URL}` : caption;
 }
 
@@ -4085,19 +4560,25 @@ function renderScoreboard() {
   setRegionAvailability(scoreboard.panel, active, { hide: true });
   if (!active) return;
 
-  const scores = loadHighScores();
-  if (scoreboard.title) scoreboard.title.textContent = STR.topScores;
+  const scores = scoreboardSource === "community" ? communityScores : loadHighScores();
+  scoreboard.local?.setAttribute("aria-selected", String(scoreboardSource === "local"));
+  scoreboard.community?.setAttribute("aria-selected", String(scoreboardSource === "community"));
+  if (scoreboard.title) scoreboard.title.textContent = scoreboardSource === "community" ? "Community Top 5" : STR.topScores;
   if (scoreboard.note) {
-    const savedCount = scores.filter((entry) => !entry.legacy).length;
-    scoreboard.note.textContent = savedCount > 0
-      ? `${Math.min(scores.length, HIGH_SCORE_LIMIT)}/${HIGH_SCORE_LIMIT} ${STR.scoreSaved}`
-      : STR.scoreArchive;
+    if (scoreboardSource === "community") {
+      scoreboard.note.textContent = !leaderboard.configured ? "Offline - score server not configured" : communityScoresState === "loading" ? "Loading signal" : communityScoresState === "error" ? "Network unavailable" : "Online archive";
+    } else {
+      const savedCount = scores.filter((entry) => !entry.legacy).length;
+      scoreboard.note.textContent = savedCount > 0
+        ? `${Math.min(scores.length, HIGH_SCORE_LIMIT)}/${HIGH_SCORE_LIMIT} ${STR.scoreSaved}`
+        : STR.scoreArchive;
+    }
   }
 
   if (scores.length === 0) {
     const empty = document.createElement("li");
     empty.className = "scoreboard-empty";
-    empty.textContent = STR.noScores;
+    empty.textContent = scoreboardSource === "community" && !leaderboard.configured ? "Connect a leaderboard endpoint to publish global scores" : STR.noScores;
     scoreboard.list.replaceChildren(empty);
     return;
   }
@@ -4114,12 +4595,50 @@ function renderScoreboard() {
     date.className = "score-date";
     rank.textContent = `#${index + 1}`;
     value.textContent = formatNumber(entry.score);
-    details.textContent = entry.legacy ? STR.scoreLegacy : `${entry.players}P / ${STR.level} ${entry.level}`;
+    details.textContent = entry.legacy ? STR.scoreLegacy : `${entry.grade ?? "C"} / ${GAME_MODES[entry.mode]?.label ?? "Campaign"} / ${entry.players}P / ${STR.level} ${entry.level}`;
     date.textContent = entry.legacy ? "" : formatScoreDate(entry.timestamp);
     row.append(rank, value, details, date);
     return row;
   });
   scoreboard.list.replaceChildren(...rows);
+}
+
+function setScoreboardSource(source) {
+  scoreboardSource = source === "community" ? "community" : "local";
+  if (scoreboardSource === "community" && leaderboard.configured && communityScoresState === "idle") loadCommunityScores();
+  renderScoreboard();
+}
+
+async function loadCommunityScores() {
+  communityScoresState = "loading";
+  renderScoreboard();
+  try {
+    const result = await leaderboard.list(HIGH_SCORE_LIMIT);
+    communityScores = result.scores;
+    communityScoresState = result.online ? "ready" : "offline";
+  } catch {
+    communityScoresState = "error";
+  }
+  renderScoreboard();
+}
+
+function submitCommunityScore(status) {
+  if (!leaderboard.configured || state.score <= 0) return;
+  leaderboard.submit({
+    name: `P${state.playerCount}`,
+    score: Math.floor(state.score),
+    players: state.playerCount,
+    level: state.levelIndex + 1,
+    mode: state.mode,
+    grade: state.resultRewards?.grade ?? "C",
+    status,
+    timestamp: Date.now()
+  }).then(() => {
+    communityScoresState = "idle";
+    if (scoreboardSource === "community") loadCommunityScores();
+  }).catch(() => {
+    communityScoresState = "error";
+  });
 }
 
 function loadPlayerCount() {
