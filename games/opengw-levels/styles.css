@@ -2610,12 +2610,12 @@ button[hidden],
   .settings-panel { grid-template-columns: 1fr; }
   .settings-header, .settings-actions { grid-column: 1; }
   .reward-panel { top: auto; left: 50%; bottom: max(132px, calc(var(--safe-bottom) + 120px)); width: min(420px, 92vw); transform: translateX(-50%); }
-  .tutorial-panel { bottom: max(92px, calc(var(--safe-bottom) + 82px)); grid-template-columns: auto minmax(0, 1fr); }
+  .tutorial-panel { bottom: max(196px, calc(var(--safe-bottom) + 186px)); grid-template-columns: auto minmax(0, 1fr); }
   .tutorial-panel button { grid-column: 1 / -1; min-height: 30px; }
   .boss-meter { top: max(54px, calc(var(--safe-top) + 48px)); width: min(360px, 66vw); }
 }
 
-@media (max-height: 760px) and (min-width: 701px) {
+@media (max-height: 820px) and (min-width: 701px) {
   #overlay[data-state="menu"] .controls-hint { display: none; }
   #overlay[data-state="menu"] .preflight-panel { padding-block: 8px; }
 }

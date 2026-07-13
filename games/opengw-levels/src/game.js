@@ -121,7 +121,7 @@ const ENEMY = {
 };
 
 const ASSETS = {
-  marquee: "../assets/2084/branding/marquee-gameplay-keyart.png",
+  marquee: "../assets/2084/branding/marquee-gameplay-keyart.webp",
   icon: "../assets/2084/branding/app-icon.png",
   atlas: "../assets/2084/sprites/sprite-atlas.png",
   parallaxFar: "../assets/2084/parallax/far.webp",
@@ -223,7 +223,7 @@ const AUDIO = {
   wellDestroyed: { file: "gravitywelldestroyed.wav", volume: 0.42 },
   wellExplode: { file: "gravitywellexplode.wav", volume: 0.45 },
   wellHit: { file: "gravitywellhit.wav", volume: 0.28 },
-  level: { file: "levelchange.wav", volume: 0.42 },
+  level: { file: "levelchange.mp3", volume: 0.42 },
   mayflies: { file: "mayflies.wav", volume: 0.22 },
   wall: { file: "missilehitwall.wav", volume: 0.18 },
   multiplier: { file: "multiplieradvance.wav", volume: 0.28 },
@@ -244,24 +244,9 @@ const RUN_AUDIO_PRELOAD = [
   "playerThrust",
   "level",
   "spawn1",
-  "spawn2",
-  "spawn3",
-  "spawn4",
-  "spawn5",
-  "spawn6",
   "hit1",
-  "hit2",
   "playerFire1",
-  "playerFire2",
-  "playerFire3",
-  "bomb",
-  "playerHit",
-  "playerSpawn",
-  "wall",
-  "repulsor",
-  "multiplier",
-  "wellAlert",
-  "wellHum"
+  "bomb"
 ];
 
 const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
@@ -1826,6 +1811,7 @@ addEventListener("keydown", (event) => {
     return;
   }
   if (event.code === "Enter" && !event.repeat) {
+    if (event.target?.closest?.("button, input, select, textarea, a[href]")) return;
     event.preventDefault();
     primary();
     return;
@@ -2861,7 +2847,7 @@ function pilotControlSummary(count) {
   if (touchDevice) return count > 1 ? "Left stick moves the squad. Right stick aims every active pilot. Tap B for a bomb." : "Left stick moves. Right stick aims and fires. Tap B for a bomb.";
   if (count === 1) return gameSettings.controlPreset === "classic" ? "P1 move WASD, aim IJKL or mouse, bomb Space." : "P1 uses the selected control preset, mouse aim, and Space bomb.";
   if (count === 2) return "P1 WASD + IJKL. P2 Arrows + Numpad. Gamepads override either pilot.";
-  return "P1 and P2 use keyboard. Extra pilots use connected gamepads or squad formation assist.";
+  return "P1 and P2 use keyboard. Extra pilots mirror P1 aim in squad formation or use connected gamepads.";
 }
 
 function syncSettingsUi() {
@@ -3281,6 +3267,8 @@ function applySquadFallback(commands) {
     const dy = leader.y + slot.y - player.y;
     const follow = Math.hypot(dx, dy) > 16 ? normalize(dx, dy) : null;
     if (follow) command.move = follow;
+    if (leadCommand.aim) command.aim = leadCommand.aim;
+    command.fire = Boolean(leadCommand.fire && leadCommand.aim);
   }
 }
 
@@ -4497,7 +4485,7 @@ function ensureVisualAssetsReady() {
 }
 
 function ensureStartupAssetsReady() {
-  const timeout = LOW_POWER_MEDIA.matches ? 5200 : 3200;
+  const timeout = LOW_POWER_MEDIA.matches ? 1600 : 1100;
   const progressTimer = window.setInterval(() => setLoadingProgress(true, loadingProgressValue()), 100);
   return Promise.race([
     Promise.allSettled([ensureVisualAssetsReady(), ensureRunAudioReady()]),
@@ -4529,7 +4517,7 @@ function setLoadingProgress(visible, value) {
 
 function ensureRunAudioReady() {
   if (bus.muted) return Promise.resolve([]);
-  const timeout = LOW_POWER_MEDIA.matches ? 4500 : 2400;
+  const timeout = LOW_POWER_MEDIA.matches ? 1200 : 850;
   return Promise.race([
     Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id))),
     new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
@@ -4864,11 +4852,14 @@ function openShareResult(platform) {
 async function copyInstagramResultCaption() {
   if (!state || (state.status !== "gameover" && state.status !== "victory")) return;
   const caption = resultCaption(true);
+  setShareStatus(STR.shareCopying);
   let copied = false;
   try {
     if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(caption);
-      copied = true;
+      copied = await Promise.race([
+        navigator.clipboard.writeText(caption).then(() => true).catch(() => false),
+        new Promise((resolve) => window.setTimeout(() => resolve(false), 900))
+      ]);
     }
   } catch {
     copied = false;

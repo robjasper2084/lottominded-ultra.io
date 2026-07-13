@@ -6,11 +6,9 @@
     <meta name="theme-color" content="#05070d" />
     <meta name="static-wave-leaderboard-endpoint" content="" />
     <title>2084 Static Wave - LottoMind</title>
-    <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
-    <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
-    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" as="image" />
-    <link rel="preload" href="./assets/audio/startup-untitled-7.mp3" as="audio" type="audio/mpeg" />
-    <link rel="stylesheet" href="./styles.css?v=graphics-evolution-1" />
+    <link rel="icon" href="./assets/2084/branding/2084-static-wars.ico?v=audit-fixes-1" />
+    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" as="image" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css?v=audit-fixes-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -77,12 +75,9 @@
 
       <section id="overlay" data-state="menu" aria-labelledby="menuTitle">
         <h1 id="menuTitle" class="sr-only">2084 Static Wave gameplay portal</h1>
-        <div id="startupBrand" aria-hidden="true">
-          <img id="startupMark" src="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" alt="" />
-        </div>
         <div id="marqueeMotion" aria-hidden="true">
           <canvas id="marqueeFx" width="1280" height="720"></canvas>
-          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" alt="" />
+          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" alt="" />
           <span class="marquee-status">Signal Ready</span>
         </div>
         <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
@@ -209,7 +204,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=no-reflection-1"></script>
+    <script type="module" src="./src/game.js?v=audit-fixes-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

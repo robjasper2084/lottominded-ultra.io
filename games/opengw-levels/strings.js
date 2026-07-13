@@ -36,6 +36,7 @@ export const STR = {
   shareFacebook: "Facebook",
   shareInstagram: "Instagram",
   shareX: "X",
+  shareCopying: "Copying Instagram caption...",
   shareCopied: "Instagram caption copied",
   shareCopyFailed: "Copy failed. Try again.",
   overlayReady: "2084 Static Wave portal armed. Select pilots, start Sector 1, and break the static wells.",
