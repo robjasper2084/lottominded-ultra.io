@@ -4425,13 +4425,16 @@ function resize() {
   canvas.height = Math.floor(view.cssH * view.dpr);
   renderer.resize();
   ultraFx.resize(canvas.width, canvas.height);
-  const portraitPlay = view.cssW <= 720 && view.cssH > view.cssW * 1.22;
+  const portraitPlay = view.cssW <= 1100 && view.cssH > view.cssW * 1.12;
   view.cameraMode = portraitPlay;
   if (portraitPlay) {
+    const reservedTop = clamp(view.cssH * 0.105, 86, 132);
+    const reservedBottom = clamp(view.cssH * 0.13, 112, 176);
+    const availableHeight = Math.max(1, view.cssH - reservedTop - reservedBottom);
     view.w = view.cssW;
-    view.h = Math.min(view.cssH * 0.54, view.cssW * 1.18);
+    view.h = Math.min(availableHeight, view.cssW * 1.45);
     view.x = 0;
-    view.y = Math.max(128, Math.min(view.cssH * 0.25, view.cssH - view.h - 190));
+    view.y = reservedTop + Math.max(0, (availableHeight - view.h) * 0.5);
     view.camH = WORLD.h;
     view.camW = view.camH * (view.w / view.h);
     view.scale = view.h / view.camH;
@@ -4439,11 +4442,13 @@ function resize() {
   } else {
     const scale = Math.min(view.cssW / WORLD.w, view.cssH / WORLD.h);
     const aspect = view.cssW / Math.max(1, view.cssH);
-    const wideBoost = clamp(aspect / (WORLD.w / WORLD.h), 1, 1.1);
-    view.scale = scale;
+    const worldAspect = WORLD.w / WORLD.h;
+    const wideBoost = clamp(aspect / worldAspect, 1, 1.1);
+    const tallBoost = clamp(worldAspect / aspect, 1, 1.22);
+    view.scale = scale * tallBoost;
     view.scaleX = scale * wideBoost;
     view.w = WORLD.w * view.scaleX;
-    view.h = WORLD.h * scale;
+    view.h = WORLD.h * view.scale;
     view.x = (view.cssW - view.w) / 2;
     view.y = (view.cssH - view.h) / 2;
     view.camW = WORLD.w;
