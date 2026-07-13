@@ -32,6 +32,8 @@ export const DEFAULT_SETTINGS = {
   shake: 0.78,
   colorMode: "standard",
   controlPreset: "classic",
+  graphicsPreset: "auto",
+  dynamicResolution: true,
   haptics: true,
   tutorial: true
 };

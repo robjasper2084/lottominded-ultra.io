@@ -10,11 +10,12 @@
     <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
     <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" as="image" />
     <link rel="preload" href="./assets/audio/startup-untitled-7.mp3" as="audio" type="audio/mpeg" />
-    <link rel="stylesheet" href="./styles.css?v=evolution-pass-3" />
+    <link rel="stylesheet" href="./styles.css?v=graphics-evolution-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
       <canvas id="game" width="1280" height="720"></canvas>
+      <canvas id="ultraFxCanvas" width="1280" height="720" aria-hidden="true"></canvas>
 
       <div id="startupScene" aria-hidden="true">
         <canvas id="startup3dCanvas" width="1280" height="720"></canvas>
@@ -170,6 +171,16 @@
             <option value="lefty">IJKL + WASD</option>
           </select>
         </label>
+        <label>Graphics preset
+          <select id="graphicsPresetInput">
+            <option value="auto">Auto (recommended)</option>
+            <option value="mobile">Mobile</option>
+            <option value="high">High WebGL2</option>
+            <option value="ultra">Ultra WebGPU</option>
+          </select>
+          <small id="graphicsStatus" class="graphics-status" aria-live="polite"></small>
+        </label>
+        <label class="toggle-setting"><input id="dynamicResolutionInput" type="checkbox" /> Dynamic resolution</label>
         <label class="toggle-setting"><input id="hapticsInput" type="checkbox" /> Haptics</label>
         <label class="toggle-setting"><input id="tutorialInput" type="checkbox" /> Tutorial prompts</label>
         <div class="settings-actions">
@@ -198,7 +209,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=evolution-pass-2"></script>
+    <script type="module" src="./src/game.js?v=graphics-evolution-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

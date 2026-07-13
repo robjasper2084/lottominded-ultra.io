@@ -831,8 +831,8 @@ button[hidden],
 
 #overlay[data-state="menu"] #marqueeMotion {
   grid-row: 3;
-  width: min(820px, 86vw);
-  max-height: min(34vh, 318px);
+  width: min(1060px, 92vw);
+  max-height: min(43vh, 430px);
   filter: drop-shadow(0 0 36px rgba(41, 247, 255, 0.28)) drop-shadow(0 0 28px rgba(255, 45, 170, 0.2));
 }
 
@@ -2301,6 +2301,29 @@ button[hidden],
   text-transform: uppercase;
 }
 
+.boss-meter[data-shielded="true"] > div {
+  border-color: rgba(41, 247, 255, 0.88);
+  box-shadow: 0 0 18px rgba(41, 247, 255, 0.28);
+}
+
+.boss-meter[data-shielded="true"] i {
+  background: linear-gradient(90deg, #29f7ff, #f6fbff 48%, #8e44ff);
+}
+
+#ultraFxCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+#shell[data-graphics="ultra"] #ultraFxCanvas { opacity: 1; }
+
 .boss-meter[hidden] { display: none; }
 
 .boss-meter > div,
@@ -2506,6 +2529,7 @@ button[hidden],
 .settings-panel label { display: grid; gap: 7px; min-width: 0; font-size: 11px; font-weight: 900; text-transform: uppercase; }
 .settings-panel input[type="range"] { width: 100%; accent-color: #29f7ff; }
 .settings-panel select { min-height: 38px; border: 1px solid rgba(41, 247, 255, 0.38); border-radius: 4px; background: #091523; color: var(--text); padding: 0 9px; }
+.settings-panel .graphics-status { min-height: 14px; color: #86edf4; font-size: 9px; line-height: 1.35; text-transform: none; }
 .settings-panel .toggle-setting { display: flex; align-items: center; gap: 9px; min-height: 38px; }
 .settings-actions button { min-height: 42px; flex: 1 1 0; border: 1px solid rgba(41, 247, 255, 0.42); border-radius: 4px; background: #0a1d2e; color: var(--text); font-weight: 900; text-transform: uppercase; cursor: pointer; }
 
@@ -2589,6 +2613,11 @@ button[hidden],
   .tutorial-panel { bottom: max(92px, calc(var(--safe-bottom) + 82px)); grid-template-columns: auto minmax(0, 1fr); }
   .tutorial-panel button { grid-column: 1 / -1; min-height: 30px; }
   .boss-meter { top: max(54px, calc(var(--safe-top) + 48px)); width: min(360px, 66vw); }
+}
+
+@media (max-height: 760px) and (min-width: 701px) {
+  #overlay[data-state="menu"] .controls-hint { display: none; }
+  #overlay[data-state="menu"] .preflight-panel { padding-block: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

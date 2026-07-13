@@ -1,5 +1,6 @@
 import { STR } from "../strings.js?v=evolution-pass-2";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
+import { UltraWebGpuLayer } from "./ultraWebGpu.js?v=graphics-evolution-1";
 import {
   ACHIEVEMENTS,
   DEFAULT_SETTINGS,
@@ -36,6 +37,21 @@ const WELL_ACTIVATION_RADIUS = 124;
 const WELL_EVENT_RADIUS = 38;
 const WELL_CORE_RADIUS = 19;
 const WELL_PLAYER_DANGER_RADIUS = 58;
+
+const GRAPHICS_PRESETS = {
+  mobile: { label: "Mobile", dprCap: 1, minScale: 0.62, targetFps: 50, post: 0 },
+  high: { label: "High WebGL2", dprCap: 1.5, minScale: 0.7, targetFps: 55, post: 1 },
+  ultra: { label: "Ultra WebGPU", dprCap: 1.8, minScale: 0.68, targetFps: 58, post: 2 }
+};
+
+const MATERIALS = {
+  player: { metallic: 0.92, roughness: 0.24, emissive: 0.24 },
+  missile: { metallic: 0.78, roughness: 0.2, emissive: 0.58 },
+  enemy: { metallic: 0.62, roughness: 0.42, emissive: 0.18 },
+  boss: { metallic: 0.94, roughness: 0.2, emissive: 0.32 },
+  well: { metallic: 0.35, roughness: 0.12, emissive: 0.72 },
+  pulse: { metallic: 0.15, roughness: 0.08, emissive: 0.9 }
+};
 
 const COLORS = {
   cyan: "#29f7ff",
@@ -291,13 +307,18 @@ class StaticWarsRenderer {
     this.currentTexture = null;
     this.currentLit = null;
     this.lights = [];
+    this.graphicsPreset = "mobile";
+    this.postEnabled = false;
+    this.postTargetsReady = false;
     this.blendMode = "";
     this.solidProgram = this.createProgram(SOLID_VERTEX_SHADER, SOLID_FRAGMENT_SHADER);
     this.textureProgram = this.createProgram(TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
     this.litProgram = this.createProgram(LIT_VERTEX_SHADER, LIT_FRAGMENT_SHADER);
+    this.postProgram = this.createProgram(POST_VERTEX_SHADER, POST_FRAGMENT_SHADER);
     this.solidBuffer = this.gl.createBuffer();
     this.textureBuffer = this.gl.createBuffer();
     this.litBuffer = this.gl.createBuffer();
+    this.postBuffer = this.gl.createBuffer();
     this.initProgramLayout();
   }
 
@@ -324,8 +345,25 @@ class StaticWarsRenderer {
       lights: gl.getUniformLocation(this.litProgram, "u_lights"),
       lightColors: gl.getUniformLocation(this.litProgram, "u_lightColors"),
       ambient: gl.getUniformLocation(this.litProgram, "u_ambient"),
-      normalStrength: gl.getUniformLocation(this.litProgram, "u_normalStrength")
+      normalStrength: gl.getUniformLocation(this.litProgram, "u_normalStrength"),
+      metallic: gl.getUniformLocation(this.litProgram, "u_metallic"),
+      roughness: gl.getUniformLocation(this.litProgram, "u_roughness"),
+      emissive: gl.getUniformLocation(this.litProgram, "u_emissive")
     };
+    this.postLayout = {
+      position: gl.getAttribLocation(this.postProgram, "a_position"),
+      scene: gl.getUniformLocation(this.postProgram, "u_scene"),
+      resolution: gl.getUniformLocation(this.postProgram, "u_resolution"),
+      time: gl.getUniformLocation(this.postProgram, "u_time"),
+      quality: gl.getUniformLocation(this.postProgram, "u_quality"),
+      arena: gl.getUniformLocation(this.postProgram, "u_arena"),
+      wellCount: gl.getUniformLocation(this.postProgram, "u_wellCount"),
+      wells: gl.getUniformLocation(this.postProgram, "u_wells"),
+      hotCount: gl.getUniformLocation(this.postProgram, "u_hotCount"),
+      hotPoints: gl.getUniformLocation(this.postProgram, "u_hotPoints")
+    };
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.postBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.disable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
     this.setBlend("normal");
@@ -362,6 +400,32 @@ class StaticWarsRenderer {
 
   resize() {
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    if (this.postEnabled) this.createPostTargets();
+  }
+
+  setGraphicsPreset(preset) {
+    this.graphicsPreset = GRAPHICS_PRESETS[preset] ? preset : "mobile";
+    this.postEnabled = this.isWebGL2 && this.graphicsPreset !== "mobile";
+    if (this.postEnabled) this.createPostTargets();
+  }
+
+  createPostTargets() {
+    const gl = this.gl;
+    if (!this.postEnabled || this.canvas.width < 1 || this.canvas.height < 1) return;
+    if (this.sceneTexture) gl.deleteTexture(this.sceneTexture);
+    if (this.sceneFramebuffer) gl.deleteFramebuffer(this.sceneFramebuffer);
+    this.sceneTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.canvas.width, this.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    this.sceneFramebuffer = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.sceneFramebuffer);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.sceneTexture, 0);
+    this.postTargetsReady = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   beginFrame(nextView, shakeX, shakeY) {
@@ -375,10 +439,50 @@ class StaticWarsRenderer {
     this.currentTexture = null;
     this.currentLit = null;
     const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.postEnabled && this.postTargetsReady ? this.sceneFramebuffer : null);
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0.015, 0.022, 0.045, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     return true;
+  }
+
+  finishFrame(frame = {}) {
+    this.flush();
+    if (!this.postEnabled || !this.postTargetsReady) return;
+    const gl = this.gl;
+    gl.disable(gl.SCISSOR_TEST);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+    gl.blendFunc(gl.ONE, gl.ZERO);
+    this.blendMode = "";
+    gl.useProgram(this.postProgram);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.sceneTexture);
+    gl.uniform1i(this.postLayout.scene, 0);
+    gl.uniform2f(this.postLayout.resolution, this.canvas.width, this.canvas.height);
+    gl.uniform1f(this.postLayout.time, frame.time || 0);
+    gl.uniform1f(this.postLayout.quality, this.graphicsPreset === "ultra" ? 2 : 1);
+    gl.uniform4f(this.postLayout.arena, frame.arena?.x || 0, frame.arena?.y || 0, frame.arena?.w || 1, frame.arena?.h || 1);
+    const wells = new Float32Array(16);
+    for (let i = 0; i < Math.min(4, frame.wells?.length || 0); i += 1) {
+      const well = frame.wells[i];
+      wells.set([well.x, well.y, well.radius, well.strength], i * 4);
+    }
+    const hot = new Float32Array(32);
+    for (let i = 0; i < Math.min(8, frame.hotPoints?.length || 0); i += 1) {
+      const point = frame.hotPoints[i];
+      hot.set([point.x, point.y, point.radius, point.strength], i * 4);
+    }
+    gl.uniform1i(this.postLayout.wellCount, Math.min(4, frame.wells?.length || 0));
+    gl.uniform4fv(this.postLayout.wells, wells);
+    gl.uniform1i(this.postLayout.hotCount, Math.min(8, frame.hotPoints?.length || 0));
+    gl.uniform4fv(this.postLayout.hotPoints, hot);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.postBuffer);
+    gl.enableVertexAttribArray(this.postLayout.position);
+    gl.vertexAttribPointer(this.postLayout.position, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    this.setBlend("normal");
   }
 
   setLights(lights) {
@@ -418,7 +522,7 @@ class StaticWarsRenderer {
 
   worldToScreen(x, y) {
     return {
-      x: this.view.x + this.shakeX + (x - this.view.camX) * this.view.scale,
+      x: this.view.x + this.shakeX + (x - this.view.camX) * (this.view.scaleX ?? this.view.scale),
       y: this.view.y + this.shakeY + (y - this.view.camY) * this.view.scale
     };
   }
@@ -579,7 +683,12 @@ class StaticWarsRenderer {
       const wy = y + p.x * sin + p.y * cos;
       return { clip: this.worldToClip(wx, wy), world: [wx, wy] };
     });
-    this.pushLitQuad(pair, corners, colorVec(options.color ?? COLORS.white, alpha), options.normalStrength ?? 0.85);
+    this.pushLitQuad(pair, corners, colorVec(options.color ?? COLORS.white, alpha), {
+      normalStrength: options.normalStrength ?? 0.85,
+      metallic: options.metallic ?? 0.55,
+      roughness: options.roughness ?? 0.4,
+      emissive: options.emissive ?? 0.2
+    });
     return true;
   }
 
@@ -618,15 +727,15 @@ class StaticWarsRenderer {
     }
   }
 
-  pushLitQuad(pair, corners, color, normalStrength) {
+  pushLitQuad(pair, corners, color, material) {
     if (this.solidData.length) this.flushSolid();
     if (this.textureData.length) this.flushTexture();
     const lit = {
       diffuse: this.textureFor(pair.diffuse, false),
       normal: this.textureFor(pair.normal, false),
-      normalStrength
+      ...material
     };
-    const key = `${pair.diffuse.src}|${pair.normal.src}|${normalStrength}`;
+    const key = `${pair.diffuse.src}|${pair.normal.src}|${material.normalStrength}|${material.metallic}|${material.roughness}|${material.emissive}`;
     if (!this.currentLit || this.currentLit.key !== key) {
       this.flushLit();
       this.currentLit = { ...lit, key };
@@ -721,6 +830,9 @@ class StaticWarsRenderer {
     if (this.litLayout.lightCount !== null) gl.uniform1i(this.litLayout.lightCount, this.lights.length);
     gl.uniform1f(this.litLayout.ambient, 0.48);
     gl.uniform1f(this.litLayout.normalStrength, this.currentLit.normalStrength);
+    gl.uniform1f(this.litLayout.metallic, this.currentLit.metallic);
+    gl.uniform1f(this.litLayout.roughness, this.currentLit.roughness);
+    gl.uniform1f(this.litLayout.emissive, this.currentLit.emissive);
 
     const packedLights = new Float32Array(MAX_LIGHTS * 4);
     const packedColors = new Float32Array(MAX_LIGHTS * 3);
@@ -816,6 +928,9 @@ uniform vec4 u_lights[8];
 uniform vec3 u_lightColors[8];
 uniform float u_ambient;
 uniform float u_normalStrength;
+uniform float u_metallic;
+uniform float u_roughness;
+uniform float u_emissive;
 varying vec2 v_world;
 varying vec2 v_uv;
 varying vec4 v_color;
@@ -828,6 +943,8 @@ void main() {
   normal = normalize(normal);
 
   vec3 light = vec3(u_ambient);
+  vec3 specular = vec3(0.0);
+  vec3 viewDir = vec3(0.0, 0.0, 1.0);
   for (int i = 0; i < 8; i++) {
     vec4 l = u_lights[i];
     float radius = max(l.z, 1.0);
@@ -838,16 +955,123 @@ void main() {
     vec3 dir = normalize(vec3(delta / radius * 1.35, 0.72));
     float lambert = max(dot(normal, dir), 0.0);
     float bevel = pow(max(1.0 - normal.z, 0.0), 2.0) * 0.18;
-    light += u_lightColors[i] * (0.12 + lambert * 1.35 + bevel) * fade * l.w;
+    float selfShadow = smoothstep(-0.18, 0.28, dot(normal, dir));
+    light += u_lightColors[i] * (0.1 + lambert * 1.45 + bevel) * fade * l.w * (0.45 + selfShadow * 0.55);
+    vec3 halfDir = normalize(dir + viewDir);
+    float shine = mix(72.0, 8.0, clamp(u_roughness, 0.0, 1.0));
+    float highlight = pow(max(dot(normal, halfDir), 0.0), shine) * fade * l.w;
+    vec3 metalTint = mix(vec3(1.0), base.rgb, u_metallic);
+    specular += u_lightColors[i] * metalTint * highlight * mix(0.28, 1.4, u_metallic);
   }
 
-  vec3 emissive = base.rgb * 0.44;
-  gl_FragColor = vec4(base.rgb * light + emissive, base.a);
+  float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
+  vec3 emissive = base.rgb * u_emissive;
+  vec3 rim = mix(vec3(0.12, 0.86, 1.0), base.rgb, u_metallic) * fresnel * (0.18 + u_metallic * 0.32);
+  gl_FragColor = vec4(base.rgb * light + specular + emissive + rim, base.a);
+}`;
+
+const POST_VERTEX_SHADER = `
+attribute vec2 a_position;
+varying vec2 v_uv;
+void main() {
+  gl_Position = vec4(a_position, 0.0, 1.0);
+  v_uv = a_position * 0.5 + 0.5;
+}`;
+
+const POST_FRAGMENT_SHADER = `
+precision highp float;
+uniform sampler2D u_scene;
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_quality;
+uniform vec4 u_arena;
+uniform int u_wellCount;
+uniform vec4 u_wells[4];
+uniform int u_hotCount;
+uniform vec4 u_hotPoints[8];
+varying vec2 v_uv;
+
+float luminance(vec3 color) {
+  return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
+
+vec3 brightSample(vec2 uv) {
+  vec3 color = texture2D(u_scene, clamp(uv, 0.0, 1.0)).rgb;
+  float gate = smoothstep(0.55, 1.15, max(max(color.r, color.g), color.b) + luminance(color) * 0.25);
+  return color * gate;
+}
+
+void main() {
+  vec2 uv = v_uv;
+  vec2 pixel = 1.0 / max(u_resolution, vec2(1.0));
+  vec2 warped = uv;
+  float lensGlow = 0.0;
+  float shadow = 1.0;
+
+  for (int i = 0; i < 4; i++) {
+    if (i >= u_wellCount) break;
+    vec4 well = u_wells[i];
+    vec2 delta = warped - well.xy;
+    delta.x *= u_resolution.x / max(u_resolution.y, 1.0);
+    float distanceToCore = length(delta);
+    float radius = max(well.z, 0.008);
+    float field = exp(-distanceToCore / (radius * 2.8)) * well.w;
+    float eventRing = exp(-abs(distanceToCore - radius) * 110.0);
+    vec2 tangent = normalize(vec2(-delta.y, delta.x) + vec2(0.0001));
+    warped += tangent * field * (0.0022 + 0.0016 * u_quality) * sin(u_time * 1.8 + distanceToCore * 90.0);
+    warped -= normalize(delta + vec2(0.0001)) * eventRing * 0.0035 * well.w;
+    lensGlow += eventRing * well.w;
+    shadow *= 1.0 - smoothstep(radius * 1.7, 0.0, distanceToCore) * 0.22;
+  }
+
+  float heat = 0.0;
+  for (int i = 0; i < 8; i++) {
+    if (i >= u_hotCount) break;
+    vec4 hot = u_hotPoints[i];
+    vec2 delta = warped - hot.xy;
+    float field = exp(-dot(delta, delta) / max(hot.z * hot.z, 0.00001)) * hot.w;
+    warped.x += sin((warped.y + u_time * 0.65) * 240.0 + float(i) * 2.3) * field * 0.0018;
+    warped.y += cos((warped.x - u_time * 0.48) * 210.0 + float(i)) * field * 0.0012;
+    heat += field;
+  }
+
+  vec3 base = texture2D(u_scene, clamp(warped, 0.0, 1.0)).rgb * shadow;
+  vec2 bloomStep = pixel * mix(2.0, 3.4, u_quality - 1.0);
+  vec3 bloom = brightSample(warped + vec2(bloomStep.x, 0.0));
+  bloom += brightSample(warped - vec2(bloomStep.x, 0.0));
+  bloom += brightSample(warped + vec2(0.0, bloomStep.y));
+  bloom += brightSample(warped - vec2(0.0, bloomStep.y));
+  if (u_quality > 1.5) {
+    bloom += brightSample(warped + bloomStep);
+    bloom += brightSample(warped - bloomStep);
+    bloom += brightSample(warped + vec2(bloomStep.x, -bloomStep.y));
+    bloom += brightSample(warped + vec2(-bloomStep.x, bloomStep.y));
+    bloom *= 0.125;
+  } else {
+    bloom *= 0.25;
+  }
+
+  float arenaBottom = u_arena.y;
+  float arenaTop = u_arena.y + u_arena.w;
+  float horizon = mix(arenaBottom, arenaTop, 0.46);
+  float floorMask = smoothstep(horizon, arenaBottom, uv.y) * smoothstep(arenaBottom - 0.02, arenaBottom + 0.08, uv.y);
+  vec2 reflectedUv = vec2(uv.x + sin(uv.y * 180.0 + u_time) * pixel.x * 2.0, horizon + (horizon - uv.y) * 0.34);
+  vec3 reflection = brightSample(reflectedUv) * floorMask * (0.09 + 0.07 * u_quality);
+  float gridBands = pow(max(0.0, sin((uv.y - arenaBottom) * u_resolution.y * 0.19)), 22.0) * floorMask;
+  reflection += vec3(0.04, 0.55, 0.72) * gridBands * 0.08;
+
+  vec3 lensColor = mix(vec3(0.08, 0.72, 1.0), vec3(0.74, 0.16, 1.0), sin(u_time * 0.7) * 0.5 + 0.5);
+  vec3 color = base + bloom * (0.26 + u_quality * 0.08) + reflection + lensColor * lensGlow * 0.14;
+  color += vec3(1.0, 0.24, 0.04) * heat * 0.025;
+  float vignette = smoothstep(1.15, 0.28, length((uv - 0.5) * vec2(1.0, 0.72)));
+  color *= mix(0.76, 1.0, vignette);
+  gl_FragColor = vec4(color, 1.0);
 }`;
 
 const $ = (id) => document.getElementById(id);
 const canvas = $("game");
 const renderer = new StaticWarsRenderer(canvas);
+const ultraFx = new UltraWebGpuLayer($("ultraFxCanvas"));
 const hud = {
   score: $("scoreValue"),
   level: $("levelValue"),
@@ -944,6 +1168,9 @@ const settingsUi = {
   shake: $("shakeInput"),
   colorMode: $("colorModeInput"),
   controlPreset: $("controlPresetInput"),
+  graphicsPreset: $("graphicsPresetInput"),
+  dynamicResolution: $("dynamicResolutionInput"),
+  graphicsStatus: $("graphicsStatus"),
   haptics: $("hapticsInput"),
   tutorial: $("tutorialInput")
 };
@@ -962,6 +1189,11 @@ const leaderboard = createLeaderboardService(leaderboardEndpoint);
 let forgeHudDismissed = false;
 let shareResultExpanded = false;
 let shareStatusTimer = 0;
+let effectiveGraphicsPreset = "mobile";
+let renderScale = 1;
+let qualityFrames = 0;
+let qualityElapsed = 0;
+let lastQualityResize = 0;
 
 document.title = STR.title;
 for (const node of document.querySelectorAll("[data-label]")) {
@@ -1524,6 +1756,7 @@ const view = {
   w: WORLD.w,
   h: WORLD.h,
   scale: 1,
+  scaleX: 1,
   dpr: 1,
   cssW: 1,
   cssH: 1,
@@ -1716,7 +1949,7 @@ settingsUi.done?.addEventListener("click", () => {
   readSettingsUi();
   setSettingsOpen(false);
 });
-for (const control of [settingsUi.music, settingsUi.sfx, settingsUi.effects, settingsUi.shake, settingsUi.colorMode, settingsUi.controlPreset, settingsUi.haptics, settingsUi.tutorial]) {
+for (const control of [settingsUi.music, settingsUi.sfx, settingsUi.effects, settingsUi.shake, settingsUi.colorMode, settingsUi.controlPreset, settingsUi.graphicsPreset, settingsUi.dynamicResolution, settingsUi.haptics, settingsUi.tutorial]) {
   control?.addEventListener("input", readSettingsUi);
   control?.addEventListener("change", readSettingsUi);
 }
@@ -1840,6 +2073,7 @@ function createState() {
     enemies: [],
     wells: [],
     particles: [],
+    bossDestructions: [],
     pickups: [],
     shake: 0,
     spawnTimer: 0,
@@ -2027,6 +2261,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const delta = Math.min(0.08, (now - lastFrame) / 1000);
   lastFrame = now;
+  updateDynamicResolution(delta, now);
 
   if (state.status === "running" && !pausedByBlur) {
     accumulator += delta;
@@ -2177,20 +2412,29 @@ function updateEnemies(dt) {
   for (const enemy of state.enemies) {
     enemy.age += dt;
     enemy.flash = Math.max(0, enemy.flash - dt * 8);
+    enemy.shieldFlash = Math.max(0, (enemy.shieldFlash || 0) - dt * 5.5);
     const player = nearestPlayer(enemy.x, enemy.y) ?? state.player;
     const toPlayer = normalize(player.x - enemy.x, player.y - enemy.y);
     const spec = ENEMY[enemy.type];
     const speed = spec.speed * (DIFFICULTIES[state.difficulty]?.speed ?? 1);
     if (enemy.type === "boss") {
+      const hpRatio = clamp(enemy.hp / enemy.maxHp, 0, 1);
+      const nextPhase = hpRatio <= 0.34 ? 3 : hpRatio <= 0.67 ? 2 : enemy.shield > 0 ? 0 : 1;
+      if (nextPhase > enemy.phase) {
+        enemy.phase = nextPhase;
+        state.banner = { text: `BOSS PHASE ${nextPhase}`, timer: 1.1 };
+        state.shake = Math.max(state.shake, 0.48);
+        addRing(enemy.x, enemy.y, nextPhase === 3 ? COLORS.red : COLORS.magenta, 78, 390);
+      }
       enemy.summon -= dt;
-      enemy.turn += dt * 0.72;
+      enemy.turn += dt * (0.72 + enemy.phase * 0.12);
       const orbitX = player.x + Math.cos(enemy.turn) * 220;
       const orbitY = player.y + Math.sin(enemy.turn * 1.14) * 150;
       enemy.vx += ((orbitX - enemy.x) * 0.72 - enemy.vx) * dt * 1.4;
       enemy.vy += ((orbitY - enemy.y) * 0.72 - enemy.vy) * dt * 1.4;
       if (enemy.summon <= 0 && state.enemies.length < currentLevel().max + 6) {
-        enemy.summon = state.rng.range(3.2, 4.8);
-        for (let i = 0; i < 3; i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-56, 56), enemy.y + state.rng.range(-56, 56), { countQuota: false });
+        enemy.summon = state.rng.range(3.2, 4.8) / (1 + enemy.phase * 0.16);
+        for (let i = 0; i < 3 + Math.min(2, enemy.phase); i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-56, 56), enemy.y + state.rng.range(-56, 56), { countQuota: false });
         state.banner = { text: "BOSS SIGNAL SURGE", timer: 0.9 };
       }
     } else if (enemy.type === "wanderer") {
@@ -2269,6 +2513,12 @@ function updateParticles(dt) {
   }
   compact(state.particles);
   if (state.particles.length > RING_PARTICLE_LIMIT) state.particles.splice(0, state.particles.length - RING_PARTICLE_LIMIT);
+  for (const destruction of state.bossDestructions) {
+    destruction.age += dt;
+    destruction.life -= dt;
+    if (destruction.life <= 0) destruction.dead = true;
+  }
+  compact(state.bossDestructions);
 }
 
 function resolveCollisions() {
@@ -2512,6 +2762,25 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
   }
 }
 
+function updateDynamicResolution(delta, now) {
+  if (state.status !== "running" || !gameSettings.dynamicResolution) return;
+  qualityFrames += 1;
+  qualityElapsed += delta;
+  if (qualityElapsed < 1.4 || now - lastQualityResize < 1400) return;
+  const measuredFps = qualityFrames / Math.max(qualityElapsed, 0.001);
+  const config = GRAPHICS_PRESETS[effectiveGraphicsPreset];
+  let next = renderScale;
+  if (measuredFps < config.targetFps - 7) next = Math.max(config.minScale, renderScale - 0.08);
+  else if (measuredFps > config.targetFps + 3) next = Math.min(1, renderScale + 0.04);
+  qualityFrames = 0;
+  qualityElapsed = 0;
+  if (Math.abs(next - renderScale) < 0.025) return;
+  renderScale = Math.round(next * 100) / 100;
+  lastQualityResize = now;
+  resize();
+  updateGraphicsStatus(`${config.label} - ${Math.round(renderScale * 100)}% render scale`);
+}
+
 function updateTutorial(commands, dt) {
   const tutorial = state.tutorial;
   if (!tutorial?.active || state.status !== "running") return;
@@ -2615,6 +2884,8 @@ function syncSettingsUi() {
   settingsUi.shake.value = String(gameSettings.shake);
   settingsUi.colorMode.value = gameSettings.colorMode;
   settingsUi.controlPreset.value = gameSettings.controlPreset;
+  settingsUi.graphicsPreset.value = gameSettings.graphicsPreset;
+  settingsUi.dynamicResolution.checked = Boolean(gameSettings.dynamicResolution);
   settingsUi.haptics.checked = Boolean(gameSettings.haptics);
   settingsUi.tutorial.checked = Boolean(gameSettings.tutorial);
 }
@@ -2628,6 +2899,8 @@ function readSettingsUi() {
     shake: Number(settingsUi.shake.value),
     colorMode: settingsUi.colorMode.value,
     controlPreset: settingsUi.controlPreset.value,
+    graphicsPreset: settingsUi.graphicsPreset.value,
+    dynamicResolution: settingsUi.dynamicResolution.checked,
     haptics: settingsUi.haptics.checked,
     tutorial: settingsUi.tutorial.checked
   };
@@ -2639,8 +2912,42 @@ function readSettingsUi() {
 function applySettings() {
   shell.dataset.colorMode = gameSettings.colorMode;
   shell.dataset.effects = Number(gameSettings.effects) < 0.55 ? "low" : "full";
+  applyGraphicsPreset();
   bus.applyCategoryLevels();
   if (typeof state !== "undefined" && state?.settings) state.settings = { ...gameSettings };
+}
+
+function resolveGraphicsPreset(requested) {
+  if (requested === "mobile") return "mobile";
+  if (requested === "ultra") return renderer.isWebGL2 && UltraWebGpuLayer.supported() ? "ultra" : "high";
+  if (requested === "high") return renderer.isWebGL2 ? "high" : "mobile";
+  const constrained = LOW_POWER_MEDIA.matches || (Number(navigator.deviceMemory) > 0 && Number(navigator.deviceMemory) <= 4);
+  return constrained || !renderer.isWebGL2 ? "mobile" : "high";
+}
+
+function applyGraphicsPreset() {
+  const requested = gameSettings.graphicsPreset || "auto";
+  const next = resolveGraphicsPreset(requested);
+  effectiveGraphicsPreset = next;
+  renderer.setGraphicsPreset(next);
+  shell.dataset.graphics = next;
+  if (!gameSettings.dynamicResolution) renderScale = 1;
+  if (next === "ultra") {
+    ultraFx.enable().then((ready) => {
+      if (ready || effectiveGraphicsPreset !== "ultra") return;
+      effectiveGraphicsPreset = "high";
+      renderer.setGraphicsPreset("high");
+      shell.dataset.graphics = "high";
+      updateGraphicsStatus("Ultra unavailable - High WebGL2 active");
+      resize();
+    });
+  }
+  const fallback = requested !== "auto" && requested !== next ? `${GRAPHICS_PRESETS[next].label} fallback` : GRAPHICS_PRESETS[next].label;
+  updateGraphicsStatus(`${fallback} - ${Math.round(renderScale * 100)}% render scale`);
+}
+
+function updateGraphicsStatus(message = "") {
+  if (settingsUi.graphicsStatus) settingsUi.graphicsStatus.textContent = message;
 }
 
 function setSettingsOpen(value) {
@@ -2662,6 +2969,7 @@ function spawnBoss(name) {
   const hpScale = DIFFICULTIES[state.difficulty]?.hp ?? 1;
   const hp = Math.ceil((spec.hp + state.levelIndex * 8) * hpScale * Math.max(1, state.playerCount * 0.72));
   state.bossName = name;
+  const shield = Math.ceil(hp * 0.38);
   state.enemies.push({
     type: "boss",
     name,
@@ -2671,6 +2979,10 @@ function spawnBoss(name) {
     vy: 0,
     hp,
     maxHp: hp,
+    shield,
+    maxShield: shield,
+    shieldFlash: 0,
+    phase: 0,
     age: 0,
     seed: state.rng.range(0, TAU),
     turn: state.rng.range(0, TAU),
@@ -2714,6 +3026,24 @@ function spawnWell() {
 }
 
 function damageEnemy(enemy, damage, bomb = false) {
+  if (enemy.type === "boss" && enemy.shield > 0) {
+    enemy.shield = Math.max(0, enemy.shield - damage);
+    enemy.shieldFlash = 1;
+    enemy.flash = 0.45;
+    addParticle(enemy.x, enemy.y, state.rng.range(-90, 90), state.rng.range(-90, 90), COLORS.cyan, 0.26, 4.2, 0.95);
+    if (enemy.shield <= 0) {
+      enemy.phase = Math.max(1, enemy.phase);
+      state.banner = { text: "BOSS SHIELD BROKEN", timer: 1.35 };
+      state.shake = Math.max(state.shake, 0.75);
+      addRing(enemy.x, enemy.y, COLORS.cyan, 92, 460);
+      burst(enemy.x, enemy.y, COLORS.cyan, 36);
+      bus.play("shieldsDown", 0.3);
+      haptic([35, 25, 65]);
+    } else {
+      bus.playRandom(["hit1", "hit2"], 0.028);
+    }
+    return;
+  }
   enemy.hp -= damage;
   enemy.flash = 1;
   addParticle(enemy.x, enemy.y, state.rng.range(-60, 60), state.rng.range(-60, 60), ENEMY[enemy.type].color, 0.2, 3.3, 0.96);
@@ -2735,6 +3065,7 @@ function killEnemy(enemy, bomb = false) {
     state.team.multiplier = Math.min(9, state.team.multiplier + 2);
     state.banner = { text: `${enemy.name || "CROWN SIGNAL"} BROKEN`, timer: 2 };
     addRing(enemy.x, enemy.y, COLORS.gold, 110, 520);
+    state.bossDestructions.push({ x: enemy.x, y: enemy.y, age: 0, life: 1.35, maxLife: 1.35, color: spec.color });
   } else if (!bomb && (state.killed % 6 === 0 || state.rng.chance(0.12))) spawnPickup(enemy.x, enemy.y);
   if (enemy.type === "splitter" && !bomb) {
     for (let i = 0; i < 3; i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-22, 22), enemy.y + state.rng.range(-22, 22));
@@ -3103,7 +3434,7 @@ function eventToWorld(event) {
   const sx = event.clientX - rect.left;
   const sy = event.clientY - rect.top;
   return {
-    x: clamp(view.camX + (sx - view.x) / view.scale, 0, WORLD.w),
+    x: clamp(view.camX + (sx - view.x) / (view.scaleX || view.scale), 0, WORLD.w),
     y: clamp(view.camY + (sy - view.y) / view.scale, 0, WORLD.h)
   };
 }
@@ -3260,7 +3591,7 @@ function spawnScorePop(x, y, text, color) {
 
 function worldToUiPoint(x, y) {
   return {
-    x: view.x + (x - view.camX) * view.scale,
+    x: view.x + (x - view.camX) * (view.scaleX || view.scale),
     y: view.y + (y - view.camY) * view.scale
   };
 }
@@ -3291,8 +3622,46 @@ function render() {
   drawBombWave();
   renderer.setWorldClip(false);
   drawLetterbox();
-  renderer.flush();
+  const postFrame = buildGraphicsFrame();
+  renderer.finishFrame(postFrame);
+  ultraFx.render({ ...postFrame, enabled: effectiveGraphicsPreset === "ultra" });
   drawBanner();
+}
+
+function buildGraphicsFrame() {
+  const toUv = (x, y) => {
+    const screen = worldToUiPoint(x, y);
+    return { x: screen.x / view.cssW, y: 1 - screen.y / view.cssH };
+  };
+  const wells = state.wells.slice(0, 4).map((well) => {
+    const point = toUv(well.x, well.y);
+    return {
+      x: point.x,
+      y: point.y,
+      radius: Math.max(0.012, (WELL_EVENT_RADIUS + (well.sinkPulse || 0) * 16) * view.scale / view.cssH),
+      strength: 0.55 + clamp(well.suction || 0, 0, 1) * 0.75
+    };
+  });
+  const hotPoints = state.bullets.slice(0, 6).map((bullet) => {
+    const point = toUv(bullet.x, bullet.y);
+    return { x: point.x, y: point.y, radius: 0.026, strength: 0.62 };
+  });
+  for (const player of state.players) {
+    if (!player.active || hotPoints.length >= 8) continue;
+    const tail = toUv(player.x - Math.cos(player.angle) * 30, player.y - Math.sin(player.angle) * 30);
+    hotPoints.push({ x: tail.x, y: tail.y, radius: 0.04, strength: 0.45 + state.thrustMix * 0.55 });
+  }
+  return {
+    time: state.time,
+    wells,
+    hotPoints,
+    arena: {
+      x: view.x / view.cssW,
+      y: 1 - (view.y + view.h) / view.cssH,
+      w: view.w / view.cssW,
+      h: view.h / view.cssH
+    }
+  };
 }
 
 function drawBackdrop() {
@@ -3412,7 +3781,7 @@ function drawWells() {
     renderer.drawWorldRing(well.x, well.y, WELL_EVENT_RADIUS + 11 + pulse * 5 + sink * 10, 2.6 + sink * 2.2, COLORS.gold, 0.34 + sink * 0.34, 28);
     renderer.setBlend("normal");
     renderer.drawWorldCircle(well.x, well.y, 62 + pulse * 3 + sink * 9, COLORS.ink, 0.62 + sink * 0.16, 42);
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["gravity-well"], well.x, well.y, 112 + pulse * 8 + sink * 8, 112 + pulse * 8 + sink * 8, spin, well.flash > 0 ? 1 : 0.94, { normalStrength: 1.05 + sink * 0.18 })) {
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["gravity-well"], well.x, well.y, 112 + pulse * 8 + sink * 8, 112 + pulse * 8 + sink * 8, spin, well.flash > 0 ? 1 : 0.94, { ...MATERIALS.well, normalStrength: 1.05 + sink * 0.18 })) {
       renderer.drawAtlas("gravity-well", well.x, well.y, 112 + pulse * 8 + sink * 8, 112 + pulse * 8 + sink * 8, spin, COLORS.white, well.flash > 0 ? 1 : 0.92);
     }
     renderer.setBlend("add");
@@ -3516,7 +3885,7 @@ function drawBullets() {
       playerTint,
       0.28
     );
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.missile, bullet.x, bullet.y, 52, 28, angle, 0.92, { color: COLORS.orange, normalStrength: 1.14 })) {
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.missile, bullet.x, bullet.y, 52, 28, angle, 0.92, { ...MATERIALS.missile, color: COLORS.orange, normalStrength: 1.14 })) {
       renderer.drawAtlas("missile", bullet.x, bullet.y, 46, 24, angle, COLORS.orange, 0.88);
     }
     renderer.drawWorldCircle(headX, headY, bullet.r + 2.4, COLORS.white, 0.72, 14);
@@ -3538,7 +3907,8 @@ function drawEnemies() {
     renderer.drawWorldImage(GL_IMAGES.glow, enemy.x, enemy.y, spec.r * scale * 0.92, spec.r * scale * 0.92, -angle, enemy.flash > 0 ? 0.24 : 0.1, { color: COLORS.white });
     renderer.setBlend("normal");
     drawEnemyPlate(enemy, spec, color, angle);
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites[sprite], enemy.x, enemy.y, spec.r * scale, spec.r * scale, angle, enemy.flash > 0 ? 1 : 0.96, { color, normalStrength: enemy.type === "mayfly" ? 0.72 : 1.12 })) {
+    const enemyMaterial = enemy.type === "boss" ? MATERIALS.boss : MATERIALS.enemy;
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites[sprite], enemy.x, enemy.y, spec.r * scale, spec.r * scale, angle, enemy.flash > 0 ? 1 : 0.96, { ...enemyMaterial, color, normalStrength: enemy.type === "mayfly" ? 0.72 : 1.12, emissive: enemyMaterial.emissive + (enemy.phase || 0) * 0.08 })) {
       renderer.drawAtlas(sprite, enemy.x, enemy.y, spec.r * scale, spec.r * scale, angle, COLORS.white, enemy.flash > 0 ? 1 : 0.94);
     }
     renderer.setBlend("add");
@@ -3650,7 +4020,7 @@ function drawPlayers() {
     renderer.setBlend("normal");
     const variant = PLAYER_VARIANTS[p.id % PLAYER_VARIANTS.length];
     renderer.drawWorldCircle(p.x + 2, p.y + 5, 31, COLORS.ink, 0.48 * alpha, 34);
-    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.player, p.x, p.y, 62 * variant.sx, 62 * variant.sy, p.angle, alpha, { color: p.color, normalStrength: 1.18 })) {
+    if (!renderer.drawLitWorldImage(GL_IMAGES.sprites.player, p.x, p.y, 62 * variant.sx, 62 * variant.sy, p.angle, alpha, { ...MATERIALS.player, color: p.color, normalStrength: 1.18 })) {
       renderer.drawAtlas("player", p.x, p.y, 60 * variant.sx, 60 * variant.sy, p.angle, COLORS.white, alpha);
     }
     drawLottoMindBattleshipHull(p, variant, alpha);
@@ -3840,6 +4210,21 @@ function drawParticles() {
       renderer.drawWorldCircle(p.x, p.y, Math.max(1.4, p.size * 0.38), COLORS.white, t * 0.22, 10);
     }
   }
+  for (const destruction of state.bossDestructions) {
+    const t = clamp(destruction.life / destruction.maxLife, 0, 1);
+    const open = 1 - t;
+    const pulse = Math.sin(open * Math.PI * 8) * 0.5 + 0.5;
+    renderer.drawWorldImage(GL_IMAGES.glow, destruction.x, destruction.y, 220 + open * 520, 220 + open * 520, 0, t * 0.24, { color: open > 0.55 ? COLORS.flame : destruction.color });
+    renderer.drawWorldRing(destruction.x, destruction.y, 46 + open * 310, 10 * t + 2, open > 0.5 ? COLORS.orange : COLORS.gold, t * 0.9, 48);
+    renderer.drawWorldRing(destruction.x, destruction.y, 22 + open * 180, 4 + pulse * 5, COLORS.white, t * 0.62, 12);
+    for (let i = 0; i < 10; i += 1) {
+      const angle = i * TAU / 10 + destruction.age * (i % 2 ? 2.3 : -1.7);
+      const radius = 26 + open * (90 + i * 8);
+      const x = destruction.x + Math.cos(angle) * radius;
+      const y = destruction.y + Math.sin(angle) * radius;
+      renderer.drawWorldLine(x, y, x + Math.cos(angle) * (18 + open * 26), y + Math.sin(angle) * (18 + open * 26), 4.5 * t, i % 2 ? COLORS.cyan : COLORS.flame, t * 0.78);
+    }
+  }
   renderer.setBlend("normal");
 }
 
@@ -3848,7 +4233,7 @@ function drawBombWave() {
   const p = state.bombOrigin ?? state.player;
   const radius = (1 - state.bombWave) * 820 + 60;
   renderer.setBlend("add");
-  if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["bomb-pulse"], p.x, p.y, radius * 2.1, radius * 2.1, state.time * 0.35, state.bombWave * 0.28, { color: p.color ?? COLORS.magenta, normalStrength: 0.9 })) {
+  if (!renderer.drawLitWorldImage(GL_IMAGES.sprites["bomb-pulse"], p.x, p.y, radius * 2.1, radius * 2.1, state.time * 0.35, state.bombWave * 0.28, { ...MATERIALS.pulse, color: p.color ?? COLORS.magenta, normalStrength: 0.9 })) {
     renderer.drawAtlas("bomb-pulse", p.x, p.y, radius * 2.1, radius * 2.1, state.time * 0.35, p.color ?? COLORS.magenta, state.bombWave * 0.22);
   }
   renderer.drawWorldImage(GL_IMAGES.glow, p.x, p.y, radius * 2.7, radius * 2.7, 0, state.bombWave * 0.12, { color: p.color ?? COLORS.magenta });
@@ -3914,14 +4299,26 @@ function haptic(pattern) {
 }
 
 function drawBoss(enemy, r, color, angle) {
-  renderer.drawWorldRing(enemy.x, enemy.y, r * 1.72, 5, COLORS.gold, 0.82, 8);
-  renderer.drawWorldRing(enemy.x, enemy.y, r * 1.28, 3, color, 0.94, 6);
+  const hpRatio = clamp(enemy.hp / enemy.maxHp, 0, 1);
+  const shieldRatio = enemy.maxShield ? clamp(enemy.shield / enemy.maxShield, 0, 1) : 0;
+  const phaseColor = enemy.phase >= 3 ? COLORS.red : enemy.phase >= 2 ? COLORS.magenta : color;
+  renderer.drawWorldRing(enemy.x, enemy.y, r * (1.72 + enemy.phase * 0.08), 5 + enemy.phase, COLORS.gold, 0.82, 8);
+  renderer.drawWorldRing(enemy.x, enemy.y, r * 1.28, 3.5, phaseColor, 0.94, 6);
+  if (shieldRatio > 0) {
+    renderer.drawWorldRing(enemy.x, enemy.y, r * 2.05, 6 + enemy.shieldFlash * 8, COLORS.cyan, 0.32 + shieldRatio * 0.56, 42);
+    renderer.drawWorldArc(enemy.x, enemy.y, r * 2.18, -Math.PI / 2, -Math.PI / 2 + TAU * shieldRatio, 4, COLORS.white, 0.72, 48);
+  }
   drawRotatedOutline(enemy.x, enemy.y, angle, [
     { x: r * 1.4, y: 0 }, { x: r * 0.55, y: -r }, { x: -r * 0.78, y: -r * 0.82 },
     { x: -r * 1.32, y: 0 }, { x: -r * 0.78, y: r * 0.82 }, { x: r * 0.55, y: r }
   ], color, 4.2, 0.82, true);
   renderer.drawWorldCircle(enemy.x, enemy.y, r * 0.42, COLORS.ink, 0.9, 24);
   renderer.drawWorldRing(enemy.x, enemy.y, r * 0.48, 3, COLORS.white, 0.72, 24);
+  const cracks = Math.floor((1 - hpRatio) * 8);
+  for (let i = 0; i < cracks; i += 1) {
+    const crackAngle = angle + i * 2.399;
+    renderer.drawWorldLine(enemy.x + Math.cos(crackAngle) * r * 0.32, enemy.y + Math.sin(crackAngle) * r * 0.32, enemy.x + Math.cos(crackAngle + 0.18) * r * (0.72 + i * 0.035), enemy.y + Math.sin(crackAngle + 0.18) * r * (0.72 + i * 0.035), 2.2, COLORS.flame, 0.38 + (1 - hpRatio) * 0.46);
+  }
 }
 
 function updateBossMeter() {
@@ -3930,8 +4327,10 @@ function updateBossMeter() {
   const active = state.status === "running" && Boolean(boss);
   bossUi.panel.hidden = !active;
   if (!active) return;
-  bossUi.name.textContent = boss.name || state.bossName || "CROWN SIGNAL";
+  const shield = boss.maxShield ? clamp(boss.shield / boss.maxShield, 0, 1) : 0;
+  bossUi.name.textContent = `${boss.name || state.bossName || "CROWN SIGNAL"} - ${shield > 0 ? `SHIELD ${Math.ceil(shield * 100)}%` : `PHASE ${Math.max(1, boss.phase)}`}`;
   bossUi.fill.style.setProperty("--meter-value", `${clamp(boss.hp / boss.maxHp, 0, 1) * 100}%`);
+  bossUi.panel.dataset.shielded = String(shield > 0);
 }
 
 function statusText() {
@@ -4020,10 +4419,12 @@ function updateDev(now) {
 function resize() {
   view.cssW = Math.max(1, innerWidth);
   view.cssH = Math.max(1, innerHeight);
-  view.dpr = Math.min(devicePixelRatio || 1, DPR_CAP);
+  const dprCap = GRAPHICS_PRESETS[effectiveGraphicsPreset]?.dprCap ?? DPR_CAP;
+  view.dpr = Math.max(0.5, Math.min(devicePixelRatio || 1, dprCap) * renderScale);
   canvas.width = Math.floor(view.cssW * view.dpr);
   canvas.height = Math.floor(view.cssH * view.dpr);
   renderer.resize();
+  ultraFx.resize(canvas.width, canvas.height);
   const portraitPlay = view.cssW <= 720 && view.cssH > view.cssW * 1.22;
   view.cameraMode = portraitPlay;
   if (portraitPlay) {
@@ -4034,10 +4435,14 @@ function resize() {
     view.camH = WORLD.h;
     view.camW = view.camH * (view.w / view.h);
     view.scale = view.h / view.camH;
+    view.scaleX = view.scale;
   } else {
     const scale = Math.min(view.cssW / WORLD.w, view.cssH / WORLD.h);
+    const aspect = view.cssW / Math.max(1, view.cssH);
+    const wideBoost = clamp(aspect / (WORLD.w / WORLD.h), 1, 1.1);
     view.scale = scale;
-    view.w = WORLD.w * scale;
+    view.scaleX = scale * wideBoost;
+    view.w = WORLD.w * view.scaleX;
     view.h = WORLD.h * scale;
     view.x = (view.cssW - view.w) / 2;
     view.y = (view.cssH - view.h) / 2;
