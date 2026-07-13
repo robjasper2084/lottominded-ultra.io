@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=share-result-1";
+import { STR } from "../strings.js?v=audio-unlock-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -1092,6 +1092,10 @@ const bus = {
     return this.context;
   },
 
+  isReady() {
+    return Boolean(this.unlocked && this.context?.state === "running");
+  },
+
   ensureMixer() {
     const context = this.context;
     if (!context || this.masterGain) return;
@@ -1139,15 +1143,21 @@ const bus = {
   async unlock(options = {}) {
     const context = this.ensureContext();
     const firstUnlock = !this.unlocked;
-    this.unlocked = true;
+    this.unlocked = Boolean(context);
     if (context && context.state !== "running") {
       await context.resume().catch(() => {});
+    }
+    this.unlocked = Boolean(context && context.state === "running");
+    if (!this.unlocked) {
+      updateOverlay();
+      return false;
     }
     this.primeContext();
     if (options.refreshLoops !== false) this.refreshLoops();
     if (options.preloadMenuMusic) this.ensureStartupMusic();
     if (firstUnlock && options.allowBackgroundLoad !== false) this.scheduleBackgroundLoad();
     updateOverlay();
+    return true;
   },
 
   primeContext() {
@@ -1479,8 +1489,8 @@ scheduleVisualPrewarm();
 addEventListener("resize", resize);
 addEventListener("orientationchange", resize);
 function armAudioFromGesture(event) {
-  if (event?.target?.closest?.("#playerChooser, #primaryAction")) return;
-  bus.unlock();
+  if (event?.target?.closest?.("#primaryAction, #soundAction")) return;
+  bus.unlock({ preloadMenuMusic: state.status === "menu" });
 }
 
 addEventListener("pointerdown", armAudioFromGesture, { passive: true });
@@ -1591,8 +1601,16 @@ canvas.addEventListener("pointerleave", (event) => {
 primaryAction.addEventListener("click", primary);
 homeAction.addEventListener("click", returnHome);
 soundAction.addEventListener("click", () => {
-  if (state.status === "menu" && !bus.muted && !bus.loops.has("startupMusic")) {
-    bus.unlock({ preloadMenuMusic: true });
+  if (bus.muted) {
+    bus.setMuted(false);
+    bus.unlock({ preloadMenuMusic: state.status === "menu" });
+    return;
+  }
+  if (!bus.isReady()) {
+    bus.unlock({ preloadMenuMusic: state.status === "menu" });
+    return;
+  }
+  if (state.status === "menu" && !bus.loops.has("startupMusic")) {
     bus.ensureStartupMusic();
     return;
   }
@@ -3495,10 +3513,12 @@ function statusText() {
 
 function updateOverlay() {
   requestStaticFrame();
-  soundAction.textContent = bus.muted ? STR.soundOff : STR.soundOn;
+  const soundReady = bus.isReady();
+  soundAction.textContent = bus.muted ? STR.soundOff : soundReady ? STR.soundOn : STR.startMusic;
   soundAction.setAttribute("aria-label", STR.muteButton);
-  soundAction.setAttribute("aria-pressed", String(!bus.muted));
-  soundAction.title = bus.muted ? "Sound is off. Click to turn sound on." : "Sound is on. Click to mute.";
+  soundAction.setAttribute("aria-pressed", String(!bus.muted && soundReady));
+  soundAction.title = bus.muted ? "Sound is off. Click to turn sound on." :
+    soundReady ? "Sound is on. Click to mute." : "Click to start the music and sound effects.";
   if (state.status === "running") {
     hideOverlay();
     return;

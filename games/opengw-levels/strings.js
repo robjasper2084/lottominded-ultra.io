@@ -14,6 +14,7 @@ export const STR = {
   selectPilots: "Select pilots",
   mute: "Mute",
   unmute: "Sound",
+  startMusic: "Start Music",
   soundOn: "Sound On",
   soundOff: "Sound Off",
   score: "Score",
