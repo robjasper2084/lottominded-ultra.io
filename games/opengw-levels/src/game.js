@@ -356,7 +356,6 @@ class StaticWarsRenderer {
       resolution: gl.getUniformLocation(this.postProgram, "u_resolution"),
       time: gl.getUniformLocation(this.postProgram, "u_time"),
       quality: gl.getUniformLocation(this.postProgram, "u_quality"),
-      arena: gl.getUniformLocation(this.postProgram, "u_arena"),
       wellCount: gl.getUniformLocation(this.postProgram, "u_wellCount"),
       wells: gl.getUniformLocation(this.postProgram, "u_wells"),
       hotCount: gl.getUniformLocation(this.postProgram, "u_hotCount"),
@@ -463,7 +462,6 @@ class StaticWarsRenderer {
     gl.uniform2f(this.postLayout.resolution, this.canvas.width, this.canvas.height);
     gl.uniform1f(this.postLayout.time, frame.time || 0);
     gl.uniform1f(this.postLayout.quality, this.graphicsPreset === "ultra" ? 2 : 1);
-    gl.uniform4f(this.postLayout.arena, frame.arena?.x || 0, frame.arena?.y || 0, frame.arena?.w || 1, frame.arena?.h || 1);
     const wells = new Float32Array(16);
     for (let i = 0; i < Math.min(4, frame.wells?.length || 0); i += 1) {
       const well = frame.wells[i];
@@ -984,7 +982,6 @@ uniform sampler2D u_scene;
 uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_quality;
-uniform vec4 u_arena;
 uniform int u_wellCount;
 uniform vec4 u_wells[4];
 uniform int u_hotCount;
@@ -1051,17 +1048,8 @@ void main() {
     bloom *= 0.25;
   }
 
-  float arenaBottom = u_arena.y;
-  float arenaTop = u_arena.y + u_arena.w;
-  float horizon = mix(arenaBottom, arenaTop, 0.46);
-  float floorMask = smoothstep(horizon, arenaBottom, uv.y) * smoothstep(arenaBottom - 0.02, arenaBottom + 0.08, uv.y);
-  vec2 reflectedUv = vec2(uv.x + sin(uv.y * 180.0 + u_time) * pixel.x * 2.0, horizon + (horizon - uv.y) * 0.34);
-  vec3 reflection = brightSample(reflectedUv) * floorMask * (0.09 + 0.07 * u_quality);
-  float gridBands = pow(max(0.0, sin((uv.y - arenaBottom) * u_resolution.y * 0.19)), 22.0) * floorMask;
-  reflection += vec3(0.04, 0.55, 0.72) * gridBands * 0.08;
-
   vec3 lensColor = mix(vec3(0.08, 0.72, 1.0), vec3(0.74, 0.16, 1.0), sin(u_time * 0.7) * 0.5 + 0.5);
-  vec3 color = base + bloom * (0.26 + u_quality * 0.08) + reflection + lensColor * lensGlow * 0.14;
+  vec3 color = base + bloom * (0.26 + u_quality * 0.08) + lensColor * lensGlow * 0.14;
   color += vec3(1.0, 0.24, 0.04) * heat * 0.025;
   float vignette = smoothstep(1.15, 0.28, length((uv - 0.5) * vec2(1.0, 0.72)));
   color *= mix(0.76, 1.0, vignette);
@@ -3654,13 +3642,7 @@ function buildGraphicsFrame() {
   return {
     time: state.time,
     wells,
-    hotPoints,
-    arena: {
-      x: view.x / view.cssW,
-      y: 1 - (view.y + view.h) / view.cssH,
-      w: view.w / view.cssW,
-      h: view.h / view.cssH
-    }
+    hotPoints
   };
 }
 
