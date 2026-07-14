@@ -1,4 +1,13 @@
 (() => {
+  const healingDisabled =
+    document.body?.hasAttribute("data-lm-healing-disabled") ||
+    /\/(?:lottery-spheres|merch-store)\.html$/i.test(location.pathname);
+  if (healingDisabled) {
+    document.querySelectorAll(".lm-healing-generator, [data-lm-healing-generator]").forEach((node) => node.remove());
+    document.body?.classList.remove("has-lm-healing-generator");
+    return;
+  }
+
   if (document.querySelector("[data-lm-healing-generator]")) return;
 
   const scriptUrl = document.currentScript?.src || new URL("./assets/js/lm-healing-frequency.js", location.href).toString();

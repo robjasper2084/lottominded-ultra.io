@@ -3089,6 +3089,9 @@ function clearStartupReturnAutoClose() {
 
 function prepareStartupVideoAudio(options = {}) {
   if (!startupVideoPlayer) return;
+  startupVideoPlayer.preload = "metadata";
+  startupVideoPlayer.setAttribute("preload", "metadata");
+  restoreDeferredVideoSources(startupVideoPlayer);
   startupVideoPlayer.muted = false;
   startupVideoPlayer.defaultMuted = false;
   startupVideoPlayer.removeAttribute("muted");

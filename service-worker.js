@@ -1,4 +1,4 @@
-const CACHE_NAME = "lottomind-shell-v1";
+const CACHE_NAME = "lottomind-shell-v2";
 const CORE = ["./", "./index.html", "./styles.css", "./site.js", "./assets/brand/lm-orb-mark.webp"];
 
 self.addEventListener("install", (event) => {
