@@ -8,7 +8,7 @@
     <title>2084 Static Wave - LottoMind</title>
     <link rel="icon" href="./assets/2084/branding/2084-static-wars.ico?v=audit-fixes-1" />
     <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" as="image" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=audit-fixes-1" />
+    <link rel="stylesheet" href="./styles.css?v=top-scores-placement-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -104,8 +104,11 @@
         </div>
         <section id="scoreboardPanel" class="scoreboard-panel" aria-labelledby="scoreboardTitle" hidden>
           <div class="scoreboard-header">
-            <span id="scoreboardTitle"></span>
-            <small id="scoreboardNote"></small>
+            <div>
+              <span id="scoreboardTitle"></span>
+              <small id="scoreboardNote"></small>
+            </div>
+            <button id="scoreboardCloseAction" class="scoreboard-close" type="button" aria-label="Close Top 5 scores">X</button>
           </div>
           <div class="scoreboard-tabs" role="tablist" aria-label="Scoreboard source">
             <button id="localScoresAction" type="button" role="tab" aria-selected="true">Local</button>
@@ -139,6 +142,7 @@
           <button id="homeAction" type="button" hidden></button>
           <button id="soundAction" type="button"></button>
           <button id="settingsAction" type="button">Settings</button>
+          <button id="scoresAction" type="button" aria-controls="scoreboardPanel" aria-expanded="false">Top 5</button>
           <button id="fullscreenAction" type="button" aria-pressed="false">Full Screen</button>
         </div>
       </section>
@@ -204,7 +208,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=audit-fixes-1"></script>
+    <script type="module" src="./src/game.js?v=top-scores-placement-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

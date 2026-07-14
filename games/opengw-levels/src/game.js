@@ -1066,7 +1066,8 @@ const scoreboard = {
   note: $("scoreboardNote"),
   list: $("scoreboardList"),
   local: $("localScoresAction"),
-  community: $("communityScoresAction")
+  community: $("communityScoresAction"),
+  close: $("scoreboardCloseAction")
 };
 const rewardsUi = {
   panel: $("rewardPanel"),
@@ -1113,6 +1114,7 @@ const primaryAction = $("primaryAction");
 const homeAction = $("homeAction");
 const soundAction = $("soundAction");
 const settingsAction = $("settingsAction");
+const scoresAction = $("scoresAction");
 const pauseAction = $("pauseAction");
 const bombAction = $("bombAction");
 const controlsHint = $("controlsHint");
@@ -1154,6 +1156,7 @@ let selectedDifficulty = loadDifficulty();
 let playerProfile = loadProfile();
 let gameSettings = loadSettings();
 let settingsOpen = false;
+let scoreboardOpen = false;
 let scoreboardSource = "local";
 let communityScores = [];
 let communityScoresState = "idle";
@@ -1803,6 +1806,11 @@ addEventListener("focus", () => {
 
 addEventListener("keydown", (event) => {
   if (event.target?.closest?.("#shareResultPanel")) return;
+  if (scoreboardOpen && event.code === "Escape") {
+    event.preventDefault();
+    setScoreboardOpen(false);
+    return;
+  }
   if (settingsOpen) {
     if (event.code === "Escape") {
       event.preventDefault();
@@ -1918,6 +1926,8 @@ soundAction.addEventListener("click", () => {
   bus.toggle();
 });
 settingsAction?.addEventListener("click", () => setSettingsOpen(true));
+scoresAction?.addEventListener("click", () => setScoreboardOpen(!scoreboardOpen));
+scoreboard.close?.addEventListener("click", () => setScoreboardOpen(false));
 settingsUi.close?.addEventListener("click", () => setSettingsOpen(false));
 settingsUi.done?.addEventListener("click", () => {
   readSettingsUi();
@@ -2146,6 +2156,7 @@ function returnHome() {
   input.mouse.down = false;
   forgeHudDismissed = false;
   setShareResultExpanded(false);
+  scoreboardOpen = false;
   state = createState();
   state.status = "menu";
   bus.play("menuSelect", 0.08);
@@ -4344,6 +4355,11 @@ function updateOverlay() {
   else primaryAction.removeAttribute("aria-busy");
   setControlAvailability(soundAction, true);
   setControlAvailability(settingsAction, state.status === "menu" || state.status === "paused", { hide: true });
+  setControlAvailability(scoresAction, menu, { hide: true });
+  if (scoresAction) {
+    scoresAction.textContent = STR.topScores;
+    scoresAction.setAttribute("aria-expanded", String(menu && scoreboardOpen));
+  }
   homeAction.textContent = STR.selectPilots;
   homeAction.setAttribute("aria-label", STR.selectPilots);
   setControlAvailability(homeAction, state.status === "gameover" || state.status === "victory", { hide: true });
@@ -4939,7 +4955,7 @@ function formatScoreDate(timestamp) {
 
 function renderScoreboard() {
   if (!scoreboard.panel || !scoreboard.list) return;
-  const active = state.status === "menu" || state.status === "gameover" || state.status === "victory";
+  const active = (state.status === "menu" && scoreboardOpen) || state.status === "gameover" || state.status === "victory";
   setRegionAvailability(scoreboard.panel, active, { hide: true });
   if (!active) return;
 
@@ -4984,6 +5000,14 @@ function renderScoreboard() {
     return row;
   });
   scoreboard.list.replaceChildren(...rows);
+}
+
+function setScoreboardOpen(open) {
+  scoreboardOpen = Boolean(open && state.status === "menu");
+  scoresAction?.setAttribute("aria-expanded", String(scoreboardOpen));
+  renderScoreboard();
+  if (scoreboardOpen) scoreboard.close?.focus({ preventScroll: true });
+  else scoresAction?.focus({ preventScroll: true });
 }
 
 function setScoreboardSource(source) {
