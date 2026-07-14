@@ -21,7 +21,6 @@ export const ASSET_URLS = {
     kalyxShadowClaw: `${PACK_ROOT}/effects/sheets/KALYX_SHADOW_CLAW_PROJECTILE_sheet.png`,
     ezraBlueBurst: `${PACK_ROOT}/effects/sheets/EZRA_BLUE_MAGIC_BURST_sheet.png`,
     ezraOwlArc: `${PACK_ROOT}/effects/sheets/EZRA_OWL_ARC_PROJECTILE_sheet.png`,
-    emberOverlay: `${PACK_ROOT}/effects/sheets/EMBER_OVERLAY_sheet.png`,
     smoke: `${PACK_ROOT}/effects/sheets/SMOKE_PUFF_sheet.png`
   },
   assists: {
