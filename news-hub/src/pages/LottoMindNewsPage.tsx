@@ -206,7 +206,7 @@ export function LottoMindNewsPage() {
           <a href="../beat2lotto-plus.html#beat2lotto" data-icon="B2">Beat2Lotto+</a>
           <a href="../merch-store.html" data-icon="DR">Merch</a>
           <a href="../how-to-use.html" data-icon="GD">Guide</a>
-          <a href="../../lotto%20mind%20refined/" data-icon="LM" data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required">LottoMind App</a>
+          <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-member-app-public="true" aria-label="Open LottoMind Refined App">LottoMind App</a>
         </nav>
         <div className="direct-launch" aria-label="Direct studio launch">
           <a className="direct-action direct-primary" href="../lottomind-stem-studio/index.html">Launch Studio</a>
