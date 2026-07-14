@@ -61,9 +61,9 @@ const siteUrl = (relativePath) => new URL(relativePath.replace(/^\.\//, ""), SIT
     { label: "Guide", href: siteUrl("./how-to-use.html"), icon: "GD" },
     {
       label: "LottoMind App",
-      href: new URL("../lotto%20mind%20refined/", SITE_ROOT_URL).toString(),
+      href: "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/",
       icon: "LM",
-      attrs: ' data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required"',
+      attrs: ' data-member-app-public="true" aria-label="Open LottoMind Refined App"',
     },
   ];
 
@@ -1156,7 +1156,7 @@ function setupUniversalFloatingMenu() {
 
   const links = [
     ["Memberships", siteUrl("./memberships.html")],
-    ["LottoMind App", new URL("../lotto%20mind%20refined/", SITE_ROOT_URL).toString()],
+    ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"],
     ["Home", siteUrl("./index.html#top")],
     ["Features", siteUrl("./features-app.html")],
     ["Events", siteUrl("./live-events.html")],
@@ -1207,6 +1207,11 @@ function setupUniversalFloatingMenu() {
 
   const panel = menu.querySelector("[data-hud-panel]");
   const menuLinks = Array.from(menu.querySelectorAll("a[href]"));
+  const refinedAppMenuLink = menuLinks.find((link) => link.textContent.trim() === "LottoMind App");
+  if (refinedAppMenuLink) {
+    refinedAppMenuLink.dataset.memberAppPublic = "true";
+    refinedAppMenuLink.setAttribute("aria-label", "Open LottoMind Refined App");
+  }
   const hudClock = menu.querySelector("[data-hud-clock]");
   const hudReadout = menu.querySelector("[data-hud-readout]");
 
@@ -1623,10 +1628,7 @@ setupSphereOrbLivePlayers();
 
 
 const PRODUCTION_REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
-const LOCAL_REFINED_APP_URL = "http://127.0.0.1:8170/lotto%20mind%20refined/";
-const REFINED_APP_URL = /^(?:localhost|127\.0\.0\.1)$/i.test(window.location.hostname)
-  ? LOCAL_REFINED_APP_URL
-  : new URL(PRODUCTION_REFINED_APP_URL, window.location.href).toString();
+const REFINED_APP_URL = PRODUCTION_REFINED_APP_URL;
 const MEMBER_APP_UNLOCK_URL = "./memberships.html?unlock=lottomind-app#membership-plans";
 const VAULT_KEYS = {
   plan: "lottomind_plan",
