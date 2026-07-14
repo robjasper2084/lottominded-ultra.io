@@ -1,4 +1,4 @@
-import { ASSET_URLS, PACK_ROOT, SPRITE_OVERRIDES } from "../config/assets.js?v=fighter-prop1";
+import { ASSET_URLS, MOTION_ASSET_VERSION } from "../config/assets.js?v=motion-atlas4-repaired";
 
 const imageCache = new Map();
 
@@ -26,6 +26,8 @@ export class AssetLoader {
     this.images = {};
     this.manifest = null;
     this.animations = {};
+    this.loadedCharacterMotions = new Set();
+    this.characterMotionLoads = new Map();
   }
 
   async load() {
@@ -50,90 +52,82 @@ export class AssetLoader {
       assistRaven: ASSET_URLS.assists.raven,
       assistNocturna: ASSET_URLS.assists.nocturna,
       dossierVespera: ASSET_URLS.dossiers.vespera,
-      dossierNocturna: ASSET_URLS.dossiers.nocturna,
-      dossierMalach: ASSET_URLS.dossiers.malach,
-      dossierMorvane: ASSET_URLS.dossiers.morvane,
-      dossierEffects: ASSET_URLS.dossiers.effects,
-      ...Object.fromEntries(
-        Object.entries(SPRITE_OVERRIDES).map(([characterId, override]) => [
-          `${characterId}_override`,
-          override.image
-        ])
-      )
+      dossierMalach: ASSET_URLS.dossiers.malach
     };
 
-    const characterEntries = [];
-    for (const [characterId, character] of Object.entries(this.manifest.characters)) {
+    for (const characterId of Object.keys(this.manifest.characters)) {
       this.animations[characterId] = {};
-      for (const [motion, data] of Object.entries(character.motions)) {
-        const key = `${characterId}_${motion}`;
-        characterEntries.push([key, `${PACK_ROOT}/${data.sheet}`, characterId, motion, data]);
-      }
     }
 
-    const all = [
-      ...Object.entries(baseImages).map(([key, url]) => ({ key, url })),
-      ...characterEntries.map(([key, url]) => ({ key, url }))
-    ];
+    const all = Object.entries(baseImages).map(([key, url]) => ({ key, url }));
+
+    const loadGroups = new Map();
+    for (const item of all) {
+      if (!loadGroups.has(item.url)) loadGroups.set(item.url, []);
+      loadGroups.get(item.url).push(item);
+    }
 
     let done = 0;
     await Promise.all(
-      all.map(async ({ key, url }) => {
-        const image = await loadImage(key, url);
-        this.images[key] = image;
+      [...loadGroups.entries()].map(async ([url, items]) => {
+        const image = await loadImage(items[0].key, url);
+        for (const { key } of items) this.images[key] = image;
         done += 1;
-        this.onProgress(done / all.length);
+        this.onProgress(done / loadGroups.size);
       })
     );
 
-    for (const [key, , characterId, motion, data] of characterEntries) {
-      this.animations[characterId][motion] = {
-        ...data,
-        image: this.images[key],
-        frameCount: data.frame_count,
-        cellWidth: data.cell_width,
-        cellHeight: data.cell_height
-      };
-    }
-
-    this.applySpriteOverrides();
     return this;
   }
 
-  applySpriteOverrides() {
-    for (const [characterId, override] of Object.entries(SPRITE_OVERRIDES)) {
-      const image = this.images[`${characterId}_override`];
-      if (!image) continue;
+  async loadCharacterMotions(characterIds, onProgress = () => {}) {
+    const uniqueIds = [...new Set(characterIds)].filter((characterId) => this.manifest.characters[characterId]);
+    let done = 0;
+    await Promise.all(uniqueIds.map(async (characterId) => {
+      await this.loadCharacterMotion(characterId);
+      done += 1;
+      onProgress(done / uniqueIds.length, characterId);
+    }));
+    return this;
+  }
+
+  async loadCharacterMotion(characterId) {
+    if (this.loadedCharacterMotions.has(characterId)) return;
+    if (this.characterMotionLoads.has(characterId)) return this.characterMotionLoads.get(characterId);
+
+    const loadPromise = (async () => {
+      const character = this.manifest.characters[characterId];
+      if (!character) throw new Error(`Unknown character motion atlas: ${characterId}`);
+      const sheetImages = new Map();
+      await Promise.all([...new Set(Object.values(character.motions).map((motion) => motion.sheet))].map(async (sheet, index) => {
+        const key = `${characterId}_motions_${index}`;
+        const image = await loadImage(key, `${sheet}?v=${MOTION_ASSET_VERSION}`);
+        if (!image) throw new Error(`Unable to load character motion atlas: ${characterId} ${sheet}`);
+        this.images[key] = image;
+        sheetImages.set(sheet, image);
+      }));
       this.animations[characterId] ??= {};
-      const frameWidth = override.frameWidth ?? override.frameSize ?? 256;
-      const frameHeight = override.frameHeight ?? override.frameSize ?? 256;
-      const frameDuration = override.frameDuration ?? 58;
-      for (const [motion, frameIndexes] of Object.entries(override.motions ?? {})) {
-        this.animations[characterId][motion] = {
-          image,
-          frameCount: frameIndexes.length,
-          cellWidth: frameWidth,
-          cellHeight: frameHeight,
-          sourceFacing: override.sourceFacing ?? 1,
-          override: true,
-          frames: frameIndexes.map((frameIndex) => ({
-            x: frameIndex * frameWidth,
-            y: 0,
-            w: frameWidth,
-            h: frameHeight,
-            duration_ms: frameDuration
-          }))
-        };
+      for (const [motion, data] of Object.entries(character.motions)) {
+        this.animations[characterId][motion] = { ...data, image: sheetImages.get(data.sheet) };
       }
+      this.loadedCharacterMotions.add(characterId);
+    })();
+
+    this.characterMotionLoads.set(characterId, loadPromise);
+    try {
+      await loadPromise;
+    } finally {
+      this.characterMotionLoads.delete(characterId);
     }
   }
+
 }
 
 export const drawSpriteFrame = (ctx, animation, frameIndex, x, y, options = {}) => {
   if (!animation?.image) return false;
   const frame = animation.frames[frameIndex % animation.frames.length];
   if (!frame || frame.w <= 0 || frame.h <= 0) return false;
-  const scale = options.scale ?? 1;
+  const scale = (options.scale ?? 1) * (animation.renderScale ?? 1);
   const w = frame.w * scale;
   const h = frame.h * scale;
   ctx.save();

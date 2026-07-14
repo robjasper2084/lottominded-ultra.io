@@ -1,0 +1,134 @@
+{
+  "outputs": {
+    "photo_world": {
+      "source": "assets\\mission\\higgsfield_photo_world_source_20260624.jpeg",
+      "alpha": "assets\\mission\\higgsfield_photo_world_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_photo_world_runtime_v1.png"
+    },
+    "photo_fx": {
+      "source": "assets\\mission\\higgsfield_photo_fx_source_20260624.png",
+      "alpha": "assets\\mission\\higgsfield_photo_fx_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_photo_fx_runtime_v1.png"
+    },
+    "photo_world_retry": {
+      "source": "assets\\mission\\higgsfield_photo_world_retry_source_20260624.png",
+      "alpha": "assets\\mission\\higgsfield_photo_world_retry_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_photo_world_retry_runtime_v1.png"
+    },
+    "hero_photo_atlas": {
+      "source": "assets\\mascot\\lottomind_hero_photo_atlas_source_20260624.png",
+      "alpha": "assets\\mascot\\lottomind_hero_photo_atlas_alpha_20260624.png",
+      "runtime": "assets\\mascot\\lottomind_hero_photo_atlas_runtime_v1.png"
+    },
+    "hero_photo_dash": {
+      "source": "assets\\mascot\\lottomind_hero_photo_dash_source_20260624.png",
+      "alpha": "assets\\mascot\\lottomind_hero_photo_dash_alpha_20260624.png",
+      "runtime": "assets\\mascot\\lottomind_hero_photo_dash_runtime_v1.png"
+    },
+    "userref_world": {
+      "source": "assets\\mission\\higgsfield_userref_world_source_20260624.png",
+      "alpha": "assets\\mission\\higgsfield_userref_world_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_userref_world_runtime_v1.png"
+    },
+    "userref_fx": {
+      "source": "assets\\mission\\higgsfield_userref_fx_source_20260624.png",
+      "alpha": "assets\\mission\\higgsfield_userref_fx_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_userref_fx_runtime_v1.png"
+    },
+    "hero_base": {
+      "source": "assets\\hero\\lottomind_hero_base_higgsfield_source_20260624.png",
+      "alpha": "assets\\hero\\lottomind_hero_base_higgsfield_alpha_20260624.png",
+      "runtime": "assets\\hero\\lottomind_hero_base_higgsfield_runtime_512.png"
+    }
+  },
+  "audits": [
+    {
+      "name": "photo_world",
+      "path": "assets\\mission\\higgsfield_photo_world_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 114
+    },
+    {
+      "name": "photo_fx",
+      "path": "assets\\mission\\higgsfield_photo_fx_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 1607
+    },
+    {
+      "name": "photo_world_retry",
+      "path": "assets\\mission\\higgsfield_photo_world_retry_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 99
+    },
+    {
+      "name": "hero_photo_atlas",
+      "path": "assets\\mascot\\lottomind_hero_photo_atlas_runtime_v1.png",
+      "size": [
+        1536,
+        1152
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 92
+    },
+    {
+      "name": "hero_photo_dash",
+      "path": "assets\\mascot\\lottomind_hero_photo_dash_runtime_v1.png",
+      "size": [
+        1536,
+        192
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 166
+    },
+    {
+      "name": "userref_world",
+      "path": "assets\\mission\\higgsfield_userref_world_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 172
+    },
+    {
+      "name": "userref_fx",
+      "path": "assets\\mission\\higgsfield_userref_fx_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 1045
+    },
+    {
+      "name": "hero_base",
+      "source": "assets\\hero\\lottomind_hero_base_higgsfield_source_20260624.png",
+      "alpha": "assets\\hero\\lottomind_hero_base_higgsfield_alpha_20260624.png",
+      "runtime": "assets\\hero\\lottomind_hero_base_higgsfield_runtime_512.png",
+      "size": [
+        512,
+        512
+      ],
+      "empty": false
+    }
+  ]
+}

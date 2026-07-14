@@ -208,7 +208,7 @@
       return `
         <iframe
           class="stream-event-preview-embed"
-          src="${event.previewEmbedUrl}"
+          data-src="${event.previewEmbedUrl}"
           title="${escapeText(event.title)} video preview"
           loading="lazy"
           allow="autoplay; encrypted-media; picture-in-picture; web-share"
@@ -220,15 +220,15 @@
       const loopSeconds = Number(event.previewLoopSeconds || 0);
       const loopAttr = loopSeconds > 0 ? ` data-preview-loop-seconds="${loopSeconds}"` : "";
       return `
-        <video class="stream-event-preview-video" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="${event.thumbnailUrl}"${loopAttr} aria-label="${escapeText(event.title)} event preview">
-          <source src="${event.previewVideoUrl}" type="video/mp4" />
+        <video class="stream-event-preview-video" muted loop playsinline webkit-playsinline preload="none" data-autoplay-on-visible="true" poster="${event.thumbnailUrl}"${loopAttr} aria-label="${escapeText(event.title)} event preview">
+          <source data-src="${event.previewVideoUrl}" type="video/mp4" />
         </video>
       `;
     }
     if (status === "live" && event.streamType === "mp4" && event.streamUrl) {
       return `
-        <video autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="${event.thumbnailUrl}" aria-label="${escapeText(event.title)} live stream preview">
-          <source src="${event.streamUrl}" type="video/mp4" />
+        <video muted loop playsinline webkit-playsinline preload="none" data-autoplay-on-visible="true" poster="${event.thumbnailUrl}" aria-label="${escapeText(event.title)} live stream preview">
+          <source data-src="${event.streamUrl}" type="video/mp4" />
         </video>
       `;
     }
@@ -310,8 +310,8 @@
     if (status === "live" && event.streamUrl) {
       return `
         <div class="live-event-player">
-          <video controls autoplay muted playsinline preload="metadata" poster="${event.bannerUrl || event.thumbnailUrl}">
-            <source src="${event.streamUrl}" type="video/mp4" />
+          <video controls muted playsinline preload="none" poster="${event.bannerUrl || event.thumbnailUrl}">
+            <source data-src="${event.streamUrl}" type="video/mp4" />
           </video>
         </div>
       `;
@@ -319,8 +319,8 @@
     if (status === "ended" && event.replayUrl) {
       return `
         <div class="live-event-player">
-          <video controls playsinline preload="metadata" poster="${event.bannerUrl || event.thumbnailUrl}">
-            <source src="${event.replayUrl}" type="video/mp4" />
+          <video controls playsinline preload="none" poster="${event.bannerUrl || event.thumbnailUrl}">
+            <source data-src="${event.replayUrl}" type="video/mp4" />
           </video>
         </div>
       `;
@@ -354,7 +354,7 @@
       return `
         <div class="live-event-banner live-event-embed-banner">
           <iframe
-            src="${event.previewEmbedUrl}"
+            data-src="${event.previewEmbedUrl}"
             title="${escapeText(event.title)} video background"
             loading="lazy"
             allow="autoplay; encrypted-media; picture-in-picture; web-share"
@@ -368,7 +368,7 @@
       return `
         <div class="live-event-banner live-event-embed-banner">
           <iframe
-            src="${event.streamUrl}"
+            data-src="${event.streamUrl}"
             title="${escapeText(event.title)} live concert stream"
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -447,6 +447,55 @@
     });
   }
 
+  function setupDeferredLiveMedia(scope = document) {
+    const media = Array.from(scope.querySelectorAll("video, iframe")).filter((element) => {
+      if (element.dataset.liveMediaReady === "true") return false;
+      if (element.matches("iframe[data-src]")) return true;
+      if (element.matches("video")) {
+        return Boolean(element.dataset.src || element.querySelector("source[data-src]"));
+      }
+      return false;
+    });
+    if (!media.length) return;
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const coarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches;
+    const saveData = navigator.connection?.saveData;
+    const shouldHoldAutoplay = Boolean(reduceMotion || coarsePointer || saveData);
+
+    const hydrate = (element) => {
+      if (element.dataset.liveMediaReady === "true") return;
+      if (element.dataset.src && !element.getAttribute("src")) {
+        element.setAttribute("src", element.dataset.src);
+      }
+      if (element.tagName === "VIDEO") {
+        element.querySelectorAll("source[data-src]").forEach((source) => {
+          if (!source.getAttribute("src")) source.setAttribute("src", source.dataset.src);
+        });
+        element.load?.();
+        if (element.dataset.autoplayOnVisible === "true" && !shouldHoldAutoplay) {
+          element.play?.().catch(() => {});
+        }
+      }
+      element.dataset.liveMediaReady = "true";
+    };
+
+    if (!("IntersectionObserver" in window)) {
+      media.forEach(hydrate);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        hydrate(entry.target);
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: coarsePointer ? "120px" : "360px", threshold: 0.04 });
+
+    media.forEach((element) => observer.observe(element));
+  }
+
   function setupStreamStartupAudio() {
     const audio = document.querySelector("[data-stream-events-soundtrack]");
     const startup = document.querySelector("[data-stream-startup-audio]");
@@ -520,6 +569,7 @@
     if (grid) grid.innerHTML = events.map(renderEventCard).join("");
     if (detail) renderDetail(detail, findEventFromUrl(events));
     setupReminders(root);
+    setupDeferredLiveMedia(root);
     setupPreviewLoops(root);
   }
 
@@ -527,6 +577,7 @@
   setupLiveEventArtlines();
   document.querySelectorAll("[data-live-events-rail]").forEach(renderLiveEventsRail);
   document.querySelectorAll("[data-live-events-page]").forEach(renderLiveEventsPage);
+  setupDeferredLiveMedia(document);
   setupPreviewLoops(document);
   window.LOTTO_MIND_STREAM_EVENTS = LOTTO_MIND_STREAM_EVENTS;
   window.LottoMindLiveEvents = {

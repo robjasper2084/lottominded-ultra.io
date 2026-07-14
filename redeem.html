@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Redeem a verified LottoMind physical collectible code." />
+    <title>Collector Redemption | LOTTOMINDED ULTRA</title>
+    <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100svh; color: #ecfaff; background: #02070e; font-family: Inter, Arial, sans-serif; letter-spacing: 0; }
+      .redeem-shell { min-height: 100svh; display: grid; place-items: center; padding: 2rem 1rem; background: linear-gradient(rgba(46,220,242,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(46,220,242,.04) 1px, transparent 1px), radial-gradient(circle at 18% 14%, rgba(226,205,104,.14), transparent 26rem), radial-gradient(circle at 84% 76%, rgba(58,225,239,.13), transparent 28rem); background-size: 52px 52px, 52px 52px, auto, auto; }
+      .redeem-panel { width: min(48rem, 100%); padding: clamp(1.25rem, 4vw, 2.4rem); border: 1px solid rgba(52,226,246,.65); border-radius: 8px; background: rgba(4,18,32,.96); box-shadow: 0 24px 70px rgba(0,0,0,.58), inset 0 0 38px rgba(51,224,242,.06); }
+      .redeem-brand { display: inline-flex; align-items: center; gap: .65rem; color: #eefbff; font-weight: 800; text-decoration: none; }
+      .redeem-brand img { width: 2.2rem; height: 2.2rem; }
+      .eyebrow { margin: 1.5rem 0 .5rem; color: #eddc7a; font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+      h1 { max-width: 12ch; margin: 0; color: #dff7ff; font-size: clamp(2.25rem, 7vw, 5rem); line-height: .92; }
+      .lede { max-width: 62ch; color: #b9d1df; line-height: 1.6; }
+      .account-state { margin: 1rem 0; padding: .8rem; border: 1px solid rgba(74,213,237,.28); border-radius: 6px; background: rgba(8,44,62,.58); color: #cde8f2; }
+      form { display: grid; gap: .65rem; margin-top: 1rem; }
+      label { color: #d9ecf4; font-size: .78rem; font-weight: 700; }
+      input { width: 100%; min-height: 3rem; padding: 0 .8rem; border: 1px solid rgba(76,215,238,.45); border-radius: 5px; color: #fff; background: #06131f; font: 600 .9rem/1 Inter, Arial, sans-serif; }
+      .actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: .35rem; }
+      button, .button { min-height: 2.8rem; padding: .65rem .9rem; border: 1px solid rgba(64,224,242,.62); border-radius: 5px; color: #eefaff; background: #0a3c55; font: 800 .74rem/1 Inter, Arial, sans-serif; text-decoration: none; cursor: pointer; }
+      .primary { border-color: #e4d26f; color: #06161d; background: linear-gradient(90deg,#e8dc79,#42e5e8); }
+      button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid #eddc77; outline-offset: 3px; }
+      .message { min-height: 1.4rem; color: #8feeff; font-size: .82rem; line-height: 1.5; }
+      .legal { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid rgba(105,201,222,.18); color: #9cb2c1; font-size: .72rem; line-height: 1.55; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main class="redeem-shell">
+      <section class="redeem-panel" aria-labelledby="redeemTitle">
+        <a class="redeem-brand" href="./index.html#top"><img src="./assets/brand/lm-orb-mark.webp" alt="" /><span>LOTTOMINDED ULTRA</span></a>
+        <p class="eyebrow">Vault Guardian Series 01</p>
+        <h1 id="redeemTitle">Collector Redemption</h1>
+        <p class="lede">Redeem the unique code included with an activated physical collectible. A verified code grants 30 days of Collector Starter access, 150 Lotto Credits, and the Vault Guardian Series 01 badge.</p>
+        <div class="account-state" data-account-state role="status">Checking account...</div>
+
+        <form data-auth-form>
+          <label for="redeemEmail">Account email</label>
+          <input id="redeemEmail" name="email" type="email" autocomplete="email" required />
+          <label for="redeemPassword">Password</label>
+          <input id="redeemPassword" name="password" type="password" autocomplete="current-password" minlength="10" required />
+          <div class="actions">
+            <button class="primary" type="submit" name="mode" value="login">Sign In</button>
+            <button type="submit" name="mode" value="register">Create Account</button>
+          </div>
+        </form>
+
+        <form data-code-form hidden>
+          <label for="redeemCode">Collectible code</label>
+          <input id="redeemCode" name="code" type="text" autocomplete="one-time-code" maxlength="96" spellcheck="false" placeholder="Enter the code from your insert" required />
+          <div class="actions">
+            <button class="primary" type="submit">Redeem Code</button>
+            <button type="button" data-sign-out>Sign Out</button>
+          </div>
+        </form>
+
+        <p class="message" data-message aria-live="polite"></p>
+        <div class="actions">
+          <a class="button" href="./beat2lotto-plus.html#beat2lotto">Return to Beat2Lotto+</a>
+          <a class="button" href="../lotto%20mind%20refined/">Open LottoMind Refined</a>
+        </div>
+        <p class="legal">Collector Starter lasts 30 days and does not renew automatically. Beat2Lotto and LottoMind are entertainment and creative number-generation tools. Generated numbers do not predict or guarantee lottery results. Lotto Credits have no cash value.</p>
+      </section>
+    </main>
+    <script src="./assets/js/lottomind-account-service.js?v=collector-access-2"></script>
+    <script>
+      (() => {
+        const service = window.LottoMindAccountService;
+        const stateNode = document.querySelector("[data-account-state]");
+        const authForm = document.querySelector("[data-auth-form]");
+        const codeForm = document.querySelector("[data-code-form]");
+        const messageNode = document.querySelector("[data-message]");
+        const signOutButton = document.querySelector("[data-sign-out]");
+
+        const message = (text, error = false) => {
+          messageNode.textContent = text || "";
+          messageNode.style.color = error ? "#ffb0b0" : "#8feeff";
+        };
+        const render = (snapshot) => {
+          authForm.hidden = snapshot.authenticated;
+          codeForm.hidden = !snapshot.authenticated;
+          if (!snapshot.verified || snapshot.offline) stateNode.textContent = "Account service offline. Redemption is paused until verification returns.";
+          else if (!snapshot.authenticated) stateNode.textContent = "Sign in or create an account before entering a collectible code.";
+          else stateNode.textContent = `${snapshot.user.displayName} · ${snapshot.wallet.balance} verified Lotto Credits`;
+        };
+
+        authForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const data = new FormData(authForm);
+          const input = { email: String(data.get("email") || ""), password: String(data.get("password") || "") };
+          try {
+            const result = event.submitter?.value === "register" ? await service.register(input) : await service.signIn(input);
+            authForm.reset();
+            render(result);
+            message("Account verified. Enter the code from your collectible insert.");
+          } catch (error) { message(error.message, true); }
+        });
+        codeForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const code = String(new FormData(codeForm).get("code") || "").trim();
+          if (!code) return message("Enter a collectible code.", true);
+          message("Verifying collectible code...");
+          try {
+            const result = await service.redeemCollectible(code);
+            codeForm.reset();
+            render(result.snapshot);
+            message(`Vault Guardian Series 01 unlocked. ${result.creditsAdded} Lotto Credits added. Collector Starter ends ${new Date(result.membershipExpiresAt).toLocaleDateString()}. No automatic renewal.`);
+          } catch (error) { message(error.message, true); }
+        });
+        signOutButton.addEventListener("click", async () => { render(await service.signOut()); message("Signed out."); });
+        service.subscribeToWallet(render);
+        service.getSnapshot().then(render).catch((error) => message(error.message, true));
+      })();
+    </script>
+  </body>
+</html>

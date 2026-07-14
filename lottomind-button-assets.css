@@ -1,0 +1,206 @@
+/* LottoMind Ultra shared button asset system for feature and Beat2Lotto pages. */
+:root {
+  --lm-btn-cyan: #21f7ff;
+  --lm-btn-mint: #8effd4;
+  --lm-btn-gold: #f8d96b;
+  --lm-btn-violet: #9a64ff;
+  --lm-btn-ink: #020711;
+}
+
+.features-cinematic-page :is(
+  .studio-launch,
+  .round-control,
+  .motion-rail .rail-cards a,
+  .stack-panel button,
+  .stack-panel-action,
+  .support-chips a,
+  .support-chips button,
+  .mail-panel button,
+  .feature-bottom-bar a,
+  .feature-live-player button
+),
+.beat2lotto-current-page :is(
+  .direct-action,
+  .primary-action,
+  .secondary-action,
+  #playBeatAudio,
+  .pl-floating,
+  .pl-close,
+  .beat-playback-card button,
+  .beat2lotto-live-player button
+) {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  border: 1px solid rgba(33, 247, 255, 0.66);
+  border-radius: 0.82rem;
+  color: #f5fffb;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 42%),
+    radial-gradient(circle at 30% 18%, rgba(142, 255, 212, 0.42), transparent 34%),
+    linear-gradient(180deg, rgba(7, 58, 86, 0.96), rgba(2, 8, 18, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -0.34rem 0 rgba(0, 0, 0, 0.38),
+    0 0.34rem 0 rgba(0, 0, 0, 0.7),
+    0 0 20px rgba(33, 247, 255, 0.2);
+  transform: translateY(0);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease,
+    filter 150ms ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.features-cinematic-page :is(
+  .studio-launch,
+  .round-control,
+  .motion-rail .rail-cards a,
+  .stack-panel button,
+  .stack-panel-action,
+  .support-chips a,
+  .support-chips button,
+  .mail-panel button,
+  .feature-bottom-bar a,
+  .feature-live-player button
+)::before,
+.beat2lotto-current-page :is(
+  .direct-action,
+  .primary-action,
+  .secondary-action,
+  #playBeatAudio,
+  .pl-floating,
+  .pl-close,
+  .beat-playback-card button,
+  .beat2lotto-live-player button
+)::before {
+  content: "";
+  position: absolute;
+  inset: 0.08rem 0.12rem auto;
+  height: 42%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.02));
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.features-cinematic-page :is(.studio-launch, .mail-panel button, .feature-live-player .big),
+.beat2lotto-current-page :is(.direct-primary, .primary-action, .beat2lotto-live-player .big) {
+  color: #041017;
+  border-color: rgba(248, 217, 107, 0.86);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.36);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 42%),
+    linear-gradient(135deg, #f8d96b 0%, #8effd4 52%, #9a64ff 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.74),
+    inset 0 -0.35rem 0 rgba(54, 37, 8, 0.32),
+    0 0.38rem 0 rgba(0, 0, 0, 0.72),
+    0 0 28px rgba(248, 217, 107, 0.24);
+}
+
+.features-cinematic-page :is(
+  .studio-launch,
+  .round-control,
+  .motion-rail .rail-cards a,
+  .stack-panel button,
+  .stack-panel-action,
+  .support-chips a,
+  .support-chips button,
+  .mail-panel button,
+  .feature-bottom-bar a,
+  .feature-live-player button
+):is(:hover, :focus-visible),
+.beat2lotto-current-page :is(
+  .direct-action,
+  .primary-action,
+  .secondary-action,
+  #playBeatAudio,
+  .pl-floating,
+  .pl-close,
+  .beat-playback-card button,
+  .beat2lotto-live-player button
+):is(:hover, :focus-visible) {
+  border-color: rgba(142, 255, 212, 0.92);
+  filter: saturate(1.18) brightness(1.1);
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -0.34rem 0 rgba(0, 0, 0, 0.34),
+    0 0.55rem 0 rgba(0, 0, 0, 0.66),
+    0 0 34px rgba(33, 247, 255, 0.34);
+  outline: 2px solid rgba(142, 255, 212, 0.46);
+  outline-offset: 3px;
+}
+
+.features-cinematic-page :is(
+  .studio-launch,
+  .round-control,
+  .motion-rail .rail-cards a,
+  .stack-panel button,
+  .stack-panel-action,
+  .support-chips a,
+  .support-chips button,
+  .mail-panel button,
+  .feature-bottom-bar a,
+  .feature-live-player button
+):active,
+.beat2lotto-current-page :is(
+  .direct-action,
+  .primary-action,
+  .secondary-action,
+  #playBeatAudio,
+  .pl-floating,
+  .pl-close,
+  .beat-playback-card button,
+  .beat2lotto-live-player button
+):active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 0.24rem 0 rgba(0, 0, 0, 0.42),
+    inset 0 -0.12rem 0 rgba(255, 255, 255, 0.14),
+    0 0.08rem 0 rgba(0, 0, 0, 0.78),
+    0 0 18px rgba(33, 247, 255, 0.18);
+}
+
+.features-cinematic-page :is(button:disabled, [aria-disabled="true"]),
+.beat2lotto-current-page :is(button:disabled, [aria-disabled="true"]) {
+  cursor: not-allowed;
+  filter: grayscale(0.32) brightness(0.72);
+  opacity: 0.64;
+  transform: none;
+}
+
+.features-cinematic-page .motion-rail .rail-cards a,
+.features-cinematic-page .support-chips a,
+.features-cinematic-page .support-chips button {
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.features-cinematic-page .stack-panel button,
+.features-cinematic-page .stack-panel-action,
+.features-cinematic-page .round-control,
+.beat2lotto-current-page .pl-floating,
+.beat2lotto-current-page .pl-close {
+  border-radius: 999px;
+  min-width: 2.7rem;
+  aspect-ratio: 1;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .features-cinematic-page :is(button, a),
+  .beat2lotto-current-page :is(button, a) {
+    transition: none !important;
+  }
+}

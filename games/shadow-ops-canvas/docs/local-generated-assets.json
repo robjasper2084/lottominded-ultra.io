@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mission_collectibles_sheet",
+    "path": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\mission_collectibles_sheet.png",
+    "bytes": 49161,
+    "source": "local-pillow-sprite-sheet"
+  },
+  {
+    "id": "extraction_portal_sheet",
+    "path": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\extraction_portal_sheet.png",
+    "bytes": 96231,
+    "source": "local-pillow-sprite-sheet"
+  },
+  {
+    "id": "vault_gate_sheet",
+    "path": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\vault_gate_sheet.png",
+    "bytes": 24846,
+    "source": "local-pillow-sprite-sheet"
+  },
+  {
+    "id": "branded_background_props_sheet",
+    "path": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\branded_background_props_sheet.png",
+    "bytes": 90027,
+    "source": "local-pillow-sprite-sheet"
+  }
+]

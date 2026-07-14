@@ -1,0 +1,145 @@
+[
+    {
+        "id":  "level1_bg_far",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\level1_bg_far.webp",
+        "bytes":  323820,
+        "jobId":  "6c39c332-f904-4c84-b169-06879650abc6"
+    },
+    {
+        "id":  "level2_bg_far",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\level2_bg_far.webp",
+        "bytes":  510582,
+        "jobId":  "d4878a23-cb6b-4fb3-86ad-a6692dd82a0c"
+    },
+    {
+        "id":  "level3_bg_far",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\level3_bg_far.webp",
+        "bytes":  281568,
+        "jobId":  "27ec2b6a-31b8-4616-846e-4b87e10a5a85"
+    },
+    {
+        "id":  "platform_tiles_level1",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\platform_tiles_level1.png",
+        "bytes":  6067316,
+        "jobId":  "ad841d52-1af3-4805-8031-571c4aca5c79"
+    },
+    {
+        "id":  "platform_tiles_level2",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\platform_tiles_level2.png",
+        "bytes":  5951963,
+        "jobId":  "1f5573c8-008a-4b9e-9405-86b8ed8bb3bd"
+    },
+    {
+        "id":  "platform_tiles_level3",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\levels\\platform_tiles_level3.png",
+        "bytes":  5185256,
+        "jobId":  "45eda9e0-01ad-4316-9561-6bd4ed433b1e"
+    },
+    {
+        "id":  "canopy_drone_queen",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\bosses\\canopy_drone_queen.png",
+        "bytes":  6587708,
+        "jobId":  "73b8a80c-3303-4f8b-b8e0-f4887bd6ed92"
+    },
+    {
+        "id":  "jackpot_forge_titan",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\bosses\\jackpot_forge_titan.png",
+        "bytes":  5986891,
+        "jobId":  "ebe51201-7b38-4a3b-a233-64b0815fde17"
+    },
+    {
+        "id":  "midas_heartcore_overlord",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\bosses\\midas_heartcore_overlord.png",
+        "bytes":  7805119,
+        "jobId":  "f2295ea8-7ee6-4d11-8867-9697250132cd"
+    },
+    {
+        "id":  "level_card_frame",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\ui\\level_card_frame.png",
+        "bytes":  6352809,
+        "jobId":  "affccc6b-4b99-43b4-bb12-e824d786bbba"
+    },
+    {
+        "id":  "boss_health_frame",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\ui\\boss_health_frame.png",
+        "bytes":  5660153,
+        "jobId":  "cf9ebb8d-c87c-4f21-8867-309566b1d563"
+    },
+    {
+        "id":  "final_victory_badge",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\ui\\final_victory_badge.png",
+        "bytes":  7076911,
+        "jobId":  "8c895fb4-1e38-4cdd-93c9-268a9cdf617f"
+    },
+    {
+        "id":  "enemy_crawler",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\enemy_crawler.png",
+        "bytes":  247688,
+        "jobId":  "bd5c5ed9-adf9-4e91-a0cf-d2770ef4e357",
+        "backgroundRemovalJobId":  "c680910d-7915-4a9d-8400-add1d5fe8b86"
+    },
+    {
+        "id":  "enemy_drone",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\enemy_drone.png",
+        "bytes":  171010,
+        "jobId":  "ce8700b8-45ac-441d-9c8a-179b70138fd4",
+        "backgroundRemovalJobId":  "1315b451-82a6-411d-b06e-a484dfa109fd"
+    },
+    {
+        "id":  "enemy_shield_guard",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\enemy_shield_guard.png",
+        "bytes":  250950,
+        "jobId":  "efd14934-2c7c-407a-92a0-190e0df07e65",
+        "backgroundRemovalJobId":  "85f10d55-af28-4e91-bfd6-53313266373f"
+    },
+    {
+        "id":  "enemy_turret",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\enemy_turret.png",
+        "bytes":  213433,
+        "jobId":  "0223d8f6-cd42-4ca2-aab5-128d54045af2",
+        "backgroundRemovalJobId":  "eb744f18-6033-4018-aa3d-318b3dd675da"
+    },
+    {
+        "id":  "enemy_motion_sheet_source",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\higgsfield_enemy_motion_sheet.webp",
+        "bytes":  83576,
+        "jobId":  "9e5dcb4a-7365-4fd4-85eb-be1c988219b9",
+        "model":  "nano-banana-pro",
+        "note":  "Non-hero enemy motion sheet generated after user rejected the new hero sheet."
+    },
+    {
+        "id":  "enemy_motion_sheet_alpha",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\higgsfield_enemy_motion_sheet_alpha.png",
+        "bytes":  690678,
+        "sourceJobId":  "9e5dcb4a-7365-4fd4-85eb-be1c988219b9",
+        "process":  "local checker cleanup to PNG alpha"
+    },
+    {
+        "id":  "mission_fx_collectibles_sheet_source",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\higgsfield_mission_fx_collectibles_sheet.webp",
+        "bytes":  109210,
+        "jobId":  "d8e8f39b-f163-42c9-89b8-d051947b61e9",
+        "model":  "nano-banana-pro"
+    },
+    {
+        "id":  "mission_fx_collectibles_sheet_alpha",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\higgsfield_mission_fx_collectibles_sheet_alpha.png",
+        "bytes":  975649,
+        "sourceJobId":  "d8e8f39b-f163-42c9-89b8-d051947b61e9",
+        "process":  "local checker cleanup to PNG alpha"
+    },
+    {
+        "id":  "background_props_sheet_source",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\higgsfield_background_props_sheet.webp",
+        "bytes":  85974,
+        "jobId":  "ae3f5669-1883-412b-bd54-67a8d1a2fb4d",
+        "model":  "nano-banana-pro"
+    },
+    {
+        "id":  "background_props_sheet_alpha",
+        "path":  "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\higgsfield_background_props_sheet_alpha.png",
+        "bytes":  651159,
+        "sourceJobId":  "ae3f5669-1883-412b-bd54-67a8d1a2fb4d",
+        "process":  "local checker cleanup to PNG alpha"
+    }
+]

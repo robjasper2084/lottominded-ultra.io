@@ -1,0 +1,357 @@
+{
+  "id": "cyber-vault-v1",
+  "name": "Shadow Ops Cyber Vault Parallax Pack",
+  "styleReference": "C:\\Users\\digit\\Downloads\\hf_20260624_003059_e4bc057a-a94a-44aa-950d-3484ee1e98ab.jpeg",
+  "activation": "Add ?envpack=cyber-vault-v1 to the game URL.",
+  "layers": [
+    {
+      "key": "envFarSky",
+      "file": "layers/far-purple-nebula-sky.png",
+      "parallax": 0.018,
+      "alpha": 1.0,
+      "role": "far sky"
+    },
+    {
+      "key": "envDistantSilhouette",
+      "file": "layers/distant-cyber-vault-silhouettes.png",
+      "parallax": 0.038,
+      "alpha": 0.9,
+      "role": "distant towers"
+    },
+    {
+      "key": "envCircuitWall",
+      "file": "layers/mid-circuit-wall.png",
+      "parallax": 0.075,
+      "alpha": 0.74,
+      "role": "mid architecture"
+    },
+    {
+      "key": "envHologramFog",
+      "file": "layers/hologram-fog-overlay.png",
+      "parallax": 0.11,
+      "alpha": 0.44,
+      "role": "hologram fog overlay"
+    }
+  ],
+  "sheets": {
+    "platforms": {
+      "file": "platforms/platform-modules-sheet.png",
+      "sprites": [
+        {
+          "name": "left_cap",
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "middle_tile",
+          "x": 512,
+          "y": 0,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "right_cap",
+          "x": 1024,
+          "y": 0,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "small_ledge",
+          "x": 1536,
+          "y": 0,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "wide_bridge",
+          "x": 0,
+          "y": 256,
+          "w": 1024,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            976,
+            96
+          ]
+        },
+        {
+          "name": "broken_ledge",
+          "x": 1024,
+          "y": 256,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "elevator_pad",
+          "x": 1536,
+          "y": 256,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "hatch_platform",
+          "x": 0,
+          "y": 512,
+          "w": 512,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            464,
+            96
+          ]
+        },
+        {
+          "name": "boss_arena_platform",
+          "x": 512,
+          "y": 512,
+          "w": 1024,
+          "h": 256,
+          "collision": [
+            24,
+            40,
+            976,
+            96
+          ]
+        }
+      ]
+    },
+    "props": {
+      "file": "props/interactive-cyber-vault-props-sheet.png",
+      "sprites": [
+        {
+          "name": "locked_vault_door",
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "unlockable_hatch",
+          "x": 256,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "elevator_terminal",
+          "x": 512,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "checkpoint_pad",
+          "x": 768,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "security_console",
+          "x": 0,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "reward_crate",
+          "x": 256,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "energy_battery",
+          "x": 512,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "purple_crystal",
+          "x": 768,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "gold_circuit_switch",
+          "x": 0,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "hologram_terminal",
+          "x": 256,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "warning_beacon",
+          "x": 512,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        },
+        {
+          "name": "boss_portal_frame",
+          "x": 768,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        }
+      ]
+    },
+    "overlays": {
+      "file": "overlays/foreground-overlay-sheet.png",
+      "sprites": [
+        {
+          "name": "fog_bank",
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "smoke_ribbon",
+          "x": 512,
+          "y": 0,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "magenta_glow",
+          "x": 1024,
+          "y": 0,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "amber_circuit_glow",
+          "x": 1536,
+          "y": 0,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "jungle_leaves",
+          "x": 0,
+          "y": 256,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "hanging_vines",
+          "x": 512,
+          "y": 256,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "purple_mushrooms",
+          "x": 1024,
+          "y": 256,
+          "w": 512,
+          "h": 256
+        },
+        {
+          "name": "particle_sparks",
+          "x": 1536,
+          "y": 256,
+          "w": 512,
+          "h": 256
+        }
+      ]
+    },
+    "heartCore": {
+      "file": "props/heart-core-reactor-states-sheet.png",
+      "sprites": [
+        {
+          "name": "heart_core_dormant",
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 512
+        },
+        {
+          "name": "heart_core_activated",
+          "x": 384,
+          "y": 0,
+          "w": 384,
+          "h": 512
+        },
+        {
+          "name": "heart_core_damaged",
+          "x": 768,
+          "y": 0,
+          "w": 384,
+          "h": 512
+        },
+        {
+          "name": "heart_core_overloaded",
+          "x": 1152,
+          "y": 0,
+          "w": 384,
+          "h": 512
+        },
+        {
+          "name": "heart_core_defeated",
+          "x": 1536,
+          "y": 0,
+          "w": 384,
+          "h": 512
+        }
+      ]
+    }
+  },
+  "constraints": {
+    "noCharacters": true,
+    "noReadableText": true,
+    "transparentSprites": true,
+    "canvasReady": true,
+    "rollback": "Remove envpack query parameter."
+  }
+}

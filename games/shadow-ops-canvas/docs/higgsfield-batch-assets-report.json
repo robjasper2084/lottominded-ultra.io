@@ -1,0 +1,54 @@
+{
+  "outputs": {
+    "batch_props": {
+      "source": "assets\\mission\\higgsfield_batch_props_source_20260624.jpeg",
+      "alpha": "assets\\mission\\higgsfield_batch_props_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_batch_props_runtime_v1.png"
+    },
+    "batch_fx": {
+      "source": "assets\\mission\\higgsfield_batch_fx_retry_source_20260624.jpeg",
+      "alpha": "assets\\mission\\higgsfield_batch_fx_retry_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_batch_fx_retry_runtime_v1.png"
+    },
+    "batch_world": {
+      "source": "assets\\mission\\higgsfield_batch_world_source_20260624.png",
+      "alpha": "assets\\mission\\higgsfield_batch_world_alpha_20260624.png",
+      "runtime": "assets\\mission\\higgsfield_batch_world_runtime_v1.png"
+    }
+  },
+  "audits": [
+    {
+      "name": "batch_props",
+      "path": "assets\\mission\\higgsfield_batch_props_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 1367
+    },
+    {
+      "name": "batch_fx",
+      "path": "assets\\mission\\higgsfield_batch_fx_retry_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 2866
+    },
+    {
+      "name": "batch_world",
+      "path": "assets\\mission\\higgsfield_batch_world_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "green_pixels": 738
+    }
+  ]
+}

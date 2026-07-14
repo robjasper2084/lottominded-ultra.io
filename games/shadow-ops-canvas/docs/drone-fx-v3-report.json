@@ -1,0 +1,13 @@
+{
+  "output": "assets\\mission\\chatgpt_drone_fx_strip_runtime_v3.png",
+  "preview": "docs\\drone-fx-v3-preview.png",
+  "size": [
+    2560,
+    180
+  ],
+  "cell_size": [
+    320,
+    180
+  ],
+  "frames": 8
+}

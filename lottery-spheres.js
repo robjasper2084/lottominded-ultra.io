@@ -4,24 +4,36 @@
   if (!stage || !canvas) return;
 
   const ctx = canvas.getContext("2d", { alpha: true });
-  const signalOutput = document.querySelector("[data-sphere-signal]");
-  const energyMeter = document.querySelector("[data-sphere-energy]");
-  const orbitOutput = document.querySelector("[data-sphere-orbit]");
-  const rerollButton = document.querySelector("[data-reroll-spheres]");
-  const moveCountOutput = document.querySelector("[data-sphere-move-count]");
-  const pick6Output = document.querySelector("[data-sphere-pick6]");
-  const pick3Output = document.querySelector("[data-sphere-pick3]");
-  const pick4Output = document.querySelector("[data-sphere-pick4]");
+  const signalOutputs = document.querySelectorAll("[data-sphere-signal]");
+  const energyMeters = document.querySelectorAll("[data-sphere-energy]");
+  const orbitOutputs = document.querySelectorAll("[data-sphere-orbit]");
+  const moveCountOutputs = document.querySelectorAll("[data-sphere-move-count]");
+  const pick6Outputs = document.querySelectorAll("[data-sphere-pick6]");
+  const pick3Outputs = document.querySelectorAll("[data-sphere-pick3]");
+  const pick4Outputs = document.querySelectorAll("[data-sphere-pick4]");
+  const eightBallForm = document.querySelector("[data-eightball-form]");
+  const eightBallQuestion = document.querySelector("[data-eightball-question]");
+  const eightBallSubmit = document.querySelector("[data-eightball-submit]");
+  const eightBallReadings = document.querySelectorAll("[data-eightball-reading]");
+  const eightBallStatus = document.querySelector("[data-eightball-status]");
   const audioGate = document.querySelector("[data-sphere-audio-gate]");
   const audioStartButton = document.querySelector("[data-sphere-audio-start]");
   const audioSkipButton = document.querySelector("[data-sphere-audio-skip]");
   const audioStatus = document.querySelector("[data-sphere-audio-status]");
   const sphereSoundtrack = document.querySelector("[data-sphere-soundtrack]");
   const liveMixAudio = document.querySelector("[data-live-player] [data-live-player-audio]");
+  const shadowPopup = document.querySelector("[data-sphere-shadow-popup]");
+  const shadowFrame = document.querySelector("[data-sphere-shadow-frame]");
+  const shadowOpenButtons = document.querySelectorAll("[data-sphere-shadow-open]");
+  const shadowCloseButtons = document.querySelectorAll("[data-sphere-shadow-close]");
+  const shadowFullscreenButton = document.querySelector("[data-sphere-shadow-fullscreen]");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const sphereAudioGateEnabled = false;
   const sphereSoundtrackFullVolume = 0.58;
   const sphereSoundtrackDuckedVolume = 0.22;
+  const sphereShadowAutoOpenEnabled = false;
+  const sphereShadowAutoDelay = 1200;
+  const sphereShadowAutoKey = "lottomind.spheres.shadowAutoShown.v1";
   let sphereSoundtrackStarted = false;
   let sphereSoundtrackUserSkipped = false;
   let liveMixDucking = false;
@@ -63,6 +75,114 @@
   let moveTriggerCount = 0;
   let lastMovePoint = null;
   let lastMoveTriggerAt = 0;
+  let shadowResumeSphereSoundtrack = false;
+  let shadowResumeLiveMix = false;
+  let eightBallRequest = null;
+  let eightBallHoldUntil = 0;
+  let eightBallEnergy = 62;
+  let eightBallOrbitLabel = "Unclear";
+
+  const eightBallFallbacks = [
+    { reading: "The signal points to yes.", score: 0.72 },
+    { reading: "Creative conditions look favorable.", score: 0.44 },
+    { reading: "The orbit is unclear. Ask again after the next reroll.", score: 0 },
+    { reading: "The field advises patience.", score: -0.28 },
+    { reading: "The signal says not yet.", score: -0.68 }
+  ];
+
+  function hasAutoShownShadowPopup() {
+    try {
+      return sessionStorage.getItem(sphereShadowAutoKey) === "true";
+    } catch {
+      return Boolean(window.__lottomindSphereShadowAutoShown);
+    }
+  }
+
+  function rememberAutoShownShadowPopup() {
+    window.__lottomindSphereShadowAutoShown = true;
+    try {
+      sessionStorage.setItem(sphereShadowAutoKey, "true");
+    } catch {
+      // Session storage can be unavailable in locked-down browsers.
+    }
+  }
+
+  function openShadowPopup() {
+    if (!shadowPopup) return;
+    if (!shadowPopup.classList.contains("is-hidden")) return;
+    if (shadowFrame && !shadowFrame.getAttribute("src")) {
+      shadowFrame.setAttribute("src", shadowFrame.dataset.src || "");
+    }
+    shadowResumeSphereSoundtrack = Boolean(sphereSoundtrack && !sphereSoundtrack.paused);
+    shadowResumeLiveMix = Boolean(liveMixAudio && !liveMixAudio.paused);
+    sphereSoundtrack?.pause();
+    liveMixAudio?.pause();
+    shadowPopup.classList.remove("is-hidden");
+    shadowPopup.setAttribute("aria-hidden", "false");
+    document.body.classList.add("has-sphere-shadow-popup");
+  }
+
+  function closeShadowPopup() {
+    if (!shadowPopup) return;
+    shadowPopup.classList.add("is-hidden");
+    shadowPopup.classList.remove("is-expanded");
+    shadowPopup.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("has-sphere-shadow-popup");
+    shadowFrame?.removeAttribute("src");
+    if (shadowResumeSphereSoundtrack && sphereSoundtrack) {
+      sphereSoundtrack.play().catch(() => {});
+    }
+    if (shadowResumeLiveMix && liveMixAudio) {
+      liveMixAudio.play().catch(() => {});
+    }
+    shadowResumeSphereSoundtrack = false;
+    shadowResumeLiveMix = false;
+  }
+
+  function requestShadowFullscreen() {
+    const stageTarget = shadowPopup?.querySelector(".sphere-shadow-popup-stage");
+    if (!shadowPopup || !stageTarget) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.().catch(() => {});
+      return;
+    }
+    const fullscreenTarget = stageTarget.requestFullscreen ? stageTarget : shadowFrame;
+    if (fullscreenTarget?.requestFullscreen) {
+      fullscreenTarget.requestFullscreen().catch(() => {
+        shadowPopup.classList.add("is-expanded");
+      });
+      return;
+    }
+    shadowPopup.classList.toggle("is-expanded");
+  }
+
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      shadowPopup?.classList.remove("is-expanded");
+    }
+  });
+
+  shadowOpenButtons.forEach((button) => button.addEventListener("click", openShadowPopup));
+  shadowCloseButtons.forEach((button) => button.addEventListener("click", closeShadowPopup));
+  shadowFullscreenButton?.addEventListener("click", requestShadowFullscreen);
+  shadowPopup?.addEventListener("click", (event) => {
+    if (event.target === shadowPopup) closeShadowPopup();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !shadowPopup?.classList.contains("is-hidden")) closeShadowPopup();
+  });
+
+  function scheduleAutoShadowPopup() {
+    if (!sphereShadowAutoOpenEnabled) return;
+    if (!shadowPopup || hasAutoShownShadowPopup()) return;
+    window.setTimeout(() => {
+      if (!shadowPopup || hasAutoShownShadowPopup() || document.visibilityState === "hidden") return;
+      rememberAutoShownShadowPopup();
+      openShadowPopup();
+    }, sphereShadowAutoDelay);
+  }
+
+  scheduleAutoShadowPopup();
 
   function clamp01(value) {
     return Math.max(0, Math.min(1, Number(value) || 0));
@@ -99,37 +219,122 @@
   }
 
   function setSignal(numbers) {
-    if (signalOutput) signalOutput.textContent = numbers.map(pad).join(" - ");
+    const signalText = numbers.map(pad).join(" - ");
+    signalOutputs.forEach((output) => {
+      output.textContent = signalText;
+    });
   }
 
   function setGeneratedSets() {
     const pick6 = makeUniqueSet(6, 69);
     const pick3 = makeDigitSet(3);
     const pick4 = makeDigitSet(4);
-    if (pick6Output) {
-      pick6Output.innerHTML = pick6
+    const pick6Markup = pick6
         .map((number, index) => `<span class="${index === 5 ? "is-sixth-digit" : ""}">${pad(number)}</span>`)
         .join('<span class="pick-separator"> - </span>');
-    }
-    if (pick3Output) pick3Output.textContent = pick3.join(" - ");
-    if (pick4Output) pick4Output.textContent = pick4.join(" - ");
-    if (moveCountOutput) moveCountOutput.textContent = "Generated after 3 ball moves. Move 3 more times for a fresh set.";
+    pick6Outputs.forEach((output) => {
+      output.innerHTML = pick6Markup;
+    });
+    pick3Outputs.forEach((output) => {
+      output.textContent = pick3.join(" - ");
+    });
+    pick4Outputs.forEach((output) => {
+      output.textContent = pick4.join(" - ");
+    });
+    moveCountOutputs.forEach((output) => {
+      output.textContent = "Generated after 3 ball moves. Move 3 more times for a fresh set.";
+    });
     setSignal(pick6.slice(0, 5));
   }
 
   function updateMoveTriggerLabel() {
-    if (!moveCountOutput || moveTriggerCount === 0) return;
-    moveCountOutput.textContent = `${moveTriggerCount}/3 ball moves captured.`;
+    if (moveTriggerCount === 0) return;
+    moveCountOutputs.forEach((output) => {
+      output.textContent = `${moveTriggerCount}/3 ball moves captured.`;
+    });
   }
 
   function setEnergy(value) {
     energy = Math.max(18, Math.min(100, value));
-    if (energyMeter) {
-      energyMeter.value = energy;
-      energyMeter.textContent = String(Math.round(energy));
+    energyMeters.forEach((meter) => {
+      meter.value = energy;
+      meter.textContent = String(Math.round(energy));
+    });
+    const orbitText = energy > 78 ? "Surge" : energy > 52 ? "Active" : "Calm";
+    orbitOutputs.forEach((output) => {
+      output.textContent = orbitText;
+    });
+  }
+
+  function setEightBallStatus(message, state = "ready") {
+    if (!eightBallStatus) return;
+    eightBallStatus.textContent = message;
+    eightBallStatus.dataset.state = state;
+  }
+
+  function applyEightBallReading(reading, rawScore, source) {
+    const score = Number.isFinite(rawScore) ? rawScore : 0;
+    const tone = score > 0.15 ? "positive" : score < -0.15 ? "negative" : "neutral";
+    const orbitLabel = tone === "positive" ? "Aligned" : tone === "negative" ? "Guarded" : "Unclear";
+    const nextEnergy = tone === "positive" ? 88 : tone === "negative" ? 38 : 62;
+
+    eightBallReadings.forEach((output) => {
+      output.textContent = reading;
+    });
+
+    rerollSpheres();
+    eightBallEnergy = nextEnergy;
+    eightBallOrbitLabel = orbitLabel;
+    eightBallHoldUntil = performance.now() + 6000;
+    setEnergy(nextEnergy);
+    orbitOutputs.forEach((output) => {
+      output.textContent = orbitLabel;
+    });
+
+    stage.dataset.eightBallTone = tone;
+    stage.classList.remove("is-eightball-pulse");
+    window.requestAnimationFrame(() => stage.classList.add("is-eightball-pulse"));
+    window.setTimeout(() => stage.classList.remove("is-eightball-pulse"), 900);
+    setEightBallStatus(
+      source === "api" ? "Eight Ball API signal received." : "Local oracle fallback active.",
+      source === "api" ? "success" : "fallback"
+    );
+  }
+
+  async function askEightBall(question) {
+    eightBallRequest?.abort();
+    const controller = new AbortController();
+    eightBallRequest = controller;
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
+
+    if (eightBallSubmit) eightBallSubmit.disabled = true;
+    setEightBallStatus("Reading the Eight Ball signal...", "loading");
+
+    try {
+      const endpoint = new URL("/api/eightball", window.location.origin);
+      endpoint.searchParams.set("question", question);
+      const response = await fetch(endpoint, {
+        headers: { Accept: "application/json" },
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error(`Eight Ball API returned ${response.status}`);
+
+      const data = await response.json();
+      const reading = typeof data?.reading === "string" ? data.reading.trim() : "";
+      if (!reading) throw new Error("Eight Ball API returned no reading");
+      applyEightBallReading(reading, Number(data?.sentiment?.score), "api");
+    } catch (error) {
+      if (eightBallRequest !== controller) return;
+      const seed = Array.from(question).reduce((total, character) => total + character.charCodeAt(0), 0);
+      const fallback = eightBallFallbacks[seed % eightBallFallbacks.length];
+      applyEightBallReading(fallback.reading, fallback.score, "fallback");
+    } finally {
+      window.clearTimeout(timeout);
+      if (eightBallRequest === controller) {
+        if (eightBallSubmit) eightBallSubmit.disabled = false;
+        eightBallRequest = null;
+      }
     }
-    if (!orbitOutput) return;
-    orbitOutput.textContent = energy > 78 ? "Surge" : energy > 52 ? "Active" : "Calm";
   }
 
   function seedBalls() {
@@ -157,7 +362,9 @@
     });
     moveTriggerCount = 0;
     lastMovePoint = null;
-    if (moveCountOutput) moveCountOutput.textContent = "Move the balls 3 times to generate sets.";
+    moveCountOutputs.forEach((output) => {
+      output.textContent = "Move the balls 3 times to generate sets.";
+    });
   }
 
   function canRender() {
@@ -395,8 +602,14 @@
     drawBackdrop(time, pulse);
     if (!reduceMotion.matches) {
       const idleEnergy = 42 + Math.sin(time * 0.0018) * 8;
-      const targetEnergy = Math.max(pointer.active ? 82 + Math.sin(time * 0.006) * 10 : idleEnergy, 44 + pulse * 56);
+      const ambientEnergy = Math.max(pointer.active ? 82 + Math.sin(time * 0.006) * 10 : idleEnergy, 44 + pulse * 56);
+      const targetEnergy = time < eightBallHoldUntil ? eightBallEnergy : ambientEnergy;
       setEnergy(energy + (targetEnergy - energy) * 0.04);
+      if (time < eightBallHoldUntil) {
+        orbitOutputs.forEach((output) => {
+          output.textContent = eightBallOrbitLabel;
+        });
+      }
     }
     balls.forEach((ball) => {
       updateBall(ball, time, pulse);
@@ -543,10 +756,30 @@
     audioPulseUntil = 0;
   });
 
-  rerollButton?.addEventListener("click", () => {
+  function rerollSpheres() {
     seedBalls();
     window.cancelAnimationFrame(raf);
     render(performance.now());
+  }
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-reroll-spheres]");
+    if (!button) return;
+    event.preventDefault();
+    eightBallHoldUntil = 0;
+    delete stage.dataset.eightBallTone;
+    rerollSpheres();
+  });
+
+  eightBallForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const question = eightBallQuestion?.value.trim() || "";
+    if (!question) {
+      setEightBallStatus("Enter a yes-or-no question first.", "error");
+      eightBallQuestion?.focus();
+      return;
+    }
+    askEightBall(question);
   });
 
   reduceMotion.addEventListener?.("change", () => {
@@ -559,10 +792,57 @@
 })();
 
 (() => {
+  const popup = document.querySelector("[data-jackpot-maze-popup]");
+  if (!popup) return;
+
+  const closeButtons = popup.querySelectorAll("[data-jackpot-maze-close]");
+  const closeButton = popup.querySelector(".spheres-jackpot-popup__close");
+  const frame = popup.querySelector(".spheres-jackpot-popup__frame");
+  let isOpen = popup.classList.contains("is-open");
+  let returnFocus = null;
+
+  function loadGame() {
+    if (!frame || (frame.getAttribute("src") && frame.getAttribute("src") !== "about:blank")) return;
+    frame.setAttribute("src", frame.dataset.src || "./games/lottomind-jackpot-maze/");
+  }
+
+  function openPopup(trigger = null) {
+    returnFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
+    isOpen = true;
+    popup.classList.add("is-open");
+    popup.setAttribute("aria-hidden", "false");
+    document.body.classList.add("has-jackpot-maze-popup");
+    loadGame();
+    window.requestAnimationFrame(() => closeButton?.focus());
+  }
+
+  function closePopup() {
+    if (!isOpen) return;
+    isOpen = false;
+    popup.classList.remove("is-open");
+    popup.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("has-jackpot-maze-popup");
+    if (frame) frame.src = "about:blank";
+    if (returnFocus instanceof HTMLElement) returnFocus.focus({ preventScroll: true });
+  }
+
+  closeButtons.forEach((button) => button.addEventListener("click", closePopup));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closePopup();
+  });
+
+  document.querySelectorAll("[data-jackpot-maze-open]").forEach((button) => {
+    button.addEventListener("click", () => openPopup(button));
+  });
+
+  if (isOpen) openPopup();
+})();
+
+(() => {
   const player = document.querySelector(".spheres-live-player[data-live-player]");
   if (!player || player.dataset.spheresFloatReady === "true") return;
 
-  const storageKey = "lottominded.ultra.spheresPlayerPosition.v1";
+  const storageKey = "lottominded.ultra.spheresPlayerPosition.v2";
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const interactiveSelector = "button, a, input, textarea, select, audio, video, [role='button']";
   const ripples = document.createElement("div");
@@ -604,8 +884,9 @@
   }
 
   function defaultPosition() {
-    const { height } = getPlayerSize();
-    return clampPosition(window.innerWidth / 2, window.innerHeight - height / 2 - 18);
+    const { width, height } = getPlayerSize();
+    const headerBottom = document.querySelector("[data-site-header]")?.getBoundingClientRect().bottom || 0;
+    return clampPosition(width / 2 + 18, headerBottom + height / 2 + 18);
   }
 
   function savePosition() {

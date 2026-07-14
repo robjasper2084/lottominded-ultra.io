@@ -1,0 +1,20 @@
+{
+  "name": "shadow-ops-canvas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A static HTML5 Canvas run-and-gun campaign with original LottoMind black/gold/purple arcade art. The player clears three vault sectors, collects each level's three keys, defeats a unique boss, and escapes through the final heartcore portal.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "ts": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

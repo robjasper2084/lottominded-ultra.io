@@ -493,10 +493,7 @@
     ctx.clearRect(0, 0, state.width, state.height);
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    drawGrid();
-    drawMirrors();
     drawTargets();
-    drawBeam();
     drawParticles();
     drawBall();
     drawHudTrace();

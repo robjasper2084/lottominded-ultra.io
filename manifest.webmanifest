@@ -1,0 +1,13 @@
+{
+  "name": "LOTTOMINDED ULTRA",
+  "short_name": "LottoMind",
+  "description": "Creative number journaling, music inspiration, games, and entertainment tools.",
+  "start_url": "./index.html#top",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#03050a",
+  "theme_color": "#03050a",
+  "icons": [
+    { "src": "./assets/brand/lm-orb-mark.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any maskable" }
+  ]
+}

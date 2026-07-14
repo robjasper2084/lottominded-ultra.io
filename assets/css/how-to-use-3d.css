@@ -1,0 +1,693 @@
+:root {
+  --guide3d-cyan: #21f7ff;
+  --guide3d-mint: #8effd4;
+  --guide3d-gold: #f8d96b;
+  --guide3d-magenta: #c46cff;
+  --guide3d-ink: #02060c;
+  --guide3d-blue: #03162c;
+  --guide3d-pointer-x: 0.5;
+  --guide3d-pointer-y: 0.36;
+  --guide3d-scroll: 0;
+  --guide3d-depth: 0;
+  --guide3d-motion: 1;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.home-page.has-sphere-header {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at calc(var(--guide3d-pointer-x) * 100%) calc(var(--guide3d-pointer-y) * 100%), rgba(33, 247, 255, 0.14), transparent 24rem),
+    radial-gradient(circle at 76% 16%, rgba(248, 217, 107, 0.12), transparent 28rem),
+    linear-gradient(180deg, #010308 0%, #03101f 42%, #01040a 100%) !important;
+}
+
+body.home-page.has-sphere-header main,
+body.home-page.has-sphere-header footer,
+body.home-page.has-sphere-header .home-signal-marquee,
+body.home-page.has-sphere-header .guide-page-menu,
+body.home-page.has-sphere-header .password-gate,
+body.home-page.has-sphere-header .guide-startup-audio {
+  position: relative;
+  z-index: 5;
+}
+
+body.home-page.has-sphere-header .guide-pong-background,
+body.home-page.has-sphere-header .guide-game-vignette,
+body.home-page.has-sphere-header .guide-puck-field {
+  display: none !important;
+}
+
+.guide3d-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint style;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(33, 247, 255, 0.08), transparent 28rem),
+    radial-gradient(circle at 82% 62%, rgba(196, 108, 255, 0.08), transparent 32rem);
+}
+
+.guide3d-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.86;
+}
+
+.guide3d-grid,
+.guide3d-light-beams,
+.guide3d-orbit-field {
+  position: absolute;
+  inset: -12%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.guide3d-grid {
+  transform:
+    translate3d(calc((var(--guide3d-pointer-x) - 0.5) * -36px), calc((var(--guide3d-pointer-y) - 0.5) * -24px), -180px)
+    rotateX(64deg)
+    translateY(calc(var(--guide3d-scroll) * -0.025px));
+  transform-origin: center bottom;
+  background-image:
+    linear-gradient(rgba(33, 247, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 247, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(ellipse at center, transparent 38%, rgba(1, 3, 8, 0.7) 76%);
+  background-size: 62px 62px, 62px 62px, 100% 100%;
+  opacity: 0.54;
+}
+
+.guide3d-light-beams {
+  transform:
+    translate3d(calc((var(--guide3d-pointer-x) - 0.5) * 42px), calc((var(--guide3d-pointer-y) - 0.5) * 22px), -90px)
+    rotateZ(-8deg);
+  background:
+    linear-gradient(108deg, transparent 12%, rgba(33, 247, 255, 0.12) 19%, transparent 28%),
+    linear-gradient(74deg, transparent 38%, rgba(248, 217, 107, 0.1) 45%, transparent 55%),
+    linear-gradient(126deg, transparent 66%, rgba(142, 255, 212, 0.1) 72%, transparent 80%);
+  filter: blur(1px);
+  opacity: 0.56;
+}
+
+.guide3d-orbit-field {
+  inset: 0;
+  background:
+    radial-gradient(circle at 76% 30%, rgba(248, 217, 107, 0.16), transparent 22rem),
+    radial-gradient(circle at 22% 72%, rgba(33, 247, 255, 0.11), transparent 24rem);
+  transform:
+    translate3d(calc((var(--guide3d-pointer-x) - 0.5) * -28px), calc((var(--guide3d-pointer-y) - 0.5) * -18px), -120px)
+    scale(1.08);
+  opacity: 0.8;
+}
+
+.guide3d-signal-progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 30;
+  width: calc(var(--guide3d-depth) * 100%);
+  height: 3px;
+  pointer-events: none;
+  background: linear-gradient(90deg, var(--guide3d-gold), var(--guide3d-mint), var(--guide3d-cyan), var(--guide3d-magenta));
+  box-shadow: 0 0 16px rgba(33, 247, 255, 0.72);
+}
+
+.guide3d-motion-toggle {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  top: clamp(5rem, 8vh, 7rem);
+  z-index: 35;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(142, 255, 212, 0.7);
+  border-radius: 999px;
+  color: #f1fffb;
+  font: 800 0.72rem/1.1 system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background:
+    linear-gradient(180deg, rgba(142, 255, 212, 0.34), rgba(2, 9, 17, 0.96)),
+    rgba(2, 9, 17, 0.84);
+  box-shadow:
+    0 0.42rem 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 0 28px rgba(33, 247, 255, 0.24);
+  cursor: pointer;
+}
+
+.guide3d-motion-toggle[aria-pressed="false"] {
+  color: rgba(241, 255, 251, 0.76);
+  border-color: rgba(248, 217, 107, 0.56);
+  background: linear-gradient(180deg, rgba(248, 217, 107, 0.22), rgba(2, 9, 17, 0.96));
+}
+
+.guide3d-motion-toggle:hover,
+.guide3d-motion-toggle:focus-visible {
+  transform: translateY(-2px);
+  outline: 2px solid rgba(142, 255, 212, 0.72);
+  outline-offset: 3px;
+}
+
+.guide3d-motion-toggle:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 0.16rem 0 rgba(0, 0, 0, 0.55),
+    inset 0 0.35rem 0.8rem rgba(0, 0, 0, 0.35);
+}
+
+body.home-page.has-sphere-header main {
+  transform-style: preserve-3d;
+}
+
+body.home-page.has-sphere-header .section {
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  overflow: visible;
+}
+
+body.home-page.has-sphere-header .section::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at calc(var(--guide3d-pointer-x) * 100%) 0%, rgba(33, 247, 255, 0.1), transparent 32rem),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.05), transparent 34%, rgba(248, 217, 107, 0.06));
+  opacity: 0.58;
+}
+
+body.home-page.has-sphere-header .hero {
+  min-height: min(780px, calc(100vh - 5.2rem));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.85fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  perspective: 1500px;
+}
+
+body.home-page.has-sphere-header .hero-copy {
+  transform:
+    translate3d(calc((var(--guide3d-pointer-x) - 0.5) * -16px), calc((var(--guide3d-pointer-y) - 0.5) * -10px), 80px)
+    rotateY(calc((var(--guide3d-pointer-x) - 0.5) * -4deg));
+  text-shadow: 0 0 24px rgba(33, 247, 255, 0.18);
+  will-change: transform;
+}
+
+body.home-page.has-sphere-header .hero-copy h1 {
+  max-width: 11ch;
+  text-wrap: balance;
+  filter: drop-shadow(0 0 18px rgba(248, 217, 107, 0.12));
+}
+
+body.home-page.has-sphere-header .hero-card {
+  min-height: clamp(30rem, 46vw, 42rem);
+  display: grid;
+  align-content: end;
+  overflow: hidden;
+  perspective: 1200px;
+  background:
+    linear-gradient(145deg, rgba(2, 8, 16, 0.48), rgba(3, 24, 45, 0.86)),
+    radial-gradient(circle at 52% 33%, rgba(33, 247, 255, 0.2), transparent 15rem);
+  box-shadow:
+    0 34px 90px rgba(0, 0, 0, 0.52),
+    inset 0 0 0 1px rgba(33, 247, 255, 0.28),
+    0 0 70px rgba(33, 247, 255, 0.16);
+}
+
+body.home-page.has-sphere-header .hero-card::after {
+  content: "SIGNAL LAB";
+  position: absolute;
+  right: 1.4rem;
+  top: 1.2rem;
+  z-index: 2;
+  color: rgba(142, 255, 212, 0.78);
+  font: 900 0.74rem/1 system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 14px rgba(33, 247, 255, 0.56);
+}
+
+body.home-page.has-sphere-header .orb-stage {
+  position: absolute;
+  inset: 0;
+  min-height: 22rem;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+}
+
+body.home-page.has-sphere-header .orb-stage::before,
+body.home-page.has-sphere-header .orb-stage::after {
+  content: "";
+  position: absolute;
+  width: clamp(17rem, 30vw, 31rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(33, 247, 255, 0.5);
+  transform:
+    rotateX(68deg)
+    rotateZ(calc(var(--guide3d-scroll) * 0.04deg + (var(--guide3d-pointer-x) - 0.5) * 18deg));
+  box-shadow: 0 0 32px rgba(33, 247, 255, 0.22), inset 0 0 32px rgba(33, 247, 255, 0.15);
+}
+
+body.home-page.has-sphere-header .orb-stage::after {
+  width: clamp(12rem, 23vw, 24rem);
+  border-color: rgba(248, 217, 107, 0.52);
+  transform:
+    rotateX(72deg)
+    rotateZ(calc(var(--guide3d-scroll) * -0.06deg + (var(--guide3d-pointer-y) - 0.5) * -16deg));
+}
+
+body.home-page.has-sphere-header .orb-stage img {
+  width: clamp(15rem, 25vw, 26rem);
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 999px;
+  transform:
+    translate3d(calc((var(--guide3d-pointer-x) - 0.5) * 34px), calc((var(--guide3d-pointer-y) - 0.5) * 22px), 120px)
+    rotateX(calc((var(--guide3d-pointer-y) - 0.5) * -16deg))
+    rotateY(calc((var(--guide3d-pointer-x) - 0.5) * 22deg));
+  box-shadow:
+    0 0 0 0.35rem rgba(2, 8, 16, 0.72),
+    0 0 0 0.55rem rgba(248, 217, 107, 0.34),
+    0 0 60px rgba(33, 247, 255, 0.42),
+    0 0 110px rgba(248, 217, 107, 0.24);
+  filter: saturate(1.12) contrast(1.06);
+  cursor: grab;
+  pointer-events: auto;
+  will-change: transform;
+}
+
+body.home-page.has-sphere-header .orb-stage img:active {
+  cursor: grabbing;
+}
+
+body.home-page.has-sphere-header .hero-card.is-orb-pulsing .orb-stage img {
+  animation: guide3dOrbPulse 760ms ease-out;
+}
+
+body.home-page.has-sphere-header .signal-panel {
+  position: relative;
+  z-index: 3;
+  margin-top: auto;
+  backdrop-filter: blur(16px);
+  background: linear-gradient(145deg, rgba(2, 11, 21, 0.72), rgba(5, 35, 58, 0.58));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 -24px 80px rgba(0, 0, 0, 0.36);
+}
+
+body.home-page.has-sphere-header .plain-copy,
+body.home-page.has-sphere-header .warning,
+body.home-page.has-sphere-header .manual-band,
+body.home-page.has-sphere-header .faq,
+body.home-page.has-sphere-header .refined-app-copy,
+body.home-page.has-sphere-header .refined-bridge-grid {
+  backdrop-filter: blur(18px) saturate(1.18);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(4, 22, 38, 0.84), rgba(1, 7, 14, 0.78));
+  border: 1px solid rgba(33, 247, 255, 0.24);
+  box-shadow:
+    0 22px 70px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+body.home-page.has-sphere-header #what .plain-copy {
+  transform:
+    perspective(1100px)
+    rotateX(calc((var(--guide3d-pointer-y) - 0.5) * 2.5deg))
+    rotateY(calc((var(--guide3d-pointer-x) - 0.5) * -3deg))
+    translateZ(28px);
+}
+
+body.home-page.has-sphere-header #how .steps,
+body.home-page.has-sphere-header #lottomind-app-guide .steps {
+  position: relative;
+  isolation: isolate;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+}
+
+.guide3d-step-paths {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.guide3d-step-paths path {
+  fill: none;
+  stroke: rgba(33, 247, 255, 0.52);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 10 15;
+  filter: drop-shadow(0 0 9px rgba(33, 247, 255, 0.72));
+  animation: guide3dPathFlow 5.4s linear infinite;
+}
+
+body.home-page.has-sphere-header .step-card,
+body.home-page.has-sphere-header .feature-card,
+body.home-page.has-sphere-header .manual-card,
+body.home-page.has-sphere-header .faq details,
+body.home-page.has-sphere-header .warning,
+body.home-page.has-sphere-header .refined-bridge-grid article {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease,
+    background 260ms ease,
+    opacity 420ms ease;
+  will-change: transform;
+}
+
+body.home-page.has-sphere-header .step-card::before,
+body.home-page.has-sphere-header .feature-card::before,
+body.home-page.has-sphere-header .manual-card::before,
+body.home-page.has-sphere-header .faq details::before,
+body.home-page.has-sphere-header .warning::before,
+body.home-page.has-sphere-header .refined-bridge-grid article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--guide3d-card-x, 50%) var(--guide3d-card-y, 20%), rgba(142, 255, 212, 0.18), transparent 11rem),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.1), transparent 34%);
+  opacity: 0.65;
+  mix-blend-mode: screen;
+}
+
+body.home-page.has-sphere-header .step-card[data-guide3d-tilt],
+body.home-page.has-sphere-header .feature-card[data-guide3d-tilt],
+body.home-page.has-sphere-header .manual-card[data-guide3d-tilt],
+body.home-page.has-sphere-header .faq details[data-guide3d-tilt],
+body.home-page.has-sphere-header .warning[data-guide3d-tilt],
+body.home-page.has-sphere-header .refined-bridge-grid article[data-guide3d-tilt] {
+  transform:
+    perspective(1000px)
+    rotateX(var(--guide3d-tilt-x, 0deg))
+    rotateY(var(--guide3d-tilt-y, 0deg))
+    translate3d(0, var(--guide3d-rise, 0), var(--guide3d-lift, 0));
+}
+
+body.home-page.has-sphere-header .step-card:hover,
+body.home-page.has-sphere-header .step-card:focus-within,
+body.home-page.has-sphere-header .feature-card:hover,
+body.home-page.has-sphere-header .feature-card:focus-within,
+body.home-page.has-sphere-header .manual-card:hover,
+body.home-page.has-sphere-header .manual-card:focus-within,
+body.home-page.has-sphere-header .faq details:hover,
+body.home-page.has-sphere-header .faq details:focus-within,
+body.home-page.has-sphere-header .refined-bridge-grid article:hover,
+body.home-page.has-sphere-header .refined-bridge-grid article:focus-within {
+  --guide3d-lift: 20px;
+  border-color: rgba(142, 255, 212, 0.68);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.48),
+    0 0 40px rgba(33, 247, 255, 0.18);
+}
+
+body.home-page.has-sphere-header .step-card.is-guide3d-active {
+  border-color: rgba(248, 217, 107, 0.76);
+  box-shadow: 0 0 42px rgba(248, 217, 107, 0.18), 0 26px 80px rgba(0, 0, 0, 0.46);
+}
+
+body.home-page.has-sphere-header .feature-card:nth-child(1) { --guide3d-card-accent: rgba(33, 247, 255, 0.22); }
+body.home-page.has-sphere-header .feature-card:nth-child(2) { --guide3d-card-accent: rgba(142, 255, 212, 0.18); }
+body.home-page.has-sphere-header .feature-card:nth-child(3) { --guide3d-card-accent: rgba(248, 217, 107, 0.18); }
+body.home-page.has-sphere-header .feature-card:nth-child(4) { --guide3d-card-accent: rgba(196, 108, 255, 0.18); }
+body.home-page.has-sphere-header .feature-card:nth-child(5) { --guide3d-card-accent: rgba(33, 247, 255, 0.16); }
+body.home-page.has-sphere-header .feature-card:nth-child(6) { --guide3d-card-accent: rgba(142, 255, 212, 0.16); }
+
+body.home-page.has-sphere-header .feature-card {
+  background:
+    radial-gradient(circle at 78% 18%, var(--guide3d-card-accent, rgba(33, 247, 255, 0.16)), transparent 10rem),
+    linear-gradient(145deg, rgba(5, 28, 48, 0.82), rgba(1, 7, 15, 0.76));
+}
+
+body.home-page.has-sphere-header .manual-band {
+  perspective: 1200px;
+}
+
+body.home-page.has-sphere-header .manual-preview .page {
+  transform:
+    rotateX(calc((var(--guide3d-pointer-y) - 0.5) * -6deg))
+    rotateY(calc((var(--guide3d-pointer-x) - 0.5) * 8deg))
+    translateZ(36px);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.46), 0 0 38px rgba(248, 217, 107, 0.16);
+}
+
+body.home-page.has-sphere-header .faq details {
+  transition: transform 260ms ease, border-color 260ms ease, background 260ms ease, box-shadow 260ms ease;
+}
+
+body.home-page.has-sphere-header .faq details[open] {
+  background:
+    radial-gradient(circle at 92% 24%, rgba(248, 217, 107, 0.12), transparent 12rem),
+    linear-gradient(145deg, rgba(5, 28, 48, 0.88), rgba(1, 8, 16, 0.78));
+  border-color: rgba(248, 217, 107, 0.46);
+}
+
+body.home-page.has-sphere-header .faq details p {
+  animation: guide3dFaqOpen 280ms ease both;
+}
+
+body.home-page.has-sphere-header .refined-app-band {
+  perspective: 1400px;
+}
+
+body.home-page.has-sphere-header .refined-app-band::after {
+  content: "";
+  position: absolute;
+  inset: 8% 4%;
+  z-index: -1;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(33, 247, 255, 0.22), transparent 28%),
+    conic-gradient(from calc(var(--guide3d-scroll) * 0.04deg), transparent, rgba(248, 217, 107, 0.24), transparent, rgba(33, 247, 255, 0.2), transparent);
+  filter: blur(24px);
+  opacity: 0.72;
+}
+
+body.home-page.has-sphere-header .primary-action,
+body.home-page.has-sphere-header .secondary-action,
+body.home-page.has-sphere-header button,
+body.home-page.has-sphere-header summary,
+body.home-page.has-sphere-header .guide-nav a,
+body.home-page.has-sphere-header footer a {
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease, border-color 180ms ease;
+}
+
+body.home-page.has-sphere-header .primary-action:hover,
+body.home-page.has-sphere-header .secondary-action:hover,
+body.home-page.has-sphere-header button:hover,
+body.home-page.has-sphere-header summary:hover,
+body.home-page.has-sphere-header .guide-nav a:hover,
+body.home-page.has-sphere-header footer a:hover,
+body.home-page.has-sphere-header .primary-action:focus-visible,
+body.home-page.has-sphere-header .secondary-action:focus-visible,
+body.home-page.has-sphere-header button:focus-visible,
+body.home-page.has-sphere-header summary:focus-visible,
+body.home-page.has-sphere-header .guide-nav a:focus-visible,
+body.home-page.has-sphere-header footer a:focus-visible {
+  transform: translateY(-2px) translateZ(10px);
+  filter: saturate(1.14) brightness(1.05);
+  box-shadow: 0 15px 34px rgba(0, 0, 0, 0.36), 0 0 22px rgba(33, 247, 255, 0.2);
+}
+
+body.home-page.has-sphere-header .primary-action:active,
+body.home-page.has-sphere-header .secondary-action:active,
+body.home-page.has-sphere-header button:active,
+body.home-page.has-sphere-header summary:active {
+  transform: translateY(2px) translateZ(0);
+  box-shadow: inset 0 0.35rem 0.75rem rgba(0, 0, 0, 0.36);
+}
+
+.guide3d-reveal {
+  opacity: 0.001;
+  transform: translate3d(0, 32px, -80px) rotateX(7deg);
+}
+
+.guide3d-reveal.is-guide3d-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotateX(0deg);
+}
+
+body.guide3d-reduced .guide3d-canvas,
+body.guide3d-reduced .guide3d-light-beams,
+body.guide3d-reduced .guide3d-orbit-field {
+  opacity: 0.22;
+}
+
+body.guide3d-reduced .guide3d-grid {
+  opacity: 0.3;
+}
+
+body.guide3d-reduced .guide3d-step-paths path,
+body.guide3d-reduced .guide3d-orb-spark,
+body.guide3d-reduced .guide3d-orb-wave {
+  animation: none !important;
+}
+
+.guide3d-orb-spark,
+.guide3d-orb-wave {
+  position: fixed;
+  z-index: 31;
+  pointer-events: none;
+  border-radius: 999px;
+}
+
+.guide3d-orb-spark {
+  left: var(--spark-x);
+  top: var(--spark-y);
+  width: 0.45rem;
+  aspect-ratio: 1;
+  background: var(--spark-color, var(--guide3d-cyan));
+  box-shadow: 0 0 18px currentColor;
+  animation: guide3dSpark 860ms ease-out forwards;
+}
+
+.guide3d-orb-wave {
+  left: var(--wave-x);
+  top: var(--wave-y);
+  width: 2rem;
+  aspect-ratio: 1;
+  border: 1px solid rgba(142, 255, 212, 0.76);
+  transform: translate(-50%, -50%);
+  animation: guide3dWave 720ms ease-out forwards;
+}
+
+@keyframes guide3dPathFlow {
+  to { stroke-dashoffset: -72; }
+}
+
+@keyframes guide3dOrbPulse {
+  0% { transform: scale(1) translateZ(120px); filter: saturate(1.1); }
+  48% { transform: scale(1.075) translateZ(150px); filter: saturate(1.45) brightness(1.12); }
+  100% { transform: scale(1) translateZ(120px); filter: saturate(1.1); }
+}
+
+@keyframes guide3dSpark {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate3d(var(--spark-dx), var(--spark-dy), 0) scale(0.22);
+  }
+}
+
+@keyframes guide3dWave {
+  from { opacity: 0.72; transform: translate(-50%, -50%) scale(0.2); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(5.4); }
+}
+
+@keyframes guide3dFaqOpen {
+  from { opacity: 0; transform: translateY(-6px) translateZ(-12px); }
+  to { opacity: 1; transform: translateY(0) translateZ(0); }
+}
+
+@media (max-width: 1024px) {
+  body.home-page.has-sphere-header .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  body.home-page.has-sphere-header .hero-copy {
+    transform: none;
+  }
+
+  body.home-page.has-sphere-header .hero-card {
+    min-height: 31rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .guide3d-motion-toggle {
+    top: auto;
+    right: 1rem;
+    bottom: 5.1rem;
+    padding: 0.58rem 0.85rem;
+  }
+
+  body.home-page.has-sphere-header .hero-card {
+    min-height: 26rem;
+  }
+
+  body.home-page.has-sphere-header .orb-stage img {
+    width: clamp(12rem, 58vw, 18rem);
+  }
+
+  body.home-page.has-sphere-header .orb-stage::before {
+    width: clamp(15rem, 70vw, 22rem);
+  }
+
+  body.home-page.has-sphere-header .orb-stage::after {
+    width: clamp(10rem, 54vw, 17rem);
+  }
+
+  body.home-page.has-sphere-header .step-card:hover,
+  body.home-page.has-sphere-header .feature-card:hover,
+  body.home-page.has-sphere-header .manual-card:hover,
+  body.home-page.has-sphere-header .faq details:hover {
+    --guide3d-lift: 8px;
+  }
+}
+
+@media (max-width: 430px) {
+  body.home-page.has-sphere-header .hero-card {
+    min-height: 24rem;
+  }
+
+  body.home-page.has-sphere-header .signal-panel {
+    margin-inline: 0.5rem;
+  }
+
+  .guide3d-step-paths {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .guide3d-canvas,
+  .guide3d-light-beams,
+  .guide3d-orbit-field,
+  .guide3d-step-paths {
+    display: none !important;
+  }
+
+  body.home-page.has-sphere-header .hero-copy,
+  body.home-page.has-sphere-header .orb-stage img,
+  body.home-page.has-sphere-header .manual-preview .page,
+  body.home-page.has-sphere-header .step-card[data-guide3d-tilt],
+  body.home-page.has-sphere-header .feature-card[data-guide3d-tilt],
+  body.home-page.has-sphere-header .manual-card[data-guide3d-tilt],
+  body.home-page.has-sphere-header .faq details[data-guide3d-tilt],
+  body.home-page.has-sphere-header .warning[data-guide3d-tilt] {
+    transform: none !important;
+    transition: none !important;
+  }
+}

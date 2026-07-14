@@ -1,26 +1,76 @@
+const SITE_SCRIPT_URL = document.currentScript?.src || new URL("./site.js", document.baseURI).href;
+const SITE_ROOT_URL = new URL("./", SITE_SCRIPT_URL);
+const siteUrl = (relativePath) => new URL(relativePath.replace(/^\.\//, ""), SITE_ROOT_URL).toString();
+
 (() => {
+  const main = document.querySelector("main");
+  if (main && !main.id) main.id = "main-content";
+  if (main && !document.querySelector(".skip-link")) {
+    const skip = document.createElement("a");
+    skip.className = "skip-link";
+    skip.href = `#${main.id}`;
+    skip.textContent = "Skip to main content";
+    document.body.prepend(skip);
+  }
+
+  const isLocalPreview = /^(?:localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+  const canonicalPath = isLocalPreview
+    ? `/lottominded-ultra.io/${window.location.pathname.replace(/^\//, "").replace(/index\.html$/i, "")}`
+    : window.location.pathname.replace(/index\.html$/i, "");
+  const canonicalUrl = new URL(canonicalPath, "https://robjasper2084.github.io");
+  if (!document.querySelector('link[rel="canonical"]')) {
+    const canonical = document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = canonicalUrl.toString();
+    document.head.append(canonical);
+  }
+  const socialMeta = [
+    ["og:title", document.title],
+    ["og:description", document.querySelector('meta[name="description"]')?.content || "LOTTOMINDED ULTRA creative entertainment tools."],
+    ["og:type", "website"],
+    ["og:url", canonicalUrl.toString()],
+    ["twitter:card", "summary_large_image"],
+  ];
+  socialMeta.forEach(([property, content]) => {
+    const attribute = property.startsWith("twitter:") ? "name" : "property";
+    if (document.querySelector(`meta[${attribute}="${property}"]`)) return;
+    const meta = document.createElement("meta");
+    meta.setAttribute(attribute, property);
+    meta.content = content;
+    document.head.append(meta);
+  });
+  if (!document.querySelector('link[rel="manifest"]')) {
+    const manifest = document.createElement("link");
+    manifest.rel = "manifest";
+    manifest.href = siteUrl("./manifest.webmanifest");
+    document.head.append(manifest);
+  }
+
   const header = document.querySelector("[data-site-header], .feature-topbar, .lm-live-topbar, [data-guide-header]");
   if (!header) return;
 
   const navItems = [
-    { label: "Home", href: "./index.html#top", icon: "HM" },
-    { label: "Features", href: "./features-app.html", icon: "FX" },
-    { label: "Streams", href: "./live-events.html", icon: "EV" },
-    { label: "Spheres", href: "./lottery-spheres.html#spheres", icon: "SP" },
-    { label: "Beat2Lotto+", href: "./beat2lotto-plus.html#beat2lotto", icon: "B2" },
-    { label: "Merch", href: "./merch-store.html", icon: "MC" },
-    { label: "Guide", href: "./how-to-use.html", icon: "GD" },
-    { label: "Studio", href: "./lottomind-stem-studio/index.html", icon: "ST" },
+    { label: "Home", href: siteUrl("./index.html#top"), icon: "HM" },
+    { label: "Memberships", href: siteUrl("./memberships.html"), icon: "MB" },
+    { label: "Features", href: siteUrl("./features-app.html"), icon: "FX" },
+    { label: "News", href: siteUrl("./news/"), icon: "NW" },
+    { label: "Events", href: siteUrl("./live-events.html"), icon: "EV" },
+    { label: "Spheres", href: siteUrl("./lottery-spheres.html#spheres"), icon: "SP" },
+    { label: "Beat2Lotto+", href: siteUrl("./beat2lotto-plus.html#beat2lotto"), icon: "B2" },
+    { label: "Merch", href: siteUrl("./merch-store.html"), icon: "DR" },
+    { label: "Guide", href: siteUrl("./how-to-use.html"), icon: "GD" },
     {
       label: "LottoMind App",
-      href: "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/",
+      href: new URL("../lotto%20mind%20refined/", SITE_ROOT_URL).toString(),
       icon: "LM",
-      attrs: ' data-vault-launch data-plan="free"',
+      attrs: ' data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required"',
     },
   ];
 
-  const currentPage = (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const currentPath = window.location.pathname.toLowerCase();
+  const currentPage = (currentPath.split("/").pop() || "index.html").toLowerCase();
   const isCurrent = (item) => {
+    if (item.label === "News") return /\/news\/?$/.test(currentPath);
     const hrefPage = item.href.split("#")[0].split("?")[0].split("/").pop().toLowerCase();
     if (item.label === "Home") return currentPage === "index.html";
     return hrefPage && currentPage === hrefPage;
@@ -38,56 +88,36 @@
   header.outerHTML = `
     <header class="site-header home-like-header home-sphere-header global-sphere-header" data-site-header>
       <div class="site-header-main">
-        <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
-          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+        <a class="brand" href="${siteUrl("./index.html#top")}" aria-label="LOTTOMINDED ULTRA home">
+          <img src="${siteUrl("./assets/brand/lm-orb-mark.webp")}" alt="" />
           <span>LOTTOMINDED ULTRA</span>
         </a>
-        <button class="site-header-toggle" type="button" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="LOTTOMINDED ULTRA sphere navigation">
         ${navMarkup}
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
-        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+        <a class="direct-action direct-primary" href="${siteUrl("./lottomind-stem-studio/index.html")}">Launch Studio</a>
       </div>
     </header>
   `;
 })();
 
-const SITE_SCRIPT_URL = document.currentScript?.src || new URL("./site.js", document.baseURI).href;
+(() => {
+  const pageFooter = [...document.querySelectorAll("body > footer")].find((footer) => footer.id !== "player" && !footer.matches("[data-feature-live-player]"));
+  if (pageFooter && !pageFooter.querySelector(".site-legal-links")) {
+    const links = document.createElement("nav");
+    links.className = "site-legal-links";
+    links.setAttribute("aria-label", "Legal and support");
+    links.innerHTML = `<a href="${siteUrl("./privacy.html")}">Privacy</a><a href="${siteUrl("./terms.html")}">Terms</a><a href="${siteUrl("./accessibility.html")}">Accessibility</a><a href="${siteUrl("./contact.html")}">Contact</a>`;
+    pageFooter.append(links);
+  }
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => navigator.serviceWorker.register(siteUrl("./service-worker.js")).catch(() => {}), { once: true });
+  }
+})();
+
 const SITE_ASSET_BASE_URL = new URL("./assets/", SITE_SCRIPT_URL);
-const VIEW_MODE_KEY = "lm-ultra-view-mode";
-const VIEW_DEFAULT_MODE = "desktop";
-const VIEW_MODES = new Set(["desktop", "mobile"]);
-
-function getStoredViewMode() {
-  let stored = VIEW_DEFAULT_MODE;
-  try {
-    stored = localStorage.getItem(VIEW_MODE_KEY) || VIEW_DEFAULT_MODE;
-  } catch {
-    stored = VIEW_DEFAULT_MODE;
-  }
-  return VIEW_MODES.has(stored) ? stored : VIEW_DEFAULT_MODE;
-}
-
-function applyViewMode(mode = getStoredViewMode()) {
-  const nextMode = VIEW_MODES.has(mode) ? mode : VIEW_DEFAULT_MODE;
-  document.documentElement.dataset.lmViewMode = nextMode;
-  document.body.dataset.lmViewMode = nextMode;
-  try {
-    localStorage.setItem(VIEW_MODE_KEY, nextMode);
-  } catch {
-    // Ignore private browsing storage failures; the current page still updates.
-  }
-  document.querySelectorAll("[data-view-mode-choice]").forEach((button) => {
-    const isActive = button.dataset.viewModeChoice === nextMode;
-    button.classList.toggle("is-active", isActive);
-    button.setAttribute("aria-pressed", String(isActive));
-  });
-  window.requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-}
-
-applyViewMode();
 
 const year = document.querySelector("#site-year");
 if (year) year.textContent = String(new Date().getFullYear());
@@ -96,6 +126,145 @@ const heroMotion = document.querySelector(".hero-motion");
 const kineticHero = document.querySelector("[data-kinetic-hero]");
 const revealSections = document.querySelectorAll("[data-reveal]");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const mobilePerformanceQuery = window.matchMedia("(max-width: 900px), (pointer: coarse)");
+if (mobilePerformanceQuery.matches) {
+  document.documentElement.classList.add("lm-mobile-performance");
+}
+
+function setupStaticPerformanceDefaults() {
+  const deferVideoSources = (video) => {
+    if (video.hasAttribute("src") && !video.dataset.src) video.dataset.src = video.getAttribute("src");
+    if (video.hasAttribute("src")) video.removeAttribute("src");
+    video.querySelectorAll("source").forEach((source) => {
+      if (source.hasAttribute("src") && !source.dataset.src) source.dataset.src = source.getAttribute("src");
+      if (source.hasAttribute("src")) source.removeAttribute("src");
+    });
+  };
+
+  document.querySelectorAll("img").forEach((image) => {
+    if (!image.hasAttribute("loading")) image.setAttribute("loading", "lazy");
+    if (!image.hasAttribute("decoding")) image.setAttribute("decoding", "async");
+  });
+
+  const shouldConserveMedia =
+    mobilePerformanceQuery.matches ||
+    reducedMotionQuery.matches ||
+    Boolean(navigator.connection?.saveData) ||
+    /(^|-)2g$/i.test(navigator.connection?.effectiveType || "");
+
+  if (shouldConserveMedia) document.documentElement.classList.add("lm-mobile-performance");
+
+  document.querySelectorAll("video").forEach((video) => {
+    const isStartupVideo = video.closest("[data-startup-video], [data-guide-startup-audio], [data-stream-startup-audio]");
+    const isTransitionVideo =
+      video.matches("[data-lm-transition-video], .page-wipe-video") ||
+      video.closest("[data-lm-page-transition], .page-wipe");
+    const isUserPlayable =
+      video.hasAttribute("controls") ||
+      video.hasAttribute("data-inline-sound-video") ||
+      video.hasAttribute("data-merch-sound-video");
+
+    if (isTransitionVideo) {
+      video.preload = "none";
+      video.setAttribute("preload", "none");
+      return;
+    }
+
+    if (video.dataset.lmVideoUnmanaged === "true") {
+      const preloadMode = video.getAttribute("preload") || "metadata";
+      video.preload = preloadMode;
+      video.setAttribute("preload", preloadMode);
+      return;
+    }
+
+    if (isStartupVideo) {
+      video.preload = "none";
+      video.setAttribute("preload", "none");
+      deferVideoSources(video);
+      try {
+        video.pause();
+      } catch (error) {}
+      return;
+    }
+
+    if (video.hasAttribute("autoplay")) {
+      if (!isUserPlayable) video.dataset.autoplayOnVisible = "true";
+      video.dataset.autoplayDeferred = "true";
+      video.removeAttribute("autoplay");
+      video.autoplay = false;
+    }
+
+    video.preload = "none";
+    video.setAttribute("preload", "none");
+    if (!isUserPlayable || video.dataset.autoplayOnVisible === "true") deferVideoSources(video);
+    try {
+      video.pause();
+    } catch (error) {}
+  });
+}
+
+function restoreDeferredVideoSources(video) {
+  if (!video) return false;
+  let changed = false;
+  if (video.dataset.src && !video.hasAttribute("src")) {
+    video.setAttribute("src", video.dataset.src);
+    changed = true;
+  }
+  video.querySelectorAll("source").forEach((source) => {
+    if (source.dataset.src && !source.hasAttribute("src")) {
+      source.setAttribute("src", source.dataset.src);
+      changed = true;
+    }
+  });
+  if (changed) video.load?.();
+  return changed;
+}
+
+function setupDeferredEmbeds() {
+  const heavyEmbeds = Array.from(document.querySelectorAll("iframe[src], iframe[data-src]")).filter((frame) => {
+    if (frame.dataset.noDefer === "true" || frame.dataset.criticalEmbed === "true") return false;
+    const source = frame.getAttribute("src") || frame.dataset.src || "";
+    return /(youtube|youtu\.be|twitch\.tv|games\/|opengw-levels|shadow-ops|gothtechnology)/i.test(source);
+  });
+
+  if (!heavyEmbeds.length) return;
+
+  const restoreEmbed = (frame) => {
+    if (!frame.dataset.src || frame.getAttribute("src")) return;
+    frame.setAttribute("src", frame.dataset.src);
+  };
+
+  const deferEmbed = (frame) => {
+    const currentSrc = frame.getAttribute("src");
+    if (currentSrc && !frame.dataset.src) frame.dataset.src = currentSrc;
+    if (currentSrc) frame.removeAttribute("src");
+    frame.setAttribute("loading", "lazy");
+    frame.dataset.embedDeferred = "true";
+  };
+
+  heavyEmbeds.forEach(deferEmbed);
+
+  if (!("IntersectionObserver" in window)) {
+    heavyEmbeds.forEach(restoreEmbed);
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        restoreEmbed(entry.target);
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: mobilePerformanceQuery.matches ? "180px 0px" : "420px 0px", threshold: 0.01 },
+  );
+
+  heavyEmbeds.forEach((frame) => observer.observe(frame));
+}
+
+setupStaticPerformanceDefaults();
+setupDeferredEmbeds();
 const siteHeader = document.querySelector("[data-site-header]");
 const headerToggle = document.querySelector("[data-header-toggle]");
 const siteBackButton = document.querySelector("[data-site-back]");
@@ -125,9 +294,10 @@ const compactHeaderLabels =
   document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
-const STARTUP_MODAL_SEEN_KEY = "lottominded.ultra.homeStartupSeen.v1";
 const STARTUP_MODAL_RETURN_DELAY = 40000;
 const STARTUP_MODAL_RETURN_VISIBLE_MS = 60000;
+const GAME_PIP_AUTO_DELAY = 90000;
+const GAME_PIP_AUTO_KEY = "lottominded.ultra.homeGamePipAutoShown.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
 const PROMPT_ACCESS_KEY = "lottominded.ultra.promptAccess.v1";
 const PROMPT_ACCESS_PASSWORD = "lottomind";
@@ -141,6 +311,57 @@ let gamePipResumeFromPage = false;
 let gamePipResumeFromHover = false;
 let gamePipDragState = null;
 let activePasswordGatePanel = null;
+
+function getSharedSignalHref() {
+  const isNestedPage = /\/(?:news|news-hub)(?:\/|$)/i.test(window.location.pathname);
+  return `${isNestedPage ? "../" : "./"}prompt-lab.html#beat2lotto`;
+}
+
+function createSharedSignalTrack(href, duplicate = false) {
+  const track = document.createElement("a");
+  track.className = "home-signal-marquee-track";
+  track.href = href;
+  if (duplicate) {
+    track.setAttribute("aria-hidden", "true");
+    track.tabIndex = -1;
+  }
+
+  [
+    "LottoMind signal online.",
+    "Creative tools ready.",
+    "Arcade routes live.",
+    "Open Beat2Lotto+\u2122",
+  ].forEach((label) => {
+    const item = document.createElement("span");
+    item.textContent = label;
+    track.append(item);
+  });
+
+  return track;
+}
+
+function setupSharedSignalMarquee() {
+  if (document.querySelector(".home-signal-marquee")) return true;
+  const header = document.querySelector("[data-site-header], .news-site-header");
+  if (!header) return false;
+
+  const banner = document.createElement("section");
+  banner.className = "home-signal-marquee site-signal-marquee--shared";
+  banner.setAttribute("aria-label", "LottoMind scrolling signal notice");
+  const href = getSharedSignalHref();
+  banner.append(createSharedSignalTrack(href), createSharedSignalTrack(href, true));
+  header.insertAdjacentElement("afterend", banner);
+  return true;
+}
+
+if (!setupSharedSignalMarquee()) {
+  const sharedSignalObserver = new MutationObserver(() => {
+    if (!setupSharedSignalMarquee()) return;
+    sharedSignalObserver.disconnect();
+  });
+  sharedSignalObserver.observe(document.body, { childList: true, subtree: true });
+  window.setTimeout(() => sharedSignalObserver.disconnect(), 5000);
+}
 
 function setupNavKineticLabels() {
   document.querySelectorAll(".site-header nav a").forEach((link) => {
@@ -507,8 +728,8 @@ function initPageTransitions() {
   const transitionVideoUrl = new URL("video/lm-transition-open-3s.mp4", SITE_ASSET_BASE_URL).href;
   const transitionPosterUrl = new URL("video/lm-portal-a-poster.jpg", SITE_ASSET_BASE_URL).href;
   wipe.innerHTML = `
-    <video class="page-wipe-video" muted playsinline preload="metadata" poster="${transitionPosterUrl}">
-      <source src="${transitionVideoUrl}" type="video/mp4">
+    <video class="page-wipe-video" muted playsinline preload="none" poster="${transitionPosterUrl}">
+      <source data-src="${transitionVideoUrl}" type="video/mp4">
     </video>
     <div class="page-wipe-signal" aria-hidden="true"></div>
   `;
@@ -541,10 +762,15 @@ function initPageTransitions() {
     transitionPending = true;
     window.LMPageTransitionAudio?.play?.("open");
     const audioNavigationDelay = window.LMPageTransitionAudio?.playCloseBeforeNavigate?.() || 0;
+    const navigationDelay = audioNavigationDelay || 320;
     document.body.classList.add("is-page-leaving");
     wipe.classList.add("is-active");
     if (wipeVideo) {
       try {
+        wipeVideo.querySelectorAll("source[data-src]").forEach((source) => {
+          if (!source.hasAttribute("src")) source.setAttribute("src", source.dataset.src);
+        });
+        wipeVideo.load();
         wipeVideo.currentTime = 0;
         wipeVideo.play()?.catch?.(() => {});
       } catch {
@@ -553,7 +779,7 @@ function initPageTransitions() {
     }
     window.setTimeout(() => {
       window.location.href = destination.href;
-    }, Math.max(260, audioNavigationDelay));
+    }, Math.max(220, Math.min(navigationDelay, 320)));
   });
 
   window.addEventListener("pageshow", () => {
@@ -578,7 +804,17 @@ function initVideoPerformanceMode() {
   const videos = Array.from(document.querySelectorAll("video"));
   if (!videos.length) return;
 
-  const maxActiveDecorativeVideos = reducedMotionQuery.matches ? 0 : 1;
+  const shouldConserveMedia =
+    reducedMotionQuery.matches ||
+    mobilePerformanceQuery.matches ||
+    Boolean(navigator.connection?.saveData) ||
+    /(^|-)2g$/i.test(navigator.connection?.effectiveType || "");
+  const isCriticalHeroVideo = (video) => video.matches(".hero-motion, [data-critical-hero-video]");
+  const maxActiveDecorativeVideos = shouldConserveMedia
+    ? videos.some(isCriticalHeroVideo)
+      ? 1
+      : 0
+    : 1;
   const visibleVideos = new Set();
   let transitionCooldownUntil = document.documentElement.classList.contains("lm-transition-arriving")
     ? performance.now() + 900
@@ -592,11 +828,20 @@ function initVideoPerformanceMode() {
   const canManageVideo = (video) =>
     !isTransitionVideo(video) &&
     video.dataset.lmVideoUnmanaged !== "true" &&
-    (video.autoplay || video.loop || video.muted || video.hasAttribute("poster"));
+    (video.dataset.autoplayOnVisible === "true" || video.autoplay || video.loop || video.muted || video.hasAttribute("poster"));
 
   const isSoundActive = (video) =>
     video.classList.contains("is-sound-active") ||
     (!video.muted && !video.paused);
+
+  const isUserPlayableVideo = (video) =>
+    video.hasAttribute("controls") ||
+    video.hasAttribute("data-inline-sound-video") ||
+    video.hasAttribute("data-merch-sound-video");
+
+  const isHiddenMedia = (video) =>
+    Boolean(video.closest(".is-hidden, [hidden]")) ||
+    Boolean(video.parentElement?.closest("[aria-hidden='true']"));
 
   const managedVideos = videos.filter(canManageVideo);
   if (!managedVideos.length) return;
@@ -608,11 +853,13 @@ function initVideoPerformanceMode() {
 
   const rememberVideoSources = (video) => {
     if (video.dataset.lmLazySourcesReady === "true") return;
-    if (video.hasAttribute("src")) {
-      video.dataset.lmLazySrc = video.getAttribute("src");
+    const videoSource = video.getAttribute("src") || video.dataset.src;
+    if (videoSource) {
+      video.dataset.lmLazySrc = videoSource;
     }
     video.querySelectorAll("source").forEach((source) => {
-      if (source.hasAttribute("src")) source.dataset.lmLazySrc = source.getAttribute("src");
+      const sourceUrl = source.getAttribute("src") || source.dataset.src;
+      if (sourceUrl) source.dataset.lmLazySrc = sourceUrl;
     });
     video.dataset.lmLazySourcesReady = "true";
   };
@@ -632,8 +879,9 @@ function initVideoPerformanceMode() {
     if (changed) video.load();
   };
 
-  const unloadVideoSources = (video) => {
-    if (isSoundActive(video) || isNearViewport(video, 80)) return;
+  const unloadVideoSources = (video, options = {}) => {
+    const force = options.force === true;
+    if (isSoundActive(video) || (!force && isNearViewport(video, 80))) return;
     let changed = false;
     if (video.dataset.lmLazySrc && video.hasAttribute("src")) {
       video.removeAttribute("src");
@@ -665,9 +913,9 @@ function initVideoPerformanceMode() {
     if (document.body.classList.contains("lm-page-is-transitioning") || performance.now() < transitionCooldownUntil) {
       return false;
     }
-    if (video.closest(".is-hidden, [hidden]")) return false;
+    if (isHiddenMedia(video)) return false;
     if (isSoundActive(video)) return false;
-    return Boolean(video.autoplay || video.loop) && video.muted;
+    return Boolean(video.dataset.autoplayOnVisible === "true" || video.autoplay) && video.muted;
   };
 
   const distanceFromViewportCenter = (video) => {
@@ -692,10 +940,18 @@ function initVideoPerformanceMode() {
       return;
     }
 
-    visibleVideos.forEach(restoreVideoSources);
+    const userPlayableVideos = new Set();
+    const activeVideos = new Set();
+    visibleVideos.forEach((video) => {
+      if (isUserPlayableVideo(video)) {
+        restoreVideoSources(video);
+        userPlayableVideos.add(video);
+      }
+    });
 
     const candidates = Array.from(visibleVideos)
       .filter(isPlayableDecorativeVideo)
+      .filter((video) => !shouldConserveMedia || isCriticalHeroVideo(video))
       .sort((a, b) => distanceFromViewportCenter(a) - distanceFromViewportCenter(b));
 
     let activeCount = 0;
@@ -706,6 +962,7 @@ function initVideoPerformanceMode() {
       }
 
       activeCount += 1;
+      activeVideos.add(video);
       restoreVideoSources(video);
       if (!video.paused) return;
       video.play()?.catch?.(() => {
@@ -717,6 +974,9 @@ function initVideoPerformanceMode() {
       if (!visibleVideos.has(video)) {
         pauseManagedVideo(video);
         unloadVideoSources(video);
+      } else if (!activeVideos.has(video) && !userPlayableVideos.has(video)) {
+        pauseManagedVideo(video);
+        unloadVideoSources(video, { force: true });
       }
     });
 
@@ -732,16 +992,15 @@ function initVideoPerformanceMode() {
     rememberVideoSources(video);
     video.playsInline = true;
     video.setAttribute("playsinline", "");
-    if (!video.hasAttribute("preload") || video.getAttribute("preload") === "auto") {
-      video.setAttribute("preload", "metadata");
-      video.preload = "metadata";
-    }
+    const preloadMode = video.dataset.preloadMetadata === "true" && !shouldConserveMedia ? "metadata" : "none";
+    video.setAttribute("preload", preloadMode);
+    video.preload = preloadMode;
     video.dataset.lmVideoOptimized = "true";
-    if (reducedMotionQuery.matches && video.autoplay && video.muted) pauseManagedVideo(video);
-    if (isNearViewport(video, 220)) {
+    if ((shouldConserveMedia || video.dataset.autoplayOnVisible === "true" || video.autoplay) && video.muted) pauseManagedVideo(video);
+    if (isUserPlayableVideo(video) && !isHiddenMedia(video) && isNearViewport(video, 220)) {
       restoreVideoSources(video);
     } else {
-      unloadVideoSources(video);
+      unloadVideoSources(video, { force: true });
     }
   });
 
@@ -749,7 +1008,6 @@ function initVideoPerformanceMode() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          restoreVideoSources(entry.target);
           visibleVideos.add(entry.target);
         } else {
           visibleVideos.delete(entry.target);
@@ -897,18 +1155,19 @@ function setupUniversalFloatingMenu() {
   if (document.getElementById("universalPageMenu")) return;
 
   const links = [
-    ["Home", "./how-to-use.html"],
-    ["Features", "./features-app.html"],
-    ["Events", "./live-events.html"],
-    ["Spheres", "./lottery-spheres.html#spheres"],
-    ["Beat2Lotto+", "./beat2lotto-plus.html#beat2lotto"],
-    ["Merch", "./merch-store.html"],
-    ["Guide", "./how-to-use.html"],
-    ["Studio", "./lottomind-stem-studio/index.html"],
-    ["LottoMind App", "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/"]
+    ["Memberships", siteUrl("./memberships.html")],
+    ["LottoMind App", new URL("../lotto%20mind%20refined/", SITE_ROOT_URL).toString()],
+    ["Home", siteUrl("./index.html#top")],
+    ["Features", siteUrl("./features-app.html")],
+    ["Events", siteUrl("./live-events.html")],
+    ["Spheres", siteUrl("./lottery-spheres.html#spheres")],
+    ["Beat2Lotto+", siteUrl("./beat2lotto-plus.html#beat2lotto")],
+    ["Merch", siteUrl("./merch-store.html")],
+    ["Guide", siteUrl("./how-to-use.html")],
+    ["Studio", siteUrl("./lottomind-stem-studio/index.html")]
   ];
 
-  const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle");
+  const existingToggle = document.querySelector("[data-universal-menu-toggle], .motion-menu-toggle, .pl-floating");
   const toggle = existingToggle || document.createElement("button");
   if (!existingToggle) {
     toggle.className = "universal-menu-toggle";
@@ -939,10 +1198,6 @@ function setupUniversalFloatingMenu() {
         <span>Route online</span>
         <span data-hud-clock>00:00</span>
       </div>
-      <div class="universal-view-switch" role="group" aria-label="View mode">
-        <button type="button" data-view-mode-choice="desktop">Web</button>
-        <button type="button" data-view-mode-choice="mobile">Mobile</button>
-      </div>
       <nav class="universal-page-menu-links" aria-label="Page menu links">
         ${links.map(([label, href], index) => `<a href="${href}" data-hud-index="${String(index + 1).padStart(2, "0")}"><span>${label}</span><i aria-hidden="true"></i></a>`).join("")}
       </nav>
@@ -952,7 +1207,6 @@ function setupUniversalFloatingMenu() {
 
   const panel = menu.querySelector("[data-hud-panel]");
   const menuLinks = Array.from(menu.querySelectorAll("a[href]"));
-  const viewModeButtons = Array.from(menu.querySelectorAll("[data-view-mode-choice]"));
   const hudClock = menu.querySelector("[data-hud-clock]");
   const hudReadout = menu.querySelector("[data-hud-readout]");
 
@@ -1044,11 +1298,6 @@ function setupUniversalFloatingMenu() {
     link.addEventListener("pointercancel", () => link.classList.remove("is-launching"));
   });
 
-  viewModeButtons.forEach((button) => {
-    button.addEventListener("click", () => applyViewMode(button.dataset.viewModeChoice));
-  });
-  applyViewMode(getStoredViewMode());
-
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menu.classList.contains("is-open")) close();
     if (!menu.classList.contains("is-open") || !["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key) || !menuLinks.length) return;
@@ -1061,54 +1310,6 @@ function setupUniversalFloatingMenu() {
 }
 
 setupUniversalFloatingMenu();
-
-function setupDirectViewModeToggle() {
-  if (document.querySelector("[data-view-mode-toggle]")) return;
-  const toggle = document.createElement("div");
-  toggle.className = "site-view-mode-toggle";
-  toggle.dataset.viewModeToggle = "true";
-  toggle.setAttribute("role", "group");
-  toggle.setAttribute("aria-label", "View mode");
-  toggle.innerHTML = `
-    <button type="button" data-view-mode-choice="desktop">Web</button>
-    <button type="button" data-view-mode-choice="mobile">Mobile</button>
-  `;
-  toggle.querySelectorAll("[data-view-mode-choice]").forEach((button) => {
-    button.addEventListener("click", () => {
-      applyViewMode(button.dataset.viewModeChoice);
-      queuePosition();
-    });
-  });
-  document.body.append(toggle);
-
-  const positionToggle = () => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    const gap = 16;
-    const lift = Math.min(104, Math.max(76, viewport.height * 0.11));
-    const rect = toggle.getBoundingClientRect();
-    toggle.style.left = `${Math.max(gap, viewport.offsetLeft + gap)}px`;
-    toggle.style.top = `${Math.max(gap, viewport.offsetTop + viewport.height - rect.height - lift)}px`;
-    toggle.style.right = "auto";
-    toggle.style.bottom = "auto";
-  };
-
-  let positionFrame = 0;
-  const queuePosition = () => {
-    window.cancelAnimationFrame(positionFrame);
-    positionFrame = window.requestAnimationFrame(positionToggle);
-  };
-
-  queuePosition();
-  window.visualViewport?.addEventListener("resize", queuePosition, { passive: true });
-  window.visualViewport?.addEventListener("scroll", queuePosition, { passive: true });
-  window.addEventListener("resize", queuePosition, { passive: true });
-  window.addEventListener("scroll", queuePosition, { passive: true });
-
-  applyViewMode(getStoredViewMode());
-}
-
-setupDirectViewModeToggle();
 
 function setupSharedLivePlayers() {
   if (document.body.classList.contains("lm-live-page")) return;
@@ -1246,7 +1447,10 @@ function setupSphereOrbLivePlayers() {
   players.forEach((player, index) => {
     if (player.dataset.sphereOrbReady === "true") return;
 
-    const storageKey = `lottominded.ultra.orbPlayer.${location.pathname.replace(/[^a-z0-9]+/gi, "-")}.${index}.v1`;
+    const positionVersion = document.body.classList.contains("features-cinematic-page") && player.matches("[data-healing-frequency-generator]")
+      ? "v2"
+      : "v1";
+    const storageKey = `lottominded.ultra.orbPlayer.${location.pathname.replace(/[^a-z0-9]+/gi, "-")}.${index}.${positionVersion}`;
     const ripples = document.createElement("div");
     let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     let drag = null;
@@ -1300,7 +1504,12 @@ function setupSphereOrbLivePlayers() {
     };
 
     const defaultPosition = () => {
-      const { height } = getPlayerSize();
+      const { width, height } = getPlayerSize();
+      if (document.body.classList.contains("features-cinematic-page") && player.matches("[data-healing-frequency-generator]")) {
+        const sideGap = Math.max(14, Math.min(32, window.innerWidth * 0.02));
+        const topLane = Math.max(height / 2 + 12, Math.min(window.innerHeight * 0.38, 470));
+        return clampPosition(window.innerWidth - width / 2 - sideGap, topLane);
+      }
       const bottomOffset = document.body.classList.contains("beat2lotto-current-page") ? 148 : 126;
       return clampPosition(window.innerWidth / 2, window.innerHeight - height / 2 - bottomOffset);
     };
@@ -1327,15 +1536,15 @@ function setupSphereOrbLivePlayers() {
 
       lastRipple = { time: now, x, y };
       const ripple = document.createElement("span");
-      const size = Math.min(190, Math.max(64, 58 + distance * 1.35));
+      const size = Math.min(340, Math.max(96, 88 + distance * 1.95));
       ripple.className = "spheres-player-ripple";
       ripple.style.setProperty("--ripple-x", `${Math.round(x)}px`);
       ripple.style.setProperty("--ripple-y", `${Math.round(y)}px`);
       ripple.style.setProperty("--ripple-size", `${Math.round(size)}px`);
       ripples.appendChild(ripple);
 
-      while (ripples.childElementCount > 26) ripples.firstElementChild?.remove();
-      window.setTimeout(() => ripple.remove(), 960);
+      while (ripples.childElementCount > 42) ripples.firstElementChild?.remove();
+      window.setTimeout(() => ripple.remove(), 1850);
     };
 
     const beginDrag = (event) => {
@@ -1413,7 +1622,12 @@ function setupSphereOrbLivePlayers() {
 setupSphereOrbLivePlayers();
 
 
-const REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
+const PRODUCTION_REFINED_APP_URL = "https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/";
+const LOCAL_REFINED_APP_URL = "http://127.0.0.1:8170/lotto%20mind%20refined/";
+const REFINED_APP_URL = /^(?:localhost|127\.0\.0\.1)$/i.test(window.location.hostname)
+  ? LOCAL_REFINED_APP_URL
+  : new URL(PRODUCTION_REFINED_APP_URL, window.location.href).toString();
+const MEMBER_APP_UNLOCK_URL = "./memberships.html?unlock=lottomind-app#membership-plans";
 const VAULT_KEYS = {
   plan: "lottomind_plan",
   credits: "lottomind_credits",
@@ -1424,6 +1638,8 @@ const VAULT_KEYS = {
 };
 const VAULT_DISCLAIMER = "LottoMind and LottoCredits are for entertainment, organization, music creation, and creative number journaling only. LottoCredits have no cash value and cannot be redeemed for money, prizes, lottery tickets, or gambling. LottoMind does not predict winning lottery numbers.";
 const VAULT_DEMO_PASS_MS = 10 * 60 * 1000;
+const VAULT_BUY_CREDITS_URL = "./features-app.html?buy=credits#vault-gateway";
+let vaultDemoExpiryTimer = 0;
 
 function readVaultNumber(key, fallback = 0) {
   const value = Number(localStorage.getItem(key));
@@ -1463,6 +1679,84 @@ function getVaultState() {
   };
 }
 
+function hasLottoMindAppAccess() {
+  const state = getVaultState();
+  const paidPlans = ["gold", "ultra", "vault", "founder", "lifetime"];
+  return hasMemberAccess() || paidPlans.includes(state.plan) || state.betaAccess;
+}
+
+function isLottoMindAppUrl(href = "") {
+  return /lotto(?:mind|(?:%20|\s)+mind)(?:%20|\s)*refined|lottomind\.one/i.test(href);
+}
+
+function getMemberAppUnlockUrl() {
+  return new URL(MEMBER_APP_UNLOCK_URL, window.location.href).toString();
+}
+
+function updatePublicMemberAppLinks() {
+  document.querySelectorAll("a[data-member-app-public='true']").forEach((link) => {
+    const original = link.dataset.memberAppHref || link.getAttribute("href") || "";
+    if (!link.dataset.memberAppHref && original) link.dataset.memberAppHref = original;
+    const originalUrl = new URL(original || REFINED_APP_URL, window.location.href);
+    const target = new URL(REFINED_APP_URL, window.location.href);
+    originalUrl.searchParams.forEach((value, key) => target.searchParams.set(key, value));
+    link.setAttribute("href", target.toString());
+  });
+}
+
+function updateMemberOnlyAppLinks() {
+  const hasAccess = hasLottoMindAppAccess();
+  document.querySelectorAll("a[href], [data-member-app-link]").forEach((link) => {
+    if (link.dataset.memberAppPublic === "true") return;
+    const href = link.getAttribute("href") || link.dataset.href || "";
+    if (!link.dataset.memberAppLink && !isLottoMindAppUrl(href)) return;
+    if (!link.dataset.memberAppHref && isLottoMindAppUrl(href)) {
+      link.dataset.memberAppHref = href;
+    }
+    link.dataset.memberAppLink = "true";
+    link.dataset.membersOnly = "true";
+    link.classList.toggle("is-member-app-locked", !hasAccess);
+    link.classList.toggle("is-member-app-unlocked", hasAccess);
+    link.setAttribute("aria-label", hasAccess ? "Open LottoMind App" : "LottoMind App membership required");
+    link.setAttribute("title", hasAccess ? "Open LottoMind App" : "Membership required to unlock LottoMind App");
+    if (link.matches("a")) {
+      link.setAttribute("href", hasAccess ? link.dataset.memberAppHref || REFINED_APP_URL : getMemberAppUnlockUrl());
+    }
+  });
+}
+
+function setupMemberOnlyAppLinks() {
+  updateMemberOnlyAppLinks();
+  document.addEventListener(
+    "click",
+    (event) => {
+      const link = event.target.closest?.("a[href], [data-member-app-link]");
+      if (!link) return;
+      if (link.dataset.memberAppPublic === "true") return;
+      const href = link.getAttribute("href") || link.dataset.href || "";
+      if (!link.dataset.memberAppLink && !isLottoMindAppUrl(href)) return;
+      if (hasLottoMindAppAccess()) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      try {
+        sessionStorage.setItem("lottomind_app_unlock_required", "true");
+      } catch {
+        /* Session storage can be unavailable in strict browser modes. */
+      }
+      const unlockUrl = getMemberAppUnlockUrl();
+      if (document.body.classList.contains("memberships-page")) {
+        window.location.href = unlockUrl;
+        return;
+      }
+      window.location.href = unlockUrl;
+    },
+    true,
+  );
+  window.addEventListener("lottomind:vault-updated", updateMemberOnlyAppLinks);
+  window.addEventListener("storage", updateMemberOnlyAppLinks);
+}
+
 function setVaultState(next = {}) {
   const current = getVaultState();
   const plan = next.plan || current.plan || "free";
@@ -1475,7 +1769,39 @@ function setVaultState(next = {}) {
   if (typeof next.betaAccess === "boolean") {
     localStorage.setItem(VAULT_KEYS.betaAccess, String(next.betaAccess));
   }
-  window.dispatchEvent(new CustomEvent("lottomind:vault-updated", { detail: getVaultState() }));
+  const updated = getVaultState();
+  scheduleVaultDemoExpiry(updated);
+  window.dispatchEvent(new CustomEvent("lottomind:vault-updated", { detail: updated }));
+}
+
+function redirectToVaultCredits(reason = "demo-expired") {
+  try {
+    sessionStorage.setItem("lottomind_vault_redirect_reason", reason);
+  } catch {
+    /* Session storage can be unavailable in strict browser modes. */
+  }
+  const target = new URL(VAULT_BUY_CREDITS_URL, window.location.href);
+  if (window.location.href === target.href) {
+    window.dispatchEvent(new CustomEvent("lottomind:vault-buy-credits"));
+    return;
+  }
+  window.location.href = target.toString();
+}
+
+function scheduleVaultDemoExpiry(state = getVaultState()) {
+  window.clearTimeout(vaultDemoExpiryTimer);
+  if (!state.passActive || !state.unlockedUntil) return;
+  const remaining = Number(state.unlockedUntil) - Date.now();
+  if (remaining <= 0) {
+    localStorage.setItem(VAULT_KEYS.unlockedUntil, "0");
+    redirectToVaultCredits();
+    return;
+  }
+  vaultDemoExpiryTimer = window.setTimeout(() => {
+    localStorage.setItem(VAULT_KEYS.unlockedUntil, "0");
+    window.dispatchEvent(new CustomEvent("lottomind:vault-updated", { detail: getVaultState() }));
+    redirectToVaultCredits();
+  }, Math.min(remaining, 2147483647));
 }
 
 function addVaultCredits(amount, reason) {
@@ -1485,9 +1811,13 @@ function addVaultCredits(amount, reason) {
   writeVaultLedger({ amount, reason, createdAt: new Date().toISOString(), balance: nextCredits });
 }
 
+function refinedLaunchHref(href) {
+  return href || REFINED_APP_URL;
+}
+
 function buildRefinedLaunchUrl(state = getVaultState(), override = {}) {
   const plan = override.plan || state.plan || "free";
-  const launchUrl = new URL(override.href || REFINED_APP_URL, window.location.href);
+  const launchUrl = new URL(refinedLaunchHref(override.href), window.location.href);
   const params = launchUrl.searchParams;
   params.set("plan", plan);
   params.set("credits", String(state.credits || 0));
@@ -1499,8 +1829,12 @@ function buildRefinedLaunchUrl(state = getVaultState(), override = {}) {
 }
 
 function setupLottoMindVaultGateway() {
+  if (document.body.classList.contains("memberships-page")) return;
   const hasGatewayTargets = document.querySelector("[data-vault-launch], [data-vault-open], [data-beta-waitlist]") || document.body.classList.contains("home-page");
   if (!hasGatewayTargets) return;
+  document.querySelectorAll("[data-vault-launch]").forEach((link) => {
+    if (link.href) link.href = refinedLaunchHref(link.href);
+  });
 
   const badge = document.createElement("button");
   badge.className = "vault-credit-badge";
@@ -1552,6 +1886,11 @@ function setupLottoMindVaultGateway() {
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("vault-gateway-open");
     window.setTimeout(() => modal.querySelector("button")?.focus(), 20);
+  };
+
+  const openBuyCredits = () => {
+    pendingLaunchOverride = {};
+    open("Your 10-minute demo has ended. Buy credits or continue with standard access.");
   };
 
   const close = () => {
@@ -1633,10 +1972,18 @@ function setupLottoMindVaultGateway() {
     open();
   });
   window.addEventListener("lottomind:vault-updated", () => update());
+  window.addEventListener("lottomind:vault-buy-credits", openBuyCredits);
   update();
+  scheduleVaultDemoExpiry();
+  const buyCreditsRequested = new URLSearchParams(window.location.search).get("buy") === "credits";
+  if (buyCreditsRequested) {
+    window.setTimeout(openBuyCredits, 120);
+  }
 }
 
+updatePublicMemberAppLinks();
 setupLottoMindVaultGateway();
+setupMemberOnlyAppLinks();
 function getReactivePoint(event) {
   if (event?.touches?.length) return { x: event.touches[0].clientX, y: event.touches[0].clientY, touch: true };
   if (event?.changedTouches?.length) return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY, touch: true };
@@ -1647,6 +1994,8 @@ function getReactivePoint(event) {
 }
 
 function setupUniversalInteractionReactivity() {
+  if (mobilePerformanceQuery.matches || reducedMotionQuery.matches) return;
+
   const reactiveTargets = document.querySelectorAll([
     "[data-site-header]",
     ".guide-header",
@@ -2706,18 +3055,27 @@ function setupInlineSoundVideos() {
 setupInlineSoundVideos();
 
 function hasSeenStartupVideo() {
-  try {
-    return localStorage.getItem(STARTUP_MODAL_SEEN_KEY) === "true";
-  } catch {
-    return false;
-  }
+  return Boolean(window.__lottomindStartupVideoSeenThisLoad);
 }
 
 function rememberStartupVideoSeen() {
+  window.__lottomindStartupVideoSeenThisLoad = true;
+}
+
+function hasAutoShownGamePip() {
   try {
-    localStorage.setItem(STARTUP_MODAL_SEEN_KEY, "true");
+    return sessionStorage.getItem(GAME_PIP_AUTO_KEY) === "true";
   } catch {
-    // Storage may be unavailable in private or locked-down browser modes.
+    return Boolean(window.__lottomindHomeGamePipAutoShown);
+  }
+}
+
+function rememberAutoShownGamePip() {
+  window.__lottomindHomeGamePipAutoShown = true;
+  try {
+    sessionStorage.setItem(GAME_PIP_AUTO_KEY, "true");
+  } catch {
+    // Session storage can be unavailable in locked-down browsers.
   }
 }
 
@@ -2725,6 +3083,32 @@ function clearStartupReturnAutoClose() {
   if (!startupReturnAutoCloseTimer) return;
   window.clearTimeout(startupReturnAutoCloseTimer);
   startupReturnAutoCloseTimer = 0;
+}
+
+function prepareStartupVideoAudio(options = {}) {
+  if (!startupVideoPlayer) return;
+  startupVideoPlayer.muted = false;
+  startupVideoPlayer.defaultMuted = false;
+  startupVideoPlayer.removeAttribute("muted");
+  startupVideoPlayer.volume = Number(startupVideoPlayer.dataset.startupVideoVolume || 0.82);
+  startupVideoPlayer.autoplay = false;
+  startupVideoPlayer.removeAttribute("autoplay");
+  if (options.reset) {
+    try {
+      startupVideoPlayer.currentTime = 0;
+    } catch {}
+  }
+}
+
+function stopStartupSoundtrack(options = {}) {
+  if (!siteSoundtrack) return;
+  siteSoundtrack.pause();
+  if (options.reset) {
+    try {
+      siteSoundtrack.currentTime = 0;
+    } catch {}
+  }
+  setSoundtrackButtonState(false);
 }
 
 async function closeStartupVideo(options = {}) {
@@ -2735,7 +3119,7 @@ async function closeStartupVideo(options = {}) {
   document.body.classList.remove("has-startup-modal");
   startupVideoPlayer?.pause();
   syncHeroMotionPreference();
-  if (options.playMusic === false) return;
+  if (options.playMusic !== true) return;
   await playSiteSoundtrack({ fromPage: true, restart: true, volume: 0.5 });
 }
 
@@ -2746,48 +3130,25 @@ function showStartupVideo() {
     document.body.classList.remove("has-startup-modal");
     return;
   }
+  if (hasSeenStartupVideo()) return;
   document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
   startupVideoModal.setAttribute("aria-hidden", "false");
+  stopStartupSoundtrack({ reset: true });
   syncHeroMotionPreference();
   rememberStartupVideoSeen();
-  if (!reducedMotionQuery.matches) {
-    startupVideoPlayer.muted = false;
-    startupVideoPlayer.defaultMuted = false;
-    startupVideoPlayer.removeAttribute("muted");
-    startupVideoPlayer.volume = 0.86;
-    startupVideoPlayer.autoplay = true;
-    startupVideoPlayer.loop = false;
-    startupVideoPlayer.removeAttribute("loop");
-    if (startupVideoPlayer.ended || startupVideoPlayer.currentTime > 0.25) {
-      try {
-        startupVideoPlayer.currentTime = 0;
-      } catch {
-        // Some browsers defer seeking until metadata is ready.
-      }
-    }
-    startupVideoPlayer?.play().catch(() => {
-      // Browsers may block autoplay until the first user gesture.
-    });
-  }
+  prepareStartupVideoAudio();
 }
 
 function showStartupVideoReturn() {
   if (!startupVideoModal) return;
+  if (hasSeenStartupVideo()) return;
   document.body.classList.add("has-startup-modal");
   startupVideoModal.classList.remove("is-hidden");
   startupVideoModal.setAttribute("aria-hidden", "false");
+  stopStartupSoundtrack({ reset: true });
   syncHeroMotionPreference();
-  if (!reducedMotionQuery.matches && startupVideoPlayer) {
-    startupVideoPlayer.muted = false;
-    startupVideoPlayer.defaultMuted = false;
-    startupVideoPlayer.removeAttribute("muted");
-    startupVideoPlayer.volume = 0.72;
-    startupVideoPlayer.currentTime = 0;
-    startupVideoPlayer.play().catch(() => {
-      // Browsers may block timed playback until the first user gesture.
-    });
-  }
+  prepareStartupVideoAudio({ reset: true });
   clearStartupReturnAutoClose();
   startupReturnAutoCloseTimer = window.setTimeout(() => {
     closeStartupVideo({ remember: false, playMusic: false });
@@ -3170,7 +3531,7 @@ function setupPromptBallpassGame() {
   if (!context) return;
 
   const puck = new Image();
-  puck.src = "./assets/brand/lottomind-branded-puck.png";
+  puck.src = "./assets/brand/lottomind-branded-puck.webp";
 
   const pointer = { x: 0.72, y: 0.48, active: false, burst: 0 };
   let ballpassInView = true;
@@ -3318,12 +3679,14 @@ setupPromptBallpassGame();
 function showGamePip() {
   if (!gamePip) return;
   if (gamePip.classList.contains("is-open")) return;
+  if (gamePip.parentElement !== document.body) document.body.appendChild(gamePip);
   window.clearTimeout(gamePipHideTimer);
   if (gamePipFrame && !gamePipFrame.getAttribute("src")) {
     gamePipFrame.setAttribute("src", gamePipFrame.dataset.src || "");
   }
   gamePip.classList.add("is-open");
   gamePip.setAttribute("aria-hidden", "false");
+  setGamePipOffset(0, 0);
   gamePipOpenedAt = Date.now();
   if (siteSoundtrack) {
     gamePipShouldResumeSoundtrack = !siteSoundtrack.paused;
@@ -3333,6 +3696,15 @@ function showGamePip() {
     soundtrackStartedFromHover = false;
     setSoundtrackButtonState(false);
   }
+}
+
+function scheduleAutoGamePip() {
+  if (!gamePip || hasAutoShownGamePip()) return;
+  window.setTimeout(() => {
+    if (!gamePip || hasAutoShownGamePip() || document.visibilityState === "hidden") return;
+    rememberAutoShownGamePip();
+    showGamePip();
+  }, GAME_PIP_AUTO_DELAY);
 }
 
 function resumeGamePipSoundtrack() {
@@ -3395,16 +3767,20 @@ function endGamePipDrag(event) {
 
 showStartupVideo();
 scheduleStartupVideoReturn();
+scheduleAutoGamePip();
 
 startupVideoCloseButtons.forEach((button) => {
-  button.addEventListener("click", () => closeStartupVideo());
+  button.addEventListener("click", () => closeStartupVideo({ playMusic: true }));
 });
-startupMusicStart?.addEventListener("click", () => closeStartupVideo());
-startupVideoPlayer?.addEventListener("ended", () => {
-  closeStartupVideo({ playMusic: false });
-});
+startupMusicStart?.addEventListener("click", () => closeStartupVideo({ playMusic: true }));
+startupVideoPlayer?.addEventListener("pointerdown", () => {
+  restoreDeferredVideoSources(startupVideoPlayer);
+  stopStartupSoundtrack({ reset: true });
+  prepareStartupVideoAudio();
+  startupVideoPlayer.play?.().catch(() => {});
+}, { passive: true });
 startupVideoModal?.addEventListener("click", (event) => {
-  if (event.target === startupVideoModal) closeStartupVideo();
+  if (event.target === startupVideoModal) closeStartupVideo({ playMusic: true });
 });
 
 function isEditableTarget(target) {
@@ -3414,13 +3790,13 @@ function isEditableTarget(target) {
 document.addEventListener("keydown", (event) => {
   if (event.code === "Space" && !isEditableTarget(event.target)) {
     const soundtrackToggle = event.target?.closest?.("[data-soundtrack-toggle]");
-    if (soundtrackToggle || document.body.classList.contains("home-page")) {
+    if (soundtrackToggle) {
       event.preventDefault();
-      if (soundtrackToggle) event.stopPropagation();
+      event.stopPropagation();
     }
   }
   if (event.key === "Escape" && !startupVideoModal?.classList.contains("is-hidden")) {
-    closeStartupVideo({ playMusic: false });
+    closeStartupVideo({ playMusic: true });
   }
   if (event.key === "Escape" && gamePip?.classList.contains("is-open")) {
     hideGamePip({ resumeSoundtrack: true });
@@ -3686,24 +4062,60 @@ generateMiniVideoPrompt();
 generateMiniNumberSignals();
 
 function setupMascotPointer() {
+  if (mobilePerformanceQuery.matches || reducedMotionQuery.matches) return;
+  if (document.body?.classList.contains("features-cinematic-page")) return;
   if (!document.body || document.querySelector(".lm-mascot-pointer")) return;
+  document.documentElement.dataset.cursorMode = "mascot";
+  document.body.dataset.cursorMode = "mascot";
 
+  const frameUrl = (name) => new URL(`cursor/${name}`, SITE_ASSET_BASE_URL).href;
   const frames = {
-    front: new URL("cursor/lm-mascot-front.png", SITE_ASSET_BASE_URL).href,
-    stepA: new URL("cursor/lm-mascot-step-a.png", SITE_ASSET_BASE_URL).href,
-    stepB: new URL("cursor/lm-mascot-step-b.png", SITE_ASSET_BASE_URL).href,
-    run: new URL("cursor/lm-mascot-run.png", SITE_ASSET_BASE_URL).href,
-    runA: new URL("cursor/lm-mascot-run-a.png", SITE_ASSET_BASE_URL).href,
-    runB: new URL("cursor/lm-mascot-run-b.png", SITE_ASSET_BASE_URL).href,
-    runC: new URL("cursor/lm-mascot-run-c.png", SITE_ASSET_BASE_URL).href,
-    runD: new URL("cursor/lm-mascot-run-d.png", SITE_ASSET_BASE_URL).href,
-    climbUp: new URL("cursor/lm-mascot-climb-up.png", SITE_ASSET_BASE_URL).href,
-    climbDown: new URL("cursor/lm-mascot-climb-down.png", SITE_ASSET_BASE_URL).href,
-    fallA: new URL("cursor/lm-mascot-fall-a.png", SITE_ASSET_BASE_URL).href,
-    fallB: new URL("cursor/lm-mascot-fall-b.png", SITE_ASSET_BASE_URL).href,
-    fallC: new URL("cursor/lm-mascot-fall-c.png", SITE_ASSET_BASE_URL).href,
-    fallDown: new URL("cursor/lm-mascot-fall-down.png", SITE_ASSET_BASE_URL).href,
+    front: frameUrl("lm-mascot-front.png"),
+    sideIdle: frameUrl("lm-mascot-step-a.png"),
+    stepA: frameUrl("lm-mascot-step-a.png"),
+    stepB: frameUrl("lm-mascot-step-b.png"),
+    run: frameUrl("lm-mascot-run.png"),
+    runA: frameUrl("lm-mascot-run-a.png"),
+    runB: frameUrl("lm-mascot-run-b.png"),
+    runC: frameUrl("lm-mascot-run-c.png"),
+    runD: frameUrl("lm-mascot-run-d.png"),
+    flyUp1: frameUrl("lm-mascot-fly-up-1.png"),
+    flyUp2: frameUrl("lm-mascot-fly-up-2.png"),
+    flyUp3: frameUrl("lm-mascot-fly-up-3.png"),
+    flyUp4: frameUrl("lm-mascot-fly-up-4.png"),
+    fallDown1: frameUrl("lm-mascot-fall-down-1.png"),
+    fallDown2: frameUrl("lm-mascot-fall-down-2.png"),
+    fallDown3: frameUrl("lm-mascot-fall-down-3.png"),
+    fallDown4: frameUrl("lm-mascot-fall-down-4.png"),
+    walkRight1: frameUrl("lm-mascot-walk-right-1.png"),
+    walkRight2: frameUrl("lm-mascot-walk-right-2.png"),
+    walkRight3: frameUrl("lm-mascot-walk-right-3.png"),
+    walkRight4: frameUrl("lm-mascot-walk-right-4.png"),
+    walkLeft1: frameUrl("lm-mascot-walk-left-1.png"),
+    walkLeft2: frameUrl("lm-mascot-walk-left-2.png"),
+    walkLeft3: frameUrl("lm-mascot-walk-left-3.png"),
+    walkLeft4: frameUrl("lm-mascot-walk-left-4.png"),
+    runRight1: frameUrl("lm-mascot-run-right-1.png"),
+    runRight2: frameUrl("lm-mascot-run-right-2.png"),
+    runRight3: frameUrl("lm-mascot-run-right-3.png"),
+    runRight4: frameUrl("lm-mascot-run-right-4.png"),
+    runLeft1: frameUrl("lm-mascot-run-left-1.png"),
+    runLeft2: frameUrl("lm-mascot-run-left-2.png"),
+    runLeft3: frameUrl("lm-mascot-run-left-3.png"),
+    runLeft4: frameUrl("lm-mascot-run-left-4.png"),
   };
+  const frameSequences = {
+    flyUp: ["flyUp1", "flyUp2", "flyUp3", "flyUp4", "flyUp3", "flyUp2"],
+    fallDown: ["fallDown1", "fallDown2", "fallDown3", "fallDown4", "fallDown3", "fallDown2"],
+    walkLeft: ["walkLeft1", "walkLeft2", "walkLeft3", "walkLeft4", "walkLeft3", "walkLeft2"],
+    walkRight: ["walkRight1", "walkRight2", "walkRight3", "walkRight4", "walkRight3", "walkRight2"],
+    runLeft: ["runLeft1", "runLeft2", "runLeft3", "runLeft4", "runLeft3", "runLeft2"],
+    runRight: ["runRight1", "runRight2", "runRight3", "runRight4", "runRight3", "runRight2"],
+  };
+  const directionalFrames = new Set(
+    ["walkLeft", "walkRight", "runLeft", "runRight"]
+      .flatMap((sequence) => frameSequences[sequence] || [])
+  );
 
   Object.values(frames).forEach((src) => {
     const preload = new Image();
@@ -3720,8 +4132,10 @@ function setupMascotPointer() {
     </span>
   `;
   document.body.appendChild(pointer);
-  document.documentElement.dataset.cursorMode = "mascot";
-  document.body.dataset.cursorMode = "mascot";
+  const heartPointer = document.createElement("span");
+  heartPointer.className = "lm-heart-pointer";
+  heartPointer.setAttribute("aria-hidden", "true");
+  document.body.appendChild(heartPointer);
 
   const image = pointer.querySelector("img");
   const reduceMotion = reducedMotionQuery.matches;
@@ -3739,6 +4153,11 @@ function setupMascotPointer() {
     frame: "front",
     scrollPose: "",
     scrollPoseUntil: 0,
+    sidePose: "",
+    sidePoseUntil: 0,
+    lastSideDirection: "",
+    inputSpeed: 0,
+    inputAngle: 0,
     hasMoved: false,
   };
   let lastScrollY = window.scrollY || window.pageYOffset || 0;
@@ -3747,7 +4166,18 @@ function setupMascotPointer() {
   function setFrame(name) {
     if (state.frame === name || !frames[name]) return;
     state.frame = name;
+    if (directionalFrames.has(name)) {
+      pointer.style.setProperty("--lm-mascot-frame-facing", "1");
+    } else {
+      pointer.style.removeProperty("--lm-mascot-frame-facing");
+    }
     image.src = frames[name];
+  }
+
+  function pickFrame(sequence, now, interval = 120) {
+    const framesInSequence = frameSequences[sequence] || [];
+    if (!framesInSequence.length) return "front";
+    return framesInSequence[Math.floor(now / interval) % framesInSequence.length];
   }
 
   function setPointerClass(name, active) {
@@ -3756,12 +4186,26 @@ function setupMascotPointer() {
 
   function syncTarget(clientX, clientY, pointerType = "mouse") {
     if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
+    const deltaX = clientX - state.targetX;
+    const deltaY = clientY - state.targetY;
     if (state.hasMoved) {
-      const deltaX = clientX - state.targetX;
-      const deltaY = clientY - state.targetY;
+      const inputDistance = Math.hypot(deltaX, deltaY);
+      if (inputDistance > 0.5) {
+        state.inputSpeed = Math.max(state.inputSpeed * 0.45, inputDistance);
+        state.inputAngle = Math.atan2(deltaY, deltaX);
+      }
+      if (Math.abs(deltaX) > 1.5 && Math.abs(deltaX) >= Math.abs(deltaY) * 0.45) {
+        state.facing = deltaX < 0 ? -1 : 1;
+        state.sidePose = deltaX < 0 ? "left" : "right";
+        state.lastSideDirection = state.sidePose;
+        state.sidePoseUntil = performance.now() + 520;
+        pointer.style.setProperty("--lm-mascot-facing", String(state.facing));
+      }
       if (Math.abs(deltaY) > 8 && Math.abs(deltaY) > Math.abs(deltaX) * 0.72) {
         setScrollPose(deltaY < 0 ? "up" : "down");
       }
+    } else {
+      state.inputAngle = 0;
     }
     state.targetX = clientX;
     state.targetY = clientY;
@@ -3794,16 +4238,15 @@ function setupMascotPointer() {
   function setScrollPose(direction) {
     if (direction !== "up" && direction !== "down") return;
     state.scrollPose = direction;
-    state.scrollPoseUntil = performance.now() + 840;
+    state.scrollPoseUntil = performance.now() + 1250;
+    state.inputSpeed = Math.max(state.inputSpeed, 24);
+    state.inputAngle = direction === "up" ? -Math.PI / 2 : Math.PI / 2;
     state.hasMoved = true;
     document.body.classList.add("has-mascot-pointer");
   }
 
   function syncFromWheel(event) {
     if (!Number.isFinite(event.deltaY) || Math.abs(event.deltaY) < 2) return;
-    if (Number.isFinite(event.clientX) && Number.isFinite(event.clientY)) {
-      syncTarget(event.clientX, event.clientY, "mouse");
-    }
     setScrollPose(event.deltaY < 0 ? "up" : "down");
   }
 
@@ -3816,15 +4259,18 @@ function setupMascotPointer() {
   }
 
   function updateFrame(speed, vx, vy, now) {
-    const moving = speed > 0.55;
-    const running = speed > 7.2;
-    const sideMotion = Math.abs(vx) > Math.abs(vy) * 0.72;
-    const verticalMotion = Math.abs(vy) > Math.abs(vx) * 0.72;
-    const upwardMotion = moving && verticalMotion && vy < -0.35;
-    const downwardMotion = moving && verticalMotion && vy > 0.35;
-    const runFrames = ["runA", "runB", "runC", "runD"];
-    const fallFrames = ["fallA", "fallB", "fallC", "fallDown"];
-    const climbing = Boolean(state.scrollPose && now < state.scrollPoseUntil);
+    const motionX = state.inputSpeed > 0.6 ? Math.cos(state.inputAngle) * state.inputSpeed : vx;
+    const motionY = state.inputSpeed > 0.6 ? Math.sin(state.inputAngle) * state.inputSpeed : vy;
+    const sidePoseActive = Boolean(state.sidePose && now < state.sidePoseUntil);
+    const sidePoseDirection = state.sidePose === "left" ? -1 : 1;
+    const sideMotionX = sidePoseActive ? sidePoseDirection : motionX;
+    const moving = speed > 0.55 || state.inputSpeed > 1.2 || sidePoseActive;
+    const running = state.inputSpeed > 20 || speed > 5.4;
+    const sideMotion = sidePoseActive || Math.abs(motionX) > Math.abs(motionY) * 0.62;
+    const verticalMotion = !sidePoseActive && Math.abs(motionY) > Math.abs(motionX) * 0.72;
+    const upwardMotion = moving && verticalMotion && motionY < -0.35;
+    const downwardMotion = moving && verticalMotion && motionY > 0.35;
+    const climbing = Boolean(state.scrollPose && now < state.scrollPoseUntil && !sidePoseActive);
     const scrollingUp = climbing && state.scrollPose === "up";
     const scrollingDown = climbing && state.scrollPose === "down";
 
@@ -3838,7 +4284,7 @@ function setupMascotPointer() {
       setPointerClass("is-side", false);
       setPointerClass("is-forward", scrollingDown);
       setPointerClass("is-backward", scrollingUp);
-      setFrame(scrollingUp ? "climbUp" : fallFrames[Math.floor(now / 112) % fallFrames.length]);
+      setFrame(scrollingUp ? pickFrame("flyUp", now, 86) : pickFrame("fallDown", now, 96));
       return;
     }
 
@@ -3853,7 +4299,7 @@ function setupMascotPointer() {
       setPointerClass("is-side", false);
       setPointerClass("is-forward", downwardMotion);
       setPointerClass("is-backward", upwardMotion);
-      setFrame(upwardMotion ? "climbUp" : fallFrames[Math.floor(now / (running ? 86 : 118)) % fallFrames.length]);
+      setFrame(upwardMotion ? pickFrame("flyUp", now, running ? 70 : 86) : pickFrame("fallDown", now, running ? 78 : 96));
       return;
     }
 
@@ -3864,33 +4310,46 @@ function setupMascotPointer() {
     setPointerClass("is-backward", moving && !sideMotion && vy < 0);
 
     if (!moving) {
+      state.facing = 1;
+      state.sidePose = "";
+      state.lastSideDirection = "";
+      pointer.style.setProperty("--lm-mascot-facing", "1");
+      pointer.style.removeProperty("--lm-mascot-frame-facing");
+      setPointerClass("is-side", false);
+      setPointerClass("is-forward", false);
+      setPointerClass("is-backward", false);
       setFrame("front");
       return;
     }
 
     if (sideMotion) {
-      if (vx < -0.25) state.facing = -1;
-      if (vx > 0.25) state.facing = 1;
+      if (sideMotionX < -0.25) state.facing = -1;
+      if (sideMotionX > 0.25) state.facing = 1;
+      state.lastSideDirection = state.facing < 0 ? "left" : "right";
       pointer.style.setProperty("--lm-mascot-facing", String(state.facing));
       if (running) {
-        setFrame(runFrames[Math.floor(now / 90) % runFrames.length]);
+        setFrame(pickFrame(sideMotionX < 0 ? "runLeft" : "runRight", now, 54));
       } else {
-        setFrame(Math.floor(now / 150) % 2 ? "stepB" : "stepA");
+        setFrame(pickFrame(sideMotionX < 0 ? "walkLeft" : "walkRight", now, 78));
       }
       return;
     }
 
     if (running) {
-      setFrame(runFrames[Math.floor(now / 95) % runFrames.length]);
+      setFrame(pickFrame(state.facing < 0 ? "runLeft" : "runRight", now, 58));
     } else {
-      setFrame("front");
+      setFrame(state.lastSideDirection ? "sideIdle" : "front");
     }
   }
 
   function paintMascot(now) {
-    const ease = state.lastType === "touch" ? 0.3 : 0.22;
-    state.x += (state.targetX - state.x) * ease;
-    state.y += (state.targetY - state.y) * ease;
+    const chaseDistance = state.lastType === "touch" ? 100 : 112;
+    const chaseX = state.targetX - Math.cos(state.inputAngle) * chaseDistance;
+    const chaseY = state.targetY - Math.sin(state.inputAngle) * chaseDistance;
+    const ease = state.lastType === "touch" ? 0.12 : 0.07;
+    state.x += (chaseX - state.x) * ease;
+    state.y += (chaseY - state.y) * ease;
+    state.inputSpeed *= 0.86;
 
     const vx = state.x - state.lastX;
     const vy = state.y - state.lastY;
@@ -3899,7 +4358,10 @@ function setupMascotPointer() {
 
     pointer.style.setProperty("--lm-mascot-x", `${state.x}px`);
     pointer.style.setProperty("--lm-mascot-y", `${state.y}px`);
+    heartPointer.style.setProperty("--lm-heart-x", `${state.targetX}px`);
+    heartPointer.style.setProperty("--lm-heart-y", `${state.targetY}px`);
     setPointerClass("is-visible", visible);
+    heartPointer.classList.toggle("is-visible", visible);
     updateFrame(speed, vx, vy, now);
 
     state.lastX = state.x;
@@ -3922,6 +4384,7 @@ function setupMascotPointer() {
   window.addEventListener("scroll", syncFromScroll, { passive: true });
   window.addEventListener("blur", () => {
     pointer.classList.remove("is-visible", "is-walking", "is-running", "is-climbing-up", "is-flying-up", "is-running-down", "is-falling-down");
+    heartPointer.classList.remove("is-visible");
   });
 
   window.requestAnimationFrame(tick);

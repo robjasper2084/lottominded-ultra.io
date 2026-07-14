@@ -1,4 +1,6 @@
-const KEYMAP = {
+const STORAGE_KEY = "gothtechnology.keymap.v1";
+
+const DEFAULT_KEYMAP = Object.freeze({
   KeyA: "p1.left",
   KeyD: "p1.right",
   KeyW: "p1.up",
@@ -38,29 +40,87 @@ const KEYMAP = {
   KeyB: "ui.debug",
   KeyG: "ui.mute",
   KeyR: "ui.reset"
+});
+
+const isEditableTarget = (target) => {
+  const tag = target?.tagName?.toLowerCase?.();
+  return Boolean(target?.isContentEditable || ["button", "input", "select", "textarea"].includes(tag));
 };
+
+const buttonPressed = (pad, index) => Boolean(pad?.buttons?.[index]?.pressed || (pad?.buttons?.[index]?.value ?? 0) > 0.55);
 
 export class InputManager {
   constructor(target = window) {
+    this.target = target;
     this.down = new Set();
     this.pressed = new Set();
     this.released = new Set();
-    this.touchHeld = new Set();
+    this.gamepadHeld = new Set();
     this.touchPointers = new Map();
+    this.touchBindings = [];
     this.lastTap = new Map();
     this.dashWindow = 0.24;
+    this.keymap = this.loadKeymap();
 
-    target.addEventListener("keydown", (event) => this.onKey(event, true), { passive: false });
-    target.addEventListener("keyup", (event) => this.onKey(event, false), { passive: false });
-    target.addEventListener("blur", () => this.clear());
-    document.addEventListener("visibilitychange", () => {
+    this.keydownHandler = (event) => this.onKey(event, true);
+    this.keyupHandler = (event) => this.onKey(event, false);
+    this.blurHandler = () => this.clear();
+    this.visibilityHandler = () => {
       if (document.hidden) this.clear();
-    });
+    };
+    this.pointerUpHandler = (event) => this.releaseTouchPointer(event.pointerId);
+    this.pointerCancelHandler = (event) => this.releaseTouchPointer(event.pointerId);
+
+    target.addEventListener("keydown", this.keydownHandler, { passive: false });
+    target.addEventListener("keyup", this.keyupHandler, { passive: false });
+    target.addEventListener("blur", this.blurHandler);
+    document.addEventListener("visibilitychange", this.visibilityHandler);
+    window.addEventListener("pointerup", this.pointerUpHandler);
+    window.addEventListener("pointercancel", this.pointerCancelHandler);
     this.bindTouchControls();
   }
 
+  loadKeymap() {
+    try {
+      const saved = JSON.parse(window.localStorage?.getItem(STORAGE_KEY) || "null");
+      if (saved && typeof saved === "object") return { ...DEFAULT_KEYMAP, ...saved };
+    } catch {
+      // Invalid or blocked storage falls back to the built-in bindings.
+    }
+    return { ...DEFAULT_KEYMAP };
+  }
+
+  saveKeymap() {
+    try {
+      window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(this.keymap));
+    } catch {
+      // Remapping still works for the current session when storage is unavailable.
+    }
+    window.dispatchEvent(new CustomEvent("gothtechnology:keymap-changed"));
+  }
+
+  getBinding(action) {
+    return Object.entries(this.keymap).find(([, mappedAction]) => mappedAction === action)?.[0] || "Unbound";
+  }
+
+  rebind(action, code) {
+    if (!action || !code) return false;
+    for (const [mappedCode, mappedAction] of Object.entries(this.keymap)) {
+      if (mappedAction === action || mappedCode === code) delete this.keymap[mappedCode];
+    }
+    this.keymap[code] = action;
+    this.saveKeymap();
+    return true;
+  }
+
+  resetBindings() {
+    this.keymap = { ...DEFAULT_KEYMAP };
+    this.saveKeymap();
+  }
+
   onKey(event, isDown) {
-    const action = KEYMAP[event.code];
+    if (isEditableTarget(event.target)) return;
+    const action = this.keymap[event.code];
     if (!action) return;
     event.preventDefault();
     if (isDown) this.press(action);
@@ -75,7 +135,7 @@ export class InputManager {
         try {
           button.setPointerCapture?.(event.pointerId);
         } catch {
-          // Pointer capture is best-effort; touch release guards below still clean up.
+          // Pointer capture is best-effort; release guards still clean up.
         }
         this.touchPointers.set(event.pointerId, action);
         button.dataset.held = "true";
@@ -92,15 +152,52 @@ export class InputManager {
         button.dataset.held = "false";
         this.release(action);
       };
-      button.addEventListener("pointerdown", hold);
-      button.addEventListener("pointerup", release);
-      button.addEventListener("pointercancel", release);
-      button.addEventListener("pointerleave", release);
-      button.addEventListener("lostpointercapture", release);
-      button.addEventListener("contextmenu", (event) => event.preventDefault());
+      const blockContextMenu = (event) => event.preventDefault();
+      for (const eventName of ["pointerdown"]) button.addEventListener(eventName, hold);
+      for (const eventName of ["pointerup", "pointercancel", "pointerleave", "lostpointercapture"]) {
+        button.addEventListener(eventName, release);
+      }
+      button.addEventListener("contextmenu", blockContextMenu);
+      this.touchBindings.push({ button, hold, release, blockContextMenu });
     });
-    window.addEventListener("pointerup", (event) => this.releaseTouchPointer(event.pointerId));
-    window.addEventListener("pointercancel", (event) => this.releaseTouchPointer(event.pointerId));
+  }
+
+  pollGamepads() {
+    const pads = Array.from(navigator.getGamepads?.() || []).filter(Boolean).slice(0, 2);
+    const nextHeld = new Set();
+    pads.forEach((pad, index) => {
+      const player = index + 1;
+      const prefix = `p${player}`;
+      const axisX = pad.axes?.[0] ?? 0;
+      const axisY = pad.axes?.[1] ?? 0;
+      const add = (active, action) => {
+        if (active) nextHeld.add(action);
+      };
+      add(axisX < -0.45 || buttonPressed(pad, 14), `${prefix}.left`);
+      add(axisX > 0.45 || buttonPressed(pad, 15), `${prefix}.right`);
+      add(axisY < -0.5 || buttonPressed(pad, 12), `${prefix}.up`);
+      add(axisY > 0.5 || buttonPressed(pad, 13), `${prefix}.down`);
+      add(buttonPressed(pad, 0), `${prefix}.lightPunch`);
+      add(buttonPressed(pad, 1), `${prefix}.lightKick`);
+      add(buttonPressed(pad, 2), `${prefix}.heavyPunch`);
+      add(buttonPressed(pad, 3), `${prefix}.heavyKick`);
+      add(buttonPressed(pad, 4), `${prefix}.assist1`);
+      add(buttonPressed(pad, 5), `${prefix}.assist2`);
+      add(buttonPressed(pad, 6), `${prefix}.throw`);
+      add(buttonPressed(pad, 7), `${prefix}.special`);
+      add(buttonPressed(pad, 8), `${prefix}.super`);
+      add(buttonPressed(pad, 9), "ui.pause");
+      add(buttonPressed(pad, 10), `${prefix}.dash`);
+      add(buttonPressed(pad, 11), `${prefix}.taunt`);
+    });
+
+    for (const action of nextHeld) {
+      if (!this.gamepadHeld.has(action)) this.pressed.add(action);
+    }
+    for (const action of this.gamepadHeld) {
+      if (!nextHeld.has(action)) this.released.add(action);
+    }
+    this.gamepadHeld = nextHeld;
   }
 
   press(action) {
@@ -125,6 +222,7 @@ export class InputManager {
     this.down.clear();
     this.pressed.clear();
     this.released.clear();
+    this.gamepadHeld.clear();
     this.releaseTouchButtons();
   }
 
@@ -148,7 +246,7 @@ export class InputManager {
   }
 
   isDown(action) {
-    return this.down.has(action);
+    return this.down.has(action) || this.gamepadHeld.has(action);
   }
 
   wasPressed(action) {
@@ -164,10 +262,10 @@ export class InputManager {
   actions(player) {
     const p = `p${player}`;
     return {
-      left: this.down.has(`${p}.left`),
-      right: this.down.has(`${p}.right`),
-      up: this.down.has(`${p}.up`),
-      down: this.down.has(`${p}.down`),
+      left: this.isDown(`${p}.left`),
+      right: this.isDown(`${p}.right`),
+      up: this.isDown(`${p}.up`),
+      down: this.isDown(`${p}.down`),
       lightPunch: this.consume(`${p}.lightPunch`),
       heavyPunch: this.consume(`${p}.heavyPunch`),
       lightKick: this.consume(`${p}.lightKick`),
@@ -185,5 +283,23 @@ export class InputManager {
   endFrame() {
     this.pressed.clear();
     this.released.clear();
+  }
+
+  destroy() {
+    this.clear();
+    this.target.removeEventListener("keydown", this.keydownHandler);
+    this.target.removeEventListener("keyup", this.keyupHandler);
+    this.target.removeEventListener("blur", this.blurHandler);
+    document.removeEventListener("visibilitychange", this.visibilityHandler);
+    window.removeEventListener("pointerup", this.pointerUpHandler);
+    window.removeEventListener("pointercancel", this.pointerCancelHandler);
+    for (const { button, hold, release, blockContextMenu } of this.touchBindings) {
+      button.removeEventListener("pointerdown", hold);
+      for (const eventName of ["pointerup", "pointercancel", "pointerleave", "lostpointercapture"]) {
+        button.removeEventListener(eventName, release);
+      }
+      button.removeEventListener("contextmenu", blockContextMenu);
+    }
+    this.touchBindings = [];
   }
 }

@@ -10,7 +10,8 @@
     <title>LOTTOMINDED ULTRA | Browser Music Workstation</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=view-mode-toggle-2" />
+    <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/" />
+<link rel="stylesheet" href="./styles.css?v=home-audit-fixes-25" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,8 +19,8 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
-    <link rel="stylesheet" href="./assets/css/home-raytrace.css?v=home-raytrace-pass-13" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
   </head>
   <body class="home-page has-sphere-header">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
@@ -39,13 +40,15 @@
       </div>
       <nav aria-label="Home sphere navigation">
         <a href="./index.html#top" data-icon="HM">Home</a>
+        <a href="./memberships.html" data-icon="MB">Memberships</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
+        <a href="./news/" data-icon="NW">News</a>
         <a href="./live-events.html" data-icon="EV">Events</a>
         <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
         <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
         <a href="./merch-store.html" data-icon="DR">Merch</a>
-        <a href="./how-to-use.html" data-icon="GO">Guide</a>
+        <a href="./how-to-use.html" data-icon="GD">Guide</a>
+        <a href="../lotto%20mind%20refined/" data-icon="LM">LottoMind App</a>
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
@@ -107,19 +110,19 @@
       </a>
     </section>
 
-    <aside class="startup-video-modal is-hidden" data-startup-video aria-label="Lottominded Ultra startup music" aria-hidden="true">
+    <aside class="startup-video-modal is-hidden" data-startup-video aria-label="Lottominded Ultra startup video" aria-hidden="true">
       <div class="startup-video-panel" role="dialog" aria-modal="true" aria-labelledby="startupVideoTitle">
         <button class="startup-video-close" type="button" data-startup-video-close aria-label="Enter site">X</button>
         <p class="eyebrow">Lottominded Ultra Signal</p>
         <h2 id="startupVideoTitle">Start the home frequency.</h2>
-        <video class="startup-video-player" autoplay playsinline controls preload="metadata">
+        <video class="startup-video-player" playsinline controls preload="none">
           <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
         </video>
         <div class="startup-video-actions">
           <button class="primary-action" type="button" data-startup-video-close>Enter Site</button>
         </div>
         <p class="startup-video-copy">
-          Audio starts with this welcome signal when the site opens. Enter the site when you are ready.
+          Play the video for its audio, or enter the site to start the home music.
         </p>
         <p class="startup-video-credit">
           Produced by LOTTOMINDED&trade;. Recording artist: Bloom Through Gloom.
@@ -127,9 +130,8 @@
       </div>
     </aside>
 
-    <main class="home-sphere-main" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg">
+    <main class="home-sphere-main" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.webp">
       <canvas class="home-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
-      <canvas class="home-raytrace-canvas" data-home-raytrace-canvas aria-hidden="true"></canvas>
       <div class="home-sphere-grid" aria-hidden="true"></div>
       <div class="home-sphere-scanline" aria-hidden="true"></div>
       <section class="hero kinetic-hero" id="top" data-kinetic-hero>
@@ -162,11 +164,11 @@
         </div>
         <aside class="hero-brand-art home-spheres-column" aria-label="Interactive LOTTOMINDED lottery spheres">
           <div class="home-spheres-orbit-mark" aria-hidden="true">
-            <img src="./assets/brand/jazz-network-gold-coin.jpeg" alt="" />
+            <img src="./assets/brand/jazz-network-gold-coin.webp" alt="" />
           </div>
           <div class="home-spheres-copy">
             <p class="section-kicker">Beat2Lotto+&trade; Signal Room</p>
-            <h2 class="kinetic-word" data-kinetic="LOTTERY SPHERES IN MOTION" tabindex="0">Lottery Spheres in Motion</h2>
+            <h2 class="kinetic-word" data-kinetic="LOTTERY SPHERES IN MOTION" aria-label="Lottery Spheres in Motion" tabindex="0">Lottery Spheres in Motion</h2>
             <p>
               Guide the glowing balls, reroll a creative set, and send the signal back into the LOTTOMINDED ULTRA&trade;
               studio. Creative number generation only. Not a prediction.
@@ -220,13 +222,6 @@
           <strong>LottoMind App &middot; Dream Oracle &middot; Number Radar &middot; Saved Wallet &middot; Creative Signals</strong>
           <span>Local-first app tools for organizing ideas, notes, number sets, and creative play.</span>
         </div>
-        <aside class="home-game-pip" data-game-pip aria-label="GOTHTECHNOLOGY game popup" aria-hidden="true">
-          <div class="home-game-pip-head">
-            <strong>GOTHTECHNOLOGY</strong>
-            <button type="button" data-game-pip-close aria-label="Close game popup">Close</button>
-          </div>
-          <iframe data-src="./games/gothtechnology2/index.html?shadow-ops-fix-1" title="Playable GOTHTECHNOLOGY game" loading="lazy"></iframe>
-        </aside>
       </section>
 
       <section class="prompt-band prompt-band-top marketing-section reveal-section" id="prompt" data-reveal>
@@ -238,7 +233,7 @@
             <span class="prompt-card-sphere-ball" style="--ball-x: 34%; --ball-y: 78%; --ball-size: 104px; --ball-delay: -3.4s;">19</span>
             <span class="prompt-card-sphere-ball" style="--ball-x: 66%; --ball-y: 84%; --ball-size: 84px; --ball-delay: -2.7s;">68</span>
           </div>
-          <h2 class="kinetic-word" data-kinetic="TURN IDEAS INTO YOUR LOTTOMIND APP FLOW." tabindex="0">Turn ideas into your LottoMind app flow.</h2>
+          <h2 class="kinetic-word" data-kinetic="TURN IDEAS INTO YOUR LOTTOMIND APP FLOW." aria-label="Turn ideas into your LottoMind app flow." tabindex="0">Turn ideas into your LottoMind app flow.</h2>
           <p>
             Save dream notes, moods, favorite numbers, draw reminders, and creative seeds in one app-style workflow.
             Use Number Radar and Dream Oracle for entertainment-only organization and creative play. Nothing predicts
@@ -268,7 +263,7 @@
             <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
           </video>
           <p class="eyebrow">Ultra Studio -> LottoMind Refined App -> Vault Membership</p>
-          <h2 class="kinetic-word refined-explode-heading" data-kinetic="ENTER THE LOTTOMIND REFINED APP" tabindex="0">Enter the LottoMind Refined App</h2>
+          <h2 class="kinetic-word refined-explode-heading" data-kinetic="ENTER THE LOTTOMIND REFINED APP" aria-label="Enter the LottoMind Refined App" tabindex="0">Enter the LottoMind Refined App</h2>
           <p>
             Step from the LOTTOMINDED ULTRA studio into the full LottoMind Refined experience - AI number tools,
             Dream Oracle, saved numbers, credits, scanner tools, rewards, and premium Vault access.
@@ -312,20 +307,19 @@
 
     </main>
 
-    <audio id="siteSoundtrack" preload="metadata">
-      <source src="./assets/audio/lottominded-main-theme.mp3?v=first-startup-1" type="audio/mpeg" />
-    </audio>
-
     <footer>
       <span>LOTTOMINDED ULTRA</span>
       <span>All rights reserved.</span>
       <span id="site-year"></span>
     </footer>
 
-    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=view-mode-toggle-2" defer></script>
-    <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
-    <script src="./assets/js/home-raytrace.js?v=home-lines-loop-1" defer></script>
+    <audio id="siteSoundtrack" preload="metadata">
+      <source src="./assets/audio/home-screen-song.mp3" type="audio/mpeg" />
+    </audio>
+
+<script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+    <script src="./site.js?v=original-page-wipe-3" defer></script>
+    <script src="./lottery-spheres.js?v=spheres-bottom-orbit-2" defer></script>
   </body>
 </html>

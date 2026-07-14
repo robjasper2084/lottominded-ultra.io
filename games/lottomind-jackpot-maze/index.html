@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#090611" />
+    <meta name="description" content="LottoMind Jackpot Maze — an original neon maze-chase game." />
+    <title>LottoMind: Jackpot Maze</title>
+    <style>
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+        color: #dffcff;
+        background: #050309;
+        font-family: system-ui, sans-serif;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+    </style>
+    <script>
+      const gameUrl = new URL("./dist/", window.location.href);
+      gameUrl.search = window.location.search;
+      gameUrl.hash = window.location.hash;
+      window.location.replace(gameUrl.href);
+    </script>
+  </head>
+  <body>
+    <p>Loading Jackpot Maze…</p>
+    <noscript><a href="./dist/">Open Jackpot Maze</a></noscript>
+  </body>
+</html>

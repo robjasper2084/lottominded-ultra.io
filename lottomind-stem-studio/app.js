@@ -466,6 +466,8 @@ let ultraCockpitFrame = null;
 let ultraCockpitRunning = false;
 let dbPromise = null;
 let renderQueued = false;
+let resizeCanvasFrame = 0;
+let lastCanvasAnimationDraw = 0;
 let deferredInstallPrompt = null;
 let waveformPreviewSource = null;
 const activePadPointers = new Map();
@@ -1498,6 +1500,40 @@ function render() {
   initUltraCockpit();
   initFloatingModes();
   initFloatingTransport();
+  initFloatingStemMixer();
+  initFloatingSequencer();
+}
+
+function syncViewControls() {
+  const isModeAliasActive = (mode, action, view) =>
+    (mode === "suno prompt" && action === "generate-suno-prompt") ||
+    (mode === "video prompt" && action === "generate-video-prompt") ||
+    (mode === "beat lottery" && action === "generate-beat-lottery") ||
+    (mode === "ai master" && view === "ai master");
+
+  document.querySelectorAll("[data-action='set-view'][data-view]").forEach((button) => {
+    const view = button.dataset.view;
+    const active = view === state.view || isModeAliasActive(state.view, button.dataset.action, view);
+    button.classList.toggle("is-active", active);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+    if (button.classList.contains("tab")) {
+      button.setAttribute("aria-current", active ? "page" : "false");
+    }
+  });
+  setActiveCreativeMode(state.view);
+}
+
+function renderActiveViewOnly() {
+  const main = document.querySelector("#app > main.view");
+  if (!main) {
+    render();
+    return;
+  }
+  main.dataset.view = state.view;
+  main.innerHTML = renderCurrentView();
+  syncViewControls();
+  drawAllCanvases();
   initFloatingStemMixer();
   initFloatingSequencer();
 }
@@ -5897,7 +5933,7 @@ async function handleAction(action, target) {
       state.view = target.dataset.view;
       state.settingsOpen = state.view === "settings";
       state.helpOpen = state.view === "help";
-      render();
+      renderActiveViewOnly();
       break;
     case "toggle-top-shell-mode":
       toggleTopShellMode();
@@ -8405,9 +8441,24 @@ function drawSpectrum() {
   });
 }
 
-function animationLoop() {
+function hasLiveCanvasMotion() {
+  return Boolean(
+    (state.playing && !state.transport.paused) ||
+    state.recording ||
+    state.sequencer.playing ||
+    state.waveformStudio.previewPlaying ||
+    (state.waveformStudio.recording.active && !state.waveformStudio.recording.paused) ||
+    state.stems.some((stem) => stem.playing) ||
+    Object.values(state.decks).some((deck) => deck.playing)
+  );
+}
+
+function animationLoop(now = performance.now()) {
   updateMeters();
-  drawAllCanvases();
+  if (hasLiveCanvasMotion() || now - lastCanvasAnimationDraw > 1000) {
+    drawAllCanvases();
+    lastCanvasAnimationDraw = now;
+  }
   animationFrame = requestAnimationFrame(animationLoop);
 }
 
@@ -12241,7 +12292,13 @@ document.addEventListener("keyup", (event) => {
   releaseMappedComputerKey(event);
 });
 
-window.addEventListener("resize", () => drawAllCanvases());
+window.addEventListener("resize", () => {
+  if (resizeCanvasFrame) return;
+  resizeCanvasFrame = requestAnimationFrame(() => {
+    resizeCanvasFrame = 0;
+    drawAllCanvases();
+  });
+});
 window.addEventListener("scroll", compactHeaderOnScroll, { passive: true });
 
 document.addEventListener("visibilitychange", () => {
@@ -12283,5 +12340,6 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
 }
 
 render();
-window.setTimeout(autoLoadDefaultDemoOnStartup, 650);
+const shouldAutoloadDemo = new URLSearchParams(window.location.search).get("demo") === "autoload";
+if (shouldAutoloadDemo) window.setTimeout(autoLoadDefaultDemoOnStartup, 650);
 animationLoop();

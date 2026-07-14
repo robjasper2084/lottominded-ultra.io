@@ -1,20 +1,25 @@
 :root {
   --lm-transition-rgb: 41 247 255;
   --lm-transition-color: #29f7ff;
-  --lm-transition-duration: 620ms;
+  --lm-transition-duration: 520ms;
 }
 
 .lm-page-transition {
   position: fixed;
   inset: 0;
   z-index: 999999;
-  display: none;
+  display: grid;
   place-items: center;
   overflow: hidden;
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
   isolation: isolate;
+  contain: layout paint style;
+  transform: translateZ(0);
+  transition:
+    opacity 140ms ease,
+    visibility 0s linear 160ms;
   background:
     radial-gradient(circle at 50% 48%, rgb(var(--lm-transition-rgb) / 0.10), transparent 34%),
     linear-gradient(145deg, rgba(2, 4, 9, 0.97), rgba(3, 7, 16, 0.98));
@@ -22,10 +27,12 @@
 
 html.lm-transition-arriving .lm-page-transition,
 .lm-page-transition.is-active {
-  display: grid;
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
+  transition:
+    opacity 110ms ease,
+    visibility 0s;
 }
 
 /* Fast page-colored burst placed behind the screen-blended portal video. */
@@ -59,7 +66,7 @@ html.lm-transition-arriving .lm-page-transition,
 }
 
 .lm-page-transition.is-closing .lm-page-transition__flash {
-  animation: lmTransitionCloseSpark 140ms 430ms ease-out both;
+  animation: lmTransitionCloseSpark 140ms 330ms ease-out both;
 }
 
 .lm-page-transition__video {

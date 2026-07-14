@@ -1,0 +1,252 @@
+{
+  "assets": [
+    {
+      "key": "droneMotion",
+      "source": "assets/characters/higgsfield_drone_motion_strip_runtime_v2.png",
+      "output": "assets/characters/higgsfield_drone_motion_strip_runtime_v3.png",
+      "source_size": [
+        3072,
+        256
+      ],
+      "output_size": [
+        3072,
+        256
+      ],
+      "cell_size": [
+        384,
+        256
+      ],
+      "green_pixels_removed": 2178,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "droneFx",
+      "source": "assets/mission/chatgpt_drone_fx_strip_runtime_v3.png",
+      "output": "assets/mission/chatgpt_drone_fx_strip_runtime_v4.png",
+      "source_size": [
+        2560,
+        180
+      ],
+      "output_size": [
+        2560,
+        180
+      ],
+      "cell_size": [
+        320,
+        180
+      ],
+      "green_pixels_removed": 0,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "droneLaserOverlay",
+      "source": "assets/characters/chatgpt_drone_laser_overlay_strip_runtime_clean.png",
+      "output": "assets/characters/chatgpt_drone_laser_overlay_strip_runtime_v2.png",
+      "source_size": [
+        5120,
+        128
+      ],
+      "output_size": [
+        4096,
+        128
+      ],
+      "cell_size": [
+        512,
+        128
+      ],
+      "green_pixels_removed": 0,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "bossCanopyMotion",
+      "source": "assets/bosses/canopy_drone_queen_motion_sheet.png",
+      "output": "assets/bosses/canopy_drone_queen_motion_sheet_runtime_384.png",
+      "source_size": [
+        4608,
+        768
+      ],
+      "output_size": [
+        2304,
+        384
+      ],
+      "cell_size": [
+        384,
+        384
+      ],
+      "green_pixels_removed": 112,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "bossForgeMotion",
+      "source": "assets/bosses/jackpot_forge_titan_motion_sheet.png",
+      "output": "assets/bosses/jackpot_forge_titan_motion_sheet_runtime_384.png",
+      "source_size": [
+        4608,
+        768
+      ],
+      "output_size": [
+        2304,
+        384
+      ],
+      "cell_size": [
+        384,
+        384
+      ],
+      "green_pixels_removed": 148,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "bossMidasMotion",
+      "source": "assets/bosses/midas_heartcore_overlord_motion_sheet.png",
+      "output": "assets/bosses/midas_heartcore_overlord_motion_sheet_runtime_384.png",
+      "source_size": [
+        4608,
+        768
+      ],
+      "output_size": [
+        2304,
+        384
+      ],
+      "cell_size": [
+        384,
+        384
+      ],
+      "green_pixels_removed": 27,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "shieldRobotMotion",
+      "source": "assets/characters/chatgpt_shield_robot_mission_strip_runtime_v4.png",
+      "output": "assets/characters/chatgpt_shield_robot_mission_strip_runtime_v5.png",
+      "source_size": [
+        3072,
+        320
+      ],
+      "output_size": [
+        3072,
+        320
+      ],
+      "cell_size": [
+        384,
+        320
+      ],
+      "green_pixels_removed": 2066,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "cannonTurretMotion",
+      "source": "assets/characters/higgsfield_cannon_turret_motion_strip_runtime_v2.png",
+      "output": "assets/characters/higgsfield_cannon_turret_motion_strip_runtime_v3.png",
+      "source_size": [
+        3072,
+        256
+      ],
+      "output_size": [
+        3072,
+        256
+      ],
+      "cell_size": [
+        384,
+        256
+      ],
+      "green_pixels_removed": 903,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "fxSheet",
+      "source": "assets/mission/higgsfield_separate_fx_repair_runtime_v3.png",
+      "output": "assets/mission/higgsfield_separate_fx_repair_runtime_v4.png",
+      "source_size": [
+        1280,
+        1024
+      ],
+      "output_size": [
+        1280,
+        1024
+      ],
+      "cell_size": [
+        256,
+        256
+      ],
+      "green_pixels_removed": 4812,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "missionProps",
+      "source": "assets/mission/higgsfield_missing_world_props_runtime_v1.png",
+      "output": "assets/mission/higgsfield_missing_world_props_runtime_v2.png",
+      "source_size": [
+        1024,
+        1024
+      ],
+      "output_size": [
+        1024,
+        1024
+      ],
+      "cell_size": [
+        256,
+        256
+      ],
+      "green_pixels_removed": 78,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "missionBatchWorld",
+      "source": "assets/mission/higgsfield_photo_world_retry_runtime_v1.png",
+      "output": "assets/mission/higgsfield_photo_world_retry_runtime_v2.png",
+      "source_size": [
+        1280,
+        1024
+      ],
+      "output_size": [
+        1280,
+        1024
+      ],
+      "cell_size": [
+        256,
+        256
+      ],
+      "green_pixels_removed": 1677,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "missionBatchProps",
+      "source": "assets/mission/higgsfield_batch_props_runtime_v1.png",
+      "output": "assets/mission/higgsfield_batch_props_runtime_v2.png",
+      "source_size": [
+        1280,
+        1024
+      ],
+      "output_size": [
+        1280,
+        1024
+      ],
+      "cell_size": [
+        256,
+        256
+      ],
+      "green_pixels_removed": 4087,
+      "edge_touch_frames": []
+    },
+    {
+      "key": "missionBatchFx",
+      "source": "assets/mission/higgsfield_batch_fx_retry_runtime_v1.png",
+      "output": "assets/mission/higgsfield_batch_fx_retry_runtime_v2.png",
+      "source_size": [
+        1280,
+        1024
+      ],
+      "output_size": [
+        1280,
+        1024
+      ],
+      "cell_size": [
+        256,
+        256
+      ],
+      "green_pixels_removed": 24371,
+      "edge_touch_frames": []
+    }
+  ],
+  "preview": "docs\\asset-polish-preview.png"
+}

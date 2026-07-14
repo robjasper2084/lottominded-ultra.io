@@ -375,7 +375,7 @@ function renderResults() {
     `Beat2Lotto+ - ${game.label} - ${method} - Set ${index + 1}: ${formatSet(set, game)} - Beat-seeded entertainment picks. Creative number generation. Not a prediction. Verify official rules.`
   )).join("\n");
   output.innerHTML = sets.map((set, index) => `
-    <article class="lotto-set-card motion-pop" style="--motion-delay:${Math.min(420, index * 65)}ms">
+    <article class="lotto-set-card motion-pop is-visible" style="--motion-delay:${Math.min(420, index * 65)}ms">
       <strong>Set ${index + 1} - ${game.label}</strong>
       <div class="lotto-number-row">
         ${set.main.map((number) => `<span class="lotto-ball">${game.type === "digits" ? number : String(number).padStart(2, "0")}</span>`).join("")}

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /news-hub/.data/
+Disallow: /api/
+
+Sitemap: https://robjasper2084.github.io/Jungle-Lotto/lottominded-ultra.io/sitemap.xml

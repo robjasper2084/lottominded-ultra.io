@@ -1,0 +1,11 @@
+node_modules/
+news-hub/node_modules/
+_site/
+.playwright-cli/
+playwright-report/
+test-results/
+*.zip
+*.log
+.env
+.env.local
+video-optimization-report.csv

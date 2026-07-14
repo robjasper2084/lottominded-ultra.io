@@ -14,6 +14,6 @@ The page uses local brand assets only. No backend, paid API, cloud upload, or th
 
 The public brand site now includes LottoMind App Beta as a product section. The beta preview links to:
 
-https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/
+http://127.0.0.1:8170/lotto%20mind%20refined/
 
 The product copy must stay entertainment-only: LottoMind organizes number ideas, dream symbols, saved sets, and daily tools. It does not predict lottery outcomes.

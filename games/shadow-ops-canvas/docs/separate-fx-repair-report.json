@@ -1,0 +1,28 @@
+{
+  "source": "assets\\mission\\higgsfield_fx_repair_runtime_v1.png",
+  "output": "assets\\mission\\higgsfield_separate_fx_repair_runtime_v2.png",
+  "separate_cells": [
+    "assets\\mission\\separate_fx_repair_cells\\frame_02.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_03.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_04.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_05.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_06.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_17.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_18.png",
+    "assets\\mission\\separate_fx_repair_cells\\frame_19.png"
+  ],
+  "frames": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    17,
+    18,
+    19
+  ],
+  "sheet_size": [
+    1280,
+    1024
+  ]
+}

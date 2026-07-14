@@ -1,5 +1,5 @@
 import { CANVAS_HEIGHT, CANVAS_WIDTH, COLORS, ROUND_SECONDS } from "../config/constants.js";
-import { drawSpriteFrame } from "../engine/assets.js?v=fighter-prop1";
+import { drawSpriteFrame } from "../engine/assets.js?v=fighter-prop2";
 
 const panel = (ctx, x, y, w, h, stroke = COLORS.gold) => {
   ctx.save();
@@ -77,12 +77,19 @@ export const drawFightHud = (ctx, game) => {
     ctx.fill();
   }
 
-  ctx.fillStyle = "rgba(255, 246, 211, 0.78)";
-  ctx.font = "700 12px system-ui";
-  ctx.textAlign = "left";
-  ctx.fillText(`P1 MOTION: ${p1.motion}`, 36, 160);
-  ctx.textAlign = "right";
-  ctx.fillText(`P2 MOTION: ${p2.motion}`, 1244, 160);
+  if (game.debug) {
+    ctx.fillStyle = "rgba(255, 246, 211, 0.78)";
+    ctx.font = "700 12px system-ui";
+    ctx.textAlign = "left";
+    ctx.fillText(`P1 MOTION: ${p1.motion}`, 36, 160);
+    ctx.textAlign = "right";
+    ctx.fillText(`P2 MOTION: ${p2.motion}`, 1244, 160);
+  } else if (game.rewardStatusTimer > 0 && game.rewardStatus) {
+    ctx.fillStyle = COLORS.blue;
+    ctx.font = "800 12px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText(game.rewardStatus, 640, 160);
+  }
 
   if (p1.comboHits >= 2) {
     ctx.textAlign = "left";
@@ -127,29 +134,33 @@ export const drawTitle = (ctx, game) => {
     ctx.save();
     ctx.shadowColor = "rgba(255, 214, 109, 0.42)";
     ctx.shadowBlur = 28;
-    ctx.drawImage(logo, 502, 34, 276, 276);
+    ctx.drawImage(logo, 530, 18, 220, 220);
     ctx.restore();
   } else {
     ctx.fillStyle = COLORS.goldBright;
     ctx.shadowColor = COLORS.goldBright;
     ctx.shadowBlur = 18;
-    ctx.font = "900 76px Georgia";
-    ctx.fillText("LOTTO MIND LIVE", CANVAS_WIDTH / 2, 190);
+    ctx.font = "900 60px Georgia";
+    ctx.fillText("GOTHTECHNOLOGY", CANVAS_WIDTH / 2, 164);
     ctx.shadowBlur = 0;
   }
+  ctx.fillStyle = COLORS.goldBright;
+  ctx.font = "900 38px Georgia";
+  ctx.fillText("GOTHTECHNOLOGY", CANVAS_WIDTH / 2, 260);
   ctx.fillStyle = COLORS.blue;
-  ctx.font = "700 20px system-ui";
+  ctx.font = "700 18px system-ui";
   const leftName = game.player1Id === "MASTER_EZRA" ? "MASTER EZRA" : "KALYX";
   const rightName = game.player2Id === "MASTER_EZRA" ? "MASTER EZRA" : "KALYX";
   const cpuName = game.player2Id === "MASTER_EZRA" ? "EZRA" : "KALYX";
-  ctx.fillText(`${leftName} VS ${rightName}`, CANVAS_WIDTH / 2, 314);
-  drawMenuButton(ctx, 494, 338, 292, 54, "PICK FIGHTER");
-  drawMenuButton(ctx, 494, 406, 292, 54, "TRAINING SELECT");
-  drawMenuButton(ctx, 494, 474, 292, 54, "GAME SELECT");
-  drawMenuButton(ctx, 494, 542, 292, 54, game.cpuEnabled ? `CPU ${cpuName}: ON` : `CPU ${cpuName}: OFF`);
+  ctx.fillText(`${leftName} VS ${rightName}`, CANVAS_WIDTH / 2, 292);
+  drawMenuButton(ctx, 494, 318, 292, 48, "PICK FIGHTER");
+  drawMenuButton(ctx, 494, 376, 292, 48, "TRAINING SELECT");
+  drawMenuButton(ctx, 494, 434, 292, 48, "GAME SELECT");
+  drawMenuButton(ctx, 494, 492, 292, 48, game.cpuEnabled ? `CPU ${cpuName}: ON` : "LOCAL 2P: GAMEPADS");
+  drawMenuButton(ctx, 494, 550, 292, 48, "CONTROLS");
   ctx.fillStyle = "rgba(255, 246, 211, 0.55)";
   ctx.font = "700 13px system-ui";
-  ctx.fillText("ENTER starts fighter select  /  GAME SELECT opens the arcade shelf", CANVAS_WIDTH / 2, 650);
+  ctx.fillText("ENTER STARTS  /  P PAUSES  /  TWO GAMEPADS SUPPORTED", CANVAS_WIDTH / 2, 632);
   ctx.restore();
 };
 
@@ -313,11 +324,11 @@ export const drawCharacterSelect = (ctx, game) => {
   drawDossierCard(ctx, 690, 128, 500, 420, "MASTER EZRA", game.player1Id === "MASTER_EZRA" ? "PLAYER 1 / blue control" : "PLAYER 2 / blue control", game.assets.images.dossierMalach, game.player1Id === "MASTER_EZRA" ? COLORS.goldBright : COLORS.blue);
   drawSelectBadge(ctx, game.player1Id === "KALYX" ? 340 : 940, 146, "P1");
   drawSelectBadge(ctx, game.player2Id === "KALYX" ? 340 : 940, 512, "P2");
-  drawMenuButton(ctx, 494, 594, 292, 54, "VERSUS");
+  drawMenuButton(ctx, 494, 570, 292, 52, "VERSUS");
   ctx.fillStyle = "rgba(255, 246, 211, 0.58)";
   ctx.font = "700 13px system-ui";
-  ctx.fillText("CLICK A CARD OR PRESS LEFT / RIGHT, THEN ENTER", 640, 652);
-  ctx.fillText(game.cpuEnabled ? `${game.player2Id === "KALYX" ? "KALYX" : "MASTER EZRA"} CPU ENABLED` : "LOCAL TWO-PLAYER ENABLED", 640, 676);
+  ctx.fillText("CLICK A CARD OR PRESS LEFT / RIGHT, THEN ENTER", 640, 650);
+  ctx.fillText(game.cpuEnabled ? `${game.player2Id === "KALYX" ? "KALYX" : "MASTER EZRA"} CPU ENABLED` : "LOCAL 2P: KEYBOARD OR TWO GAMEPADS", 640, 676);
   ctx.restore();
 };
 
@@ -337,7 +348,12 @@ export const drawVersus = (ctx, game) => {
   ctx.fillText(p2.config.name, 920, 210);
   ctx.fillStyle = COLORS.blue;
   ctx.font = "700 18px system-ui";
-  ctx.fillText("BEST OF THREE / 99 SECONDS", 640, 628);
+  if (!game.motionAssetsReady) {
+    const percent = Math.round((game.motionLoadingProgress ?? 0) * 100);
+    ctx.fillText(`PREPARING FIGHTERS ${percent}%`, 640, 628);
+  } else {
+    ctx.fillText("BEST OF THREE / 99 SECONDS", 640, 628);
+  }
   ctx.restore();
 };
 
@@ -362,27 +378,31 @@ export const drawPause = (ctx, game) => {
   ctx.save();
   ctx.fillStyle = "rgba(0, 0, 0, 0.62)";
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  panel(ctx, 364, 154, 552, 404, COLORS.goldBright);
+  panel(ctx, 344, 112, 592, 516, COLORS.goldBright);
   ctx.textAlign = "center";
   ctx.fillStyle = COLORS.goldBright;
   ctx.font = "900 42px Georgia";
-  ctx.fillText("PAUSED", 640, 224);
+  ctx.fillText("PAUSED", 640, 178);
   ctx.fillStyle = COLORS.white;
   ctx.font = "700 16px system-ui";
-  ctx.fillText(game.training ? "TRAINING MODE" : "ARCADE MATCH", 640, 272);
-  ctx.fillText(game.cpuEnabled ? `CPU ${game.fighters[1]?.config.name ?? "FIGHTER"}` : "LOCAL TWO-PLAYER", 640, 300);
-  ctx.fillText(game.audio.muted ? "AUDIO MUTED" : "AUDIO ACTIVE", 640, 328);
+  ctx.fillText(game.training ? "TRAINING MODE" : "ARCADE MATCH", 640, 222);
+  ctx.fillText(game.cpuEnabled ? `CPU ${game.fighters[1]?.config.name ?? "FIGHTER"}` : "LOCAL TWO-PLAYER / GAMEPADS READY", 640, 250);
+  ctx.fillText(game.audio.muted ? "AUDIO MUTED" : "AUDIO ACTIVE", 640, 278);
   ctx.textAlign = "left";
   ctx.fillStyle = "rgba(255, 246, 211, 0.9)";
   ctx.font = "800 14px system-ui";
   const moves = [
-    "MOVE: A/D or arrows    JUMP: W    CROUCH: S",
-    "ATTACKS: LP J, HP U, LK K, HK I",
-    "SPECIAL: L    SUPER: O    THROW: H",
-    "ASSISTS: N / M    DASH: Shift or double tap",
-    "CHAINS: light > heavy > special > super"
+    "P1 MOVE: A/D    JUMP: W    CROUCH: S",
+    "STRIKES: J / U / K / I    SPECIAL: L    SUPER: O",
+    "THROW: H    ASSISTS: N / M    DASH: SHIFT    TAUNT: Y",
+    game.cpuEnabled ? "GAMEPAD 1 READY    CONTROLS OPENS KEY REMAPPING" : "P2: ARROWS + NUMPAD OR GAMEPAD 2",
+    "P OR ESC RESUMES    LIGHT > HEAVY > SPECIAL > SUPER"
   ];
-  moves.forEach((line, index) => ctx.fillText(line, 430, 374 + index * 28));
+  moves.forEach((line, index) => ctx.fillText(line, 414, 326 + index * 27));
+  drawMenuButton(ctx, 454, 484, 172, 48, "RESUME");
+  drawMenuButton(ctx, 654, 484, 172, 48, "CONTROLS");
+  drawMenuButton(ctx, 454, 540, 172, 48, "RESTART");
+  drawMenuButton(ctx, 654, 540, 172, 48, "TITLE");
   ctx.restore();
 };
 

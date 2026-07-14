@@ -2707,6 +2707,31 @@ canvas {
   }
 }
 
+@media (max-width: 900px), (pointer: coarse) {
+  .studio-cinematic-backdrop,
+  .studio-cinematic-backdrop::after {
+    opacity: 0.45;
+    filter: none;
+    animation: none !important;
+  }
+
+  .top-shell,
+  .top-shell-body,
+  .tabs.ultra-left-dock,
+  .studio-bottom-status,
+  .panel,
+  .card {
+    backdrop-filter: none !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.34);
+  }
+
+  .ultra-waveform-rail span,
+  .top-shell::before,
+  .top-shell::after {
+    animation: none !important;
+  }
+}
+
 @media (max-width: 1180px) {
   .top-shell-body {
     grid-template-columns: minmax(120px, 148px) minmax(0, 1fr);

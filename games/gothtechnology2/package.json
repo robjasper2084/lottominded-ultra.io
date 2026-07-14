@@ -1,0 +1,19 @@
+{
+  "name": "gothtechnology-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "check:assets": "node scripts/validate-assets.mjs",
+    "check": "npm run check:syntax && npm run check:assets",
+    "test": "npm run test:unit",
+    "test:unit": "node --test tests/gameplay.test.js",
+    "test:unit:ci": "node --test --test-reporter=junit --test-reporter-destination=output/test-results/unit.xml tests/gameplay.test.js",
+    "test:browser": "node node_modules/playwright/cli.js test",
+    "ci": "npm run check && npm run test:unit && npm run test:browser"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1"
+  }
+}

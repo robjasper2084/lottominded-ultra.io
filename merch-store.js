@@ -7,9 +7,14 @@ const cartNote = document.querySelector("[data-cart-note]");
 const merchSoundCard = document.querySelector("[data-merch-sound-card]");
 const merchSoundVideo = document.querySelector("[data-merch-sound-video]");
 const merchSoundToggle = document.querySelector("[data-merch-sound-toggle]");
+const merchShadowPopup = document.querySelector("[data-merch-shadow-popup]");
+const merchShadowFrame = document.querySelector("[data-merch-shadow-frame]");
+const merchShadowCloseButtons = document.querySelectorAll("[data-merch-shadow-close]");
 let merchHeroVideo = document.querySelector(".merch-hero-video");
 let merchHeroSoundToggle = document.querySelector("[data-merch-hero-sound-toggle]");
 const CART_STORAGE_KEY = "lottomind.merch.cart.v1";
+const MERCH_SHADOW_AUTO_DELAY = 90000;
+const MERCH_SHADOW_AUTO_KEY = "lottomind.merch.shadowAutoShown.v1";
 let merchHeroToggleAt = 0;
 
 function loadCart() {
@@ -34,6 +39,42 @@ function getMerchHeroSoundToggle() {
     merchHeroSoundToggle = document.querySelector("[data-merch-hero-sound-toggle]");
   }
   return merchHeroSoundToggle;
+}
+
+function primeMerchHeroBackgroundVideo() {
+  const video = getMerchHeroVideo();
+  if (!video) return;
+  const source = video.querySelector("source");
+  const heroSource =
+    source?.getAttribute("src") ||
+    source?.dataset.src ||
+    source?.dataset.lmLazySrc ||
+    video.dataset.src ||
+    video.dataset.lmLazySrc ||
+    "./assets/merch/merch-motion-01.opt.mp4";
+
+  video.dataset.lmVideoUnmanaged = "true";
+  video.muted = true;
+  video.defaultMuted = true;
+  video.loop = true;
+  video.playsInline = true;
+  video.setAttribute("muted", "");
+  video.setAttribute("loop", "");
+  video.setAttribute("playsinline", "");
+  video.preload = "metadata";
+  video.setAttribute("preload", "metadata");
+
+  if (source && heroSource && !source.getAttribute("src")) {
+    source.setAttribute("src", heroSource);
+    video.load?.();
+  } else if (heroSource && !video.currentSrc && !video.getAttribute("src") && !source) {
+    video.setAttribute("src", heroSource);
+    video.load?.();
+  }
+
+  video.play?.().catch(() => {
+    // Muted hero video is decorative; leave the loaded frame visible if autoplay is blocked.
+  });
 }
 
 function saveCart() {
@@ -180,7 +221,7 @@ async function playMerchHeroSound() {
   if (!video) return;
   pauseMerchIntroAudio(video);
   video.muted = false;
-  video.volume = 0.62;
+  video.volume = 0.3;
   setMerchHeroSoundState(true);
   try {
     await video.play();
@@ -212,7 +253,9 @@ async function playMerchCapsuleSound() {
   resetMerchCapsuleVideo();
   try {
     merchSoundVideo.muted = false;
-    merchSoundVideo.volume = 0.78;
+    merchSoundVideo.defaultMuted = false;
+    merchSoundVideo.removeAttribute("muted");
+    merchSoundVideo.volume = 0.28;
     await merchSoundVideo.play();
     played = true;
   } catch {
@@ -235,6 +278,8 @@ function startMerchCapsuleOnPageOpen() {
   if (!merchSoundVideo) return;
   merchSoundVideo.autoplay = true;
   merchSoundVideo.playsInline = true;
+  merchSoundVideo.setAttribute("autoplay", "");
+  merchSoundVideo.setAttribute("playsinline", "");
   playMerchCapsuleSound();
 }
 
@@ -243,6 +288,50 @@ function pauseMerchCapsuleSound() {
   merchSoundVideo.muted = true;
   merchSoundToggle.textContent = "Play sound";
   merchSoundToggle.classList.remove("is-playing");
+}
+
+function openMerchShadowPopup() {
+  if (!merchShadowPopup) return;
+  if (merchShadowFrame && !merchShadowFrame.getAttribute("src")) {
+    merchShadowFrame.setAttribute("src", merchShadowFrame.dataset.src || "");
+  }
+  merchShadowPopup.classList.remove("is-hidden");
+  merchShadowPopup.setAttribute("aria-hidden", "false");
+  document.body.classList.add("has-merch-shadow-popup");
+}
+
+function closeMerchShadowPopup() {
+  if (!merchShadowPopup) return;
+  merchShadowPopup.classList.add("is-hidden");
+  merchShadowPopup.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("has-merch-shadow-popup");
+  merchShadowFrame?.removeAttribute("src");
+}
+
+function hasAutoShownMerchShadowPopup() {
+  try {
+    return sessionStorage.getItem(MERCH_SHADOW_AUTO_KEY) === "true";
+  } catch {
+    return Boolean(window.__lottomindMerchShadowAutoShown);
+  }
+}
+
+function rememberAutoShownMerchShadowPopup() {
+  window.__lottomindMerchShadowAutoShown = true;
+  try {
+    sessionStorage.setItem(MERCH_SHADOW_AUTO_KEY, "true");
+  } catch {
+    // Session storage may be unavailable in private browser modes.
+  }
+}
+
+function scheduleAutoMerchShadowPopup() {
+  if (!merchShadowPopup || hasAutoShownMerchShadowPopup()) return;
+  window.setTimeout(() => {
+    if (!merchShadowPopup || hasAutoShownMerchShadowPopup() || document.visibilityState === "hidden") return;
+    rememberAutoShownMerchShadowPopup();
+    openMerchShadowPopup();
+  }, MERCH_SHADOW_AUTO_DELAY);
 }
 
 function toggleMerchHeroSound(event) {
@@ -374,8 +463,12 @@ document.addEventListener("click", (event) => {
   }
 });
 
+primeMerchHeroBackgroundVideo();
 bindMerchHeroSoundToggle();
-document.addEventListener("DOMContentLoaded", bindMerchHeroSoundToggle);
+document.addEventListener("DOMContentLoaded", () => {
+  primeMerchHeroBackgroundVideo();
+  bindMerchHeroSoundToggle();
+});
 merchSoundCard?.addEventListener("pointerenter", playMerchCapsuleSound);
 merchSoundVideo?.addEventListener("pointerdown", () => {
   pauseMerchIntroAudio();
@@ -394,7 +487,9 @@ merchSoundVideo?.addEventListener("volumechange", () => {
 });
 
 window.addEventListener("load", () => {
+  primeMerchHeroBackgroundVideo();
   window.setTimeout(startMerchCapsuleOnPageOpen, 180);
+  scheduleAutoMerchShadowPopup();
 });
 
 if (document.readyState === "loading") {
@@ -403,11 +498,26 @@ if (document.readyState === "loading") {
   startMerchCapsuleOnPageOpen();
 }
 
-window.addEventListener("pageshow", startMerchCapsuleOnPageOpen);
+window.addEventListener("pageshow", () => {
+  primeMerchHeroBackgroundVideo();
+  startMerchCapsuleOnPageOpen();
+});
 
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") {
     startMerchCapsuleOnPageOpen();
+  }
+});
+
+merchShadowCloseButtons.forEach((button) => button.addEventListener("click", closeMerchShadowPopup));
+merchShadowPopup?.addEventListener("click", (event) => {
+  if (event.target === merchShadowPopup) {
+    closeMerchShadowPopup();
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !merchShadowPopup?.classList.contains("is-hidden")) {
+    closeMerchShadowPopup();
   }
 });
 

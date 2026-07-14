@@ -1,0 +1,17 @@
+{
+  "source": "assets\\mission\\higgsfield_fx_repair_source_20260624.jpeg",
+  "outputs": {
+    "alpha": "assets\\mission\\higgsfield_fx_repair_alpha_20260624.png",
+    "runtime": "assets\\mission\\higgsfield_fx_repair_runtime_v1.png"
+  },
+  "audit": {
+    "path": "assets\\mission\\higgsfield_fx_repair_runtime_v1.png",
+    "size": [
+      1280,
+      1024
+    ],
+    "empty": [],
+    "clipped": [],
+    "green_pixels": 11
+  }
+}

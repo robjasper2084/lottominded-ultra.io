@@ -7,8 +7,8 @@
     <title>2084 Static Wave - LottoMind</title>
     <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
     <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
-    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" as="image" />
-    <link rel="stylesheet" href="./styles.css?v=top-scores-center-1" />
+    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" as="image" />
+    <link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-20" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -75,7 +75,7 @@
         </div>
         <div id="marqueeMotion" aria-hidden="true">
           <canvas id="marqueeFx" width="1280" height="720"></canvas>
-          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.png?v=gameplay-keyart-restored-1" alt="" />
+          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" alt="" />
           <span class="marquee-status">Signal Ready</span>
         </div>
         <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
@@ -86,13 +86,6 @@
         <h1 id="overlayTitle"></h1>
         <p id="overlayCopy"></p>
         <div id="overlayStats" hidden></div>
-        <section id="scoreboardPanel" class="scoreboard-panel" aria-labelledby="scoreboardTitle" hidden>
-          <div class="scoreboard-header">
-            <span id="scoreboardTitle"></span>
-            <small id="scoreboardNote"></small>
-          </div>
-          <ol id="scoreboardList" class="scoreboard-list"></ol>
-        </section>
         <div id="playerChooser" class="player-chooser" aria-label="Player count"></div>
         <p id="controlsHint" class="controls-hint"></p>
         <div class="overlay-actions">
@@ -117,7 +110,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=top-scores-1"></script>
+    <script type="module" src="./src/game.js?v=fullscreen-button-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

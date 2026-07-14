@@ -1,10 +1,11 @@
 import { rectsOverlap } from "../engine/math.js";
 import { ATTACKS } from "../config/moves.js?v=fighter-prop1";
 import { FloatingText, SpriteEffect } from "./effects.js";
+import { registerAttackHit, sliceAttackForHit } from "./hits.js";
 
 export function resolveMelee(attacker, defender, game) {
   const attackState = attacker.currentAttack;
-  if (!attackState || attackState.hitTargets.has(defender.id) || defender.invulnerable > 0 || defender.isKO) return;
+  if (!attackState || defender.invulnerable > 0 || defender.isKO) return;
   const attack = attackState.data;
   if (!attack.active) return;
   const elapsed = attackState.elapsed;
@@ -12,7 +13,8 @@ export function resolveMelee(attacker, defender, game) {
   const box = attacker.getAttackBox();
   if (!box || !rectsOverlap(box, defender.hurtbox)) return;
   if (attackState.name === "throw" && Math.abs(attacker.x - defender.x) > 76) return;
-  attackState.hitTargets.add(defender.id);
+  const hit = registerAttackHit(attackState, defender.id, attack, elapsed);
+  if (!hit) return;
   if (attackState.name === "throw" && defender.throwTechTimer > 0) {
     attacker.currentAttack = null;
     defender.currentAttack = null;
@@ -24,11 +26,13 @@ export function resolveMelee(attacker, defender, game) {
     game.audio.beep("block");
     return;
   }
-  game.resolveIncomingHit(attacker, defender, attack, {
+  game.resolveIncomingHit(attacker, defender, sliceAttackForHit(attack, hit.hitIndex), {
     box,
     projectile: false,
     level: attack.level,
-    sourceName: attackState.name
+    sourceName: attackState.name,
+    hitIndex: hit.hitIndex,
+    maxHits: hit.maxHits
   });
 }
 

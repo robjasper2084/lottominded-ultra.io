@@ -117,7 +117,8 @@ export const ATTACKS = {
     y: -122,
     knockback: 230,
     level: "mid",
-    multiHit: 2
+    multiHit: 2,
+    hitInterval: 0.09
   },
   combo2: {
     motion: "COMBO_2",
@@ -135,7 +136,8 @@ export const ATTACKS = {
     y: -126,
     knockback: 280,
     level: "mid",
-    multiHit: 2
+    multiHit: 2,
+    hitInterval: 0.1
   },
   throw: {
     motion: "THROW_GRAB",
@@ -184,7 +186,8 @@ export const ATTACKS = {
     blockstun: 0.5,
     knockback: 520,
     level: "mid",
-    multiHit: 3
+    multiHit: 3,
+    hitInterval: 0.075
   }
 };
 

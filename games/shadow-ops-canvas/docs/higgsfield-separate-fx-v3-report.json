@@ -1,0 +1,167 @@
+{
+  "base_sheet": "assets\\mission\\higgsfield_separate_fx_repair_runtime_v2.png",
+  "output_sheet": "assets\\mission\\higgsfield_separate_fx_repair_runtime_v3.png",
+  "preview": "docs\\higgsfield-separate-fx-v3-preview.png",
+  "frames": [
+    {
+      "frame": 2,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        223,
+        372,
+        815,
+        664
+      ],
+      "cell_content_size": [
+        212,
+        105
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_02_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_02.png"
+    },
+    {
+      "frame": 3,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        142,
+        239,
+        898,
+        797
+      ],
+      "cell_content_size": [
+        212,
+        156
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_03_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_03.png"
+    },
+    {
+      "frame": 4,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        78,
+        347,
+        940,
+        679
+      ],
+      "cell_content_size": [
+        212,
+        82
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_04_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_04.png"
+    },
+    {
+      "frame": 5,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        245,
+        375,
+        780,
+        649
+      ],
+      "cell_content_size": [
+        212,
+        109
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_05_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_05.png"
+    },
+    {
+      "frame": 6,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        304,
+        302,
+        741,
+        722
+      ],
+      "cell_content_size": [
+        212,
+        204
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_06_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_06.png"
+    },
+    {
+      "frame": 17,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        70,
+        341,
+        961,
+        740
+      ],
+      "cell_content_size": [
+        212,
+        95
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_17_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_17.png"
+    },
+    {
+      "frame": 18,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        128,
+        374,
+        896,
+        650
+      ],
+      "cell_content_size": [
+        212,
+        76
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_18_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_18.png"
+    },
+    {
+      "frame": 19,
+      "source_size": [
+        1024,
+        1024
+      ],
+      "bbox": [
+        123,
+        412,
+        899,
+        612
+      ],
+      "cell_content_size": [
+        212,
+        55
+      ],
+      "touches_source_edge": false,
+      "source": "assets\\mission\\higgsfield_separate_cell_sources\\frame_19_source_higgsfield_20260624.jpeg",
+      "output": "assets\\mission\\higgsfield_separate_fx_cells\\frame_19.png"
+    }
+  ]
+}

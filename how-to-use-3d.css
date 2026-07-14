@@ -1,0 +1,344 @@
+:root {
+  --guide-3d-cyan: #21f7ff;
+  --guide-3d-mint: #8effd4;
+  --guide-3d-gold: #f8d96b;
+  --guide-3d-ink: #02070d;
+  --guide-3d-blue: #031932;
+  --guide-pointer-x: 0.5;
+  --guide-pointer-y: 0.42;
+  --guide-scroll: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.home-page.has-sphere-header {
+  background:
+    radial-gradient(circle at calc(var(--guide-pointer-x) * 100%) calc(var(--guide-pointer-y) * 100%), rgba(33, 247, 255, 0.12), transparent 28rem),
+    radial-gradient(circle at 50% 18%, rgba(248, 217, 107, 0.08), transparent 30rem),
+    linear-gradient(180deg, #010409 0%, #03101f 48%, #010307 100%) !important;
+  overflow-x: hidden;
+}
+
+body.home-page.has-sphere-header main,
+body.home-page.has-sphere-header footer,
+body.home-page.has-sphere-header .home-signal-marquee {
+  position: relative;
+  z-index: 4;
+}
+
+.guide-3d-world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  perspective: 1100px;
+  transform-style: preserve-3d;
+  contain: layout paint style;
+}
+
+.guide-3d-world::before,
+.guide-3d-world::after {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  transform: translate3d(
+    calc((var(--guide-pointer-x) - 0.5) * -34px),
+    calc((var(--guide-pointer-y) - 0.5) * -28px),
+    -180px
+  );
+  background:
+    radial-gradient(circle at 22% 26%, rgba(33, 247, 255, 0.22), transparent 18rem),
+    radial-gradient(circle at 76% 38%, rgba(142, 255, 212, 0.14), transparent 20rem),
+    radial-gradient(circle at 48% 72%, rgba(248, 217, 107, 0.12), transparent 24rem);
+  filter: blur(8px);
+  opacity: 0.85;
+  will-change: transform;
+}
+
+.guide-3d-world::after {
+  inset: 0;
+  transform: translateZ(-340px) rotateX(62deg) scale(1.2);
+  transform-origin: center bottom;
+  background-image:
+    linear-gradient(rgba(33, 247, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 247, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(115deg, rgba(248, 217, 107, 0.08), transparent 38%);
+  background-size: 56px 56px, 56px 56px, 100% 100%;
+  opacity: 0.58;
+  filter: none;
+}
+
+.guide-3d-depth-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 49%, rgba(33, 247, 255, 0.1) 49% 51%, transparent 51%),
+    radial-gradient(ellipse at center, transparent 24%, rgba(1, 4, 9, 0.34) 68%, rgba(1, 4, 9, 0.92) 100%);
+  background-size: 100% 100%;
+  opacity: 0.7;
+}
+
+.guide-3d-orb {
+  position: absolute;
+  left: 50%;
+  top: clamp(15rem, 46vh, 34rem);
+  width: clamp(12rem, 23vw, 23rem);
+  aspect-ratio: 1;
+  border-radius: 999px;
+  transform:
+    translate3d(-50%, -50%, 0)
+    rotateX(calc((var(--guide-pointer-y) - 0.5) * -18deg))
+    rotateY(calc((var(--guide-pointer-x) - 0.5) * 22deg))
+    translateY(calc(var(--guide-scroll) * -0.045px));
+  background:
+    radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.9), rgba(248, 217, 107, 0.4) 16%, transparent 30%),
+    url("./assets/brand/guide-jazz-network-gold-orb.jpeg") center / cover no-repeat;
+  box-shadow:
+    0 0 0 1px rgba(248, 217, 107, 0.34),
+    0 0 48px rgba(33, 247, 255, 0.26),
+    0 0 96px rgba(248, 217, 107, 0.16);
+  opacity: 0.42;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+.guide-3d-orb-core,
+.guide-3d-orb-ring,
+.guide-3d-orb-signal {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.guide-3d-orb-ring {
+  border: 2px solid rgba(33, 247, 255, 0.64);
+  box-shadow: inset 0 0 36px rgba(33, 247, 255, 0.24);
+  transform: scale(1.08);
+}
+
+.guide-3d-orb-signal {
+  inset: 9%;
+  border: 1px solid rgba(142, 255, 212, 0.42);
+  animation: guideOrbSpin 18s linear infinite;
+}
+
+.guide-3d-orb.is-pulsing .guide-3d-orb-ring {
+  animation: guideOrbPulse 720ms ease-out;
+}
+
+.guide-3d-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.guide-3d-particle {
+  position: absolute;
+  left: calc(var(--x) * 1px);
+  top: calc(var(--y) * 1px);
+  width: 0.45rem;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: var(--guide-3d-gold);
+  box-shadow: 0 0 16px rgba(33, 247, 255, 0.7);
+  animation: guideParticle 860ms ease-out forwards;
+}
+
+.guide-3d-toggle {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  top: clamp(5.4rem, 10vh, 7.25rem);
+  z-index: 8;
+  min-height: 2.45rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(33, 247, 255, 0.62);
+  border-radius: 999px;
+  color: #effffb;
+  font: 800 0.72rem/1.1 system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background:
+    linear-gradient(180deg, rgba(142, 255, 212, 0.22), rgba(2, 10, 20, 0.92)),
+    rgba(2, 10, 20, 0.8);
+  box-shadow: 0 0.35rem 0 rgba(0, 0, 0, 0.45), 0 0 22px rgba(33, 247, 255, 0.22);
+  cursor: pointer;
+}
+
+.guide-3d-toggle[aria-pressed="false"] {
+  color: rgba(238, 255, 251, 0.78);
+  border-color: rgba(248, 217, 107, 0.45);
+  background: linear-gradient(180deg, rgba(248, 217, 107, 0.18), rgba(2, 10, 20, 0.94));
+}
+
+.guide-3d-toggle:hover,
+.guide-3d-toggle:focus-visible {
+  transform: translateY(-2px);
+  outline: 2px solid rgba(142, 255, 212, 0.72);
+  outline-offset: 3px;
+}
+
+.guide-3d-toggle:active {
+  transform: translateY(2px);
+}
+
+.guide-step-paths {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.guide-step-paths path {
+  fill: none;
+  stroke: rgba(33, 247, 255, 0.44);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 9 14;
+  filter: drop-shadow(0 0 8px rgba(33, 247, 255, 0.6));
+  animation: guideEnergyFlow 4.8s linear infinite;
+}
+
+.steps.has-guide-step-paths {
+  position: relative;
+  isolation: isolate;
+  perspective: 900px;
+}
+
+.steps.has-guide-step-paths .step-card {
+  position: relative;
+  z-index: 1;
+}
+
+.step-card,
+.manual-card,
+.hero-card,
+.faq details,
+.warning {
+  transform-style: preserve-3d;
+  transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.step-card[data-guide-tilt],
+.manual-card[data-guide-tilt],
+.hero-card[data-guide-tilt],
+.faq details[data-guide-tilt],
+.warning[data-guide-tilt] {
+  transform:
+    perspective(900px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    translateZ(var(--tilt-z, 0));
+}
+
+.step-card[data-guide-tilt]:hover,
+.manual-card[data-guide-tilt]:hover,
+.hero-card[data-guide-tilt]:hover,
+.faq details[data-guide-tilt]:hover,
+.warning[data-guide-tilt]:hover {
+  --tilt-z: 12px;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.38), 0 0 34px rgba(33, 247, 255, 0.14);
+  border-color: rgba(142, 255, 212, 0.58);
+}
+
+body.has-guide-game-bg .guide-puck-field,
+.guide-puck-field {
+  display: none !important;
+}
+
+.guide-game-vignette {
+  z-index: 1;
+  pointer-events: none;
+}
+
+#featureRaytraceGame.guide-pong-background {
+  opacity: 0.18 !important;
+  filter: saturate(0.85) brightness(0.8);
+}
+
+main .section {
+  backdrop-filter: blur(2px);
+}
+
+@keyframes guideOrbSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes guideOrbPulse {
+  0% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+@keyframes guideParticle {
+  to {
+    transform: translate(calc(var(--dx) * 1px), calc(var(--dy) * 1px)) scale(0.18);
+    opacity: 0;
+  }
+}
+
+@keyframes guideEnergyFlow {
+  to {
+    stroke-dashoffset: -92;
+  }
+}
+
+body.guide-3d-paused .guide-3d-orb,
+body.guide-3d-paused .guide-3d-orb-signal,
+body.guide-3d-paused .guide-step-paths path {
+  animation-play-state: paused !important;
+}
+
+body.guide-3d-paused .guide-3d-orb {
+  transform: translate3d(-50%, -50%, 0);
+}
+
+@media (max-width: 720px) {
+  .guide-3d-orb {
+    top: 42vh;
+    width: clamp(10rem, 54vw, 17rem);
+    opacity: 0.32;
+  }
+
+  .guide-3d-toggle {
+    top: auto;
+    right: 1rem;
+    bottom: 5.2rem;
+    font-size: 0.66rem;
+  }
+
+  main .section {
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .guide-3d-world *,
+  .guide-step-paths path,
+  .step-card,
+  .manual-card,
+  .hero-card,
+  .faq details,
+  .warning {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .guide-3d-orb {
+    opacity: 0.22;
+    transform: translate3d(-50%, -50%, 0) !important;
+  }
+}

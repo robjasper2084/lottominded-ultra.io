@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <title>ROBOT RAHBE</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./style.css?v=title-cinematic-1" />
+  </head>
+  <body class="is-title-mode">
+    <main class="game-shell" aria-label="ROBOT RAHBE browser game">
+      <canvas id="game" width="1280" height="720" aria-label="ROBOT RAHBE playfield"></canvas>
+
+      <section id="titleScreen" class="screen screen--title">
+        <div id="startupScene" aria-hidden="true">
+          <canvas id="startup3dCanvas" width="1280" height="720"></canvas>
+          <div class="startup-scene-layer startup-scene-far"></div>
+          <div class="startup-scene-layer startup-scene-mid"></div>
+          <div class="startup-scene-layer startup-scene-emissive"></div>
+          <div class="startup-scene-layer startup-scene-fog"></div>
+          <div class="startup-scene-layer startup-scene-rails"></div>
+          <div class="startup-scene-layer startup-scene-mask"></div>
+        </div>
+        <div class="title-copy">
+          <p class="small-label">Lil-Man Presents</p>
+          <h1>ROBOT RAHBE</h1>
+          <figure class="title-product-card title-product-card--gameplay" aria-label="Robot Rahbe gameplay key art">
+            <img src="./assets/backgrounds/robot-rahbe-title-keyart-cinematic-v3.png?v=title-cinematic-1" alt="" />
+            <figcaption>Gameplay key art</figcaption>
+          </figure>
+          <p class="screen-copy">Break three number vaults, claim each key set, defeat every boss, and turn your run stats into a final lottery drop.</p>
+          <div class="button-row">
+            <button class="primary" data-action="start-solo">Solo Run</button>
+            <button data-action="start-two-player">2 Player Run</button>
+            <button data-action="start-coop">2 Player Co-op</button>
+            <button data-action="purchase">Buy Collectible</button>
+            <button data-action="settings">Settings</button>
+          </div>
+          <p class="control-strip" aria-label="Player one controls: W A S D to move, Space to jump, J to fire, K to dash, and L for overdrive.">
+            <span class="control-player">P1</span>
+            <span class="wasd-keypad" aria-hidden="true">
+              <kbd class="control-key control-key--w">W</kbd>
+              <kbd class="control-key">A</kbd>
+              <kbd class="control-key">S</kbd>
+              <kbd class="control-key">D</kbd>
+            </span>
+            <kbd class="control-key control-key--wide" title="Jump">SPACE</kbd>
+            <kbd class="control-key" title="Fire">J</kbd>
+            <kbd class="control-key" title="Dash">K</kbd>
+            <kbd class="control-key" title="Overdrive">L</kbd>
+          </p>
+        </div>
+      </section>
+
+      <section id="purchaseScreen" class="screen screen--purchase is-hidden">
+        <div class="screen-panel purchase-panel">
+          <div class="purchase-copy">
+            <p class="small-label">Collectible Drop</p>
+            <h2>Robot Rahbe Keychain</h2>
+            <p class="screen-copy">Open the merch vault to view the LottoMind collectible keychain and add it from the store page.</p>
+            <div class="button-row">
+              <a class="button-link primary" href="../../merch-store.html#keychains" target="_blank" rel="noopener">Open Store</a>
+              <button data-action="close-purchase">Back</button>
+            </div>
+          </div>
+          <figure class="purchase-product-card" aria-label="LottoMind collectible keychain package">
+            <img src="../../assets/merch/lottomind-keychain-counter-display.webp" alt="" />
+          </figure>
+        </div>
+      </section>
+
+      <section id="pauseScreen" class="screen screen--pause is-hidden">
+        <div class="screen-panel">
+          <p class="small-label">Paused</p>
+          <h2>Vault Link Held</h2>
+          <p class="screen-copy">The run is frozen at the current checkpoint.</p>
+          <div class="button-row">
+            <button class="primary" data-action="resume">Resume</button>
+            <button data-action="restart">Restart</button>
+            <button data-action="settings">Settings</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsScreen" class="screen screen--settings is-hidden">
+        <div class="screen-panel">
+          <p class="small-label">Settings</p>
+          <h2>Field Console</h2>
+          <label class="toggle-row">
+            <span>Sound FX</span>
+            <input id="soundToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Pulse Music</span>
+            <input id="musicToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Reduced Motion</span>
+            <input id="motionToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Reduced Camera Shake</span>
+            <input id="shakeToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>High Contrast Shots</span>
+            <input id="contrastToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Touch Controls</span>
+            <input id="touchToggle" type="checkbox" />
+          </label>
+          <label class="toggle-row">
+            <span>Difficulty</span>
+            <select id="difficultySelect" aria-label="Difficulty">
+              <option value="casual">Casual</option>
+              <option value="arcade">Arcade</option>
+              <option value="hardcore">Hardcore</option>
+            </select>
+          </label>
+          <div class="button-row">
+            <button class="primary" data-action="close-settings">Done</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="resultsScreen" class="screen screen--results is-hidden">
+        <div class="screen-panel results-panel">
+          <p id="resultKicker" class="small-label">Run Complete</p>
+          <h2 id="resultTitle">Extraction Clear</h2>
+          <p id="resultCopy" class="screen-copy">The signal core is secured.</p>
+          <div class="result-grid">
+            <span>Score <strong id="resultScore">0</strong></span>
+            <span>Time <strong id="resultTime">00:00</strong></span>
+            <span>Kills <strong id="resultKills">0</strong></span>
+            <span>Accuracy <strong id="resultAccuracy">0%</strong></span>
+            <span>Damage <strong id="resultDamage">0</strong></span>
+            <span>Max Combo <strong id="resultCombo">0</strong></span>
+            <span>Rank <strong id="resultRank">C</strong></span>
+            <span>Best <strong id="resultBest">0</strong></span>
+          </div>
+          <div class="lottery-panel" aria-label="Generated lottery numbers">
+            <div class="lottery-panel__header">
+              <span id="resultLotteryLevel">Level 1 Vault Drop</span>
+              <strong id="resultLotterySeed">DROP 0000</strong>
+            </div>
+            <div class="lottery-row">
+              <span>Pick 3</span>
+              <strong id="resultPick3">000</strong>
+            </div>
+            <div class="lottery-row">
+              <span>Pick 4</span>
+              <strong id="resultPick4">0000</strong>
+            </div>
+            <div class="lottery-row lottery-row--wide">
+              <span>Pick 6 Mega</span>
+              <strong id="resultLotto6">-- -- -- -- -- + --</strong>
+            </div>
+            <p class="lottery-disclaimer">Beat2Lotto and LottoMind are entertainment and creative number-generation tools. Generated numbers do not predict or guarantee lottery results.</p>
+            <details class="lottery-drops">
+              <summary>Run Lottery Drops</summary>
+              <div id="runLotteryDrops" class="lottery-drops__list"></div>
+            </details>
+          </div>
+          <div class="button-row">
+            <button class="primary" data-action="restart">Replay</button>
+            <button data-action="copy-all-lottery">Copy All Drops</button>
+            <div class="result-share">
+              <button id="shareResultButton" type="button" data-action="share-result" aria-expanded="false" aria-controls="resultShareMenu">Share Result</button>
+              <div id="resultShareMenu" class="result-share__menu" role="group" aria-label="Share result" hidden>
+                <button type="button" data-share-platform="facebook">Facebook</button>
+                <button type="button" data-share-platform="instagram">Instagram</button>
+                <button type="button" data-share-platform="x">X</button>
+              </div>
+              <span id="resultShareStatus" class="result-share__status" aria-live="polite"></span>
+            </div>
+            <button data-action="title">Title</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="lotteryTerminalScreen" class="screen screen--lottery is-hidden" aria-labelledby="lotteryTerminalTitle">
+        <div class="screen-panel lottery-terminal-panel" role="dialog" aria-modal="true">
+          <p class="small-label">Vault Reward</p>
+          <h2 id="lotteryTerminalTitle">Lottery Number Terminal</h2>
+          <p id="lotteryTerminalStatus" class="screen-copy">Level reward ready.</p>
+          <div id="lotteryTicket" class="lottery-ticket" aria-live="polite" aria-atomic="true">
+            <div class="lottery-ticket__row">
+              <span>Pick 3</span>
+              <strong id="terminalPick3" aria-label="Pick 3 number">---</strong>
+            </div>
+            <div class="lottery-ticket__row">
+              <span>Pick 4</span>
+              <strong id="terminalPick4" aria-label="Pick 4 number">----</strong>
+            </div>
+            <div class="lottery-ticket__row">
+              <span>Pick 6 Mega</span>
+              <strong id="terminalPick6" aria-label="Pick 6 Mega numbers">-- -- -- -- -- + --</strong>
+            </div>
+          </div>
+          <div class="terminal-meta">
+            <span id="terminalRerolls">Rerolls 0/2</span>
+            <span>Cost 25 shards</span>
+            <span id="collectorTerminalBadge" class="collector-terminal-badge" hidden>Vault Guardian Series 01</span>
+          </div>
+          <p class="lottery-disclaimer">Beat2Lotto and LottoMind are entertainment and creative number-generation tools. Generated numbers do not predict or guarantee lottery results.</p>
+          <p id="lotteryCopyStatus" class="copy-status" aria-live="polite"></p>
+          <div class="button-row">
+            <button id="generateLotteryButton" class="primary" data-action="generate-lottery">Generate Numbers</button>
+            <button id="premiumLotteryButton" class="premium-lottery-button" type="button" disabled>Premium Convert</button>
+            <button id="copyLotteryButton" data-action="copy-lottery" disabled>Copy</button>
+            <button data-action="close-lottery">Continue</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="hud" class="hud is-hidden" aria-live="polite">
+        <div class="hud-left">
+          <img src="./assets/hero/lottomind-hero-main.png" alt="" class="portrait" />
+          <div>
+            <div id="hudTitle" class="hud-title">ROBOT RAHBE</div>
+            <div id="hpHearts" class="hearts" aria-label="Health"></div>
+            <div class="lives">Lives <span id="livesText">3</span></div>
+          </div>
+        </div>
+        <div class="hud-mid">
+          <span>Level <strong id="levelText">1</strong></span>
+          <span>Score <strong id="scoreText">000000</strong></span>
+          <span id="comboWrap">Combo <strong id="comboText">x0</strong></span>
+          <span>Shards <strong id="shardText">0</strong></span>
+          <span>Keys <strong id="keyText">0/3</strong></span>
+          <span id="dropStatusWrap" class="drop-status is-hidden">Drop <strong id="dropStatusText">READY</strong></span>
+          <span>Weapon <strong id="weaponText">HEART</strong></span>
+        </div>
+        <div class="hud-right">
+          <div class="meter-label">OD</div>
+          <div class="meter"><span id="overdriveBar"></span></div>
+          <div class="dash-meter" aria-label="Dash cooldown"><span id="dashCooldownBar"></span></div>
+          <button id="pauseButton" class="icon-button pause-icon" aria-label="Pause" data-action="pause"><span aria-hidden="true"></span></button>
+        </div>
+      </div>
+
+      <div id="bossHud" class="boss-hud is-hidden">
+        <span id="bossName">Vault Sentinel</span>
+        <div class="boss-meter"><span id="bossBar"></span></div>
+        <strong id="bossPhase">Phase 1</strong>
+      </div>
+
+      <div id="objectiveChip" class="objective-chip is-hidden">Collect 3 vault keys</div>
+
+      <div id="touchControls" class="touchbar" aria-label="Touch controls">
+        <div class="touch-cluster touch-cluster--move">
+          <button data-touch="left" aria-label="Move left">L</button>
+          <button data-touch="jump" aria-label="Jump">JMP</button>
+          <button data-touch="down" aria-label="Crouch">DUCK</button>
+          <button data-touch="right" aria-label="Move right">R</button>
+        </div>
+        <div class="touch-cluster">
+          <button data-touch="fire" aria-label="Fire">FIRE</button>
+          <button data-touch="dash" aria-label="Dash">DASH</button>
+          <button data-touch="overdrive" aria-label="Overdrive">OD</button>
+          <button id="touchUseButton" class="touch-use is-hidden" data-touch="interact" aria-label="Use terminal">USE</button>
+          <button class="pause-icon" data-touch="pause" aria-label="Pause"><span aria-hidden="true"></span></button>
+        </div>
+      </div>
+    </main>
+    <script src="../../assets/js/lm-game-rewards-sdk.js?v=rewards-sdk-1"></script>
+    <script src="./src/mobile-touch.js?v=full-game-audit-1"></script>
+    <script type="module" src="./src/startup3d.js?v=startup3d-opengw-1"></script>
+  <script src="./src/game.js?v=full-game-audit-1"></script>
+    <script src="./src/brand-title-v2.js?v=title-fit-1"></script>
+  </body>
+</html>

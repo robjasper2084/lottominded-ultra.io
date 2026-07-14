@@ -1,10 +1,11 @@
 export const PACK_ROOT = "assets/GOTHTECHNOLOGY_EXPANDED_SPRITE_PACK_V2";
 export const LOCAL_ROOT = "assets";
+export const MOTION_ASSET_VERSION = "motion-atlas4-repaired";
 
 export const ASSET_URLS = {
-  manifest: `${PACK_ROOT}/manifests/GOTHTECHNOLOGY_expanded_motion_manifest.json`,
+  manifest: `${LOCAL_ROOT}/motion-atlases/motion-atlas-manifest.json?v=${MOTION_ASSET_VERSION}`,
   logo: `${LOCAL_ROOT}/user-title/lottomind-live-logo.png`,
-  titleBackdrop: `${LOCAL_ROOT}/user-title/gothtechnology-cover-start-bg.png`,
+  titleBackdrop: `${LOCAL_ROOT}/user-title/gothtechnology-cover-start-bg.webp?v=${MOTION_ASSET_VERSION}`,
   background: `${LOCAL_ROOT}/user-stage/forest-fight-background.jpg`,
   farTrees: `${PACK_ROOT}/backgrounds/GOTHTECHNOLOGY_PARALLAX_FAR_TREES.png`,
   fog: `${PACK_ROOT}/backgrounds/GOTHTECHNOLOGY_FOG_OVERLAY_TRANSPARENT.png`,
@@ -30,113 +31,7 @@ export const ASSET_URLS = {
   },
   dossiers: {
     vespera: `${LOCAL_ROOT}/user-sheets/vespera-sheet.png`,
-    nocturna: `${LOCAL_ROOT}/user-sheets/nocturna-sheet.png`,
-    malach: `${LOCAL_ROOT}/user-sheets/malach-sheet.png`,
-    morvane: `${LOCAL_ROOT}/user-sheets/morvane-sheet.png`,
-    owl: `${LOCAL_ROOT}/user-sheets/owl-flight-sheet.png`,
-    raven: `${LOCAL_ROOT}/user-sheets/shadow-raven-sheet.png`,
-    wraith: `${LOCAL_ROOT}/user-sheets/wraith-flight-sheet.png`,
-    bats: `${LOCAL_ROOT}/user-sheets/bat-swarm-sheet.png`,
-    effects: `${LOCAL_ROOT}/user-sheets/flying-effects-sheet.png`
-  }
-};
-
-export const SPRITE_OVERRIDES = {
-  KALYX: {
-    image: `${LOCAL_ROOT}/generated-sprites/kalyx-gpt2-motion-atlas.png`,
-    frameWidth: 384,
-    frameHeight: 384,
-    frameDuration: 54,
-    sourceFacing: 1,
-    motions: {
-      IDLE: [0],
-      READY_STANCE: [1, 0],
-      WALK_FORWARD: [0, 2, 0, 2],
-      WALK_BACK: [2, 0, 2, 0],
-      RUN_FORWARD: [2, 5, 2, 6],
-      RUN_BACK: [2, 0, 2, 0],
-      DASH_FORWARD: [2, 6, 5],
-      DASH_BACK: [2, 0, 1],
-      JUMP_START: [2],
-      JUMP_RISE: [6],
-      JUMP_PEAK: [6],
-      JUMP_FALL: [6],
-      LANDING: [3, 0],
-      BLOCK_HIGH: [1],
-      BLOCK_LOW: [1],
-      CROUCH_IDLE: [3],
-      CROUCH_WALK: [3, 4],
-      CROUCH_ATTACK: [3, 4, 4, 3],
-      LIGHT_PUNCH: [1, 5, 5, 1],
-      HEAVY_PUNCH: [1, 5, 6, 1],
-      LIGHT_KICK: [6, 6],
-      HEAVY_KICK: [7, 7],
-      AIR_ATTACK: [7, 7],
-      THROW_GRAB: [1, 10, 10],
-      THROW_FINISH: [10, 4, 1],
-      COMBO_1: [1, 5, 6],
-      COMBO_2: [6, 7, 10],
-      SPECIAL_START: [4, 10],
-      SPECIAL_PROJECTILE: [10, 10],
-      SPECIAL_RECOVER: [1],
-      SUPER_CHARGE: [4, 10],
-      SUPER_RELEASE: [9, 10],
-      HURT_LIGHT: [1],
-      HURT_HEAVY: [1],
-      KNOCKDOWN: [3],
-      GET_UP: [3, 1, 0],
-      TAUNT: [1, 0],
-      VICTORY: [0, 1],
-      DEFEAT: [3]
-    }
-  },
-  MASTER_EZRA: {
-    image: `${LOCAL_ROOT}/generated-sprites/ezra-stable-action-atlas.png`,
-    frameWidth: 384,
-    frameHeight: 384,
-    frameDuration: 38,
-    sourceFacing: 1,
-    motions: {
-      IDLE: [0],
-      READY_STANCE: [1, 0],
-      WALK_FORWARD: [2, 3, 4, 5],
-      WALK_BACK: [5, 4, 3, 2],
-      RUN_FORWARD: [2, 4, 5],
-      RUN_BACK: [5, 4, 2],
-      DASH_FORWARD: [4, 5],
-      DASH_BACK: [5, 4],
-      JUMP_START: [2],
-      JUMP_RISE: [13],
-      JUMP_PEAK: [12],
-      JUMP_FALL: [13],
-      LANDING: [6, 0],
-      BLOCK_HIGH: [1],
-      BLOCK_LOW: [6],
-      CROUCH_IDLE: [6],
-      CROUCH_WALK: [6, 7],
-      CROUCH_ATTACK: [6, 7, 7, 6],
-      LIGHT_PUNCH: [8, 9, 8],
-      HEAVY_PUNCH: [8, 10, 11, 10],
-      LIGHT_KICK: [12, 12],
-      HEAVY_KICK: [12, 12],
-      AIR_ATTACK: [12, 12],
-      THROW_GRAB: [15, 15],
-      THROW_FINISH: [15, 7, 0],
-      COMBO_1: [8, 9, 12],
-      COMBO_2: [10, 11, 12],
-      SPECIAL_START: [11, 14],
-      SPECIAL_PROJECTILE: [14, 14],
-      SPECIAL_RECOVER: [11, 0],
-      SUPER_CHARGE: [11, 14],
-      SUPER_RELEASE: [14, 14],
-      HURT_LIGHT: [1],
-      HURT_HEAVY: [1],
-      KNOCKDOWN: [16, 17],
-      GET_UP: [17, 6, 0],
-      TAUNT: [0, 1],
-      VICTORY: [0, 1],
-      DEFEAT: [17]
-    }
+    malach: `${LOCAL_ROOT}/user-sheets/malach-sheet.png`
   }
 };
 
@@ -149,9 +44,9 @@ export const FIGHTERS = {
     spriteFacing: 1,
     palette: "#f0a23b",
     accent: "#ffcf67",
-    scale: 1.56,
-    stableScale: 1.56,
-    spriteFilter: "blur(0.16px) contrast(1.08) saturate(0.9)",
+    scale: 1.34,
+    stableScale: 1.34,
+    spriteFilter: "brightness(1.14) contrast(1.06) saturate(1.04)",
     stageMargin: 196,
     speed: 430,
     runSpeed: 720,
@@ -167,7 +62,9 @@ export const FIGHTERS = {
       groundDecel: 4200,
       airAccel: 1500,
       dashBrake: 2100,
-      landingLag: 0.012
+      runThreshold: 0.24,
+      crouchWalkScale: 0.42,
+      landingLag: 0.12
     },
     maxHealth: 1000,
     attackOverrides: {
@@ -280,9 +177,9 @@ export const FIGHTERS = {
     spriteFacing: 1,
     palette: "#8bd4ff",
     accent: "#d8aa45",
-    scale: 1.24,
-    stableScale: 1.24,
-    spriteFilter: "contrast(1.08) saturate(0.94)",
+    scale: 1.3,
+    stableScale: 1.3,
+    spriteFilter: "brightness(1.04) contrast(1.05) saturate(1)",
     speed: 410,
     runSpeed: 670,
     dashSpeed: 1150,
@@ -297,7 +194,9 @@ export const FIGHTERS = {
       groundDecel: 4000,
       airAccel: 1450,
       dashBrake: 2000,
-      landingLag: 0.012
+      runThreshold: 0.28,
+      crouchWalkScale: 0.4,
+      landingLag: 0.13
     },
     maxHealth: 1060,
     attackOverrides: {
@@ -349,12 +248,6 @@ export const FIGHTERS = {
         knockback: 250,
         level: "high"
       }
-    },
-    motionRemap: {
-      RUN_FORWARD: "WALK_FORWARD",
-      RUN_BACK: "WALK_BACK",
-      DASH_FORWARD: "WALK_FORWARD",
-      DASH_BACK: "WALK_BACK"
     },
     assistNames: ["OWL COMPANION", "ARCANE GUARD"],
     superName: "Sky Judgment",

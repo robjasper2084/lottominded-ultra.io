@@ -98,7 +98,7 @@ function setupFeaturePuckField() {
   if (!field) return;
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const puckSrc = field.dataset.puckSrc || "./assets/brand/lottomind-branded-puck.png";
+  const puckSrc = field.dataset.puckSrc || "./assets/brand/lottomind-branded-puck.webp";
   const puckCount = window.innerWidth < 720 ? 5 : 9;
   const pointer = {
     x: window.innerWidth * 0.5,

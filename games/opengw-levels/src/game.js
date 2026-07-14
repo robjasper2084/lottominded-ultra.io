@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=top-scores-1";
+import { STR } from "../strings.js?v=fullscreen-button-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 
 const WORLD = { w: 1280, h: 720 };
@@ -227,8 +227,6 @@ const RUN_AUDIO_PRELOAD = [
 const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
 const MUTE_STORAGE_KEY = "2084-static-wav-muted-v2";
 const LEGACY_MUTE_STORAGE_KEYS = ["2084-static-wav-muted", "2084-static-wars-muted"];
-const HIGH_SCORE_STORAGE_KEY = "2084-static-wav-top-scores-v1";
-const HIGH_SCORE_LIMIT = 5;
 
 class StaticWarsRenderer {
   constructor(targetCanvas) {
@@ -838,12 +836,6 @@ const overlay = $("overlay");
 const overlayTitle = $("overlayTitle");
 const overlayCopy = $("overlayCopy");
 const overlayStats = $("overlayStats");
-const scoreboard = {
-  panel: $("scoreboardPanel"),
-  title: $("scoreboardTitle"),
-  note: $("scoreboardNote"),
-  list: $("scoreboardList")
-};
 const bannerText = $("bannerText");
 const fxLayer = $("fxLayer");
 const forgeUi = {
@@ -1650,7 +1642,6 @@ function createState() {
     runTime: 0,
     score: 0,
     best: loadBest(),
-    scoreSaved: false,
     playerCount,
     players,
     team: {
@@ -1722,18 +1713,10 @@ async function primary() {
   if (state.status === "menu" || state.status === "gameover" || state.status === "victory") {
     startPending = true;
     updateOverlay();
-    try {
-      await Promise.race([
-        bus.unlock({ refreshLoops: false, allowBackgroundLoad: false }),
-        new Promise((resolve) => window.setTimeout(resolve, 700))
-      ]);
-      await ensureStartupAssetsReady();
-    } catch {
-      // Slow or unsupported media should never trap the player on the launch button.
-    } finally {
-      startPending = false;
-      startRun();
-    }
+    await bus.unlock({ refreshLoops: false, allowBackgroundLoad: false });
+    await Promise.all([ensureVisualAssetsReady(), ensureRunAudioReady()]);
+    startPending = false;
+    startRun();
   } else if (state.status === "paused") {
     bus.unlock();
     setPaused(false);
@@ -1875,9 +1858,14 @@ function updatePlayers(dt, commands) {
     player.x = clamp(player.x, 28, WORLD.w - 28);
     player.y = clamp(player.y, 28, WORLD.h - 28);
 
-    if (command.aim) {
-      player.lastAim = command.aim;
-      player.angle = turnTowardAngle(player.angle, Math.atan2(command.aim.y, command.aim.x), PLAYER_TURN_RATE, dt);
+    let aim = command.aim;
+    if (!aim) {
+      const target = nearestThreat(player.x, player.y);
+      if (target) aim = normalize(target.x - player.x, target.y - player.y);
+    }
+    if (aim) {
+      player.lastAim = aim;
+      player.angle = turnTowardAngle(player.angle, Math.atan2(aim.y, aim.x), PLAYER_TURN_RATE, dt);
     }
     if (command.fire && player.shotTimer <= 0) {
       fireBullet(player, player.lastAim);
@@ -2423,7 +2411,6 @@ function finishRun(status) {
   state.status = status;
   state.best = Math.max(state.best, state.score);
   saveBest(state.best);
-  saveRunScore(status);
   state.banner.timer = 0;
   bus.refreshLoops();
   if (status === "gameover") bus.play("gameOver", 0.4);
@@ -2516,6 +2503,10 @@ function applySquadFallback(commands) {
     const dy = leader.y + slot.y - player.y;
     const follow = Math.hypot(dx, dy) > 16 ? normalize(dx, dy) : null;
     if (follow) command.move = follow;
+    if (leadCommand.fire || leadCommand.aim) {
+      command.aim = leadCommand.aim ?? leader.lastAim;
+      command.fire = leadCommand.fire;
+    }
   }
 }
 
@@ -2629,7 +2620,7 @@ function updateTouchVectors() {
       ? normalize(aimTouch.world.x - state.players[0].x, aimTouch.world.y - state.players[0].y)
       : null;
     input.aimPoint = null;
-    input.aimVector = stickAim ?? worldAim;
+    input.aimVector = stickAim ?? worldAim ?? state.players[0]?.lastAim ?? { x: 0, y: -1 };
   }
   updateTouchUi();
 }
@@ -2707,6 +2698,26 @@ function blackHoleSwallow(well, body, color, count) {
       0.986
     );
   }
+}
+
+function nearestThreat(x, y) {
+  let best = null;
+  let bestD = Infinity;
+  for (const enemy of state.enemies) {
+    const d = distance2({ x, y }, enemy);
+    if (d < bestD) {
+      bestD = d;
+      best = enemy;
+    }
+  }
+  for (const well of state.wells) {
+    const d = distance2({ x, y }, well) * 0.8;
+    if (d < bestD) {
+      bestD = d;
+      best = well;
+    }
+  }
+  return best;
 }
 
 function nearestPlayer(x, y) {
@@ -3511,7 +3522,6 @@ function updateOverlay() {
   } else {
     overlayStats.textContent = "";
   }
-  renderScoreboard();
   updateForgePanels();
 }
 
@@ -3619,21 +3629,9 @@ function ensureVisualAssetsReady() {
   });
 }
 
-function ensureStartupAssetsReady() {
-  const timeout = LOW_POWER_MEDIA.matches ? 5200 : 3200;
-  return Promise.race([
-    Promise.allSettled([ensureVisualAssetsReady(), ensureRunAudioReady()]),
-    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
-  ]);
-}
-
 function ensureRunAudioReady() {
   if (bus.muted) return Promise.resolve([]);
-  const timeout = LOW_POWER_MEDIA.matches ? 4500 : 2400;
-  return Promise.race([
-    Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id))),
-    new Promise((resolve) => window.setTimeout(() => resolve([]), timeout))
-  ]);
+  return Promise.allSettled(RUN_AUDIO_PRELOAD.map((id) => bus.loadBuffer(id)));
 }
 
 function visualAssetsReady() {
@@ -3849,129 +3847,6 @@ function saveBest(value) {
   } catch {
     // Storage can be disabled in privacy modes; the run still plays.
   }
-}
-
-function normalizeHighScore(entry) {
-  if (!entry || typeof entry !== "object") return null;
-  const score = Number(entry.score);
-  if (!Number.isFinite(score) || score <= 0) return null;
-  const players = Math.round(clamp(Number(entry.players) || 1, 1, 4));
-  const level = Math.round(clamp(Number(entry.level) || 1, 1, LEVELS.length));
-  const timestamp = Number(entry.timestamp);
-  return {
-    score: Math.floor(score),
-    players,
-    level,
-    status: typeof entry.status === "string" ? entry.status : "run",
-    timestamp: Number.isFinite(timestamp) ? timestamp : Date.now(),
-    legacy: Boolean(entry.legacy)
-  };
-}
-
-function compareHighScores(a, b) {
-  return b.score - a.score || b.timestamp - a.timestamp;
-}
-
-function loadHighScores() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(HIGH_SCORE_STORAGE_KEY) || "[]");
-    const scores = Array.isArray(parsed) ? parsed.map(normalizeHighScore).filter(Boolean) : [];
-    scores.sort(compareHighScores);
-    if (scores.length > 0) return scores.slice(0, HIGH_SCORE_LIMIT);
-  } catch {
-    // Fall through to the legacy single-score archive if JSON is unavailable.
-  }
-
-  const best = loadBest();
-  if (best > 0) {
-    return [{
-      score: Math.floor(best),
-      players: loadPlayerCount(),
-      level: 1,
-      status: "archive",
-      timestamp: 0,
-      legacy: true
-    }];
-  }
-  return [];
-}
-
-function saveHighScores(scores) {
-  try {
-    localStorage.setItem(HIGH_SCORE_STORAGE_KEY, JSON.stringify(scores.slice(0, HIGH_SCORE_LIMIT)));
-  } catch {
-    // Scores display for the session even if persistent storage is blocked.
-  }
-}
-
-function saveRunScore(status) {
-  if (!state || state.scoreSaved || state.score <= 0) return;
-  state.scoreSaved = true;
-  const currentScores = loadHighScores();
-  const savedScores = currentScores.filter((entry) => !entry.legacy);
-  const legacyBest = currentScores.find((entry) => entry.legacy);
-  if (legacyBest) savedScores.push(legacyBest);
-  savedScores.push({
-    score: Math.floor(state.score),
-    players: state.playerCount,
-    level: Math.min(state.levelIndex + 1, LEVELS.length),
-    status,
-    timestamp: Date.now()
-  });
-  savedScores.sort(compareHighScores);
-  saveHighScores(savedScores);
-}
-
-function formatScoreDate(timestamp) {
-  if (!timestamp) return STR.scoreLegacy;
-  try {
-    return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(new Date(timestamp));
-  } catch {
-    return STR.scoreArchive;
-  }
-}
-
-function renderScoreboard() {
-  if (!scoreboard.panel || !scoreboard.list) return;
-  const active = state.status === "menu" || state.status === "gameover" || state.status === "victory";
-  setRegionAvailability(scoreboard.panel, active, { hide: true });
-  if (!active) return;
-
-  const scores = loadHighScores();
-  if (scoreboard.title) scoreboard.title.textContent = STR.topScores;
-  if (scoreboard.note) {
-    const savedCount = scores.filter((entry) => !entry.legacy).length;
-    scoreboard.note.textContent = savedCount > 0
-      ? `${Math.min(scores.length, HIGH_SCORE_LIMIT)}/${HIGH_SCORE_LIMIT} ${STR.scoreSaved}`
-      : STR.scoreArchive;
-  }
-
-  if (scores.length === 0) {
-    const empty = document.createElement("li");
-    empty.className = "scoreboard-empty";
-    empty.textContent = STR.noScores;
-    scoreboard.list.replaceChildren(empty);
-    return;
-  }
-
-  const rows = scores.slice(0, HIGH_SCORE_LIMIT).map((entry, index) => {
-    const row = document.createElement("li");
-    const rank = document.createElement("span");
-    const value = document.createElement("strong");
-    const details = document.createElement("span");
-    const date = document.createElement("small");
-    rank.className = "score-rank";
-    value.className = "score-value";
-    details.className = "score-meta";
-    date.className = "score-date";
-    rank.textContent = `#${index + 1}`;
-    value.textContent = formatNumber(entry.score);
-    details.textContent = entry.legacy ? STR.scoreLegacy : `${entry.players}P / ${STR.level} ${entry.level}`;
-    date.textContent = entry.legacy ? "" : formatScoreDate(entry.timestamp);
-    row.append(rank, value, details, date);
-    return row;
-  });
-  scoreboard.list.replaceChildren(...rows);
 }
 
 function loadPlayerCount() {

@@ -4,8 +4,8 @@
   const ARRIVAL_KEY = "lmTransitionArriving";
   const THEME_KEY = "lmTransitionTheme";
   const LABEL_KEY = "lmTransitionLabel";
-  const DURATION = 620;
-  const NAVIGATE_AT = 520;
+  const DURATION = 680;
+  const NAVIGATE_AT = 560;
 
   const THEMES = {
     home:       { rgb: "41 247 255",  color: "#29f7ff" },
@@ -23,7 +23,7 @@
   const video = overlay?.querySelector("[data-lm-transition-video]");
   const label = overlay?.querySelector("[data-lm-transition-label]");
 
-  if (!overlay || !video) return;
+  if (!overlay) return;
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const scriptElement =
@@ -59,6 +59,24 @@
     if (!filename || filename === "index.html") return "home";
 
     return "home";
+  }
+
+  function supportsArrivalTransition(pathname) {
+    const path = decodeURIComponent(pathname || "").replace(/\/+$/, "").toLowerCase();
+    const filename = path.split("/").filter(Boolean).pop() || "";
+
+    return (
+      !filename ||
+      filename === "index.html" ||
+      filename === "features-app.html" ||
+      filename === "live-events.html" ||
+      filename === "lottery-spheres.html" ||
+      filename === "beat2lotto-plus.html" ||
+      filename === "memberships.html" ||
+      filename === "merch-store.html" ||
+      filename === "prompt-lab.html" ||
+      filename === "how-to-use.html"
+    );
   }
 
   function clipUrl(theme, phase) {
@@ -136,6 +154,8 @@
   }
 
   function playVideo(theme, phase) {
+    if (!video) return;
+
     const url = clipUrl(theme, phase);
 
     video.preload = "auto";
@@ -179,9 +199,11 @@
     window.clearTimeout(navigationTimer);
     window.clearTimeout(cleanupTimer);
 
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
+    if (video) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
 
     overlay.classList.remove("is-active", "is-opening", "is-closing");
     document.documentElement.classList.remove("lm-transition-arriving");
@@ -232,16 +254,28 @@
     preload(theme, "open", true);
 
     try {
-      sessionStorage.setItem(ARRIVAL_KEY, "yes");
-      sessionStorage.setItem(THEME_KEY, theme);
-      sessionStorage.setItem(LABEL_KEY, destinationLabel);
+      if (supportsArrivalTransition(url.pathname)) {
+        sessionStorage.setItem(ARRIVAL_KEY, "yes");
+        sessionStorage.setItem(THEME_KEY, theme);
+        sessionStorage.setItem(LABEL_KEY, destinationLabel);
+      } else {
+        sessionStorage.removeItem(ARRIVAL_KEY);
+        sessionStorage.removeItem(THEME_KEY);
+        sessionStorage.removeItem(LABEL_KEY);
+      }
     } catch (_) {}
 
     activate(theme, "open", destinationLabel);
 
-    navigationTimer = window.setTimeout(() => {
-      window.location.assign(url.href);
-    }, reduceMotion.matches ? 120 : NAVIGATE_AT);
+    const startNavigationTimer = () => {
+      navigationTimer = window.setTimeout(() => {
+        window.location.assign(url.href);
+      }, reduceMotion.matches ? 90 : NAVIGATE_AT);
+    };
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(startNavigationTimer);
+    });
   }
 
   function playArrival() {
@@ -292,8 +326,14 @@
     if (event.persisted) resetTransition();
   });
 
+  window.addEventListener("pagehide", () => {
+    window.clearTimeout(navigationTimer);
+    window.clearTimeout(cleanupTimer);
+    video?.pause?.();
+  });
+
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && !transitioning) video.pause();
+    if (document.hidden && !transitioning) video?.pause?.();
   });
 
   const schedulePreload = window.requestIdleCallback || ((callback) => setTimeout(callback, 250));

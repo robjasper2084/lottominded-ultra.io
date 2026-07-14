@@ -10,7 +10,8 @@
     <title>LOTTOMINDED ULTRA | Live Events</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=view-mode-toggle-2" />
+    <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/live-events.html" />
+<link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,116 +19,86 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=shadow-ops-popup-2" />
+    <style>
+      .shadow-ops-modal,
+      [data-shadow-ops-modal],
+      .shadow-ops-trigger,
+      [data-shadow-ops-open] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      body.has-shadow-ops-modal,
+      body.has-shadow-ops-frame-expanded {
+        overflow: auto !important;
+      }
+    </style>
+    <script>
+      (() => {
+        const shadowOpsSelector = "[data-shadow-ops-modal], .shadow-ops-modal, [data-shadow-ops-open], .shadow-ops-trigger";
+        const removeShadowOps = () => {
+          document.querySelectorAll(shadowOpsSelector).forEach((element) => element.remove());
+          document.body?.classList.remove("has-shadow-ops-modal", "has-shadow-ops-frame-expanded");
+        };
+
+        const startShadowOpsGuard = () => {
+          removeShadowOps();
+          if (!document.documentElement || !("MutationObserver" in window)) return;
+          new MutationObserver((mutations) => {
+            const hasShadowOpsMutation = mutations.some((mutation) =>
+              Array.from(mutation.addedNodes).some((node) =>
+                node.nodeType === 1 && (node.matches?.(shadowOpsSelector) || node.querySelector?.(shadowOpsSelector))
+              )
+            );
+            if (hasShadowOpsMutation) removeShadowOps();
+          }).observe(document.documentElement, { childList: true, subtree: true });
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", startShadowOpsGuard, { once: true });
+        } else {
+          startShadowOpsGuard();
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-badge-above-player-1" />
+    <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
   </head>
-  <body class="live-events-page lm-live-page">
+  <body class="live-events-page lm-live-page has-sphere-tabs">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
     </div>
-    <aside class="stream-startup-audio is-hidden" data-stream-startup-audio aria-label="Stream startup audio" aria-hidden="true">
-      <div class="stream-startup-audio-panel" role="dialog" aria-modal="true" aria-labelledby="streamStartupTitle">
-        <button class="stream-startup-close" type="button" data-stream-startup-close aria-label="Enter stream without startup music">X</button>
-        <p class="eyebrow">Stream Signal</p>
-        <h2 id="streamStartupTitle">Start Stream Audio.</h2>
-        <p>Tap once to play Verse 1 when the stream page opens.</p>
-        <div class="stream-startup-actions">
-          <button class="primary-action" type="button" data-stream-startup-play>Start Music</button>
-          <button class="secondary-action" type="button" data-stream-startup-close>Enter Muted</button>
-        </div>
-        <p class="stream-startup-status" data-stream-startup-status aria-live="polite"></p>
+    <header class="site-header home-like-header home-sphere-header global-sphere-header sphere-tabs-header" data-site-header>
+      <div class="site-header-main">
+        <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
+          <img src="./assets/brand/lm-orb-mark.webp" alt="" />
+          <span>LOTTOMINDED ULTRA</span>
+        </a>
+        <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-    </aside>
-    <aside class="shadow-ops-modal" data-shadow-ops-modal aria-hidden="true">
-      <div class="shadow-ops-panel" role="dialog" aria-modal="true" aria-labelledby="shadowOpsTitle">
-        <button class="shadow-ops-close" type="button" data-shadow-ops-close aria-label="Close Shadow Ops">X</button>
-        <div class="shadow-ops-game-head">
-          <div>
-            <p class="eyebrow">Game Studio Event Drop</p>
-            <h2 id="shadowOpsTitle">Shadow Ops</h2>
-          </div>
-          <a class="live-btn shadow-ops-popout" href="https://robjasper2084.github.io/Jungle-Lotto/lottominded-ultra.io/games/shadow-ops-canvas/index.html?bg=soul-location-1&amp;v=mission-higgsfield-assets-2" target="_blank" rel="noopener noreferrer">Full Screen</a>
-        </div>
-        <div class="shadow-ops-game-frame">
-          <iframe
-            title="Shadow Ops game"
-            data-shadow-ops-frame
-            data-src="https://robjasper2084.github.io/Jungle-Lotto/lottominded-ultra.io/games/shadow-ops-canvas/index.html?bg=soul-location-1&amp;v=mission-higgsfield-assets-2"
-            loading="lazy"
-            allow="autoplay; fullscreen; gamepad"
-          ></iframe>
-        </div>
-      </div>
-    </aside>
-    <header class="lm-live-topbar" data-live-shell>
-      <a class="lm-live-logo" href="./how-to-use.html" aria-label="LOTTOMINDED ULTRA home">
-        <img src="./assets/live-events/svg/lm-live-logo.svg" alt="" />
-      </a>
-
-      <nav class="lm-live-nav" aria-label="Live events primary navigation">
-        <a href="./how-to-use.html">Home</a>
-        <a href="./features-app.html">Music</a>
-        <a class="is-active" href="./live-events.html">Events</a>
-        <a href="#upcoming">Shows</a>
-        <a href="#community">Community</a>
-        <a href="./merch-store.html">Store</a>
-        <a href="./how-to-use.html">About</a>
+      <nav aria-label="Ultra sphere navigation">
+        <a href="./index.html#top" data-icon="HM">Home</a>
+        <a href="./memberships.html" data-icon="MB">Memberships</a>
+        <a href="./features-app.html" data-icon="FX">Features</a>
+        <a href="./news/" data-icon="NW">News</a>
+        <a class="nav-signal-active" href="./live-events.html" data-icon="EV" aria-current="page">Events</a>
+        <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
+        <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
+        <a href="./merch-store.html" data-icon="DR">Merch</a>
+        <a href="./how-to-use.html" data-icon="GD">Guide</a>
+        <a href="../lotto%20mind%20refined/" data-icon="LM" data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required">LottoMind App</a>
       </nav>
-
-      <form class="lm-live-search" role="search">
-        <label>
-          <span class="sr-only">Search events</span>
-          <input type="search" placeholder="Search events, artists..." />
-        </label>
-      </form>
-
-      <button class="lm-live-bell" type="button" aria-label="Notifications">!</button>
-      <button class="lm-live-profile" type="button">
-        <span class="crown">VIP</span>
-        <span><small>Ultra Member</small><strong>LOTTOMINDED</strong></span>
-      </button>
+      <div class="direct-launch" aria-label="Direct studio launch">
+        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
+      </div>
     </header>
-
-    <section class="lm-synth-rail" aria-label="Playable live instrument navigation" data-live-console>
-      <div class="lm-synth-left">
-        <span>Master Volume</span>
-        <i></i>
-      </div>
-      <div class="lm-synth-tabs" aria-label="Live instrument modes">
-        <button type="button" data-live-mode="synth">Synth</button>
-        <button type="button" class="is-active" data-live-mode="piano">Piano</button>
-        <button type="button" data-live-mode="drums">Drums</button>
-        <button type="button" data-live-mode="bass">Bass</button>
-        <button type="button" data-live-mode="fx">FX</button>
-        <button type="button" data-live-mode="vocals">Vocals</button>
-        <button type="button" data-live-mode="live">Live</button>
-      </div>
-      <div class="lm-mini-piano" aria-label="Playable C minor blues piano" data-live-piano>
-        <button type="button" data-note="C" data-frequency="261.63">C</button>
-        <button type="button" data-note="Eb" data-frequency="311.13">Eb</button>
-        <button type="button" data-note="F" data-frequency="349.23">F</button>
-        <button type="button" data-note="Gb" data-frequency="369.99">Gb</button>
-        <button type="button" data-note="G" data-frequency="392.00">G</button>
-        <button type="button" data-note="Bb" data-frequency="466.16">Bb</button>
-        <button type="button" data-note="C" data-frequency="523.25">C</button>
-        <button type="button" data-note="Eb" data-frequency="622.25">Eb</button>
-        <button type="button" data-note="F" data-frequency="698.46">F</button>
-        <button type="button" data-note="Gb" data-frequency="739.99">Gb</button>
-        <button type="button" data-note="G" data-frequency="783.99">G</button>
-        <button type="button" data-note="Bb" data-frequency="932.33">Bb</button>
-      </div>
-      <div class="lm-synth-knobs" aria-hidden="true">
-        <span>Reverb<i></i></span>
-        <span>Delay<i></i></span>
-        <span>Filter<i></i></span>
-        <span>Drive<i></i></span>
-      </div>
-      <div class="lm-output-meter" aria-hidden="true" data-live-meter><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    </section>
 
     <main class="lm-live-grid">
       <section class="lm-live-hero panel-glow">
@@ -142,7 +113,6 @@
             <a class="live-btn" href="#replays">Replays</a>
             <a class="live-btn" href="./beat2lotto-plus.html#beat2lotto">Beat2Lotto+</a>
             <a class="live-btn" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-            <button class="live-btn shadow-ops-trigger" type="button" data-shadow-ops-open>Shadow Ops</button>
           </div>
         </div>
         <article class="lm-stage-card">
@@ -158,22 +128,31 @@
         </article>
       </section>
 
-      <aside class="lm-community panel-glow" id="community">
-        <header><strong>Ultra Community</strong><span>2,846 online</span></header>
-        <div class="chat-tabs"><a class="is-active" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Twitch Chat</a><a href="#twitch-live">Live Video</a><a href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Channel</a></div>
-        <div class="twitch-chat-frame" aria-label="LottoMinded Twitch live chat">
-          <iframe
-            src="https://www.twitch.tv/embed/lottominded/chat?parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&darkpopout"
-            title="LottoMinded Twitch live chat"
-            loading="lazy"
-          ></iframe>
-          <div class="twitch-chat-fallback">
-            <strong>Twitch chat connected</strong>
-            <span>If chat does not load, open the LottoMinded Twitch page.</span>
-            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch Chat</a>
+      <section class="lm-section panel-glow" id="upcoming">
+        <header class="section-head"><h2>Upcoming Streams</h2><a href="#upcoming">View All</a></header>
+        <article class="twitch-live-card" id="twitch-live" aria-label="LottoMinded Twitch live stream">
+          <div class="twitch-live-copy">
+            <p class="status-live"><span></span>Twitch Live</p>
+            <h3>LottoMinded Channel</h3>
+            <p>Live stream video is connected to the LottoMinded Twitch page. If the player is blocked by Twitch or browser settings, open the channel directly.</p>
+            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch</a>
           </div>
+          <div class="twitch-player-frame">
+            <iframe
+              data-src="https://player.twitch.tv/?channel=lottominded&parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&muted=true"
+              title="LottoMinded Twitch live stream"
+              loading="lazy"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </article>
+        <div class="stream-list">
+          <article><time>May<br /><b>25</b><small>6:00 PM</small></time><span class="mini-thumb video-mini-thumb"><video muted loop playsinline preload="none" aria-label="Retro Waves Live video thumbnail" data-autoplay-on-visible="true"><source data-src="./assets/video/retro-waves-live-thumb.mp4" type="video/mp4" /></video></span><div><h3>Retro Waves Live</h3><p>Synthwave - Live Set</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
+          <article><time>May<br /><b>25</b><small>8:30 PM</small></time><span class="mini-thumb alt"></span><div><h3>The Cosmic Collective</h3><p>Jam Band - Live</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
+          <article><time>May<br /><b>26</b><small>11:00 AM</small></time><span class="mini-thumb gold"></span><div><h3>Creator Economy 2025</h3><p>Conference - Panel</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
         </div>
-      </aside>
+      </section>
 
       <section class="lm-section panel-glow live-ballpass-section" id="featured">
         <canvas class="live-ballpass-field" data-live-ballpass-bg aria-hidden="true"></canvas>
@@ -182,7 +161,7 @@
           <article class="event-card live">
             <div class="thumb video-thumb">
               <iframe
-                src="https://www.youtube-nocookie.com/embed/lZco4lHgIoY?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=lZco4lHgIoY&modestbranding=1&rel=0"
+                data-src="https://www.youtube-nocookie.com/embed/lZco4lHgIoY?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=lZco4lHgIoY&modestbranding=1&rel=0"
                 title="Jazz-Off Detroit M Rabinowitz at Orchestra Hall video thumbnail"
                 loading="lazy"
                 allow="autoplay; encrypted-media; picture-in-picture; web-share"
@@ -195,7 +174,7 @@
           <article class="event-card live">
             <div class="thumb video-thumb">
               <iframe
-                src="https://www.youtube-nocookie.com/embed/6GHATpTBBHc?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=6GHATpTBBHc&modestbranding=1&rel=0"
+                data-src="https://www.youtube-nocookie.com/embed/6GHATpTBBHc?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=6GHATpTBBHc&modestbranding=1&rel=0"
                 title="Jazz-Off Detroit Alex Harding Band video thumbnail"
                 loading="lazy"
                 allow="autoplay; encrypted-media; picture-in-picture; web-share"
@@ -208,7 +187,7 @@
           <article class="event-card live">
             <div class="thumb video-thumb">
               <iframe
-                src="https://www.youtube-nocookie.com/embed/eHU6tov9O3s?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=eHU6tov9O3s&modestbranding=1&rel=0"
+                data-src="https://www.youtube-nocookie.com/embed/eHU6tov9O3s?autoplay=1&mute=1&controls=0&playsinline=1&loop=1&playlist=eHU6tov9O3s&modestbranding=1&rel=0"
                 title="Jazz-Off Detroit Bill Foster Interview video thumbnail"
                 loading="lazy"
                 allow="autoplay; encrypted-media; picture-in-picture; web-share"
@@ -221,31 +200,22 @@
         </div>
       </section>
 
-      <section class="lm-section panel-glow" id="upcoming">
-        <header class="section-head"><h2>Upcoming Streams</h2><a href="#upcoming">View All</a></header>
-        <article class="twitch-live-card" id="twitch-live" aria-label="LottoMinded Twitch live stream">
-          <div class="twitch-live-copy">
-            <p class="status-live"><span></span>Twitch Live</p>
-            <h3>LottoMinded Channel</h3>
-            <p>Live stream video is connected to the LottoMinded Twitch page. If the player is blocked by Twitch or browser settings, open the channel directly.</p>
-            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch</a>
+      <aside class="lm-community panel-glow" id="community">
+        <header><strong>Ultra Community</strong><span>2,846 online</span></header>
+        <div class="chat-tabs"><a class="is-active" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Twitch Chat</a><a href="#twitch-live">Live Video</a><a href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Channel</a></div>
+        <div class="twitch-chat-frame" aria-label="LottoMinded Twitch live chat">
+          <iframe
+            data-src="https://www.twitch.tv/embed/lottominded/chat?parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&darkpopout"
+            title="LottoMinded Twitch live chat"
+            loading="lazy"
+          ></iframe>
+          <div class="twitch-chat-fallback">
+            <strong>Twitch chat connected</strong>
+            <span>If chat does not load, open the LottoMinded Twitch page.</span>
+            <a class="live-btn primary" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Open Twitch Chat</a>
           </div>
-          <div class="twitch-player-frame">
-            <iframe
-              src="https://player.twitch.tv/?channel=lottominded&parent=127.0.0.1&parent=localhost&parent=robjasper2084.github.io&muted=true"
-              title="LottoMinded Twitch live stream"
-              loading="lazy"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowfullscreen
-            ></iframe>
-          </div>
-        </article>
-        <div class="stream-list">
-          <article><time>May<br /><b>25</b><small>6:00 PM</small></time><span class="mini-thumb video-mini-thumb"><video muted autoplay loop playsinline preload="metadata" aria-label="Retro Waves Live video thumbnail"><source src="./assets/video/retro-waves-live-thumb.mp4" type="video/mp4" /></video></span><div><h3>Retro Waves Live</h3><p>Synthwave - Live Set</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
-          <article><time>May<br /><b>25</b><small>8:30 PM</small></time><span class="mini-thumb alt"></span><div><h3>The Cosmic Collective</h3><p>Jam Band - Live</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
-          <article><time>May<br /><b>26</b><small>11:00 AM</small></time><span class="mini-thumb gold"></span><div><h3>Creator Economy 2025</h3><p>Conference - Panel</p></div><a class="twitch-link" href="https://m.twitch.tv/lottominded/home" target="_blank" rel="noopener noreferrer">Watch Twitch</a></article>
         </div>
-      </section>
+      </aside>
 
       <section class="lm-category-grid panel-glow">
         <header class="section-head"><h2>Event Categories</h2><a href="#featured">View All</a></header>
@@ -261,8 +231,8 @@
 
       <section class="lm-spotlight panel-glow">
         <a class="artist-art video-spotlight-link local-video-spotlight" href="./assets/video/luna-vex-spotlight.mp4" target="_blank" rel="noopener noreferrer" aria-label="Watch Luna Vex spotlight video">
-          <video muted autoplay loop playsinline preload="metadata" aria-label="Luna Vex spotlight video">
-            <source src="./assets/video/luna-vex-spotlight.mp4" type="video/mp4" />
+          <video muted loop playsinline preload="none" aria-label="Luna Vex spotlight video" data-autoplay-on-visible="true">
+            <source data-src="./assets/video/luna-vex-spotlight.mp4" type="video/mp4" />
           </video>
         </a>
         <div>
@@ -328,10 +298,10 @@
       <div class="points"><b>Ultra Points</b><strong>12,450</strong><span>Rank Ultra Elite</span></div>
     </footer>
 
-    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=view-mode-toggle-2" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=shadow-ops-popup-2" defer></script>
+<script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+    <script src="./site.js?v=original-page-wipe-3" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=shadow-ops-removed-2" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
   </body>
 </html>

@@ -11,9 +11,9 @@
   */
   const AUDIO_CONFIG = {
     enabled: true,
-    volume: 0.38,
+    volume: 0.16,
     playCloseBeforeNavigate: true,
-    closeDelay: 520,
+    closeDelay: 150,
     playCloseOnArrival: false,
     files: {
       open: "lm-portal-open.mp3",
@@ -98,38 +98,36 @@
 
     const now = context.currentTime + 0.008;
     const isClose = kind === "close";
-    const duration = isClose ? 0.34 : 0.46;
+    const duration = isClose ? 0.28 : 0.34;
     const carrier = context.createOscillator();
     const body = context.createOscillator();
     const filter = context.createBiquadFilter();
     const gain = context.createGain();
 
-    carrier.type = isClose ? "square" : "sawtooth";
-    body.type = "triangle";
-    filter.type = "bandpass";
-    filter.Q.setValueAtTime(isClose ? 9 : 6, now);
+    carrier.type = "sine";
+    body.type = "sine";
+    filter.type = "lowpass";
+    filter.Q.setValueAtTime(1.35, now);
 
     if (isClose) {
-      carrier.frequency.setValueAtTime(940, now);
-      carrier.frequency.exponentialRampToValueAtTime(180, now + duration * 0.68);
-      carrier.frequency.exponentialRampToValueAtTime(92, now + duration);
-      body.frequency.setValueAtTime(170, now);
-      body.frequency.exponentialRampToValueAtTime(58, now + duration);
-      filter.frequency.setValueAtTime(3200, now);
-      filter.frequency.exponentialRampToValueAtTime(620, now + duration);
+      carrier.frequency.setValueAtTime(520, now);
+      carrier.frequency.exponentialRampToValueAtTime(190, now + duration);
+      body.frequency.setValueAtTime(130, now);
+      body.frequency.exponentialRampToValueAtTime(74, now + duration);
+      filter.frequency.setValueAtTime(1600, now);
+      filter.frequency.exponentialRampToValueAtTime(540, now + duration);
     } else {
       carrier.frequency.setValueAtTime(180, now);
-      carrier.frequency.exponentialRampToValueAtTime(920, now + duration * 0.72);
-      carrier.frequency.exponentialRampToValueAtTime(680, now + duration);
-      body.frequency.setValueAtTime(72, now);
-      body.frequency.exponentialRampToValueAtTime(164, now + duration);
-      filter.frequency.setValueAtTime(540, now);
-      filter.frequency.exponentialRampToValueAtTime(3400, now + duration * 0.82);
+      carrier.frequency.exponentialRampToValueAtTime(620, now + duration * 0.82);
+      body.frequency.setValueAtTime(82, now);
+      body.frequency.exponentialRampToValueAtTime(146, now + duration);
+      filter.frequency.setValueAtTime(680, now);
+      filter.frequency.exponentialRampToValueAtTime(1900, now + duration);
     }
 
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * (isClose ? 0.34 : 0.42), now + 0.028);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.18, now + duration * 0.58);
+    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * (isClose ? 0.2 : 0.24), now + 0.028);
+    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.08, now + duration * 0.58);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
     carrier.connect(filter);
@@ -211,9 +209,9 @@
   }
 
   function scheduleCloseBeforeNavigate() {
-    if (!AUDIO_CONFIG.playCloseBeforeNavigate) return 0;
+    if (!AUDIO_CONFIG.playCloseBeforeNavigate || !audioAllowed()) return 0;
     window.setTimeout(() => playSound("close"), AUDIO_CONFIG.closeDelay);
-    return AUDIO_CONFIG.closeDelay + 140;
+    return AUDIO_CONFIG.closeDelay + SOUND_TIMING.close + 20;
   }
 
   function playCloseOnArrival() {

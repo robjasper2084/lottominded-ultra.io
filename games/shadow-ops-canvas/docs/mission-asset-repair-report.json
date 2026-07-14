@@ -1,0 +1,81 @@
+{
+  "source": {
+    "imagegen_world_sheet": "C:\\Users\\digit\\.codex\\generated_images\\019eed4b-0703-7d93-afa9-fe59b16ca221\\ig_00e056fa27cffc88016a3af84b241481909550fccacf8cde9a.png",
+    "shield_robot_green": "C:\\Users\\digit\\.codex\\generated_images\\019eed4b-0703-7d93-afa9-fe59b16ca221\\ig_06dc218f4c47dd95016a3b01a77bd88196b02532ad3f55cc6b.png",
+    "fx_green": "C:\\Users\\digit\\AppData\\Local\\Temp\\codex-clipboard-ce285afd-728e-44f8-a3af-626ac4a3847b.png"
+  },
+  "outputs": {
+    "world": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\chatgpt_world_elements_sheet_runtime.png",
+    "shield_robot": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\chatgpt_shield_robot_mission_strip_runtime_v4.png",
+    "drone_fx": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\chatgpt_drone_fx_strip_runtime_clean.png",
+    "drone_laser": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\characters\\chatgpt_drone_laser_overlay_strip_runtime_clean.png",
+    "gameplay_fx": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\chatgpt_gameplay_fx_sheet_runtime_clean.png",
+    "mission_fx": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\chatgpt_mission_fx_sheet_runtime_clean.png",
+    "collectibles": "C:\\Users\\digit\\Documents\\phone\\lottomind ultra website\\games\\shadow-ops-canvas\\assets\\mission\\mission_collectibles_sheet_clean.png"
+  },
+  "audit": [
+    {
+      "path": "assets\\characters\\chatgpt_shield_robot_mission_strip_runtime_v4.png",
+      "size": [
+        3072,
+        320
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\mission\\chatgpt_drone_fx_strip_runtime_clean.png",
+      "size": [
+        2560,
+        180
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\characters\\chatgpt_drone_laser_overlay_strip_runtime_clean.png",
+      "size": [
+        5120,
+        128
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\mission\\chatgpt_gameplay_fx_sheet_runtime_clean.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\mission\\chatgpt_mission_fx_sheet_runtime_clean.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\mission\\mission_collectibles_sheet_clean.png",
+      "size": [
+        768,
+        384
+      ],
+      "empty": [],
+      "clipped": []
+    },
+    {
+      "path": "assets\\mission\\chatgpt_world_elements_sheet_runtime.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "empty": [],
+      "clipped": []
+    }
+  ]
+}

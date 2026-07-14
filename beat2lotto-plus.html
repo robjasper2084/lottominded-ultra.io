@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Beat2Lotto+ is the current LOTTOMINDED ULTRA creative number signal console with lotto-ball background."
+      content="A dedicated LOTTOMINDED ULTRA gameplay portal for Shadow Ops Canvas inside the Beat2Lotto+ route."
     />
-    <title>Beat2Lotto+ | Current Signal Console</title>
+    <title>Shadow Ops Canvas | Beat2Lotto+</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=view-mode-toggle-2" />
+    <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/beat2lotto-plus.html" />
+<link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
+    <link rel="stylesheet" href="./lottomind-button-assets.css?v=beat2-game-shell-1" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,332 +20,198 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
-    <link rel="stylesheet" href="./beat2lotto-plus.css?v=b2l-player-compact-header-1" />
-    <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-4" />
-    <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-4" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <style>
-      .beat2lotto-current-page {
-        position: relative;
-        isolation: isolate;
-        min-height: 100vh;
-        background:
-          radial-gradient(circle at 16% 14%, rgba(255, 224, 113, 0.18), transparent 18rem),
-          radial-gradient(circle at 88% 20%, rgba(41, 247, 255, 0.16), transparent 20rem),
-          linear-gradient(135deg, #03050a 0%, #061426 48%, #02040a 100%);
-        overflow-x: hidden;
+      :root {
+        color-scheme: dark;
+        --guide-header-height: 9rem;
+        --guide-frame-scale: 1.04;
       }
 
-      #b2lBallpassGame.b2l-game-generator-bg {
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body.beat2lotto-game-page {
+        margin: 0;
+        min-height: 100svh;
+        color: #f5fbff;
+        background:
+          radial-gradient(circle at 18% 6%, rgba(255, 224, 113, 0.16), transparent 19rem),
+          radial-gradient(circle at 88% 14%, rgba(41, 247, 255, 0.16), transparent 24rem),
+          radial-gradient(circle at 50% 106%, rgba(126, 70, 255, 0.16), transparent 32rem),
+          linear-gradient(135deg, #010309 0%, #051528 48%, #010208 100%);
+        overflow: hidden;
+      }
+
+      body.beat2lotto-game-page::before {
+        content: "";
         position: fixed;
         inset: 0;
         z-index: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(rgba(41, 247, 255, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(41, 247, 255, 0.038) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: radial-gradient(circle at 50% 38%, rgba(0, 0, 0, 0.96), transparent 78%);
+      }
+
+      .beat2lotto-game-page .site-header {
+        position: relative;
+        z-index: 20;
+      }
+
+      body.beat2lotto-game-page .beat2-game-shell {
+        position: fixed;
+        inset: var(--guide-header-height) 0 0;
+        z-index: 2;
+        display: block;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #02040a;
+      }
+
+      .beat2-gamebox {
+        position: relative;
         width: 100%;
         height: 100%;
-        background: #03050a;
-        pointer-events: none;
+        min-height: 0;
+        border: 0;
+        border-radius: 0;
+        background: #02040a;
+        box-shadow: none;
+        overflow: hidden;
       }
 
-      .b2l-game-generator-vignette {
-        position: fixed;
+      .beat2-gameframe {
+        display: block;
+        position: absolute;
         inset: 0;
         z-index: 1;
-        pointer-events: none;
-        background:
-          radial-gradient(circle at 50% 32%, rgba(25, 224, 255, 0.13), transparent 28rem),
-          radial-gradient(circle at 76% 72%, rgba(134, 60, 255, 0.12), transparent 23rem),
-          linear-gradient(180deg, rgba(2, 5, 12, 0.2), rgba(2, 5, 12, 0.68));
-        mix-blend-mode: screen;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #02040a;
       }
 
-      .beat2lotto-current-page .home-signal-marquee {
-        position: relative;
-        z-index: 6;
-        margin-top: 0;
-      }
-
-      .beat2lotto-current-main {
-        position: relative;
-        isolation: isolate;
-        z-index: 4;
-        min-height: 100vh;
-        padding: clamp(1rem, 2.5vw, 2rem);
-        overflow: hidden;
-      }
-
-      .b2l-static-balls {
-        position: fixed;
-        inset: 0;
-        z-index: 2;
-        overflow: hidden;
-        pointer-events: none;
-        opacity: 0.72;
-        mix-blend-mode: screen;
-      }
-
-      .b2l-static-balls span {
-        position: absolute;
-        left: var(--x);
-        top: var(--y);
-        width: var(--s);
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-        border-radius: 50%;
-        color: #17202a;
-        font: 900 clamp(0.82rem, 2.1vw, 2.2rem) / 1 var(--font-body, system-ui);
-        background:
-          radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.92) 0 8%, transparent 9% 26%),
-          radial-gradient(circle at 50% 48%, rgba(244, 255, 255, 0.9) 0 24%, rgba(255, 232, 126, 0.92) 25% 48%, rgba(95, 62, 21, 0.9) 100%);
-        box-shadow:
-          inset -0.55rem -0.62rem 0.95rem rgba(15, 7, 0, 0.62),
-          inset 0.32rem 0.22rem 0.5rem rgba(255, 255, 255, 0.38),
-          0 0 2.1rem rgba(255, 224, 113, 0.36);
-        transform: translate(-50%, -50%);
-        animation: b2lBallFloat var(--d, 8s) ease-in-out infinite alternate;
-        animation-delay: var(--delay, 0s);
-      }
-
-      .b2l-static-balls span:nth-child(3n) {
-        filter: hue-rotate(28deg) saturate(1.15);
-      }
-
-      .b2l-static-balls span:nth-child(4n) {
-        opacity: 0.58;
-        filter: hue-rotate(175deg) saturate(1.25);
-      }
-
-      .beat2lotto-current-page .prompt-lab-beat2lotto-top {
-        margin: 0 auto clamp(1.2rem, 3vw, 2.4rem);
-        min-height: calc(100vh - 2rem);
-      }
-
-      .beat2lotto-current-page .prompt-lab-beat2lotto-top::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: -4;
-        background:
-          radial-gradient(circle at 18% 78%, rgba(255, 224, 113, 0.2), transparent 18rem),
-          radial-gradient(circle at 82% 24%, rgba(41, 247, 255, 0.18), transparent 18rem),
-          linear-gradient(135deg, rgba(3, 5, 10, 0.36), rgba(9, 36, 58, 0.3));
-      }
-
-      .beat2lotto-current-page .beat2lotto-coin-orb img {
-        display: block;
-      }
-
-      @keyframes b2lBallFloat {
-        from {
-          transform: translate(-50%, -50%) translate3d(-0.4rem, -0.6rem, 0) scale(0.96);
+      @media (max-width: 900px) {
+        body.beat2lotto-game-page {
+          overflow: hidden;
         }
-        to {
-          transform: translate(-50%, -50%) translate3d(0.6rem, 0.55rem, 0) scale(1.04);
+
+        body.beat2lotto-game-page .beat2-game-shell {
+          height: auto;
+          min-height: 0;
         }
       }
 
-      @media (prefers-reduced-motion: reduce) {
-        .b2l-static-balls span {
-          animation: none;
+      @media (max-width: 520px) {
+        body.beat2lotto-game-page .beat2-game-shell {
+          height: auto;
         }
       }
     </style>
   </head>
-<body class="home-page has-sphere-header prompt-lab-page has-manual-instrument-header pl-page beat2lotto-current-page">
-  <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
-    <div class="lm-page-transition__flash"></div>
-    <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
-    <div class="lm-page-transition__vignette"></div>
-    <div class="lm-page-transition__scanlines"></div>
-    <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
-  </div>
-    <canvas id="b2lBallpassGame" class="b2l-game-generator-bg" data-b2l-ballpass-canvas aria-hidden="true"></canvas>
-    <div class="b2l-game-generator-vignette" aria-hidden="true"></div>
-
+  <body class="home-page has-sphere-header has-global-sphere-header beat2lotto-game-page">
+    <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
+      <div class="lm-page-transition__flash"></div>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
+      <div class="lm-page-transition__vignette"></div>
+      <div class="lm-page-transition__scanlines"></div>
+      <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
+    </div>
     <header class="site-header home-like-header home-sphere-header global-sphere-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
           <span>LOTTOMINDED ULTRA</span>
         </a>
-        <button class="site-header-toggle" type="button" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="Home sphere navigation">
+      <nav aria-label="LOTTOMINDED ULTRA sphere navigation">
         <a href="./index.html#top" data-icon="HM">Home</a>
+        <a href="./memberships.html" data-icon="MB">Memberships</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
+        <a href="./news/" data-icon="NW">News</a>
         <a href="./live-events.html" data-icon="EV">Events</a>
         <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
-        <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2" aria-current="page">Beat2Lotto+&trade;</a>
+        <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2" aria-current="page">Beat2Lotto+</a>
         <a href="./merch-store.html" data-icon="DR">Merch</a>
-        <a href="./how-to-use.html" data-icon="GO">Guide</a>
+        <a href="./how-to-use.html" data-icon="GD">Guide</a>
+        <a href="../lotto%20mind%20refined/" data-icon="LM" data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required">LottoMind App</a>
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
       </div>
     </header>
 
-    <section class="home-signal-marquee" aria-label="Beat2Lotto creative signal notice">
-      <a class="home-signal-marquee-track" href="#beat2lotto">
-        <span>Beat-seeded signals.</span>
-        <span>Creative sets only.</span>
-        <span>Not a prediction.</span>
-        <span>Open Beat2Lotto+&trade;</span>
+    <section class="home-signal-marquee site-signal-marquee--shared" aria-label="LottoMind scrolling signal notice">
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto">
+        <span>LottoMind signal online.</span>
+        <span>Creative tools ready.</span>
+        <span>Arcade routes live.</span>
+        <span>Open Beat2Lotto+Ã¢â€žÂ¢</span>
       </a>
-      <a class="home-signal-marquee-track" href="#beat2lotto" aria-hidden="true" tabindex="-1">
-        <span>Beat-seeded signals.</span>
-        <span>Creative sets only.</span>
-        <span>Not a prediction.</span>
-        <span>Open Beat2Lotto+&trade;</span>
+      <a class="home-signal-marquee-track" href="./prompt-lab.html#beat2lotto" aria-hidden="true" tabindex="-1">
+        <span>LottoMind signal online.</span>
+        <span>Creative tools ready.</span>
+        <span>Arcade routes live.</span>
+        <span>Open Beat2Lotto+Ã¢â€žÂ¢</span>
       </a>
     </section>
 
-    <main class="beat2lotto-current-main" id="top">
-      <div class="b2l-static-balls" aria-hidden="true">
-        <span style="--x: 9%; --y: 16%; --s: 6.4rem; --d: 8s;">32</span>
-        <span style="--x: 86%; --y: 18%; --s: 7.4rem; --d: 9.5s; --delay: -1s;">07</span>
-        <span style="--x: 20%; --y: 78%; --s: 8.2rem; --d: 10s; --delay: -2s;">55</span>
-        <span style="--x: 75%; --y: 74%; --s: 5.8rem; --d: 7.5s; --delay: -3s;">19</span>
-        <span style="--x: 50%; --y: 12%; --s: 4.4rem; --d: 8.5s; --delay: -1.5s;">68</span>
-        <span style="--x: 96%; --y: 52%; --s: 8.8rem; --d: 11s; --delay: -4s;">24</span>
-        <span style="--x: 5%; --y: 58%; --s: 5rem; --d: 9s; --delay: -2.5s;">44</span>
-        <span style="--x: 58%; --y: 92%; --s: 6.8rem; --d: 10.5s; --delay: -3.2s;">11</span>
-      </div>
-
-      <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ current console" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/beat2lotto-juneteenth-orb.png">
-        <canvas class="prompt-lab-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
-        <div class="prompt-lab-sphere-scanline" aria-hidden="true"></div>
-        <div class="prompt-lab-sphere-grid" aria-hidden="true"></div>
-
-        <section class="beat2lotto-hero">
-          <div>
-            <h1 class="b2l-motion-title" data-title="Beat2Lotto+">Beat2Lotto+<span class="tm" aria-hidden="true"></span></h1>
-            <p>
-              A standalone creative number signal console powered by beat-style inputs. Import a beat or
-              music file, enter a BPM, groove, mood, or session phrase, then generate beat-seeded
-              entertainment picks for journaling, creative play, and studio rituals.
-            </p>
-            <p class="lotto-safety">
-              Beat2Lotto+&trade; is not a prediction. Lottery outcomes are random. Verify game rules, matrices,
-              draw times, prizes, and eligibility with official lottery sources before playing.
-            </p>
-          </div>
-          <div class="beat2lotto-orb beat2lotto-coin-orb" aria-hidden="true">
-            <img src="./assets/brand/beat2lotto-static-logo-coin.png" alt="" />
-          </div>
-        </section>
-
-        <section class="beat2lotto-console" aria-label="Beat2Lotto+ generator">
-          <div class="lotto-controls">
-            <label class="file-drop">
-              <span>Import beat or music</span>
-              <input id="lottoAudioFile" type="file" accept="audio/*" />
-              <small>Local analysis only. Audio never uploads.</small>
-            </label>
-            <div class="beat-playback-card" id="beatPlayback" hidden>
-              <audio id="lottoAudioPlayer" preload="metadata" controls></audio>
-              <button type="button" id="playBeatAudio" disabled>Play uploaded beat</button>
-              <div class="beat-playback-meter" aria-hidden="true">
-                <span id="beatPlaybackEnergy"></span>
-              </div>
-              <small id="beatPlaybackStatus">Upload music to unlock playback.</small>
-            </div>
-            <div id="beatAnalysis" class="beat-analysis-card" aria-live="polite">
-              <strong>No beat imported yet</strong>
-              <span>Generate from typed Beat DNA, or load audio to seed the digits.</span>
-            </div>
-            <label>
-              <span>Session seed</span>
-              <input id="lottoSeed" type="text" value="neon drums, 120 BPM, late-night bounce" />
-            </label>
-            <label>
-              <span>BPM</span>
-              <input id="lottoBpm" type="number" min="40" max="220" value="120" />
-            </label>
-            <label>
-              <span>Game format</span>
-              <select id="lottoGame">
-                <option value="pick3">Pick 3</option>
-                <option value="pick4">Pick 4</option>
-                <option value="cash5">Cash 5 / Fantasy 5</option>
-                <option value="lotto6">Lotto 6</option>
-                <option value="powerball">Powerball Style</option>
-                <option value="mega">Mega Millions Style</option>
-              </select>
-            </label>
-            <label>
-              <span>Sets</span>
-              <input id="lottoCount" type="number" min="1" max="12" value="5" />
-            </label>
-            <label>
-              <span>Method</span>
-              <select id="lottoMethod">
-                <option>Beat DNA</option>
-                <option>Rhythm Signature</option>
-                <option>Drum Pattern</option>
-                <option>Stem Mix</option>
-                <option>Random + Beat DNA</option>
-              </select>
-            </label>
-            <button class="primary-action" type="button" id="generateLotto">Generate Number Signals</button>
-            <button class="secondary-action" type="button" id="copyLotto">Copy All</button>
-          </div>
-
-          <div class="lotto-output-panel">
-            <div class="lotto-output-head">
-              <h2>Beat-seeded entertainment picks</h2>
-              <span>Creative number generation - Not a prediction</span>
-            </div>
-            <div id="lottoOutput" class="lotto-output-grid" aria-live="polite"></div>
-          </div>
-        </section>
-      </div>
+    <main id="beat2lotto" class="beat2-game-shell" aria-label="Shadow Ops Canvas game">
+      <h1 class="visually-hidden">Beat2Lotto+ Shadow Ops Canvas</h1>
+      <section class="beat2-gamebox" data-beat2-game-shell aria-label="Shadow Ops Canvas game viewport">
+        <iframe
+          class="beat2-gameframe"
+          title="Shadow Ops Canvas game"
+          src="./games/shadow-ops-canvas/index.html?v=embedded-8142-2"
+          allow="fullscreen; autoplay; gamepad; keyboard-map *"
+          allowfullscreen
+          data-beat2-game-frame
+        ></iframe>
+      </section>
     </main>
 
-    <button class="pl-floating" type="button" aria-label="Open Beat2Lotto menu">+</button>
-    <div class="pl-overlay" role="dialog" aria-modal="true" aria-label="Beat2Lotto menu">
-      <div class="pl-overlay-card">
-        <button class="pl-close" type="button" aria-label="Close menu">X</button>
-        <a href="./how-to-use.html">Home</a>
-        <a href="./features-app.html">Features</a>
-        <a href="./live-events.html">Live Events</a>
-        <a href="./lottery-spheres.html#spheres">Spheres</a>
-        <a href="./beat2lotto-plus.html#beat2lotto">Beat2Lotto+</a>
-        <a href="./merch-store.html">Merch</a>
-        <a href="./how-to-use.html">Guide</a>
-        <a href="./lottomind-stem-studio/index.html">Launch Studio</a>
-      </div>
-    </div>
+    <script>
+      (() => {
+        const targetGame = new URL("./games/shadow-ops-canvas/index.html?v=embedded-8142-2", window.location.href).href;
 
-    <footer class="lm-live-player beat2lotto-live-player sphere-orb-live-player" id="player" data-b2l-live-player aria-label="Beat2Lotto uploaded audio player">
-      <div class="now-art" aria-hidden="true"><span>1025</span></div>
-      <div class="now-copy">
-        <small>Now Playing</small>
-        <strong data-b2l-player-title>Beat2Lotto+ Uploaded Media</strong>
-        <span data-b2l-player-subtitle>Import audio to drive the signal</span>
-      </div>
-      <div class="now-wave" aria-hidden="true"><i></i></div>
-      <button type="button" data-b2l-player-control data-b2l-player-prev aria-label="Rewind uploaded Beat2Lotto audio" disabled>&lt;&lt;</button>
-      <button type="button" class="big" data-b2l-player-control data-b2l-player-toggle aria-label="Play or pause uploaded Beat2Lotto audio" aria-pressed="false" disabled>&#9654;</button>
-      <button type="button" data-b2l-player-control data-b2l-player-next aria-label="Fast-forward uploaded Beat2Lotto audio" disabled>&gt;&gt;</button>
-      <span class="time" data-b2l-player-time>0:00 / --:--</span>
-      <div class="points" aria-label="Ultra points">
-        <b>Ultra Points</b>
-        <strong>12,450</strong>
-        <span>Rank Ultra Elite</span>
-      </div>
-    </footer>
-    <footer>
-      <span>Beat2Lotto+ Current Console</span>
-      <span>All rights reserved.</span>
-    </footer>
+        const header = document.querySelector("[data-site-header]");
+        const shell = document.querySelector("[data-beat2-game-shell]");
+        const frame = document.querySelector("[data-beat2-game-frame]");
 
-    <script src="./assets/js/beat2lotto-ballpass.js?v=perf-fixes-1" defer></script>
-    <script src="./beat2lotto-plus.js?v=hud-spheres-b2l-8124-3" defer></script>
-    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=view-mode-toggle-2" defer></script>
-    <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
-    <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-4" defer></script>
+        if (frame) frame.src = targetGame;
+
+        const syncHeaderHeight = () => {
+          if (!header) return;
+          const height = Math.ceil(header.getBoundingClientRect().height);
+          document.documentElement.style.setProperty("--guide-header-height", `${height}px`);
+        };
+
+        syncHeaderHeight();
+        window.addEventListener("resize", syncHeaderHeight, { passive: true });
+        if ("ResizeObserver" in window && header) {
+          new ResizeObserver(syncHeaderHeight).observe(header);
+        }
+
+        shell?.addEventListener("dblclick", async () => {
+          try {
+            if (document.fullscreenElement) {
+              await document.exitFullscreen();
+            } else {
+              await shell.requestFullscreen();
+            }
+          } catch (error) {}
+        });
+      })();
+    </script>
+<script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
   </body>
 </html>

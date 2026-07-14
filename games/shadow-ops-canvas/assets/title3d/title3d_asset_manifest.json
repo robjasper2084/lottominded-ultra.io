@@ -1,0 +1,318 @@
+{
+  "props": {
+    "crate_a": {
+      "file": "cards/crate_a.png",
+      "width": 212,
+      "height": 221
+    },
+    "mushrooms_a": {
+      "file": "cards/mushrooms_a.png",
+      "width": 222,
+      "height": 228
+    },
+    "vines_a": {
+      "file": "cards/vines_a.png",
+      "width": 225,
+      "height": 230
+    },
+    "wall_panel_a": {
+      "file": "cards/wall_panel_a.png",
+      "width": 206,
+      "height": 228
+    },
+    "energy_pylon_a": {
+      "file": "cards/energy_pylon_a.png",
+      "width": 154,
+      "height": 218
+    },
+    "crystal_a": {
+      "file": "cards/crystal_a.png",
+      "width": 171,
+      "height": 238
+    },
+    "platform_chunk_a": {
+      "file": "cards/platform_chunk_a.png",
+      "width": 238,
+      "height": 165
+    },
+    "terminal_a": {
+      "file": "cards/terminal_a.png",
+      "width": 180,
+      "height": 215
+    },
+    "crate_b": {
+      "file": "cards/crate_b.png",
+      "width": 212,
+      "height": 226
+    },
+    "mushrooms_b": {
+      "file": "cards/mushrooms_b.png",
+      "width": 172,
+      "height": 227
+    },
+    "vines_b": {
+      "file": "cards/vines_b.png",
+      "width": 225,
+      "height": 230
+    },
+    "wall_panel_b": {
+      "file": "cards/wall_panel_b.png",
+      "width": 192,
+      "height": 226
+    },
+    "energy_pylon_b": {
+      "file": "cards/energy_pylon_b.png",
+      "width": 139,
+      "height": 237
+    },
+    "crystal_b": {
+      "file": "cards/crystal_b.png",
+      "width": 189,
+      "height": 223
+    },
+    "platform_chunk_b": {
+      "file": "cards/platform_chunk_b.png",
+      "width": 236,
+      "height": 170
+    },
+    "terminal_b": {
+      "file": "cards/terminal_b.png",
+      "width": 191,
+      "height": 221
+    }
+  },
+  "decals": {
+    "vault_ring": {
+      "file": "cards/vault_ring.png",
+      "width": 264,
+      "height": 273
+    },
+    "m_plaque": {
+      "file": "cards/m_plaque.png",
+      "width": 270,
+      "height": 272
+    },
+    "scan_strip": {
+      "file": "cards/scan_strip.png",
+      "width": 321,
+      "height": 139
+    },
+    "heart_node": {
+      "file": "cards/heart_node.png",
+      "width": 242,
+      "height": 243
+    },
+    "chevrons": {
+      "file": "cards/chevrons.png",
+      "width": 223,
+      "height": 242
+    },
+    "terminal_screen": {
+      "file": "cards/terminal_screen.png",
+      "width": 229,
+      "height": 243
+    },
+    "lock_icon": {
+      "file": "cards/lock_icon.png",
+      "width": 242,
+      "height": 242
+    },
+    "portal_card": {
+      "file": "cards/portal_card.png",
+      "width": 240,
+      "height": 234
+    },
+    "neon_arrow": {
+      "file": "cards/neon_arrow.png",
+      "width": 228,
+      "height": 202
+    },
+    "power_rune": {
+      "file": "cards/power_rune.png",
+      "width": 227,
+      "height": 240
+    },
+    "gold_corner": {
+      "file": "cards/gold_corner.png",
+      "width": 242,
+      "height": 236
+    }
+  },
+  "reference_v2": {
+    "source": "hf_20260624_003059_e4bc057a-a94a-44aa-950d-3484ee1e98ab.jpeg",
+    "backdrop": "title3d_ref_backdrop_v2.jpg",
+    "platformTexture": "title3d_ref_platform_tile_v2.jpg",
+    "wallTexture": "title3d_ref_wall_tile_v2.jpg",
+    "nebulaTexture": "title3d_ref_nebula_tile_v2.jpg",
+    "cards": [
+      {
+        "file": "ref_cards/heart_core_v2.png",
+        "source_box": [
+          1180,
+          145,
+          1695,
+          765
+        ],
+        "mode": "purple_glow",
+        "size": [
+          515,
+          620
+        ]
+      },
+      {
+        "file": "ref_cards/m_emblem_v2.png",
+        "source_box": [
+          0,
+          450,
+          410,
+          900
+        ],
+        "mode": "gold_lines",
+        "size": [
+          410,
+          450
+        ]
+      },
+      {
+        "file": "ref_cards/upper_platform_v2.png",
+        "source_box": [
+          660,
+          320,
+          1035,
+          470
+        ],
+        "mode": "dark_silhouette",
+        "size": [
+          375,
+          150
+        ]
+      },
+      {
+        "file": "ref_cards/mid_platform_v2.png",
+        "source_box": [
+          1070,
+          650,
+          1535,
+          748
+        ],
+        "mode": "dark_silhouette",
+        "size": [
+          401,
+          98
+        ]
+      },
+      {
+        "file": "ref_cards/floor_chunk_v2.png",
+        "source_box": [
+          1420,
+          1010,
+          2245,
+          1215
+        ],
+        "mode": "dark_silhouette",
+        "size": [
+          825,
+          205
+        ]
+      },
+      {
+        "file": "ref_cards/crate_stack_v2.png",
+        "source_box": [
+          1730,
+          390,
+          2115,
+          605
+        ],
+        "mode": "bright_prop",
+        "size": [
+          385,
+          215
+        ]
+      },
+      {
+        "file": "ref_cards/lock_badge_v2.png",
+        "source_box": [
+          2425,
+          865,
+          2635,
+          1090
+        ],
+        "mode": "gold_lines",
+        "size": [
+          209,
+          109
+        ]
+      },
+      {
+        "file": "ref_cards/left_wall_circuit_v2.png",
+        "source_box": [
+          0,
+          95,
+          445,
+          1110
+        ],
+        "mode": "gold_lines",
+        "size": [
+          445,
+          1015
+        ]
+      },
+      {
+        "file": "ref_cards/right_wall_circuit_v2.png",
+        "source_box": [
+          2365,
+          60,
+          2752,
+          940
+        ],
+        "mode": "gold_lines",
+        "size": [
+          387,
+          860
+        ]
+      },
+      {
+        "file": "ref_cards/fog_center_v2.png",
+        "source_box": [
+          760,
+          610,
+          1940,
+          1150
+        ],
+        "mode": "fog",
+        "size": [
+          1024,
+          469
+        ]
+      },
+      {
+        "file": "ref_cards/fog_floor_v2.png",
+        "source_box": [
+          0,
+          1040,
+          2752,
+          1536
+        ],
+        "mode": "fog",
+        "size": [
+          1600,
+          289
+        ]
+      },
+      {
+        "file": "ref_cards/purple_hud_scan_v2.png",
+        "source_box": [
+          620,
+          640,
+          1035,
+          810
+        ],
+        "mode": "purple_glow",
+        "size": [
+          415,
+          170
+        ]
+      }
+    ]
+  }
+}

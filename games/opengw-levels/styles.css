@@ -623,7 +623,7 @@ button[hidden],
 }
 
 #overlay[data-state="menu"] {
-  grid-template-rows: minmax(20px, 0.18fr) auto auto auto auto auto auto minmax(18px, 0.24fr);
+  grid-template-rows: minmax(24px, 0.24fr) auto auto auto auto auto minmax(18px, 0.3fr);
   gap: 10px;
   background:
     linear-gradient(90deg, rgba(5, 7, 13, 0.56), rgba(5, 7, 13, 0.02) 25%, rgba(5, 7, 13, 0.02) 75%, rgba(5, 7, 13, 0.56)),
@@ -790,13 +790,13 @@ button[hidden],
   position: absolute;
   z-index: 5;
   left: 50%;
-  top: -10px;
+  top: 119%;
   display: grid;
-  min-width: min(240px, 42%);
-  min-height: 30px;
+  min-width: min(320px, 48%);
+  min-height: 42px;
   place-items: center;
-  padding: 4px 18px;
-  transform: translate(-50%, -100%);
+  padding: 6px 22px;
+  transform: translate(-50%, -50%);
   border: 1px solid rgba(255, 223, 117, 0.58);
   border-radius: 4px;
   background:
@@ -808,7 +808,7 @@ button[hidden],
   backdrop-filter: blur(3px);
   color: #ffdf75;
   font-family: var(--display-font);
-  font-size: clamp(11px, 1.05vw, 15px);
+  font-size: clamp(14px, 1.7vw, 21px);
   font-weight: 950;
   font-stretch: condensed;
   letter-spacing: 0.08em;
@@ -821,11 +821,11 @@ button[hidden],
 
 @media (max-width: 700px) {
   .marquee-status {
-    top: -6px;
-    min-width: min(190px, 58%);
-    min-height: 28px;
-    padding: 3px 14px;
-    font-size: clamp(10px, 3.2vw, 13px);
+    top: 94%;
+    min-width: min(220px, 54%);
+    min-height: 38px;
+    padding: 4px 16px;
+    font-size: clamp(13px, 4.2vw, 18px);
   }
 }
 
@@ -986,126 +986,6 @@ button[hidden],
   text-align: center;
 }
 
-.scoreboard-panel {
-  grid-row: 6;
-  position: relative;
-  z-index: 5;
-  width: min(560px, 88vw);
-  max-height: none;
-  padding: 14px 16px 15px;
-  border: 1px solid rgba(41, 247, 255, 0.42);
-  border-radius: 8px;
-  background:
-    linear-gradient(90deg, rgba(41, 247, 255, 0.12), transparent 28% 72%, rgba(255, 45, 170, 0.1)),
-    linear-gradient(180deg, rgba(8, 19, 31, 0.9), rgba(5, 7, 13, 0.88)),
-    url("./assets/2084/ui/menu-panel.png") center / 100% 100% no-repeat;
-  box-shadow:
-    inset 0 0 0 1px rgba(246, 251, 255, 0.06),
-    inset 0 0 24px rgba(41, 247, 255, 0.1),
-    0 0 28px rgba(41, 247, 255, 0.12),
-    0 18px 34px rgba(0, 0, 0, 0.38);
-  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
-  overflow: hidden;
-}
-
-.scoreboard-panel[hidden] {
-  display: none;
-}
-
-.scoreboard-panel::before {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border: 1px solid rgba(255, 223, 117, 0.24);
-  pointer-events: none;
-  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
-}
-
-.scoreboard-header {
-  position: relative;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-  color: var(--text);
-  font-family: var(--display-font);
-  text-transform: uppercase;
-}
-
-.scoreboard-header span {
-  font-size: 15px;
-  font-weight: 950;
-  text-shadow: 0 0 12px rgba(41, 247, 255, 0.44);
-}
-
-.scoreboard-header small {
-  color: var(--warm-gold);
-  font-size: 10px;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
-.scoreboard-list {
-  position: relative;
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.scoreboard-list li {
-  display: grid;
-  grid-template-columns: 34px minmax(70px, 1fr) minmax(76px, auto) auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 28px;
-  padding: 5px 7px;
-  border: 1px solid rgba(41, 247, 255, 0.16);
-  border-radius: 5px;
-  background: rgba(3, 5, 12, 0.52);
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 850;
-}
-
-.scoreboard-list .score-rank {
-  color: var(--warm-gold);
-  font-weight: 950;
-}
-
-.scoreboard-list .score-value {
-  color: var(--text);
-  font-size: 14px;
-  text-align: right;
-  text-shadow: 0 0 10px rgba(41, 247, 255, 0.32);
-}
-
-.scoreboard-list .score-meta {
-  color: var(--cyan);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.scoreboard-list .score-date {
-  color: rgba(246, 251, 255, 0.64);
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.scoreboard-list .score-date:empty {
-  display: none;
-}
-
-.scoreboard-list .scoreboard-empty {
-  display: block;
-  padding: 12px;
-  color: var(--muted);
-  text-align: center;
-  text-transform: uppercase;
-}
-
 .player-chooser {
   grid-row: 5;
   display: flex;
@@ -1141,18 +1021,6 @@ button[hidden],
     inset 0 0 18px rgba(41, 247, 255, 0.08),
     0 0 28px rgba(41, 247, 255, 0.1),
     0 16px 32px rgba(0, 0, 0, 0.32);
-}
-
-#overlay[data-state="menu"] .scoreboard-panel {
-  grid-row: 6;
-}
-
-#overlay[data-state="menu"] .controls-hint {
-  grid-row: 7;
-}
-
-#overlay[data-state="menu"] .overlay-actions {
-  grid-row: 8;
 }
 
 #overlay[data-state="menu"] .player-chooser::before,
@@ -1739,26 +1607,6 @@ button[hidden],
 }
 
 @media (max-width: 980px) {
-  #overlay[data-state="menu"] {
-    grid-template-rows: minmax(14px, 0.18fr) auto auto auto auto auto auto minmax(14px, 0.22fr);
-  }
-
-  .scoreboard-panel {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    width: min(560px, 88vw);
-    max-height: none;
-  }
-
-  #overlay[data-state="menu"] .controls-hint {
-    grid-row: 7;
-  }
-
-  #overlay[data-state="menu"] .overlay-actions {
-    grid-row: 8;
-  }
-
   #overlay[data-state="menu"] .player-chooser {
     position: relative;
     transform: none;
@@ -1790,7 +1638,7 @@ button[hidden],
   }
 
   #overlay[data-state="menu"] {
-    grid-template-rows: minmax(14px, 0.18fr) auto auto auto auto auto auto minmax(14px, 0.22fr);
+    grid-template-rows: minmax(14px, 0.18fr) auto auto auto auto auto minmax(14px, 0.22fr);
     gap: 6px;
   }
 
@@ -1895,19 +1743,6 @@ button[hidden],
   .overlay-actions {
     width: min(94vw, 390px);
     padding: 7px;
-  }
-
-  .scoreboard-panel {
-    width: min(94vw, 440px);
-    padding: 12px 13px;
-  }
-
-  .scoreboard-list li {
-    grid-template-columns: 30px minmax(64px, 1fr) minmax(70px, auto);
-  }
-
-  .scoreboard-list .score-date {
-    display: none;
   }
 
   .overlay-actions button {

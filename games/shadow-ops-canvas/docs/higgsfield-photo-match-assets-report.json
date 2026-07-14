@@ -1,0 +1,67 @@
+{
+  "sources": {
+    "world": "assets\\mission\\higgsfield_world_props_source_20260623.jpeg",
+    "fx": "assets\\mission\\higgsfield_heart_fx_source_20260623.png",
+    "enemy": "assets\\characters\\higgsfield_enemy_anim_source_20260623.jpeg"
+  },
+  "outputs": {
+    "worldProps": "assets\\mission\\higgsfield_world_props_runtime_v2.png",
+    "fxSheet": "assets\\mission\\higgsfield_heart_fx_sheet_runtime_v2.png",
+    "droneMotion": "assets\\characters\\higgsfield_drone_motion_strip_runtime_v2.png",
+    "crawlerWalk": "assets\\characters\\higgsfield_robot_dog_walk_strip_runtime_v2.png",
+    "cannonTurretMotion": "assets\\characters\\higgsfield_cannon_turret_motion_strip_runtime_v2.png"
+  },
+  "world_component_count": 16,
+  "audits": [
+    {
+      "path": "assets\\mission\\higgsfield_world_props_runtime_v2.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "greenish_pixels": 554
+    },
+    {
+      "path": "assets\\mission\\higgsfield_heart_fx_sheet_runtime_v2.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "greenish_pixels": 8118
+    },
+    {
+      "path": "assets\\characters\\higgsfield_drone_motion_strip_runtime_v2.png",
+      "size": [
+        3072,
+        256
+      ],
+      "empty": [],
+      "clipped": [],
+      "greenish_pixels": 1038
+    },
+    {
+      "path": "assets\\characters\\higgsfield_robot_dog_walk_strip_runtime_v2.png",
+      "size": [
+        2560,
+        240
+      ],
+      "empty": [],
+      "clipped": [],
+      "greenish_pixels": 12
+    },
+    {
+      "path": "assets\\characters\\higgsfield_cannon_turret_motion_strip_runtime_v2.png",
+      "size": [
+        3072,
+        256
+      ],
+      "empty": [],
+      "clipped": [],
+      "greenish_pixels": 597
+    }
+  ]
+}

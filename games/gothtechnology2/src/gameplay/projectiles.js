@@ -1,6 +1,7 @@
-import { drawSheetFrame } from "../engine/assets.js?v=fighter-prop1";
+import { drawSheetFrame } from "../engine/assets.js?v=fighter-prop2";
 import { rectsOverlap } from "../engine/math.js";
 import { SpriteEffect } from "./effects.js";
+import { sliceAttackForHit } from "./hits.js";
 
 const hexAlpha = (color, alpha) => {
   if (!color?.startsWith("#") || color.length !== 7) return color;
@@ -21,7 +22,8 @@ export class Projectile {
     this.radius = attack.radius ?? 34;
     this.age = 0;
     this.dead = false;
-    this.hitIds = new Set();
+    this.hitCount = 0;
+    this.hitCooldown = 0;
     this.trail = [];
     this.seed = Math.random() * Math.PI * 2;
     this.burstDone = false;
@@ -38,6 +40,7 @@ export class Projectile {
 
   update(dt, game) {
     this.age += dt;
+    this.hitCooldown = Math.max(0, this.hitCooldown - dt);
     this.trail.unshift({
       x: this.x,
       y: this.y + Math.sin(this.age * 14 + this.seed) * Math.min(18, this.radius * 0.32),
@@ -50,17 +53,33 @@ export class Projectile {
       this.dead = true;
     }
     const target = game.fighters.find((fighter) => fighter.id !== this.owner.id);
-    if (!target || target.isKO || this.hitIds.has(target.id)) return;
+    if (!target || target.isKO || this.hitCooldown > 0) return;
     if (rectsOverlap(this.rect, target.hurtbox)) {
-      this.hitIds.add(target.id);
-      game.resolveIncomingHit(this.owner, target, this.attack, {
+      const maxHits = Math.max(1, Math.floor(this.attack.multiHit ?? 1));
+      this.hitCount += 1;
+      game.resolveIncomingHit(this.owner, target, sliceAttackForHit(this.attack, this.hitCount), {
         box: this.rect,
         projectile: true,
         level: this.attack.level ?? "mid",
-        sourceName: this.kind
+        sourceName: this.kind,
+        hitIndex: this.hitCount,
+        maxHits
       });
-      this.spawnBurst(game, target.x - this.direction * 34, this.y, true);
-      this.dead = true;
+      if (this.hitCount >= maxHits) {
+        this.spawnBurst(game, target.x - this.direction * 34, this.y, true);
+        this.dead = true;
+      } else {
+        this.hitCooldown = this.attack.hitInterval ?? 0.075;
+        game.effects.push(new SpriteEffect({
+          x: target.x - this.direction * 24,
+          y: this.y + this.radius * 0.7,
+          image: this.image,
+          duration: 0.18,
+          scale: Math.max(0.3, this.radius / 120),
+          flip: this.direction < 0,
+          alpha: 0.62
+        }));
+      }
     }
   }
 

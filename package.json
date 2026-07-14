@@ -1,0 +1,11 @@
+{
+  "name": "lottominded-ultra-site",
+  "private": true,
+  "scripts": {
+    "check:home": "node scripts/validate-home-page.mjs",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1"
+  }
+}

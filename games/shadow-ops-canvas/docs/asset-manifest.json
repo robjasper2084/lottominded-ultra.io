@@ -1,0 +1,77 @@
+{
+  "project": "LottoMind Vault Run",
+  "runtime": "static HTML5 canvas",
+  "concept": {
+    "path": "docs/lottomind-vault-run-concept.png",
+    "generatedWith": "built-in Image Gen concept pass",
+    "purpose": "visual direction for the playable run-and-gun screen"
+  },
+  "currentAssets": {
+    "heroTitle": "assets/hero/lottomind-hero-main.png",
+    "heroTitleArchivedVariant": "assets/hero/lottomind-hero-main-313.png",
+    "playerAtlas": "assets/mascot/lottomind-mascot-runner-atlas.png",
+    "playerAtlasSource": "assets/mascot/lottomind-mascot-runner-atlas-green.png",
+    "legacyPlayerAtlas": "assets/mascot/master-ezra-shadowops-atlas.png",
+    "level1Tiles": "assets/levels/platform_tiles_level1_clean.png",
+    "level2Tiles": "assets/levels/platform_tiles_level2_clean.png",
+    "level3Tiles": "assets/levels/platform_tiles_level3_clean.png",
+    "soulLocationBackplate": "assets/backgrounds/higgsfield-soul-location-backplate.png",
+    "soulLocationFarParallax": "assets/backgrounds/higgsfield-soul-location-far-parallax.png",
+    "soulLocationForegroundGround": "assets/backgrounds/higgsfield-soul-location-foreground-ground.png",
+    "enemyCrawler": "assets/characters/enemy_crawler.png",
+    "crawlerWalk": "assets/characters/chatgpt_robot_dog_walk_strip_runtime.png",
+    "enemyDrone": "assets/characters/enemy_drone.png",
+    "enemyShieldGuard": "assets/characters/enemy_shield_guard.png",
+    "enemyTurret": "assets/characters/enemy_turret.png",
+    "cannonTurretMotion": "assets/characters/chatgpt_cannon_turret_motion_strip_runtime.png",
+    "droneMotion": "assets/characters/higgsfield_drone_motion_strip_runtime.png",
+    "droneLaserOverlay": "assets/characters/chatgpt_drone_laser_overlay_strip_runtime.png",
+    "droneFx": "assets/mission/chatgpt_drone_fx_strip_runtime.png",
+    "shieldRobotMotion": "assets/characters/chatgpt_shield_robot_motion_strip_runtime.png",
+    "enemyMotion": "assets/characters/higgsfield_enemy_motion_sheet_runtime.png",
+    "missionCollectibles": "assets/mission/mission_collectibles_sheet.png",
+    "missionPortal": "assets/mission/extraction_portal_sheet.png",
+    "missionGate": "assets/mission/vault_gate_sheet.png",
+    "missionBrandProps": "assets/mission/branded_background_props_sheet.png",
+    "missionProps": "assets/mission/higgsfield_background_props_sheet_runtime.png",
+    "fxSheet": "assets/mission/higgsfield_mission_fx_collectibles_sheet_runtime.png",
+    "gameplayFx": "assets/mission/chatgpt_gameplay_fx_sheet_runtime.png"
+  },
+  "higgsfieldSoulLocationJobs": {
+    "backplate": {
+      "jobId": "9d5e3610-b033-4a65-825f-66cbfbf97c6c",
+      "model": "soul_location"
+    },
+    "farParallax": {
+      "jobId": "3de587f4-e766-40ea-bfec-7115713ad9f7",
+      "model": "soul_location",
+      "note": "Saved for iteration; not wired into gameplay because it generated an unwanted corner mark."
+    },
+    "foregroundGround": {
+      "jobId": "52fb6afa-fe65-4542-94bf-632dafedba35",
+      "model": "soul_location"
+    }
+  },
+  "plannedProductionAssets": [
+    "player run strip",
+    "player idle/aim strip",
+    "player jump/duck strip",
+    "player slash strip",
+    "heart-fire projectile sheet",
+    "hit spark sheet",
+    "Signal Warden boss sheet",
+    "three parallax background layers",
+    "platform tile strip",
+    "props and pickups sheet",
+    "HUD portrait and icon sheet",
+    "gameplay FX and warning sprite sheet"
+  ],
+  "promptPack": "docs/asset-generation-prompts.md",
+  "rules": [
+    "Use original LottoMind assets only.",
+    "Do not copy Contra IP, characters, logos, enemies, or level layouts.",
+    "Use one full strip per animation whenever possible.",
+    "Normalize sprite frames to a shared bottom-center anchor before runtime use.",
+    "Keep game rules code-native and image assets purely visual."
+  ]
+}

@@ -1,0 +1,1247 @@
+{
+  "assets": [
+    {
+      "key": "gameplayFx",
+      "source": "assets/mission/chatgpt_gameplay_fx_sheet_runtime_clean.png",
+      "output": "assets/mission/chatgpt_gameplay_fx_sheet_runtime_v2.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "layout": [
+        5,
+        4
+      ],
+      "ghost_plate_pixels_before": 0,
+      "ghost_plate_pixels_after": 0,
+      "border_pixels_removed": 0,
+      "frames": [
+        {
+          "frame": 1,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            28,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 2,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 3,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 4,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 5,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 6,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 7,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 8,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 9,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 10,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 11,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 12,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            28,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 13,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 14,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 15,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 16,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 17,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 18,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 19,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        },
+        {
+          "frame": 20,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            32,
+            32,
+            225,
+            225
+          ]
+        }
+      ]
+    },
+    {
+      "key": "missionProps",
+      "source": "assets/mission/higgsfield_missing_world_props_runtime_v2.png",
+      "output": "assets/mission/higgsfield_missing_world_props_runtime_v3.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "layout": [
+        4,
+        4
+      ],
+      "ghost_plate_pixels_before": 14725,
+      "ghost_plate_pixels_after": 548,
+      "border_pixels_removed": 27843,
+      "frames": [
+        {
+          "frame": 1,
+          "ghost_plate_pixels_before": 95,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 95,
+          "bbox": [
+            18,
+            57,
+            238,
+            198
+          ]
+        },
+        {
+          "frame": 2,
+          "ghost_plate_pixels_before": 131,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 131,
+          "bbox": [
+            18,
+            57,
+            238,
+            198
+          ]
+        },
+        {
+          "frame": 3,
+          "ghost_plate_pixels_before": 5,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 5,
+          "bbox": [
+            18,
+            57,
+            238,
+            198
+          ]
+        },
+        {
+          "frame": 4,
+          "ghost_plate_pixels_before": 918,
+          "ghost_plate_pixels_after": 1,
+          "border_pixels_removed": 925,
+          "bbox": [
+            18,
+            73,
+            238,
+            183
+          ]
+        },
+        {
+          "frame": 5,
+          "ghost_plate_pixels_before": 791,
+          "ghost_plate_pixels_after": 2,
+          "border_pixels_removed": 805,
+          "bbox": [
+            18,
+            98,
+            238,
+            157
+          ]
+        },
+        {
+          "frame": 6,
+          "ghost_plate_pixels_before": 672,
+          "ghost_plate_pixels_after": 10,
+          "border_pixels_removed": 676,
+          "bbox": [
+            18,
+            81,
+            238,
+            175
+          ]
+        },
+        {
+          "frame": 7,
+          "ghost_plate_pixels_before": 943,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 948,
+          "bbox": [
+            18,
+            29,
+            238,
+            226
+          ]
+        },
+        {
+          "frame": 8,
+          "ghost_plate_pixels_before": 749,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 750,
+          "bbox": [
+            18,
+            29,
+            238,
+            226
+          ]
+        },
+        {
+          "frame": 9,
+          "ghost_plate_pixels_before": 849,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 852,
+          "bbox": [
+            18,
+            32,
+            238,
+            224
+          ]
+        },
+        {
+          "frame": 10,
+          "ghost_plate_pixels_before": 2260,
+          "ghost_plate_pixels_after": 98,
+          "border_pixels_removed": 2221,
+          "bbox": [
+            18,
+            31,
+            238,
+            225
+          ]
+        },
+        {
+          "frame": 11,
+          "ghost_plate_pixels_before": 2113,
+          "ghost_plate_pixels_after": 97,
+          "border_pixels_removed": 4790,
+          "bbox": [
+            18,
+            21,
+            238,
+            235
+          ]
+        },
+        {
+          "frame": 12,
+          "ghost_plate_pixels_before": 1285,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 1323,
+          "bbox": [
+            35,
+            18,
+            221,
+            238
+          ]
+        },
+        {
+          "frame": 13,
+          "ghost_plate_pixels_before": 837,
+          "ghost_plate_pixels_after": 180,
+          "border_pixels_removed": 2232,
+          "bbox": [
+            71,
+            18,
+            185,
+            238
+          ]
+        },
+        {
+          "frame": 14,
+          "ghost_plate_pixels_before": 1176,
+          "ghost_plate_pixels_after": 156,
+          "border_pixels_removed": 4505,
+          "bbox": [
+            39,
+            18,
+            217,
+            238
+          ]
+        },
+        {
+          "frame": 15,
+          "ghost_plate_pixels_before": 1127,
+          "ghost_plate_pixels_after": 1,
+          "border_pixels_removed": 3580,
+          "bbox": [
+            24,
+            18,
+            231,
+            238
+          ]
+        },
+        {
+          "frame": 16,
+          "ghost_plate_pixels_before": 774,
+          "ghost_plate_pixels_after": 3,
+          "border_pixels_removed": 4005,
+          "bbox": [
+            18,
+            27,
+            238,
+            229
+          ]
+        }
+      ]
+    },
+    {
+      "key": "missionBatchProps",
+      "source": "assets/mission/higgsfield_batch_props_runtime_v2.png",
+      "output": "assets/mission/higgsfield_batch_props_runtime_v3.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "layout": [
+        5,
+        4
+      ],
+      "ghost_plate_pixels_before": 64334,
+      "ghost_plate_pixels_after": 11037,
+      "border_pixels_removed": 54966,
+      "frames": [
+        {
+          "frame": 1,
+          "ghost_plate_pixels_before": 3594,
+          "ghost_plate_pixels_after": 1717,
+          "border_pixels_removed": 2007,
+          "bbox": [
+            46,
+            18,
+            210,
+            238
+          ]
+        },
+        {
+          "frame": 2,
+          "ghost_plate_pixels_before": 1912,
+          "ghost_plate_pixels_after": 2,
+          "border_pixels_removed": 1955,
+          "bbox": [
+            18,
+            57,
+            238,
+            198
+          ]
+        },
+        {
+          "frame": 3,
+          "ghost_plate_pixels_before": 3623,
+          "ghost_plate_pixels_after": 1052,
+          "border_pixels_removed": 2638,
+          "bbox": [
+            51,
+            18,
+            205,
+            238
+          ]
+        },
+        {
+          "frame": 4,
+          "ghost_plate_pixels_before": 2174,
+          "ghost_plate_pixels_after": 10,
+          "border_pixels_removed": 2299,
+          "bbox": [
+            50,
+            18,
+            206,
+            238
+          ]
+        },
+        {
+          "frame": 5,
+          "ghost_plate_pixels_before": 3290,
+          "ghost_plate_pixels_after": 303,
+          "border_pixels_removed": 3061,
+          "bbox": [
+            32,
+            18,
+            223,
+            238
+          ]
+        },
+        {
+          "frame": 6,
+          "ghost_plate_pixels_before": 3819,
+          "ghost_plate_pixels_after": 377,
+          "border_pixels_removed": 3530,
+          "bbox": [
+            18,
+            26,
+            238,
+            230
+          ]
+        },
+        {
+          "frame": 7,
+          "ghost_plate_pixels_before": 4757,
+          "ghost_plate_pixels_after": 1206,
+          "border_pixels_removed": 3634,
+          "bbox": [
+            24,
+            18,
+            232,
+            238
+          ]
+        },
+        {
+          "frame": 8,
+          "ghost_plate_pixels_before": 3983,
+          "ghost_plate_pixels_after": 15,
+          "border_pixels_removed": 4032,
+          "bbox": [
+            18,
+            27,
+            238,
+            228
+          ]
+        },
+        {
+          "frame": 9,
+          "ghost_plate_pixels_before": 1818,
+          "ghost_plate_pixels_after": 1,
+          "border_pixels_removed": 1847,
+          "bbox": [
+            18,
+            71,
+            238,
+            187
+          ]
+        },
+        {
+          "frame": 10,
+          "ghost_plate_pixels_before": 2154,
+          "ghost_plate_pixels_after": 171,
+          "border_pixels_removed": 2070,
+          "bbox": [
+            46,
+            18,
+            210,
+            238
+          ]
+        },
+        {
+          "frame": 11,
+          "ghost_plate_pixels_before": 4847,
+          "ghost_plate_pixels_after": 2114,
+          "border_pixels_removed": 2812,
+          "bbox": [
+            27,
+            18,
+            229,
+            238
+          ]
+        },
+        {
+          "frame": 12,
+          "ghost_plate_pixels_before": 2435,
+          "ghost_plate_pixels_after": 146,
+          "border_pixels_removed": 2353,
+          "bbox": [
+            18,
+            30,
+            238,
+            226
+          ]
+        },
+        {
+          "frame": 13,
+          "ghost_plate_pixels_before": 4378,
+          "ghost_plate_pixels_after": 654,
+          "border_pixels_removed": 3805,
+          "bbox": [
+            45,
+            18,
+            212,
+            236
+          ]
+        },
+        {
+          "frame": 14,
+          "ghost_plate_pixels_before": 2759,
+          "ghost_plate_pixels_after": 503,
+          "border_pixels_removed": 2407,
+          "bbox": [
+            75,
+            18,
+            181,
+            238
+          ]
+        },
+        {
+          "frame": 15,
+          "ghost_plate_pixels_before": 4212,
+          "ghost_plate_pixels_after": 1735,
+          "border_pixels_removed": 2512,
+          "bbox": [
+            18,
+            26,
+            238,
+            228
+          ]
+        },
+        {
+          "frame": 16,
+          "ghost_plate_pixels_before": 2309,
+          "ghost_plate_pixels_after": 114,
+          "border_pixels_removed": 2238,
+          "bbox": [
+            19,
+            40,
+            238,
+            216
+          ]
+        },
+        {
+          "frame": 17,
+          "ghost_plate_pixels_before": 2683,
+          "ghost_plate_pixels_after": 167,
+          "border_pixels_removed": 2580,
+          "bbox": [
+            18,
+            35,
+            238,
+            220
+          ]
+        },
+        {
+          "frame": 18,
+          "ghost_plate_pixels_before": 4010,
+          "ghost_plate_pixels_after": 46,
+          "border_pixels_removed": 4090,
+          "bbox": [
+            27,
+            18,
+            229,
+            238
+          ]
+        },
+        {
+          "frame": 19,
+          "ghost_plate_pixels_before": 2099,
+          "ghost_plate_pixels_after": 519,
+          "border_pixels_removed": 1678,
+          "bbox": [
+            18,
+            79,
+            238,
+            176
+          ]
+        },
+        {
+          "frame": 20,
+          "ghost_plate_pixels_before": 3478,
+          "ghost_plate_pixels_after": 185,
+          "border_pixels_removed": 3418,
+          "bbox": [
+            36,
+            18,
+            220,
+            238
+          ]
+        }
+      ]
+    },
+    {
+      "key": "missionBatchWorld",
+      "source": "assets/mission/higgsfield_photo_world_retry_runtime_v2.png",
+      "output": "assets/mission/higgsfield_photo_world_retry_runtime_v3.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "layout": [
+        5,
+        4
+      ],
+      "ghost_plate_pixels_before": 17855,
+      "ghost_plate_pixels_after": 815,
+      "border_pixels_removed": 17148,
+      "frames": [
+        {
+          "frame": 1,
+          "ghost_plate_pixels_before": 437,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 438,
+          "bbox": [
+            58,
+            22,
+            198,
+            234
+          ]
+        },
+        {
+          "frame": 2,
+          "ghost_plate_pixels_before": 833,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 842,
+          "bbox": [
+            22,
+            36,
+            234,
+            220
+          ]
+        },
+        {
+          "frame": 3,
+          "ghost_plate_pixels_before": 645,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 651,
+          "bbox": [
+            56,
+            22,
+            200,
+            234
+          ]
+        },
+        {
+          "frame": 4,
+          "ghost_plate_pixels_before": 2589,
+          "ghost_plate_pixels_after": 233,
+          "border_pixels_removed": 2361,
+          "bbox": [
+            43,
+            22,
+            212,
+            234
+          ]
+        },
+        {
+          "frame": 5,
+          "ghost_plate_pixels_before": 769,
+          "ghost_plate_pixels_after": 373,
+          "border_pixels_removed": 397,
+          "bbox": [
+            78,
+            22,
+            178,
+            234
+          ]
+        },
+        {
+          "frame": 6,
+          "ghost_plate_pixels_before": 947,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 951,
+          "bbox": [
+            30,
+            22,
+            226,
+            234
+          ]
+        },
+        {
+          "frame": 7,
+          "ghost_plate_pixels_before": 823,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 829,
+          "bbox": [
+            66,
+            22,
+            189,
+            234
+          ]
+        },
+        {
+          "frame": 8,
+          "ghost_plate_pixels_before": 686,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 687,
+          "bbox": [
+            52,
+            22,
+            204,
+            234
+          ]
+        },
+        {
+          "frame": 9,
+          "ghost_plate_pixels_before": 847,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 851,
+          "bbox": [
+            27,
+            22,
+            228,
+            234
+          ]
+        },
+        {
+          "frame": 10,
+          "ghost_plate_pixels_before": 721,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 724,
+          "bbox": [
+            52,
+            22,
+            203,
+            234
+          ]
+        },
+        {
+          "frame": 11,
+          "ghost_plate_pixels_before": 1613,
+          "ghost_plate_pixels_after": 129,
+          "border_pixels_removed": 1486,
+          "bbox": [
+            27,
+            22,
+            229,
+            234
+          ]
+        },
+        {
+          "frame": 12,
+          "ghost_plate_pixels_before": 1520,
+          "ghost_plate_pixels_after": 27,
+          "border_pixels_removed": 1503,
+          "bbox": [
+            22,
+            34,
+            234,
+            221
+          ]
+        },
+        {
+          "frame": 13,
+          "ghost_plate_pixels_before": 679,
+          "ghost_plate_pixels_after": 53,
+          "border_pixels_removed": 630,
+          "bbox": [
+            49,
+            22,
+            207,
+            234
+          ]
+        },
+        {
+          "frame": 14,
+          "ghost_plate_pixels_before": 692,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 694,
+          "bbox": [
+            22,
+            55,
+            234,
+            201
+          ]
+        },
+        {
+          "frame": 15,
+          "ghost_plate_pixels_before": 760,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 761,
+          "bbox": [
+            34,
+            22,
+            222,
+            234
+          ]
+        },
+        {
+          "frame": 16,
+          "ghost_plate_pixels_before": 656,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 692,
+          "bbox": [
+            22,
+            49,
+            234,
+            207
+          ]
+        },
+        {
+          "frame": 17,
+          "ghost_plate_pixels_before": 840,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 849,
+          "bbox": [
+            22,
+            36,
+            234,
+            219
+          ]
+        },
+        {
+          "frame": 18,
+          "ghost_plate_pixels_before": 969,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 973,
+          "bbox": [
+            22,
+            49,
+            234,
+            206
+          ]
+        },
+        {
+          "frame": 19,
+          "ghost_plate_pixels_before": 0,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 0,
+          "bbox": [
+            38,
+            22,
+            218,
+            234
+          ]
+        },
+        {
+          "frame": 20,
+          "ghost_plate_pixels_before": 829,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 829,
+          "bbox": [
+            43,
+            22,
+            212,
+            234
+          ]
+        }
+      ]
+    },
+    {
+      "key": "missionBatchFx",
+      "source": "assets/mission/higgsfield_batch_fx_retry_runtime_v2.png",
+      "output": "assets/mission/higgsfield_batch_fx_retry_runtime_v3.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "layout": [
+        5,
+        4
+      ],
+      "ghost_plate_pixels_before": 19061,
+      "ghost_plate_pixels_after": 6690,
+      "border_pixels_removed": 16653,
+      "frames": [
+        {
+          "frame": 1,
+          "ghost_plate_pixels_before": 896,
+          "ghost_plate_pixels_after": 180,
+          "border_pixels_removed": 735,
+          "bbox": [
+            30,
+            18,
+            226,
+            238
+          ]
+        },
+        {
+          "frame": 2,
+          "ghost_plate_pixels_before": 798,
+          "ghost_plate_pixels_after": 182,
+          "border_pixels_removed": 670,
+          "bbox": [
+            56,
+            18,
+            199,
+            238
+          ]
+        },
+        {
+          "frame": 3,
+          "ghost_plate_pixels_before": 2852,
+          "ghost_plate_pixels_after": 1887,
+          "border_pixels_removed": 967,
+          "bbox": [
+            18,
+            18,
+            238,
+            237
+          ]
+        },
+        {
+          "frame": 4,
+          "ghost_plate_pixels_before": 736,
+          "ghost_plate_pixels_after": 173,
+          "border_pixels_removed": 626,
+          "bbox": [
+            18,
+            30,
+            238,
+            226
+          ]
+        },
+        {
+          "frame": 5,
+          "ghost_plate_pixels_before": 387,
+          "ghost_plate_pixels_after": 38,
+          "border_pixels_removed": 491,
+          "bbox": [
+            18,
+            62,
+            238,
+            193
+          ]
+        },
+        {
+          "frame": 6,
+          "ghost_plate_pixels_before": 643,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 830,
+          "bbox": [
+            18,
+            34,
+            237,
+            222
+          ]
+        },
+        {
+          "frame": 7,
+          "ghost_plate_pixels_before": 141,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 1153,
+          "bbox": [
+            18,
+            18,
+            237,
+            238
+          ]
+        },
+        {
+          "frame": 8,
+          "ghost_plate_pixels_before": 1326,
+          "ghost_plate_pixels_after": 201,
+          "border_pixels_removed": 1302,
+          "bbox": [
+            18,
+            18,
+            238,
+            237
+          ]
+        },
+        {
+          "frame": 9,
+          "ghost_plate_pixels_before": 224,
+          "ghost_plate_pixels_after": 2,
+          "border_pixels_removed": 406,
+          "bbox": [
+            32,
+            19,
+            224,
+            234
+          ]
+        },
+        {
+          "frame": 10,
+          "ghost_plate_pixels_before": 79,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 402,
+          "bbox": [
+            59,
+            20,
+            197,
+            235
+          ]
+        },
+        {
+          "frame": 11,
+          "ghost_plate_pixels_before": 1136,
+          "ghost_plate_pixels_after": 615,
+          "border_pixels_removed": 611,
+          "bbox": [
+            18,
+            59,
+            237,
+            197
+          ]
+        },
+        {
+          "frame": 12,
+          "ghost_plate_pixels_before": 2224,
+          "ghost_plate_pixels_after": 1376,
+          "border_pixels_removed": 852,
+          "bbox": [
+            18,
+            18,
+            237,
+            238
+          ]
+        },
+        {
+          "frame": 13,
+          "ghost_plate_pixels_before": 766,
+          "ghost_plate_pixels_after": 473,
+          "border_pixels_removed": 425,
+          "bbox": [
+            18,
+            88,
+            238,
+            168
+          ]
+        },
+        {
+          "frame": 14,
+          "ghost_plate_pixels_before": 1342,
+          "ghost_plate_pixels_after": 203,
+          "border_pixels_removed": 1560,
+          "bbox": [
+            27,
+            18,
+            228,
+            238
+          ]
+        },
+        {
+          "frame": 15,
+          "ghost_plate_pixels_before": 168,
+          "ghost_plate_pixels_after": 0,
+          "border_pixels_removed": 627,
+          "bbox": [
+            24,
+            25,
+            228,
+            230
+          ]
+        },
+        {
+          "frame": 16,
+          "ghost_plate_pixels_before": 1250,
+          "ghost_plate_pixels_after": 680,
+          "border_pixels_removed": 958,
+          "bbox": [
+            25,
+            22,
+            230,
+            234
+          ]
+        },
+        {
+          "frame": 17,
+          "ghost_plate_pixels_before": 1539,
+          "ghost_plate_pixels_after": 87,
+          "border_pixels_removed": 1977,
+          "bbox": [
+            18,
+            18,
+            238,
+            237
+          ]
+        },
+        {
+          "frame": 18,
+          "ghost_plate_pixels_before": 968,
+          "ghost_plate_pixels_after": 279,
+          "border_pixels_removed": 700,
+          "bbox": [
+            53,
+            18,
+            203,
+            238
+          ]
+        },
+        {
+          "frame": 19,
+          "ghost_plate_pixels_before": 765,
+          "ghost_plate_pixels_after": 128,
+          "border_pixels_removed": 675,
+          "bbox": [
+            57,
+            18,
+            199,
+            238
+          ]
+        },
+        {
+          "frame": 20,
+          "ghost_plate_pixels_before": 821,
+          "ghost_plate_pixels_after": 186,
+          "border_pixels_removed": 686,
+          "bbox": [
+            18,
+            29,
+            238,
+            226
+          ]
+        }
+      ]
+    }
+  ],
+  "preview": "docs\\ghost-artifact-clean-preview.png"
+}

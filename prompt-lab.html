@@ -15,7 +15,7 @@
         window.location.replace(`./beat2lotto-plus.html${window.location.search}#beat2lotto`);
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=view-mode-toggle-2" />
+<link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -23,7 +23,7 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
     <link rel="stylesheet" href="./beat2lotto-plus.css?v=uploaded-audio-player-1" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion.css?v=prompt-lab-motion-4" />
     <link rel="stylesheet" href="./assets/css/prompt-lab-motion-fix.css?v=prompt-lab-motion-4" />
@@ -31,7 +31,7 @@
   <body class="prompt-lab-page has-manual-instrument-header pl-page">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
@@ -46,13 +46,14 @@
       </div>
       <nav aria-label="Prompt Lab navigation" hidden style="display: none;">
         <a href="./index.html#top" data-icon="LM">Lottomind&trade;</a>
+        <a href="./memberships.html" data-icon="MB">Memberships</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
+        <a href="../lotto%20mind%20refined/" data-icon="LM">LottoMind App</a>
         <a href="#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
         <a href="./lottery-spheres.html#spheres" data-icon="SP">Spheres</a>
         <a href="./merch-store.html" data-icon="DR">Merch</a>
         <a href="./prompt-lab.html" data-icon="PR">Prompts</a>
-        <a href="./how-to-use.html" data-icon="GO">Guide</a>
+        <a href="./how-to-use.html" data-icon="GD">Guide</a>
       </nav>
       <div class="direct-launch" aria-label="Direct studio launch">
         <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
@@ -115,7 +116,7 @@
     </section>
 
     <main id="top">
-      <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ copied console" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.jpeg">
+      <div class="beat2lotto-shell prompt-lab-beat2lotto-top" id="beat2lotto" aria-label="Beat2Lotto+ copied console" data-spheres-stage data-spheres-theme="golden" data-spheres-accent-src="./assets/brand/jazz-network-gold-coin.webp">
         <canvas class="prompt-lab-sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
         <div class="prompt-lab-sphere-scanline" aria-hidden="true"></div>
         <div class="prompt-lab-sphere-grid" aria-hidden="true"></div>
@@ -133,7 +134,7 @@
             </p>
         </div>
         <div class="beat2lotto-orb beat2lotto-coin-orb" aria-hidden="true">
-          <img src="./assets/brand/jazz-network-gold-coin.jpeg" alt="" />
+          <img src="./assets/brand/jazz-network-gold-coin.webp" alt="" />
         </div>
       </section>
 
@@ -276,8 +277,8 @@
 
         <article class="prompt-mini-app" id="beat-video" data-mini-app="video" data-password-gate="prompt-lab" data-password-label="Video Prompt" data-membership-gate="true" tabindex="0">
           <div class="prompt-mini-video-bg" aria-hidden="true">
-            <video autoplay muted loop playsinline preload="metadata">
-              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
+            <video muted loop playsinline preload="none" data-autoplay-on-visible="true">
+              <source data-src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
             </video>
           </div>
           <h2>Beat -> Video Prompt</h2>
@@ -292,8 +293,8 @@
 
         <article class="prompt-mini-app" id="beat2lotto-mini" data-mini-app="numbers">
           <div class="beat2lotto-video-blend" aria-hidden="true">
-            <video autoplay muted loop playsinline preload="metadata">
-              <source src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
+            <video muted loop playsinline preload="none" data-autoplay-on-visible="true">
+              <source data-src="./assets/video/beat2lotto-blend.mp4" type="video/mp4" />
             </video>
           </div>
           <h2>Beat2Lotto+&trade; Signals</h2>
@@ -329,6 +330,7 @@
         <a href="./index.html">Home</a>
         <a href="./features-app.html">Features</a>
         <a href="./live-events.html">Live Events</a>
+        <a href="./news/">News</a>
         <a href="./lottery-spheres.html#spheres">Spheres</a>
         <a href="./prompt-lab.html#beat2lotto">Beat2Lotto+</a>
         <a href="./prompt-lab.html">Prompts</a>
@@ -344,9 +346,9 @@
     </footer>
 
     <script src="./beat2lotto-plus.js?v=uploaded-audio-player-1" defer></script>
-    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=view-mode-toggle-2" defer></script>
+<script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+    <script src="./site.js?v=original-page-wipe-3" defer></script>
     <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
     <script src="./assets/js/prompt-lab-motion.js?v=prompt-lab-motion-4" defer></script>
   </body>

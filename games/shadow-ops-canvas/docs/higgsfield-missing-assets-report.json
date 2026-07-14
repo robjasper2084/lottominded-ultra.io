@@ -1,0 +1,80 @@
+{
+  "source": "assets\\mission\\higgsfield_missing_assets_source_20260623.jpeg",
+  "outputs": {
+    "alpha": "assets\\mission\\higgsfield_missing_assets_alpha_20260623.png",
+    "worldProps": "assets\\mission\\higgsfield_missing_world_props_runtime_v1.png",
+    "fxSheet": "assets\\mission\\higgsfield_missing_fx_sheet_runtime_v1.png"
+  },
+  "cells": {
+    "world": [
+      "wall_vertical",
+      "wall_circuit",
+      "wall_cross",
+      "platform_short",
+      "platform_bridge",
+      "platform_core",
+      "vault_eye",
+      "vault_gold",
+      "vault_bar",
+      "heart_idle",
+      "shield_orb",
+      "shield_badge",
+      "shard_single",
+      "shard_pair",
+      "spark_pink",
+      "spark_gold"
+    ],
+    "fxRows": [
+      [
+        "heart_idle",
+        "heart_dash_1",
+        "heart_dash_2",
+        "heart_dash_3",
+        "heart_dash_2"
+      ],
+      [
+        "spark_pink",
+        "spark_gold",
+        "shield_orb",
+        "shard_pair",
+        "shard_single"
+      ],
+      [
+        "shield_badge",
+        "vault_eye",
+        "vault_gold",
+        "vault_bar",
+        "shield_orb"
+      ],
+      [
+        "muzzle_short",
+        "muzzle_long",
+        "heart_dash_3",
+        "heart_dash_2",
+        "spark_gold"
+      ]
+    ]
+  },
+  "audits": [
+    {
+      "path": "assets\\mission\\higgsfield_missing_world_props_runtime_v1.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "checker_like_pixels": 27946
+    },
+    {
+      "path": "assets\\mission\\higgsfield_missing_fx_sheet_runtime_v1.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "empty": [],
+      "clipped": [],
+      "checker_like_pixels": 82145
+    }
+  ]
+}

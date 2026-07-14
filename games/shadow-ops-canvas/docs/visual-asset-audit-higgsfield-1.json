@@ -1,0 +1,201 @@
+{
+  "asset_count": 38,
+  "missing": [],
+  "sheet_checks": [
+    {
+      "key": "missionProps",
+      "path": "./assets/mission/chatgpt_world_elements_sheet_runtime.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "cell": [
+        256,
+        256
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    },
+    {
+      "key": "fxSheet",
+      "path": "./assets/mission/chatgpt_mission_fx_sheet_runtime_clean.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "cell": [
+        256,
+        256
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    },
+    {
+      "key": "gameplayFx",
+      "path": "./assets/mission/chatgpt_gameplay_fx_sheet_runtime_clean.png",
+      "size": [
+        1280,
+        1024
+      ],
+      "cell": [
+        320,
+        256
+      ],
+      "empty_cells": [],
+      "clipped_cells": [
+        {
+          "i": 0,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.688
+        },
+        {
+          "i": 1,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 2,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 3,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.681
+        },
+        {
+          "i": 4,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.679
+        },
+        {
+          "i": 5,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 6,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 7,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.681
+        },
+        {
+          "i": 8,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.679
+        },
+        {
+          "i": 9,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 10,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 11,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.681
+        },
+        {
+          "i": 12,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.679
+        },
+        {
+          "i": 13,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 14,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.754
+        },
+        {
+          "i": 15,
+          "empty": false,
+          "margin": 0,
+          "coverage": 0.681
+        }
+      ]
+    },
+    {
+      "key": "crawlerWalk",
+      "path": "./assets/characters/chatgpt_robot_dog_walk_strip_runtime.png",
+      "size": [
+        2560,
+        240
+      ],
+      "cell": [
+        320,
+        240
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    },
+    {
+      "key": "droneMotion",
+      "path": "./assets/characters/higgsfield_drone_motion_strip_runtime.png",
+      "size": [
+        3072,
+        256
+      ],
+      "cell": [
+        768,
+        256
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    },
+    {
+      "key": "cannonTurretMotion",
+      "path": "./assets/characters/chatgpt_cannon_turret_motion_strip_runtime.png",
+      "size": [
+        3072,
+        256
+      ],
+      "cell": [
+        384,
+        256
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    },
+    {
+      "key": "shieldRobotMotion",
+      "path": "./assets/characters/chatgpt_shield_robot_mission_strip_runtime_v4.png",
+      "size": [
+        3072,
+        320
+      ],
+      "cell": [
+        384,
+        320
+      ],
+      "empty_cells": [],
+      "clipped_cells": []
+    }
+  ]
+}

@@ -10,7 +10,8 @@
     <title>LOTTOMINDED ULTRA | Lottery Spheres</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=view-mode-toggle-2" />
+    <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/lottery-spheres.html" />
+<link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -18,39 +19,38 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=compositor-pass-1" />
-    <link rel="stylesheet" href="./lottery-spheres.css?v=spheres-player-20-1" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./lottery-spheres.css?v=player-fit-1" />
+    <link rel="stylesheet" href="./lottery-spheres-console.css?v=console-badge-front-1" />
+    <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
   </head>
-  <body class="lottery-spheres-page">
+  <body class="lottery-spheres-page home-page has-sphere-header has-global-sphere-header has-jackpot-maze-popup">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
     </div>
-    <header class="site-header home-like-header home-sphere-header global-sphere-header" data-site-header>
+    <header class="site-header home-like-header home-sphere-header global-sphere-header lottery-spheres-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
           <img src="./assets/brand/lm-orb-mark.webp" alt="" />
           <span>LOTTOMINDED ULTRA</span>
         </a>
-        <button class="site-header-toggle" type="button" data-header-toggle aria-expanded="true">Menu</button>
       </div>
-      <nav aria-label="LOTTOMINDED ULTRA sphere navigation">
+      <nav aria-label="Lottery Spheres navigation">
         <a href="./index.html#top" data-icon="HM">Home</a>
+        <a href="./memberships.html" data-icon="MB">Memberships</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
-        <a href="./live-events.html" data-icon="EV">Streams</a>
+        <a href="./news/" data-icon="NW">News</a>
+        <a href="./live-events.html" data-icon="EV">Events</a>
         <a href="./lottery-spheres.html#spheres" data-icon="SP" aria-current="page">Spheres</a>
         <a href="./beat2lotto-plus.html#beat2lotto" data-icon="B2">Beat2Lotto+&trade;</a>
-        <a href="./merch-store.html" data-icon="MC">Merch</a>
+        <a href="./merch-store.html" data-icon="DR">Merch</a>
         <a href="./how-to-use.html" data-icon="GD">Guide</a>
-        <a href="./lottomind-stem-studio/index.html" data-icon="ST">Studio</a>
-        <a href="https://robjasper2084.github.io/Jungle-Lotto/lotto%20mind%20refined/" data-icon="LM" data-vault-launch data-plan="free">LottoMind App</a>
+        <a href="../lotto%20mind%20refined/" data-icon="LM" data-member-app-link="true" data-members-only="true" aria-label="LottoMind App membership required">LottoMind App</a>
       </nav>
-      <div class="direct-launch" aria-label="Direct studio launch">
-        <a class="direct-action direct-primary" href="./lottomind-stem-studio/index.html">Launch Studio</a>
-      </div>
     </header>
 
     <div class="sphere-audio-gate is-hidden" data-sphere-audio-gate role="dialog" aria-modal="true" aria-label="Sphere background music" hidden>
@@ -67,6 +67,32 @@
     </div>
     <audio data-sphere-soundtrack src="./assets/audio/lottomind-vault-174-hz.mp3" loop preload="metadata"></audio>
 
+    <aside class="sphere-shadow-popup is-hidden" data-sphere-shadow-popup aria-hidden="true" aria-labelledby="sphereShadowTitle">
+      <div class="sphere-shadow-popup-panel" role="dialog" aria-modal="true">
+        <button class="sphere-shadow-popup-close" type="button" data-sphere-shadow-close aria-label="Close Shadow Ops game">X</button>
+        <div class="sphere-shadow-popup-copy">
+          <p class="sphere-shadow-popup-kicker">Sphere Vault Signal</p>
+          <h2 id="sphereShadowTitle">Shadow Ops Canvas</h2>
+          <p>Break the number vaults, collect every key, and bring the signal back into the sphere room.</p>
+        </div>
+        <div class="sphere-shadow-popup-stage" aria-label="Shadow Ops Canvas game popup">
+          <button class="sphere-shadow-fullscreen" type="button" data-sphere-shadow-fullscreen aria-label="Play Shadow Ops fullscreen">Fullscreen</button>
+          <iframe
+            data-sphere-shadow-frame
+            data-src="./games/shadow-ops-canvas/index.html?bg=soul-location-1&amp;v=higgsfield-trailer-1"
+            title="Shadow Ops Canvas playable game"
+            loading="lazy"
+            allow="autoplay; fullscreen; gamepad"
+          ></iframe>
+        </div>
+        <div class="sphere-shadow-popup-rail" aria-hidden="true">
+          <span>Sphere route locked</span>
+          <span>Number run live</span>
+          <span>Signal drop armed</span>
+        </div>
+      </div>
+    </aside>
+
     <main>
       <section class="sphere-stage" id="spheres" data-spheres-stage aria-label="Interactive LOTTOMINDED lottery spheres">
         <canvas class="sphere-canvas" data-spheres-canvas aria-hidden="true"></canvas>
@@ -75,6 +101,7 @@
 
         <div class="sphere-copy">
           <p class="section-kicker">Beat2Lotto+&trade; Signal Room</p>
+          <a class="sphere-app-chip" href="../lotto%20mind%20refined/">Open LottoMind App</a>
           <h1 class="kinetic-word" data-kinetic="LOTTERY SPHERES IN MOTION" tabindex="0">Lottery Spheres in Motion</h1>
           <p>
             Guide the glowing balls, reroll a creative set, and send the signal back into the
@@ -82,7 +109,9 @@
           </p>
           <div class="sphere-actions">
             <button class="primary-action" type="button" data-reroll-spheres>Reroll Spheres</button>
-          <a class="secondary-action" href="./beat2lotto-plus.html#beat2lotto">Open Beat2Lotto+&trade;</a>
+            <button class="secondary-action" type="button" data-sphere-shadow-open>Open Shadow Ops</button>
+            <a class="secondary-action" href="../lotto%20mind%20refined/">Open LottoMind App</a>
+            <a class="secondary-action" href="./beat2lotto-plus.html#beat2lotto">Open Beat2Lotto+&trade;</a>
             <a class="secondary-action" href="./lottomind-stem-studio/index.html">Launch Studio</a>
           </div>
         </div>
@@ -111,6 +140,30 @@
               <div><dt>Pick 4</dt><dd data-sphere-pick4>--</dd></div>
             </dl>
           </div>
+          <section class="sphere-eightball" aria-labelledby="sphereEightBallTitle">
+            <div class="sphere-eightball-heading">
+              <span>Eight Ball API</span>
+              <strong id="sphereEightBallTitle">Sphere Oracle</strong>
+            </div>
+            <blockquote data-eightball-reading aria-live="polite">Ask a yes-or-no question to tune the sphere field.</blockquote>
+            <form class="sphere-eightball-form" data-eightball-form>
+              <label for="sphereEightBallQuestion">Your question</label>
+              <div class="sphere-eightball-controls">
+                <input
+                  id="sphereEightBallQuestion"
+                  data-eightball-question
+                  type="text"
+                  maxlength="160"
+                  autocomplete="off"
+                  placeholder="Will my creative signal align?"
+                  required
+                />
+                <button type="submit" data-eightball-submit>Ask Oracle</button>
+              </div>
+            </form>
+            <p class="sphere-eightball-status" data-eightball-status role="status">Ready for a question.</p>
+            <small>For entertainment and creative journaling only. Not a prediction.</small>
+          </section>
         </aside>
       </section>
 
@@ -132,12 +185,84 @@
         </article>
       </section>
 
+
+      <aside class="spheres-jackpot-popup is-open" data-jackpot-maze-popup aria-hidden="false">
+        <div class="spheres-jackpot-popup__panel" role="dialog" aria-modal="true" aria-labelledby="spheresJackpotMazeTitle">
+          <button class="spheres-jackpot-popup__close" type="button" data-jackpot-maze-close aria-label="Enter the Spheres page">X</button>
+          <div class="spheres-jackpot-popup__heading">
+            <div>
+              <p class="section-kicker">Playable LottoMind arcade signal</p>
+              <h2 id="spheresJackpotMazeTitle">LottoMind: Jackpot Maze</h2>
+            </div>
+            <div class="spheres-jackpot-popup__actions">
+              <a class="secondary-action" href="./games/lottomind-jackpot-maze/" target="_blank" rel="noopener noreferrer">Open Full Game</a>
+              <button class="primary-action" type="button" data-jackpot-maze-close>Enter Spheres Page</button>
+            </div>
+          </div>
+          <iframe
+            class="spheres-jackpot-popup__frame"
+            data-src="./games/lottomind-jackpot-maze/"
+            title="Playable LottoMind Jackpot Maze game"
+            allow="autoplay; fullscreen"
+          ></iframe>
+        </div>
+      </aside>
+
     </main>
 
+    <section class="instrument-console ultra-page-instrument-console neon-panel" aria-label="Studio instrument console bottom copy">
+      <div class="console-pill"><small>Signal Route</small><strong>Ultra Mode</strong></div>
+      <div class="console-keyboard">
+        <div class="mode-tabs">
+          <button class="is-active" type="button">Piano</button>
+          <button type="button">Synth</button>
+          <button type="button">Pad</button>
+          <button type="button">Bass</button>
+          <button type="button">Lead</button>
+          <button type="button">FX</button>
+        </div>
+        <div class="playable-piano" data-playable-piano aria-label="Playable C minor blues piano">
+          <button class="piano-key is-root" type="button" data-note="C3" data-frequency="130.81"><span>C</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Eb3" data-frequency="155.56"><span>Eb</span></button>
+          <button class="piano-key" type="button" data-note="F3" data-frequency="174.61"><span>F</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Gb3" data-frequency="185"><span>Gb</span></button>
+          <button class="piano-key" type="button" data-note="G3" data-frequency="196"><span>G</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Bb3" data-frequency="233.08"><span>Bb</span></button>
+          <button class="piano-key is-root" type="button" data-note="C4" data-frequency="261.63"><span>C</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Eb4" data-frequency="311.13"><span>Eb</span></button>
+          <button class="piano-key" type="button" data-note="F4" data-frequency="349.23"><span>F</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Gb4" data-frequency="369.99"><span>Gb</span></button>
+          <button class="piano-key" type="button" data-note="G4" data-frequency="392"><span>G</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Bb4" data-frequency="466.16"><span>Bb</span></button>
+          <button class="piano-key is-root" type="button" data-note="C5" data-frequency="523.25"><span>C</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Eb5" data-frequency="622.25"><span>Eb</span></button>
+          <button class="piano-key" type="button" data-note="F5" data-frequency="698.46"><span>F</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Gb5" data-frequency="739.99"><span>Gb</span></button>
+          <button class="piano-key" type="button" data-note="G5" data-frequency="783.99"><span>G</span></button>
+          <button class="piano-key is-accidental" type="button" data-note="Bb5" data-frequency="932.33"><span>Bb</span></button>
+        </div>
+      </div>
+      <div class="console-eq" data-live-eq aria-label="Live signal equalizer">
+        <small>Signal EQ</small>
+        <div class="live-eq-meter" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <span class="eq-source-status" data-eq-status>Listening</span>
+      </div>
+      <div class="console-knobs" aria-label="Studio effect controls">
+        <button type="button" data-fx-control="drive" aria-label="Adjust drive effect" aria-pressed="false"><i></i><span>Drive</span></button>
+        <button type="button" data-fx-control="reverb" aria-label="Adjust reverb effect" aria-pressed="false"><i></i><span>Reverb</span></button>
+        <button type="button" data-fx-control="delay" aria-label="Adjust delay effect" aria-pressed="false"><i></i><span>Delay</span></button>
+        <button type="button" class="master" data-fx-control="master" aria-label="Adjust master volume" aria-pressed="true"><i></i><span>Master</span></button>
+      </div>
+      <div class="console-status"><small>Studio Status</small><strong>Online</strong><div class="status-wave" aria-hidden="true"></div></div>
+    </section>
+
     <footer class="lm-live-player spheres-live-player" id="player" data-live-player aria-label="Lottery Spheres live mix player">
-      <audio data-live-player-audio preload="metadata" src="./assets/audio/digital-static-cover-1.mp3"></audio>
+      <audio data-live-player-audio data-stream-open-audio preload="metadata" src="./assets/audio/verse-1-stream-open.mp3"></audio>
       <div class="now-art"></div>
-      <div class="now-copy"><small>Now Playing</small><strong>Digital Static - Spheres Page</strong><span>Uploaded cover mix</span></div>
+      <div class="now-copy"><small>Now Playing</small><strong>Verse 1 - Stream Page</strong><span>Stream opens with uploaded media</span></div>
       <div class="now-wave" aria-hidden="true"><i></i></div>
       <button type="button" aria-label="Back 15 seconds" data-live-player-prev>&lt;&lt;</button>
       <button type="button" class="big" aria-label="Play live mix" aria-pressed="false" data-live-player-toggle>&#9654;</button>
@@ -151,9 +276,11 @@
       <span>2026</span>
     </footer>
 
-    <script src="./assets/js/lm-page-transition-audio.js?v=verified-transitions-1" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-hotfix-2" defer></script>
-    <script src="./site.js?v=view-mode-toggle-2" defer></script>
-    <script src="./lottery-spheres.js?v=perf-fixes-1" defer></script>
+<script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+    <script src="./site.js?v=original-page-wipe-3" defer></script>
+    <script src="./assets/features-app/js/features-cinematic-motion.js?v=instrument-console-bottom-20260626" defer></script>
+    <script src="./lottery-spheres.js?v=player-fit-1" defer></script>
+    <script src="./assets/js/lm-healing-frequency.js?v=magic-eight-float-1" defer></script>
   </body>
 </html>

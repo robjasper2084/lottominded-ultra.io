@@ -622,7 +622,7 @@ button.is-copy-pulsed {
 }
 
 .beat2lotto-current-page.home-page.has-sphere-header .home-sphere-header nav {
-  width: min(100%, 60rem) !important;
+  width: min(100%, 62rem) !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   scrollbar-width: none !important;
@@ -838,8 +838,8 @@ button.is-copy-pulsed {
 }
 
 .beat2lotto-current-page.home-page.has-sphere-header .home-sphere-header nav a {
-  min-inline-size: clamp(4.2rem, 5.35vw, 5.28rem) !important;
-  padding-inline: 0.4rem !important;
+  min-inline-size: clamp(4.5rem, 7.4vw, 5.8rem) !important;
+  padding-inline: 0.28rem !important;
 }
 
 @media (max-width: 620px) {
@@ -894,7 +894,6 @@ button.is-copy-pulsed {
 }
 
 body.beat2lotto-current-page #player.sphere-orb-live-player {
-  --player-orb-size: clamp(216px, 27.2vw, 272px);
   border-color: rgba(255, 221, 109, 0.86) !important;
   background:
     radial-gradient(circle at 29% 18%, rgba(255, 255, 255, 0.82), rgba(255, 231, 142, 0.34) 10%, transparent 23%),
