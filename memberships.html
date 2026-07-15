@@ -10,6 +10,11 @@
     <title>Memberships | LOTTOMINDED ULTRA</title>
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
+    <link rel="preload" as="image" href="./assets/brand/lottomind-little-man-membership-hero-v2.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/cursor/lm-mascot-front.png" fetchpriority="high" />
+    <link rel="preload" as="image" href="./assets/brand/membership-lottomind-reporter-particle-mask.png" />
+    <link rel="preload" as="image" href="./assets/brand/membership-hooded-brain-particle-mask.jpg" />
+    <link rel="preload" as="image" href="./assets/brand/membership-circuit-brain-particle-mask.jpg" />
     <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/memberships.html" />
     <script>
       try {
@@ -20,10 +25,10 @@
     </script>
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
 <link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
-    <link rel="stylesheet" href="./assets/css/beat2lotto-collector-access.css?v=collector-memberships-2" />
+    <link rel="stylesheet" href="./assets/css/beat2lotto-collector-access.css?v=collector-memberships-3" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <link rel="stylesheet" href="./assets/vendor/lenis/lenis.css?v=1.1.20" />
-    <link rel="stylesheet" href="./assets/css/memberships-cinematic.css?v=membership-entity-4" />
+    <link rel="stylesheet" href="./assets/css/memberships-cinematic.css?v=gaming-generator-showcase-1" />
     <script type="importmap">
       {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
     </script>
@@ -45,8 +50,8 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Membership navigation">
-        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./memberships.html" data-icon="MB" aria-current="page">Memberships</a>
+        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./news/" data-icon="NW">News</a>
         <a href="./live-events.html" data-icon="EV">Events</a>
@@ -78,8 +83,8 @@
       <div id="lmSignalGrain" class="lm-signal-layer lm-signal-grain" aria-hidden="true"></div>
       <div id="lmSignalVignette" class="lm-signal-layer lm-signal-vignette" aria-hidden="true"></div>
 
-      <section class="membership-section membership-collector-section" id="lm-access-hero" aria-labelledby="collectorSectionTitle">
-        <div class="membership-section-heading">
+      <section class="home-collector-access-section" id="lm-access-hero" aria-labelledby="collectorSectionTitle">
+        <div class="home-collector-access-section__heading">
           <span>Vault Guardian Series 01</span>
           <h2 id="collectorSectionTitle">Collector Access</h2>
           <p>Sign in, view your shared LottoCredits wallet, or redeem the protected code included with an eligible physical collectible.</p>
@@ -134,9 +139,9 @@
           </p>
           <h1 id="membershipHeroTitle">Memberships for the <em>Lottomind app</em></h1>
           <p class="membership-temporal-subtitle">A membership observatory — walk every signal tier in one continuous hall.</p>
-          <p>
-            Choose a public Phase 1 pass for LottoMind tools, creative number journaling, music inspiration,
-            vault drops, entertainment-only LottoCredits, app use, and member download access.
+          <p class="membership-collectible-offer">
+            The Little Man collectible is $19.95.<br />
+            It includes three months of membership — free.
           </p>
           <div class="membership-hero-actions">
             <a class="primary-action" href="#membership-plans">Compare Plans</a>
@@ -152,16 +157,24 @@
             <span>LottoCredits</span>
           </div>
         </div>
-        <aside class="membership-signal-card" aria-label="Featured Ultra membership summary">
-          <div class="membership-signal-orbit" aria-hidden="true">
-            <img src="./assets/brand/lm-brain-orb.webp" alt="" />
+        <aside class="membership-signal-card membership-collectible-card" aria-label="Little Man Luggage Charm and Backpack Guardian with complimentary three-month LottoMind app membership">
+          <div class="membership-signal-orbit">
+            <img
+              src="./assets/brand/lottomind-little-man-membership-hero-v2.png"
+              alt="LottoMind Little Man Luggage Charm and Backpack Guardian in black-and-gold retail packaging"
+              width="1003"
+              height="1536"
+              fetchpriority="high"
+              decoding="async"
+            />
           </div>
           <div class="membership-signal-card-copy">
-            <span class="plan-featured-tag">Best value</span>
-            <span>Featured route</span>
-            <strong>Ultra Membership</strong>
-            <b>$9.99<span>/month</span></b>
-            <p>$99/year for premium vault tools, advanced creative reports, app use, download access, and early beta drops.</p>
+            <span class="plan-featured-tag">3 months included</span>
+            <span>Luggage Charm &middot; Backpack Guardian</span>
+            <strong>Little Man Guardian + App Membership</strong>
+            <b>$19.95<span> one time</span></b>
+            <p>Buy the Little Man Luggage Charm and Backpack Guardian and receive three complimentary months of membership across the LottoMind apps.</p>
+            <a class="membership-collectible-cta" href="./merch-store.html?product=guardian#keychains">View Guardian</a>
           </div>
         </aside>
       </section>
@@ -172,7 +185,19 @@
         </p>
       </section>
 
-      <section class="membership-section lm-observatory-section lm-plans" id="membership-plans" aria-labelledby="plansTitle" data-lm-shape="1" data-lm-bg="#0a0710" data-lm-glow="#ff8a5b" data-lm-epoch="Ignition" data-lm-time="T − 13.6 Gyr">
+      <section class="membership-statement lm-observatory-section" id="ignition" aria-labelledby="ignitionTitle" data-lm-shape="1" data-lm-bg="#0a0710" data-lm-glow="#ff8a5b" data-lm-epoch="Create" data-lm-time="Music · Games · Journals">
+        <div class="membership-statement__copy">
+          <p class="membership-statement__kicker">LottoMind Ultra &middot; What this website does</p>
+          <h2 class="membership-statement__lines" id="ignitionTitle" aria-label="LottoMind Ultra is a creative studio for numbers and ideas. Make music, games, journals, and signals.">
+            <span data-lm-ignition-line>A creative studio</span>
+            <span data-lm-ignition-line>for <em>numbers and ideas.</em></span>
+            <span data-lm-ignition-line>Make music, games,</span>
+            <span data-lm-ignition-line>journals, and <em>signals.</em></span>
+          </h2>
+        </div>
+      </section>
+
+      <section class="membership-section lm-plans" id="membership-plans" aria-labelledby="plansTitle">
         <div class="membership-section-heading">
           <span>T − 13.6 Gyr · Plan ladder</span>
           <h2 id="plansTitle">Choose the <em>signal level.</em></h2>
@@ -269,44 +294,75 @@
         </div>
       </section>
 
-      <section class="membership-section membership-what-you-get lm-observatory-section" id="lm-benefits" aria-labelledby="whatYouGetTitle" data-lm-shape="2" data-lm-bg="#070910" data-lm-glow="#c9a06a" data-lm-epoch="Worlds" data-lm-time="T − 4.6 Gyr">
-        <div class="membership-section-heading">
-          <span>T − 4.6 Gyr · What you get</span>
-          <h2 id="whatYouGetTitle">Creative tools, saved routes, and <em>vault access.</em></h2>
-        </div>
-        <div class="membership-feature-grid">
-          <article>
-            <img src="./assets/icons/brain.svg" alt="" loading="lazy" decoding="async" />
-            <h3>Creative lottery journaling tools</h3>
-            <p>Organize notes, dreams, saved sets, and number ideas for entertainment-only creative workflows.</p>
-          </article>
-          <article>
-            <img src="./assets/brand/beat2lotto-static-logo-coin.png" alt="" loading="lazy" decoding="async" />
-            <h3>Music and number inspiration tools</h3>
-            <p>Use Beat2Lotto+, Dream Oracle, Number Radar, and studio prompts as creative signal generators.</p>
-          </article>
-          <article>
-            <img src="./assets/brand/lm-orb-mark.webp" alt="" loading="lazy" decoding="async" />
-            <h3>Saved creative workflows</h3>
-            <p>Keep repeatable routes for idea capture, history, app previews, and future account-backed tools.</p>
-          </article>
-          <article>
-            <img src="./assets/icons/vault.svg" alt="" loading="lazy" decoding="async" />
-            <h3>Vault access for premium members</h3>
-            <p>Gold and Ultra routes can map to premium Vault features when the backend/auth phase is added.</p>
-          </article>
-          <article>
-            <img src="./assets/brand/jazz-network-gold-coin.webp" alt="" loading="lazy" decoding="async" />
-            <h3>LottoCredits add-ons</h3>
-            <p>Entertainment-only credits for app tools. They have no cash value and cannot be redeemed.</p>
-          </article>
-        </div>
-        <div class="membership-signal-strip" aria-label="Membership benefits summary">
-          <span>Creative tools</span><span>Saved routes</span><span>Member downloads</span><span>Premium vault</span><span>Early drops</span><span>LottoCredits</span>
+      <section class="membership-section membership-what-you-get lm-observatory-section lm-worlds" id="worlds" aria-labelledby="worldsTitle" data-lm-shape="2" data-lm-bg="#070910" data-lm-glow="#c9a06a" data-lm-epoch="Worlds" data-lm-time="T − 4.6 Gyr">
+        <div class="lm-worlds__pin" data-lm-worlds-pin>
+          <div class="membership-section-heading lm-worlds__heading">
+            <span>Eight playable worlds · Arcade online</span>
+            <h2 id="worldsTitle">Gaming Generator <em>Showcase.</em></h2>
+            <p>Scroll through the live LottoMind arcade. Each card opens a playable route while the planetary signal follows the track.</p>
+          </div>
+          <div class="lm-worlds__viewport" aria-label="Eight playable LottoMind games">
+            <div class="lm-worlds__track" data-lm-worlds-track>
+              <a class="lm-epoch-card lm-world-game-card" href="./games/gothtechnology2/" aria-label="Play GOTHTECHNOLOGY">
+                <div class="lm-epoch-card__media"><img src="./games/gothtechnology2/assets/user-title/gothtechnology-cover-start-bg.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">01 · Live</span><span class="lm-epoch-card__era">Action · Advanced</span></div><h3>GOTHTECHNOLOGY</h3><p>Cross the Blackwood forest, break the signal lock, and fight your way into the vault.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./games/lottomind-jackpot-maze/" aria-label="Play LottoMind Jackpot Maze">
+                <div class="lm-epoch-card__media"><img src="./games/lottomind-jackpot-maze/public/assets/ui/lottomind-jackpot-maze-title-card-gpt2.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">02 · Live</span><span class="lm-epoch-card__era">Arcade · Intermediate</span></div><h3>LottoMind: Jackpot Maze</h3><p>Collect secure number reveals, outsmart five comic villains, and open the neon vault.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./games/opengw-levels/" aria-label="Play 2084 Static Wave">
+                <div class="lm-epoch-card__media"><img src="./games/opengw-levels/assets/2084/branding/marquee-gameplay-keyart.png" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">03 · Live</span><span class="lm-epoch-card__era">Action · Advanced</span></div><h3>2084 Static Wave</h3><p>Pilot the static signal through a fast neon combat grid with solo and multiplayer routes.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./games/shadow-ops-canvas/" aria-label="Play Robot Rahbe">
+                <div class="lm-epoch-card__media"><img src="./games/shadow-ops-canvas/assets/backgrounds/robot-rahbe-gameplay-keyart-flipped.png" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">04 · Live</span><span class="lm-epoch-card__era">Action · Intermediate</span></div><h3>Robot Rahbe</h3><p>Enter the Shadow Ops arena, survive the mission grid, and hold the tactical signal.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./games/raytrace-pong-background/" aria-label="Play Raytrace Pong">
+                <div class="lm-epoch-card__media"><img src="./assets/arcade/raytrace-pong-title.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">05 · Live</span><span class="lm-epoch-card__era">Simulation · Casual</span></div><h3>Raytrace Pong</h3><p>Play a light-traced Pong simulation where the ball illuminates the arena and casts live shadows.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./lottery-spheres.html#spheres" aria-label="Play Lottery Spheres in Motion">
+                <div class="lm-epoch-card__media"><img src="./assets/arcade/lottery-spheres-title.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">06 · Live</span><span class="lm-epoch-card__era">Arcade · Casual</span></div><h3>Lottery Spheres in Motion</h3><p>Guide the glowing spheres, reroll a creative set, and bend the orbit path with your pointer.</p><span class="lm-world-game-card__launch">Play now <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./prompt-lab.html" aria-label="Open Beat2Lotto Plus Prompt Lab">
+                <div class="lm-epoch-card__media"><img src="./assets/arcade/beat2lotto-prompt-lab-title.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">07 · Live</span><span class="lm-epoch-card__era">Creative tools · Casual</span></div><h3>Beat2Lotto+ Prompt Lab</h3><p>Turn local beat energy into entertainment-only number signals and production-ready creative prompts.</p><span class="lm-world-game-card__launch">Open lab <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+              <a class="lm-epoch-card lm-world-game-card" href="./lottomind-stem-studio/" aria-label="Open LottoMind Stem Studio">
+                <div class="lm-epoch-card__media"><img src="./assets/arcade/stem-studio-title.webp" alt="" loading="lazy" decoding="async" /></div>
+                <div class="lm-epoch-card__body"><div class="lm-epoch-card__meta"><span class="lm-epoch-card__number">08 · Live</span><span class="lm-epoch-card__era">Music &amp; rhythm · Intermediate</span></div><h3>LottoMind Stem Studio</h3><p>Mix stems, shape the live signal, and build a playable music route in the browser studio.</p><span class="lm-world-game-card__launch">Open studio <span aria-hidden="true">&rarr;</span></span></div>
+              </a>
+            </div>
+          </div>
+          <div class="lm-worlds__progress" aria-hidden="true"><span data-lm-worlds-progress></span></div>
         </div>
       </section>
 
-      <section class="membership-section membership-credits lm-observatory-section" id="lm-credits" aria-labelledby="creditsTitle" data-lm-shape="3" data-lm-bg="#04080d" data-lm-glow="#4fb6e0" data-lm-epoch="Water" data-lm-time="T − 3.8 Gyr">
+      <section class="membership-section membership-water lm-observatory-section" id="water" aria-labelledby="waterTitle" data-lm-shape="3" data-lm-bg="#04080d" data-lm-glow="#4fb6e0" data-lm-epoch="Water" data-lm-time="T &minus; 3.8 Gyr">
+        <div class="membership-water__copy">
+          <div class="membership-section-heading">
+            <span>Featured hall &middot; Ocean memory</span>
+            <h2 id="waterTitle">Hall 04 &mdash;<br /><em>The Restless Water.</em></h2>
+            <p>A field of light that behaves like the first ocean: it has currents, weather, and a long memory. Stand still and it settles around you. Move, and your wake persists for an hour after you leave.</p>
+          </div>
+          <dl class="membership-water__stats" aria-label="Restless Water hall details">
+            <div><dt>Basin</dt><dd>40 m projection floor</dd></div>
+            <div><dt>Sound</dt><dd>22.1 spatial field</dd></div>
+            <div><dt>Memory</dt><dd>Wake persistence &middot; 60 min</dd></div>
+          </dl>
+        </div>
+        <figure class="membership-water__figure" data-speed="1.1" data-lm-water-figure>
+          <div class="membership-water__media" data-lm-water-media>
+            <img src="https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&amp;fit=crop&amp;w=1400&amp;q=82" alt="Dark ocean water rolling beneath a blue atmospheric horizon" loading="lazy" decoding="async" data-lm-water-image />
+          </div>
+          <figcaption>FIG 04 &mdash; Wake persistence study &middot; long exposure</figcaption>
+        </figure>
+      </section>
+
+      <section class="membership-section membership-credits" id="lm-credits" aria-labelledby="creditsTitle">
         <div class="membership-credits-intro">
           <div class="membership-section-heading">
             <span>T − 3.8 Gyr · Add-on packs</span>
@@ -318,8 +374,8 @@
           </div>
           <div class="membership-wallet-state">
             <span>Shared wallet</span>
-            <strong>Sign in to view wallet</strong>
-            <button class="secondary-action" type="button" data-lm-open-collector>Collector Access</button>
+            <strong>Collector wallet access is available here</strong>
+            <a class="secondary-action" href="#lm-access-hero">Collector Access</a>
           </div>
         </div>
         <div class="credit-pack-grid">
@@ -329,36 +385,42 @@
         </div>
       </section>
 
-      <section class="membership-section membership-steps lm-observatory-section" id="lm-unlock-route" aria-labelledby="stepsTitle" data-lm-shape="4" data-lm-bg="#050a0a" data-lm-glow="#5bf0d8" data-lm-epoch="Life" data-lm-time="T − 0.54 Gyr">
-        <div class="membership-section-heading">
-          <span>T − 0.54 Gyr · How membership works</span>
-          <h2 id="stepsTitle">Choose, checkout, and <em>unlock.</em></h2>
+      <section class="membership-section membership-visit lm-observatory-section" id="life" aria-labelledby="lifeTitle" data-lm-shape="4" data-lm-bg="#050a0a" data-lm-glow="#5bf0d8" data-lm-epoch="Life" data-lm-time="T − 0.54 Gyr">
+        <div class="visit-lead">
+          <span class="visit-lead__kicker">Plan Your Crossing</span>
+          <h2 id="lifeTitle"><span>Thirteen billion years,</span><br /><em>one afternoon.</em></h2>
+          <p>The full walk takes about ninety minutes. Evening entries are limited to preserve the dark-adapted halls.</p>
         </div>
-        <ol>
-          <li><strong>Choose a plan.</strong><span>Pick Free, Gold, Ultra, Vault, or a LottoCredits pack with app access clearly included.</span></li>
-          <li><strong>Checkout securely with Stripe.</strong><span>Test checkout uses server-created Stripe Checkout Sessions. Live mode stays disabled until explicitly configured.</span></li>
-          <li><strong>Use and download the app.</strong><span>Use the hosted app now; member download access activates when beta builds are supplied.</span></li>
-          <li><strong>Unlock premium creative tools.</strong><span>The existing LottoMind account service receives membership access after Stripe confirms checkout.</span></li>
-          <li><strong>Manage billing through Stripe.</strong><span>After the first checkout, open the Stripe Customer Portal from this page.</span></li>
-        </ol>
+        <aside class="membership-ticket-card" aria-label="AEON Temporal Observatory timed entry details">
+          <header>
+            <span>Timed admission</span>
+            <strong>AEON — Temporal Observatory</strong>
+          </header>
+          <dl>
+            <div><dt>Address</dt><dd>Pier 40 · Harbour District</dd></div>
+            <div><dt>Hours</dt><dd>Wed — Sun · 10:00 — 22:00</dd></div>
+            <div><dt>Day entry</dt><dd>24 —</dd></div>
+            <div><dt>Evening (after 19:00)</dt><dd>18 —</dd></div>
+            <div><dt>Under 26</dt><dd>12 —</dd></div>
+          </dl>
+          <a class="primary-action" href="#membership-plans">Reserve Timed Entry</a>
+        </aside>
       </section>
 
-      <section class="membership-section membership-vault-access lm-observatory-section" id="lm-vault-access" aria-labelledby="vaultAccessTitle" data-lm-shape="5" data-lm-bg="#0a070c" data-lm-glow="#e08ab8" data-lm-epoch="Flight" data-lm-time="T − 0.12 Gyr">
-        <div class="membership-vault-copy">
-          <span>T − 0.12 Gyr · Premium vault route</span>
-          <h2 id="vaultAccessTitle">Premium <em>Vault tools.</em></h2>
-          <p>Founder / limited access. Use and download LottoMind app beta builds when the package is supplied.</p>
-          <div class="membership-vault-actions">
-            <a class="primary-action" href="#membership-plans">Choose a Plan</a>
-            <a class="secondary-action" data-member-app-public="true" href="../lotto%20mind%20refined/?source=memberships">Launch App</a>
-          </div>
-        </div>
-        <div class="membership-vault-visual" aria-hidden="true">
-          <img src="./assets/brand/lm-brain-orb.webp" alt="" loading="lazy" decoding="async" />
+      <section class="membership-section membership-manifesto lm-observatory-section" id="signal" aria-labelledby="signalTitle" data-lm-shape="6" data-lm-bg="#0a0812" data-lm-glow="#a78bfa" data-lm-epoch="Signal" data-lm-time="T − 0.00 Gyr">
+        <div class="membership-manifesto__inner">
+          <span class="membership-manifesto__kicker">Curatorial Note</span>
+          <h2 class="membership-manifesto__lines" id="signalTitle">
+            <span data-lm-manifesto-line>You are not outside this story.</span>
+            <span data-lm-manifesto-line>The iron in your blood was forged <em>in a dying star.</em></span>
+            <span data-lm-manifesto-line>The calcium in your hands <em>remembers the sea.</em></span>
+            <span data-lm-manifesto-line>You are the collection, <em>walking.</em></span>
+          </h2>
+          <p class="membership-manifesto__credit">Curated by <strong>THE AEON FOUNDATION</strong></p>
         </div>
       </section>
 
-      <section class="membership-section stripe-placeholder-panel lm-observatory-section" id="stripe-pricing-table" aria-labelledby="stripeTitle" data-lm-shape="6" data-lm-bg="#0a0812" data-lm-glow="#a78bfa" data-lm-epoch="Signal" data-lm-time="T − 0.00 Gyr">
+      <section class="membership-section stripe-placeholder-panel" id="stripe-pricing-table" aria-labelledby="stripeTitle">
         <div class="membership-section-heading">
           <span>T − 0.00 Gyr · Secure billing / Test checkout</span>
           <h2 id="stripeTitle">Stripe <em>test checkout.</em></h2>
@@ -396,15 +458,15 @@
 
     <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
     <script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
-    <script src="./site.js?v=original-page-wipe-3" defer></script>
+    <script src="./site.js?v=memberships-first-1" defer></script>
     <script src="./assets/js/lottomind-account-service.js?v=collector-access-2"></script>
-    <script src="./assets/js/beat2lotto-collector-access.js?v=collector-memberships-2" defer></script>
+    <script src="./assets/js/beat2lotto-collector-access.js?v=collector-memberships-1" defer></script>
     <script src="./assets/js/lm-stripe-memberships.js?v=stripe-test-auth-1" defer></script>
     <script src="./assets/vendor/gsap/gsap.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/gsap/ScrollTrigger.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/gsap/SplitText.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/lenis/lenis.min.js?v=1.1.20" defer></script>
-    <script type="module" src="./assets/js/memberships-main.js?v=membership-entity-4"></script>
+    <script type="module" src="./assets/js/memberships-main.js?v=membership-reference-particles-6"></script>
     <script>
       (() => {
         const focusButton = document.querySelector("[data-membership-bg-focus]");
