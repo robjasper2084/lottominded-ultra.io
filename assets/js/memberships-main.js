@@ -1423,5 +1423,5 @@ const connectRuntime = async (runtime) => {
 };
 window.addEventListener("lm:membership-runtime-ready", (event) => connectRuntime(event.detail), { once: true });
 
-await import("./memberships-cinematic.js?v=membership-statement-charge-2");
+await import("./memberships-cinematic.js?v=membership-runtime-ready-3");
 if (window.__lmMembershipRuntime) connectRuntime(window.__lmMembershipRuntime);

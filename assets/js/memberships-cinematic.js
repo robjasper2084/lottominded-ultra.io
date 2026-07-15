@@ -17,12 +17,11 @@
   if (gsap && SplitText) gsap.registerPlugin(SplitText);
   const sectionMap = [
     ["dust", "Dust", "T − 13.8 Gyr"],
-    ["membership-plans", "Ignition", "T − 13.6 Gyr"],
-    ["lm-benefits", "Worlds", "T − 4.6 Gyr"],
-    ["lm-credits", "Water", "T − 3.8 Gyr"],
-    ["lm-unlock-route", "Life", "T − 0.54 Gyr"],
-    ["lm-vault-access", "Flight", "T − 0.12 Gyr"],
-    ["stripe-pricing-table", "Signal", "T − 0.00 Gyr"],
+    ["ignition", "Ignition", "T − 13.6 Gyr"],
+    ["worlds", "Worlds", "T − 4.6 Gyr"],
+    ["water", "Water", "T − 3.8 Gyr"],
+    ["life", "Life", "T − 0.54 Gyr"],
+    ["signal", "Signal", "T − 0.00 Gyr"],
     ["lm-final", "Return", "Now"],
   ].map(([id, label, time], index) => ({ id, label, time, index, node: document.getElementById(id) })).filter((item) => item.node);
 
@@ -33,6 +32,7 @@
     lenis: null,
     soundEnabled: false,
     audioContext: null,
+    hintRetired: false,
     telemetry: { x: 0.5, y: 0.5, status: "ARRAY STABLE" },
   };
 
@@ -111,11 +111,19 @@
 
   const cursorDot = document.createElement("span");
   const cursorRing = document.createElement("span");
+  const cursorHint = document.createElement("span");
   cursorDot.className = "lm-cursor-dot";
   cursorRing.className = "lm-cursor-ring";
+  cursorHint.className = "lm-cursor-hint";
+  cursorHint.textContent = "Click — disturb the array";
   cursorDot.setAttribute("aria-hidden", "true");
   cursorRing.setAttribute("aria-hidden", "true");
-  if (finePointer.matches && !reducedMotion.matches) root.append(cursorDot, cursorRing);
+  cursorHint.setAttribute("aria-hidden", "true");
+  try { state.hintRetired = localStorage.getItem("aeonBurstDiscovered") === "yes"; } catch (error) {}
+  if (finePointer.matches && !reducedMotion.matches) {
+    root.append(cursorDot, cursorRing);
+    if (!state.hintRetired) root.append(cursorHint);
+  }
 
   const playEpochTone = (index) => {
     if (!state.soundEnabled) return;
@@ -160,6 +168,32 @@
   const updateTelemetry = () => {
     hudRight.textContent = `${state.telemetry.x.toFixed(2)} · ${state.telemetry.y.toFixed(2)} · ${state.telemetry.status}`;
   };
+  document.addEventListener("pointermove", (event) => {
+    state.telemetry.x = Math.max(0, Math.min(1, event.clientX / innerWidth));
+    state.telemetry.y = Math.max(0, Math.min(1, event.clientY / innerHeight));
+    updateTelemetry();
+  }, { passive: true });
+
+  const formatDeepTime = (years, progress) => {
+    if (progress >= 0.9995 || years < 0.5) return "T − 0 · now";
+    const units = years >= 1e9
+      ? [1e9, "Gyr"]
+      : years >= 1e6
+        ? [1e6, "Myr"]
+        : years >= 1e3
+          ? [1e3, "kyr"]
+          : [1, "yr"];
+    const value = years / units[0];
+    const digits = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+    return `T − ${value.toFixed(digits)} ${units[1]}`;
+  };
+
+  const updateChronometer = () => {
+    const scrollRange = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    const scrollProgress = Math.max(0, Math.min(1, scrollY / scrollRange));
+    const years = 13.8e9 * Math.pow(1 - scrollProgress, 7);
+    hudLeft.textContent = formatDeepTime(years, scrollProgress);
+  };
 
   const setActiveSection = (index) => {
     const item = sectionMap[index];
@@ -175,7 +209,6 @@
       body.style.backgroundColor = background;
       body.style.setProperty("--lm-active-glow", glow);
     }
-    hudLeft.textContent = `${item.label} · ${item.time}`;
     rail.querySelectorAll("button").forEach((button) => {
       const active = button.dataset.lmSectionTarget === item.id;
       button.classList.toggle("is-active", active);
@@ -185,6 +218,7 @@
     window.dispatchEvent(new CustomEvent("lm:membership-era", {
       detail: { index, label: item.label, time: item.time, glow, background },
     }));
+    if (item.id !== "ignition") state.visual?.arrivalPulse?.();
     if (previousIndex !== index) playEpochTone(index);
   };
 
@@ -235,6 +269,98 @@
     revealTargets.filter((node) => !node.classList.contains("is-visible")).forEach((node) => revealObserver.observe(node));
   } else {
     revealTargets.forEach((node) => node.classList.add("is-visible"));
+  }
+
+  const waterSection = document.getElementById("water");
+  const waterFigure = waterSection?.querySelector("[data-lm-water-figure]");
+  const waterMedia = waterFigure?.querySelector("[data-lm-water-media]");
+  const waterImage = waterFigure?.querySelector("[data-lm-water-image]");
+  if (waterSection && waterFigure && waterMedia && waterImage) {
+    if (gsap && ScrollTrigger && !reducedMotion.matches) {
+      const figureSpeed = Number.parseFloat(waterFigure.dataset.speed || "1.1") || 1.1;
+      const drift = 11 * figureSpeed;
+      gsap.set(waterMedia, { clipPath: "inset(0 0 100% 0)" });
+      gsap.set(waterImage, {
+        "--lm-water-scale": 1.25,
+        "--lm-water-pan": "0%",
+        "--lm-water-drift": `${-drift}px`,
+      });
+      ScrollTrigger.create({
+        trigger: waterFigure,
+        start: "top 88%",
+        once: true,
+        onEnter: () => {
+          gsap.timeline()
+            .to(waterMedia, { clipPath: "inset(0 0 0% 0)", duration: 1.45, ease: "expo.out" })
+            .to(waterImage, { "--lm-water-scale": 1, duration: 1.55, ease: "expo.out" }, 0);
+        },
+      });
+      gsap.to(waterImage, {
+        "--lm-water-pan": "-12%",
+        ease: "none",
+        scrollTrigger: {
+          id: "lm-water-photo-pan",
+          trigger: waterSection,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+      gsap.to(waterImage, {
+        "--lm-water-drift": `${drift}px`,
+        ease: "none",
+        scrollTrigger: {
+          id: "lm-water-photo-parallax",
+          trigger: waterSection,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: figureSpeed,
+        },
+      });
+    } else {
+      waterMedia.style.clipPath = "none";
+      waterImage.style.setProperty("--lm-water-scale", "1");
+      waterImage.style.setProperty("--lm-water-pan", "0%");
+      waterImage.style.setProperty("--lm-water-drift", "0px");
+    }
+  }
+
+  const manifestoSection = document.getElementById("signal");
+  const manifestoLines = manifestoSection
+    ? [...manifestoSection.querySelectorAll("[data-lm-manifesto-line]")]
+    : [];
+  if (manifestoSection && manifestoLines.length) {
+    if (gsap && ScrollTrigger && !reducedMotion.matches) {
+      gsap.set(manifestoLines, { opacity: 0.1, y: 26 });
+      const manifestoTimeline = gsap.timeline({ paused: true })
+        .to(manifestoLines, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.5,
+          ease: "none",
+        });
+      const manifestoTrigger = ScrollTrigger.create({
+        id: "lm-manifesto-ignite",
+        trigger: manifestoSection,
+        start: "top 82%",
+        end: "center 42%",
+        scrub: 0.6,
+        animation: manifestoTimeline,
+        invalidateOnRefresh: true,
+      });
+      window.__lmMembershipManifesto = {
+        get progress() { return manifestoTimeline.progress(); },
+        get lineOpacity() { return manifestoLines.map((line) => Number.parseFloat(getComputedStyle(line).opacity)); },
+        get lineY() { return manifestoLines.map((line) => new DOMMatrixReadOnly(getComputedStyle(line).transform).m42); },
+        trigger: manifestoTrigger,
+      };
+    } else {
+      manifestoLines.forEach((line) => {
+        line.style.opacity = "1";
+        line.style.transform = "none";
+      });
+    }
   }
 
   let heroSplit = null;
@@ -288,22 +414,6 @@
     if (open) comparePanel.querySelector("[tabindex]")?.focus({ preventScroll: true });
   });
 
-  const collectorTrigger = document.querySelector("[data-collector-trigger]");
-  const collectorBalance = document.querySelector("[data-collector-trigger-balance]");
-  const walletState = root.querySelector(".membership-wallet-state strong");
-  const syncWalletState = () => {
-    if (!walletState || !collectorTrigger) return;
-    const balance = collectorBalance?.textContent?.trim();
-    const signedIn = balance && balance !== "--";
-    walletState.textContent = signedIn ? `${balance} LottoCredits` : "Sign in to view wallet";
-  };
-  syncWalletState();
-  if (collectorTrigger) new MutationObserver(syncWalletState).observe(collectorTrigger, { attributes: true, childList: true, subtree: true });
-  root.querySelector("[data-lm-open-collector]")?.addEventListener("click", () => {
-    scrollToNode(document.getElementById("lm-access-hero"));
-    window.setTimeout(() => collectorTrigger?.click(), reducedMotion.matches ? 0 : 420);
-  });
-
   if (finePointer.matches && !reducedMotion.matches) {
     root.querySelectorAll(".membership-plan-card, .membership-feature-grid article").forEach((card) => {
       card.addEventListener("pointermove", (event) => {
@@ -314,23 +424,30 @@
     });
 
     const pointer = { targetX: -100, targetY: -100, x: -100, y: -100 };
+    const interactiveSelector = "a, button, input, textarea, select, form, [tabindex], article, table, .collector-access, .lm-section-rail, footer, .site-header";
     root.addEventListener("pointermove", (event) => {
       pointer.targetX = event.clientX;
       pointer.targetY = event.clientY;
-      state.telemetry.x = Math.max(0, Math.min(1, event.clientX / innerWidth));
-      state.telemetry.y = Math.max(0, Math.min(1, event.clientY / innerHeight));
-      updateTelemetry();
-      const interactive = !!event.target.closest("a, button, input, [tabindex]");
+      const interactive = !!event.target.closest(interactiveSelector);
       cursorRing.classList.toggle("is-interactive", interactive);
+      cursorHint.classList.toggle("is-visible", !interactive && !state.hintRetired);
       body.classList.add("lm-cursor-ready");
     }, { passive: true });
-    root.addEventListener("pointerleave", () => body.classList.remove("lm-cursor-ready"), { passive: true });
+    root.addEventListener("pointerleave", () => {
+      body.classList.remove("lm-cursor-ready");
+      cursorHint.classList.remove("is-visible");
+    }, { passive: true });
     const moveCursor = () => {
       pointer.x += (pointer.targetX - pointer.x) * 0.18;
       pointer.y += (pointer.targetY - pointer.y) * 0.18;
       const transform = `translate3d(${pointer.x}px, ${pointer.y}px, 0)`;
       cursorDot.style.transform = transform;
       cursorRing.style.transform = transform;
+      const hintWidth = cursorHint.offsetWidth || 190;
+      const hintHeight = cursorHint.offsetHeight || 24;
+      const hintX = Math.max(10, Math.min(pointer.x + 18, window.innerWidth - hintWidth - 12));
+      const hintY = Math.max(10, Math.min(pointer.y + 22, window.innerHeight - hintHeight - 12));
+      cursorHint.style.transform = `translate3d(${hintX}px, ${hintY}px, 0)`;
     };
     if (gsap) gsap.ticker.add(moveCursor);
 
@@ -347,28 +464,50 @@
     });
   }
 
-  const setDisturbed = () => {
+  const setDisturbed = (duration = 2850) => {
     window.clearTimeout(state.disturbedTimer);
     state.telemetry.status = "ARRAY DISTURBED";
+    body.classList.add("lm-array-disturbed");
     updateTelemetry();
-    state.visual?.pulse();
     state.disturbedTimer = window.setTimeout(() => {
       state.telemetry.status = "ARRAY STABLE";
+      body.classList.remove("lm-array-disturbed");
       updateTelemetry();
-    }, 900);
+    }, duration);
   };
-  root.addEventListener("click", (event) => {
-    if (!finePointer.matches || reducedMotion.matches) return;
-    if (event.target.closest("a, button, input, form, article, table, .collector-access, .lm-section-rail, footer")) return;
+
+  window.addEventListener("aeon:burst", () => {
     setDisturbed();
+    if (state.hintRetired) return;
+    state.hintRetired = true;
+    cursorHint.classList.remove("is-visible");
+    cursorHint.remove();
+    try { localStorage.setItem("aeonBurstDiscovered", "yes"); } catch (error) {}
+  });
+
+  document.addEventListener("click", (event) => {
+    if (reducedMotion.matches) return;
+    if (event.target.closest("a, button, input, textarea, select, form, [tabindex], article, table, .collector-access, .lm-section-rail, footer, .site-header")) return;
+    state.visual?.burst?.();
   });
 
   const footer = document.querySelector("body.memberships-page > footer");
-  const syncFooterProximity = () => {
-    if (!footer) return;
-    body.classList.toggle("lm-near-footer", footer.getBoundingClientRect().top < innerHeight + 70);
+  const syncHudState = () => {
+    updateChronometer();
+    if (footer) body.classList.toggle("lm-near-footer", footer.getBoundingClientRect().top < innerHeight + 70);
   };
-  document.addEventListener("scroll", syncFooterProximity, { passive: true });
+  document.addEventListener("scroll", syncHudState, { passive: true });
+  state.lenis?.on?.("scroll", syncHudState);
+
+  const statement = document.getElementById("dust");
+  if (gsap && ScrollTrigger && statement && !reducedMotion.matches) {
+    ScrollTrigger.create({
+      trigger: statement,
+      start: "top 75%",
+      onEnter: () => body.classList.add("lm-hud-visible"),
+      onLeaveBack: () => body.classList.remove("lm-hud-visible"),
+    });
+  }
 
   // The persistent WebGL entity is isolated in memberships-main.js.
 
@@ -408,16 +547,22 @@
     }
   });
 
+  let heroIntroRequested = false;
   state.visual = window.__lmMembershipVisual || null;
-  window.addEventListener("lm:membership-entity-ready", (event) => { state.visual = event.detail; });
+  window.addEventListener("lm:membership-entity-ready", (event) => {
+    state.visual = event.detail;
+    if (heroIntroRequested) state.visual?.startHeroIntro?.();
+  });
   window.__lmMembershipRuntime = { lenis: state.lenis };
   window.dispatchEvent(new CustomEvent("lm:membership-runtime-ready", { detail: window.__lmMembershipRuntime }));
   setActiveSection(0);
   updateTelemetry();
-  syncFooterProximity();
+  syncHudState();
   body.classList.add("lm-motion-ready");
   ScrollTrigger?.refresh();
   await runPreloader();
+  heroIntroRequested = true;
+  state.visual?.startHeroIntro?.();
   state.lenis?.start();
   revealHero();
   ScrollTrigger?.refresh();
