@@ -4,6 +4,7 @@ import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } f
 import { STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND } from '../config/streetBonuses';
 import type { CompassDirection, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, PlayerCount, PlayStyle, StreetBonusKind } from '../types/game';
 import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, shouldSnapLateTurn, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
+import { createPortalNetwork } from './PortalNetwork';
 
 type EnemyKind = 'tax' | 'reaper' | 'chaos' | 'envy' | 'police';
 type VillainMode = 'normal' | 'frightened' | 'returning';
@@ -76,16 +77,16 @@ const ORIGIN_Y = 20;
 const GAME_WIDTH = 520;
 const GAME_HEIGHT = 540;
 const LEVEL_PALETTES = [
-  { primary: 0x35dfff, secondary: 0xffd45d, lane: 0xffe27a, road: 0x061826, portalLeft: 0x54eaff, portalRight: 0xb06cff },
-  { primary: 0xffa33d, secondary: 0x48e6ff, lane: 0xffcf54, road: 0x211106, portalLeft: 0xffb04e, portalRight: 0x36d9ff },
-  { primary: 0x4d9dff, secondary: 0xbdeeff, lane: 0x8bd7ff, road: 0x071a32, portalLeft: 0x62c9ff, portalRight: 0x8c7cff },
-  { primary: 0xff5d9e, secondary: 0xffb35a, lane: 0xff799f, road: 0x250914, portalLeft: 0xff6fb4, portalRight: 0xffb347 },
-  { primary: 0xffd45d, secondary: 0xb07cff, lane: 0xffe680, road: 0x1d1504, portalLeft: 0xffd75d, portalRight: 0x9e78ff },
-  { primary: 0xff873d, secondary: 0xff70ca, lane: 0xffbf68, road: 0x281006, portalLeft: 0xff874e, portalRight: 0xff68cc },
-  { primary: 0x42f5a1, secondary: 0x42dff5, lane: 0x8dffbf, road: 0x052018, portalLeft: 0x43f5ae, portalRight: 0x3cd7ff },
-  { primary: 0x49b8ff, secondary: 0xff4d65, lane: 0xffe05b, road: 0x07182a, portalLeft: 0x42c8ff, portalRight: 0xff526f },
-  { primary: 0xb574ff, secondary: 0x61efff, lane: 0xe2a4ff, road: 0x160925, portalLeft: 0xb66dff, portalRight: 0x53efff },
-  { primary: 0xffd84d, secondary: 0xf46bff, lane: 0xffffff, road: 0x241c04, portalLeft: 0xffdd55, portalRight: 0xf067ff }
+  { primary: 0x35dfff, secondary: 0xffd45d, lane: 0xffe27a, road: 0x061826, portalLeft: 0x54eaff, portalRight: 0xb06cff, powerUp: 0x6ff7ff },
+  { primary: 0xffa33d, secondary: 0x48e6ff, lane: 0xffcf54, road: 0x211106, portalLeft: 0xffb04e, portalRight: 0x36d9ff, powerUp: 0xffbd5a },
+  { primary: 0x4d9dff, secondary: 0xbdeeff, lane: 0x8bd7ff, road: 0x071a32, portalLeft: 0x62c9ff, portalRight: 0x8c7cff, powerUp: 0x8bc8ff },
+  { primary: 0xff5d9e, secondary: 0xffb35a, lane: 0xff799f, road: 0x250914, portalLeft: 0xff6fb4, portalRight: 0xffb347, powerUp: 0xff64bc },
+  { primary: 0xffd45d, secondary: 0xb07cff, lane: 0xffe680, road: 0x1d1504, portalLeft: 0xffd75d, portalRight: 0x9e78ff, powerUp: 0xffe15c },
+  { primary: 0xff873d, secondary: 0xff70ca, lane: 0xffbf68, road: 0x281006, portalLeft: 0xff874e, portalRight: 0xff68cc, powerUp: 0xff784e },
+  { primary: 0x42f5a1, secondary: 0x42dff5, lane: 0x8dffbf, road: 0x052018, portalLeft: 0x43f5ae, portalRight: 0x3cd7ff, powerUp: 0x56ffb0 },
+  { primary: 0x49b8ff, secondary: 0xff4d65, lane: 0xffe05b, road: 0x07182a, portalLeft: 0x42c8ff, portalRight: 0xff526f, powerUp: 0x4da7ff },
+  { primary: 0xb574ff, secondary: 0x61efff, lane: 0xe2a4ff, road: 0x160925, portalLeft: 0xb66dff, portalRight: 0x53efff, powerUp: 0xc886ff },
+  { primary: 0xffd84d, secondary: 0xf46bff, lane: 0xffffff, road: 0x241c04, portalLeft: 0xffdd55, portalRight: 0xf067ff, powerUp: 0xffffff }
 ] as const;
 const WORLD_ACCENTS = LEVEL_PALETTES.map(palette => palette.primary);
 const DETROIT_STREETS = [
@@ -113,6 +114,7 @@ function copyPoint(point: GridPoint): GridPoint { return { x: point.x, y: point.
 
 export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions): GameRuntimeHandle {
   const values = [...options.draw.main, ...(options.draw.special === undefined ? [] : [options.draw.special])];
+  const portalRunSeed = values.reduce((seed, value, index) => Math.imul(seed ^ (value + index * 37), 0x45d9f3b) >>> 0, 0x313777);
   const pressedCodes = new Set<string>();
 
   class MazeScene extends Phaser.Scene {
@@ -134,6 +136,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private streetDecor: Array<Phaser.GameObjects.Image | Phaser.GameObjects.Text> = [];
     private pelletObjects = new Map<string, Phaser.GameObjects.GameObject>();
     private powerPellets = new Set<string>();
+    private portalPoints: GridPoint[] = [];
+    private portalLinks = new Map<string, GridPoint>();
+    private portalCooldownUntil: [number, number] = [0, 0];
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private keys!: Record<string, Phaser.Input.Keyboard.Key>;
     private world = 0;
@@ -259,6 +264,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.worldObjects.forEach(object => object.destroy()); this.worldObjects = [];
       this.villains.forEach(villain => { villain.sprite.destroy(); villain.shadow.destroy(); villain.label.destroy(); }); this.villains = [];
       this.pelletObjects.clear(); this.powerPellets.clear(); this.maze = createMazeDefinition(this.world);
+      const portalNetwork = createPortalNetwork(this.maze, this.world, portalRunSeed);
+      this.portalPoints = portalNetwork.portals;
+      this.portalLinks = portalNetwork.links;
+      this.portalCooldownUntil = [0, 0];
       this.cityDepthLights = [];
       this.streetDecor = [];
       this.worldCollected = options.initialCheckpoint?.world === this.world ? options.initialCheckpoint.worldCollected ?? 0 : 0;
@@ -275,6 +284,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.worldStartScore = this.score;
       const treatment = DETROIT_LEVELS[this.world] ?? DETROIT_LEVELS[0];
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      this.forceFields.forEach(field => field?.setFillStyle(palette.powerUp, 0.055).setStrokeStyle(2, palette.powerUp, 0.95));
       const background = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'world1').setDisplaySize(GAME_WIDTH + 34, GAME_HEIGHT + 34).setAlpha(0.72).setDepth(-10);
       background.setCrop(80 + (this.world * 67) % 620, 0, 868, 900);
       const cityNear = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'world1').setDisplaySize(GAME_WIDTH + 58, GAME_HEIGHT + 58).setAlpha(0.12).setDepth(-7).setBlendMode(Phaser.BlendModes.SCREEN);
@@ -355,7 +365,6 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       };
       drawWall(ORIGIN_X + 2, ORIGIN_Y + 2, this.maze.width * TILE - 4, this.maze.height * TILE - 4, 13, false);
       this.drawDetroitRoadMarkings(walls);
-      const tunnelY = this.pixelY(this.maze.tunnelRow);
       // A larger gutter makes one-tile turns look open enough for the oversized
       // character sprites, matching the forgiving logical collision grid.
       this.maze.wallBlocks.forEach(block => {
@@ -364,27 +373,28 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       });
       drawWall(this.pixelX(7) - TILE / 2 + 8, this.pixelY(9) - TILE / 2 + 8, TILE * 7 - 16, TILE * 5 - 16, 8);
       this.worldObjects.push(walls);
-      this.createTunnelPortals(tunnelY);
+      this.createPortals();
       const door = this.add.rectangle(this.pixelX(10), this.pixelY(9), TILE - 3, 4, 0xffb8d9, 1).setDepth(5);
       this.worldObjects.push(door);
       this.createDetroitStreetLabels();
     }
 
-    private createTunnelPortals(tunnelY: number): void {
-      const makePortal = (x: number, color: number, orbitColor: number, direction: 'left' | 'right') => {
-        const portal = this.add.container(x, tunnelY).setDepth(9);
-        const mask = this.add.ellipse(0, 0, 29, 49, 0x010208, 0.98);
-        const halo = this.add.ellipse(0, 0, 43, 61, color, 0.12).setStrokeStyle(5, color, 0.26);
-        const outer = this.add.ellipse(0, 0, 34, 54, 0x000000, 0).setStrokeStyle(4, color, 1);
-        const middle = this.add.ellipse(0, 0, 26, 46, 0x000000, 0).setStrokeStyle(2, orbitColor, 0.95);
-        const core = this.add.ellipse(0, 0, 18, 38, 0x01020a, 1).setStrokeStyle(1, 0xffffff, 0.26);
-        const rimTop = this.add.ellipse(direction === 'left' ? 3 : -3, -1, 10, 30, color, 0.18);
+    private createPortals(): void {
+      const makePortal = (point: GridPoint, color: number, orbitColor: number, direction: 'left' | 'right', pair: number) => {
+        const portal = this.add.container(this.pixelX(point.x), this.pixelY(point.y)).setDepth(9);
+        const mask = this.add.ellipse(0, 0, 25, 35, 0x010208, 0.96);
+        const halo = this.add.ellipse(0, 0, 35, 47, color, 0.1).setStrokeStyle(4, color, 0.24);
+        const outer = this.add.ellipse(0, 0, 29, 41, 0x000000, 0).setStrokeStyle(3, color, 1);
+        const middle = this.add.ellipse(0, 0, 22, 34, 0x000000, 0).setStrokeStyle(2, orbitColor, 0.95);
+        const core = this.add.ellipse(0, 0, 14, 27, 0x01020a, 1).setStrokeStyle(1, 0xffffff, 0.24);
+        const rimTop = this.add.ellipse(direction === 'left' ? 2 : -2, -1, 8, 23, color, 0.17);
         const orbit = this.add.container(0, 0);
-        const sparkA = this.add.circle(0, -26, 2.7, 0xffffff, 1);
-        const sparkB = this.add.circle(0, 26, 2.2, orbitColor, 1);
-        const sparkC = this.add.circle(direction === 'left' ? -16 : 16, 0, 1.8, color, 0.95);
+        const sparkA = this.add.circle(0, -20, 2.2, 0xffffff, 1);
+        const sparkB = this.add.circle(0, 20, 1.9, orbitColor, 1);
+        const sparkC = this.add.circle(direction === 'left' ? -13 : 13, 0, 1.6, color, 0.95);
+        const pairLabel = this.add.text(0, 0, `${pair + 1}`, { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '7px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5);
         orbit.add([sparkA, sparkB, sparkC]);
-        portal.add([halo, mask, rimTop, core, outer, middle, orbit]);
+        portal.add([halo, mask, rimTop, core, outer, middle, orbit, pairLabel]);
         this.worldObjects.push(portal);
         if (!options.reducedMotion) {
           this.tweens.add({ targets: halo, scaleX: 1.15, scaleY: 1.08, alpha: 0.25, duration: 620, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
@@ -393,8 +403,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         }
       };
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
-      makePortal(this.pixelX(0), palette.portalLeft, palette.portalRight, 'left');
-      makePortal(this.pixelX(this.maze.width - 1), palette.portalRight, palette.portalLeft, 'right');
+      this.portalPoints.forEach((point, index) => {
+        const first = index % 2 === 0;
+        makePortal(point, first ? palette.portalLeft : palette.portalRight, first ? palette.portalRight : palette.portalLeft, first ? 'left' : 'right', Math.floor(index / 2));
+      });
     }
 
     private drawDetroitRoadMarkings(roads: Phaser.GameObjects.Graphics): void {
@@ -482,6 +494,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private createPellets(): void {
       const checkpoint = options.initialCheckpoint?.world === this.world ? options.initialCheckpoint : null;
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
       const remaining = checkpoint?.remainingHeartKeys ? new Set(checkpoint.remainingHeartKeys) : null;
       const remainingPower = checkpoint?.remainingPowerKeys ? new Set(checkpoint.remainingPowerKeys) : null;
       let total = 0;
@@ -491,11 +504,11 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         if (token === 'o') {
           total += 1;
           if (remaining && !remaining.has(key)) continue;
-          const orb = this.add.image(this.pixelX(x), this.pixelY(y), 'mindCoin').setDisplaySize(28, 28).setDepth(8);
+          const orb = this.add.image(this.pixelX(x), this.pixelY(y), 'mindCoin').setDisplaySize(28, 28).setDepth(8).setTint(palette.powerUp);
           if (!options.reducedMotion) this.tweens.add({ targets: orb, scaleX: orb.scaleX * 1.25, scaleY: orb.scaleY * 1.25, duration: 520, yoyo: true, repeat: -1 });
           this.pelletObjects.set(key, orb); if (!remainingPower || remainingPower.has(key)) this.powerPellets.add(key); this.worldObjects.push(orb);
         } else {
-          if ((x + y * 2) % HEART_GRID_SPACING !== 0) continue;
+          if (this.portalLinks.has(key) || (x + y * 2) % HEART_GRID_SPACING !== 0) continue;
           total += 1;
           if (remaining && !remaining.has(key)) continue;
           const pellet = this.add.image(this.pixelX(x), this.pixelY(y), 'loveHeart').setDisplaySize(HEART_SIZE, HEART_SIZE).setDepth(7).setData('pellet', true);
@@ -567,7 +580,11 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         const riverFlow = this.world === 6 && (mover.direction === 'left' || mover.direction === 'right') ? 1.12 : 1;
         mover.speed = (time < this.luckyRushUntil ? 7.2 : 5.7) * LEVEL_PLAYER_SPEED[this.world] * trafficPulse * riverFlow * options.gameSpeed;
         const arrivals = this.advanceMover(mover, dt, state => chooseForgivingDirection(this.maze, state.tile, state.queued, state.direction));
-        arrivals.forEach(tile => this.collectNearby(tile, time, playerIndex));
+        arrivals.forEach(tile => {
+          this.collectNearby(tile, time, playerIndex);
+          const destination = this.teleportPlayerAtPortal(mover, tile, time, playerIndex);
+          if (destination) this.collectNearby(destination, time, playerIndex);
+        });
         this.positionSprite(sprite, mover); this.animatePlayer(sprite, mover, time);
       };
       advancePlayer(this.player, this.playerMover, 0);
@@ -698,15 +715,16 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       const kind = STREET_BONUS_ORDER[(this.world + this.bonusSpawnIndex) % STREET_BONUS_ORDER.length];
       this.bonusSpawnIndex += 1;
       const definition = STREET_BONUSES[kind];
+      const powerColor = this.currentPowerColor();
       const tile = Phaser.Utils.Array.GetRandom(candidates);
       const x = this.pixelX(tile.x); const y = this.pixelY(tile.y);
-      const ring = this.add.circle(0, 1, 17, definition.color, 0.1).setStrokeStyle(1.5, definition.color, 0.85);
-      const sprite = this.add.image(0, 0, definition.texture).setDepth(1);
+      const ring = this.add.circle(0, 1, 17, powerColor, 0.1).setStrokeStyle(1.5, powerColor, 0.92);
+      const sprite = this.add.image(0, 0, definition.texture).setDepth(1).setTint(0xffffff, powerColor, 0xffffff, powerColor);
       if (kind === 'cash') sprite.setDisplaySize(32, 26);
       else if (kind === 'ticket') sprite.setDisplaySize(36, 24);
       else sprite.setDisplaySize(30, 30);
       const label = this.add.text(0, 20, definition.pickupLabel, {
-        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '6px', color: '#ffffff',
+        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '6px', color: this.currentPowerColorCss(),
         backgroundColor: '#050812', padding: { x: 2, y: 1 }, stroke: '#050812', strokeThickness: 1
       }).setOrigin(0.5).setDepth(2);
       const container = this.add.container(x, y, [ring, sprite, label]).setDepth(14).setScale(0.72).setAlpha(0);
@@ -751,19 +769,21 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private spawnStreetBonusFx(x: number, y: number, kind: StreetBonusKind, award: number, playerIndex: 0 | 1): void {
       const definition = STREET_BONUSES[kind];
-      const icon = this.add.image(x, y, definition.texture).setDisplaySize(kind === 'ticket' ? 42 : 36, kind === 'scratch' ? 36 : 32).setDepth(35);
+      const powerColor = this.currentPowerColor();
+      const color = Phaser.Display.Color.IntegerToColor(powerColor);
+      const icon = this.add.image(x, y, definition.texture).setDisplaySize(kind === 'ticket' ? 42 : 36, kind === 'scratch' ? 36 : 32).setDepth(35).setTint(0xffffff, powerColor, 0xffffff, powerColor);
       const label = this.add.text(x, y - 20, `${definition.label} +${award}`, {
-        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '10px', color: '#ffffff', stroke: '#020207', strokeThickness: 3
+        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '10px', color: this.currentPowerColorCss(), stroke: '#020207', strokeThickness: 3
       }).setOrigin(0.5).setDepth(36);
       const collector = playerIndex === 1 && this.player2 ? this.player2 : this.player;
-      collector.setTint(definition.color);
+      collector.setTint(powerColor);
       this.time.delayedCall(620, () => this.applyPlayerStyle());
       if (options.reducedMotion) { this.time.delayedCall(420, () => { icon.destroy(); label.destroy(); }); return; }
-      this.cameras.main.flash(130, kind === 'cash' ? 255 : 70, kind === 'ticket' ? 220 : 95, kind === 'scratch' ? 220 : 90, false);
+      this.cameras.main.flash(130, color.red, color.green, color.blue, false);
       this.tweens.add({ targets: icon, y: y - 36, scaleX: icon.scaleX * 1.45, scaleY: icon.scaleY * 1.45, alpha: 0, duration: 720, ease: 'Cubic.Out', onComplete: () => icon.destroy() });
       this.tweens.add({ targets: label, y: y - 62, alpha: 0, duration: 900, ease: 'Cubic.Out', onComplete: () => label.destroy() });
       for (let index = 0; index < 7; index += 1) {
-        const spark = this.add.circle(collector.x, collector.y, 2 + index % 2, definition.color, 0.9).setDepth(34);
+        const spark = this.add.circle(collector.x, collector.y, 2 + index % 2, powerColor, 0.9).setDepth(34);
         const angle = Phaser.Math.DegToRad(index * (360 / 7));
         this.tweens.add({ targets: spark, x: collector.x + Math.cos(angle) * 38, y: collector.y + Math.sin(angle) * 32, alpha: 0, duration: 420, onComplete: () => spark.destroy() });
       }
@@ -782,7 +802,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.lastSpeedTrailAt = time;
       for (const [index, sprite] of sprites.entries()) {
         if (!sprite || this.downedPlayers[index]) continue;
-        const trail = this.add.ellipse(sprite.x, sprite.y + 9, 22, 8, index === 1 ? 0xff5dcb : 0x43dcff, 0.32).setDepth(18);
+        const trail = this.add.ellipse(sprite.x, sprite.y + 9, 22, 8, this.currentPowerColor(), index === 1 ? 0.25 : 0.34).setDepth(18);
         this.tweens.add({ targets: trail, alpha: 0, scaleX: 0.25, duration: options.reducedMotion ? 120 : 300, onComplete: () => trail.destroy() });
       }
     }
@@ -892,6 +912,33 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       return arrivals;
     }
 
+    private teleportPlayerAtPortal(mover: GridMover, tile: GridPoint, time: number, playerIndex: 0 | 1): GridPoint | null {
+      if (time < this.portalCooldownUntil[playerIndex]) return null;
+      const destination = this.portalLinks.get(tileKey(tile));
+      if (!destination) return null;
+      const source = { ...tile };
+      mover.tile = { ...destination };
+      mover.next = null;
+      mover.progress = 0;
+      this.portalCooldownUntil[playerIndex] = time + 850;
+      this.usedPortal = true;
+      const pair = Math.floor(Math.max(0, this.portalPoints.findIndex(point => tileKey(point) === tileKey(source))) / 2) + 1;
+      this.spawnPortalJumpFx(source, destination, playerIndex);
+      this.setWarning(`P${playerIndex + 1} PORTAL ${pair} JUMP`, 850);
+      this.tone(460 + pair * 110, 0.11);
+      return destination;
+    }
+
+    private spawnPortalJumpFx(source: GridPoint, destination: GridPoint, playerIndex: 0 | 1): void {
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      const color = playerIndex === 1 ? palette.portalRight : palette.portalLeft;
+      [source, destination].forEach((point, index) => {
+        const ring = this.add.ellipse(this.pixelX(point.x), this.pixelY(point.y), 20, 29, 0x000000, 0).setStrokeStyle(3, color, 0.95).setDepth(31);
+        if (options.reducedMotion) this.time.delayedCall(180, () => ring.destroy());
+        else this.tweens.add({ targets: ring, scaleX: 2.1, scaleY: 1.7, alpha: 0, duration: 420 + index * 80, ease: 'Cubic.Out', onComplete: () => ring.destroy() });
+      });
+    }
+
     private updateVillains(time: number, dt: number): void {
       this.villains.forEach((villain, index) => {
         if (time < villain.releaseAt) {
@@ -945,7 +992,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           reaper: corners[0],
           chaos: corners[3],
           envy: corners[2],
-          police: { x: Math.floor(time / 2400) % 2 ? 0 : this.maze.width - 1, y: this.maze.tunnelRow }
+          police: this.portalPoints[Math.floor(time / 2400) % Math.max(1, this.portalPoints.length)] ?? { x: 0, y: this.maze.tunnelRow }
         };
         return shortestDirection(this.maze, tile, cornerByKind[villain.kind], villain.direction);
       }
@@ -956,7 +1003,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (villain.kind === 'envy') target = this.distanceTiles(villain.tile, chaseMover.tile) < 6 ? corners[2] : chaseMover.tile;
       if (villain.kind === 'police') {
         const projected = projectTile(this.maze, chaseMover.tile, chaseMover.direction, 6);
-        const portal = { x: chaseMover.tile.x < this.maze.width / 2 ? this.maze.width - 1 : 0, y: this.maze.tunnelRow };
+        const portal = this.portalPoints[(Math.floor(time / 3000) + index) % Math.max(1, this.portalPoints.length)] ?? { x: 0, y: this.maze.tunnelRow };
         target = this.pelletObjects.size < this.initialPellets * 0.35 ? chaseMover.tile : Math.floor(time / 3000) % 2 ? projected : portal;
       }
       return shortestDirection(this.maze, tile, target, villain.direction);
@@ -1012,8 +1059,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private spawnCollectFx(tile: GridPoint, award: number, power: boolean, combo: number, playerIndex: 0 | 1): void {
       const x = this.pixelX(tile.x); const y = this.pixelY(tile.y);
       const icon = this.add.image(x, y, power ? 'mindCoin' : 'loveHeart').setDisplaySize(power ? 34 : 14, power ? 34 : 14).setDepth(32);
+      if (power) icon.setTint(this.currentPowerColor());
       const label = this.add.text(x, y - 8, power ? `MIND COIN +${award}` : `+${award}${combo > 1 ? `  ×${combo}` : ''}`, {
-        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: power ? '11px' : '9px', color: power ? '#9bf3ff' : '#fff3a8', stroke: '#020207', strokeThickness: 3
+        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: power ? '11px' : '9px', color: power ? this.currentPowerColorCss() : '#fff3a8', stroke: '#020207', strokeThickness: 3
       }).setOrigin(0.5).setDepth(34);
       if (options.reducedMotion) {
         this.time.delayedCall(260, () => { icon.destroy(); label.destroy(); }); return;
@@ -1279,6 +1327,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       }
     }
 
+    private currentPowerColor(): number { return (LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0]).powerUp; }
+    private currentPowerColorCss(): string { return `#${this.currentPowerColor().toString(16).padStart(6, '0')}`; }
     private pixelX(x: number): number { return ORIGIN_X + x * TILE + TILE / 2; }
     private pixelY(y: number): number { return ORIGIN_Y + y * TILE + TILE / 2; }
     private distanceTiles(a: GridPoint, b: GridPoint): number { return Math.abs(a.x - b.x) + Math.abs(a.y - b.y); }

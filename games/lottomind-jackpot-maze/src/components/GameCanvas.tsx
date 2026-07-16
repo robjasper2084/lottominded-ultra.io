@@ -66,7 +66,7 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
     { title: 'COLLECT LOVE IN THE STREETS', text: 'Follow the glowing hearts. Nearby hearts magnet toward the hero and build a score combo.' },
     { title: 'ACTIVATE MIND COINS', text: 'Corner Mind Coins frighten villains. Press Space, gamepad A, or POWER to restore a shield or trigger a speed rush.' },
     { title: 'CHASE STREET BONUSES', text: 'Cash, lottery tickets, and scratch-offs move through the grid. Follow the HUD arrow before their countdown expires.' },
-    { title: 'USE THE PORTALS', text: 'Drive into either side portal to wrap instantly across the Detroit grid.' },
+    { title: 'USE THE PORTALS', text: 'Drive into a numbered portal to jump to its matching exit. Some Detroit maps have one pair; others have two pairs.' },
     { title: 'SURVIVE THE VILLAINS', text: 'Colored outlines identify each villain. Shields absorb one hit; without a shield you lose a life.' },
     ...(playStyle === 'coop' ? [{ title: 'REVIVE YOUR TEAMMATE', text: 'P1 and P2 score together. Stand beside a downed teammate to revive them and earn a teamwork bonus.' }] : [])
   ];
