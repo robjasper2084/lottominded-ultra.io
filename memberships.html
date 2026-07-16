@@ -83,53 +83,6 @@
       <div id="lmSignalGrain" class="lm-signal-layer lm-signal-grain" aria-hidden="true"></div>
       <div id="lmSignalVignette" class="lm-signal-layer lm-signal-vignette" aria-hidden="true"></div>
 
-      <section class="home-collector-access-section" id="lm-access-hero" aria-labelledby="collectorSectionTitle">
-        <div class="home-collector-access-section__heading">
-          <span>Vault Guardian Series 01</span>
-          <h2 id="collectorSectionTitle">Collector Access</h2>
-          <p>Sign in, view your shared LottoCredits wallet, or redeem the protected code included with an eligible physical collectible.</p>
-        </div>
-        <div class="collector-access" data-collector-access hidden>
-          <button class="collector-access__trigger" type="button" data-collector-trigger data-state="signed-out" aria-expanded="false" aria-controls="collectorAccessPanel"><span>Collector Access</span><b data-collector-trigger-balance>--</b></button>
-          <section class="collector-access__panel" id="collectorAccessPanel" data-collector-panel hidden aria-labelledby="collectorAccessTitle">
-            <button class="collector-access__close" type="button" data-collector-close aria-label="Close Collector Access">X</button>
-            <p class="collector-access__eyebrow">Vault Guardian Series 01</p>
-            <h2 class="collector-access__title" id="collectorAccessTitle">Collector Access</h2>
-            <h3 class="collector-access__offer-title">Your Collectible Unlocks Member Access</h3>
-            <p class="collector-access__offer">Purchase an eligible LottoMind collectible and redeem the protected code inside the package for a complimentary 30-day Collector Starter Membership, 150 Lotto Credits, and an exclusive Series 01 digital badge. No automatic renewal.</p>
-            <p class="collector-access__status" data-collector-status>Checking account access...</p>
-            <p class="collector-access__status" data-collector-membership></p>
-            <ul class="collector-access__benefits">
-              <li>Additional saved lottery drops</li>
-              <li>Premium mission visualizer access</li>
-              <li>Gold circuit collector theme and Series 01 badge</li>
-              <li>Verified Lotto Credit actions with server-priced confirmation</li>
-            </ul>
-            <div class="collector-access__wallet" data-collector-wallet hidden><span>Verified LottoCredits</span><strong>0</strong></div>
-            <section class="collector-access__results" data-game-results hidden aria-labelledby="collectorGameResultsTitle">
-              <h3 id="collectorGameResultsTitle">Recent Game Results</h3>
-              <p>Verified Shadow Ops and GOTHTECHNOLOGY finishes appear here and add fixed LottoCredits to this wallet.</p>
-              <ul data-game-results-list></ul>
-            </section>
-            <form class="collector-access__form" data-collector-auth-form>
-              <label for="collectorEmail">Account email</label>
-              <input id="collectorEmail" name="email" type="email" autocomplete="email" required />
-              <label for="collectorPassword">Password</label>
-              <input id="collectorPassword" name="password" type="password" autocomplete="current-password" minlength="10" required />
-              <div class="collector-access__actions"><button class="is-primary" type="submit" name="mode" value="login">Sign In</button><button type="submit" name="mode" value="register">Create Account</button></div>
-            </form>
-            <form class="collector-access__form" data-collector-redeem-form hidden>
-              <label for="collectorCode">Collectible code</label>
-              <input id="collectorCode" name="code" type="text" autocomplete="one-time-code" maxlength="96" spellcheck="false" placeholder="Enter the code from your insert" required />
-              <button class="is-primary" type="submit">Redeem Collector Code</button>
-            </form>
-            <div class="collector-access__actions"><a href="./redeem.html?source=memberships">Open Redemption Center</a><button type="button" data-collector-logout hidden>Sign Out</button></div>
-            <p class="collector-access__message" data-collector-message role="status" aria-live="polite"></p>
-            <p class="collector-access__legal">Collector Starter lasts 30 days and does not renew automatically. Beat2Lotto and LottoMind are entertainment and creative number-generation tools. Generated numbers do not predict or guarantee lottery results.</p>
-          </section>
-        </div>
-      </section>
-
       <section class="membership-hero lm-observatory-section" id="dust" aria-labelledby="membershipHeroTitle" data-lm-shape="0" data-lm-bg="#04060a" data-lm-glow="#5be9ff" data-lm-epoch="Dust" data-lm-time="T − 13.8 Gyr">
         <div class="membership-hero-copy">
           <p class="studio-boot-sequence" aria-hidden="true">
@@ -183,6 +136,53 @@
         <p>
           LottoMind is for entertainment, organization, music creation, and creative number journaling only. It does not predict winning lottery numbers. LottoCredits have no cash value and cannot be redeemed for money, prizes, tickets, or gambling.
         </p>
+      </section>
+
+      <section class="home-collector-access-section" id="lm-access-hero" aria-labelledby="collectorSectionTitle">
+        <div class="home-collector-access-section__heading">
+          <span>Vault Guardian Series 01</span>
+          <h2 id="collectorSectionTitle">Collector Access</h2>
+          <p>Sign in, view your shared LottoCredits wallet, or redeem the protected code included with an eligible physical collectible.</p>
+        </div>
+        <div class="collector-access" data-collector-access hidden>
+          <button class="collector-access__trigger" type="button" data-collector-trigger data-state="signed-out" aria-expanded="false" aria-controls="collectorAccessPanel"><span>Collector Access</span><b data-collector-trigger-balance>--</b></button>
+          <section class="collector-access__panel" id="collectorAccessPanel" data-collector-panel hidden aria-labelledby="collectorAccessTitle">
+            <button class="collector-access__close" type="button" data-collector-close aria-label="Close Collector Access">X</button>
+            <p class="collector-access__eyebrow">Vault Guardian Series 01</p>
+            <h2 class="collector-access__title" id="collectorAccessTitle">Collector Access</h2>
+            <h3 class="collector-access__offer-title">Your Collectible Unlocks Member Access</h3>
+            <p class="collector-access__offer">Purchase an eligible LottoMind collectible and redeem the protected code inside the package for a complimentary 30-day Collector Starter Membership, 150 Lotto Credits, and an exclusive Series 01 digital badge. No automatic renewal.</p>
+            <p class="collector-access__status" data-collector-status>Checking account access...</p>
+            <p class="collector-access__status" data-collector-membership></p>
+            <ul class="collector-access__benefits">
+              <li>Additional saved lottery drops</li>
+              <li>Premium mission visualizer access</li>
+              <li>Gold circuit collector theme and Series 01 badge</li>
+              <li>Verified Lotto Credit actions with server-priced confirmation</li>
+            </ul>
+            <div class="collector-access__wallet" data-collector-wallet hidden><span>Verified LottoCredits</span><strong>0</strong></div>
+            <section class="collector-access__results" data-game-results hidden aria-labelledby="collectorGameResultsTitle">
+              <h3 id="collectorGameResultsTitle">Recent Game Results</h3>
+              <p>Verified Shadow Ops and GOTHTECHNOLOGY finishes appear here and add fixed LottoCredits to this wallet.</p>
+              <ul data-game-results-list></ul>
+            </section>
+            <form class="collector-access__form" data-collector-auth-form>
+              <label for="collectorEmail">Account email</label>
+              <input id="collectorEmail" name="email" type="email" autocomplete="email" required />
+              <label for="collectorPassword">Password</label>
+              <input id="collectorPassword" name="password" type="password" autocomplete="current-password" minlength="10" required />
+              <div class="collector-access__actions"><button class="is-primary" type="submit" name="mode" value="login">Sign In</button><button type="submit" name="mode" value="register">Create Account</button></div>
+            </form>
+            <form class="collector-access__form" data-collector-redeem-form hidden>
+              <label for="collectorCode">Collectible code</label>
+              <input id="collectorCode" name="code" type="text" autocomplete="one-time-code" maxlength="96" spellcheck="false" placeholder="Enter the code from your insert" required />
+              <button class="is-primary" type="submit">Redeem Collector Code</button>
+            </form>
+            <div class="collector-access__actions"><a href="./redeem.html?source=memberships">Open Redemption Center</a><button type="button" data-collector-logout hidden>Sign Out</button></div>
+            <p class="collector-access__message" data-collector-message role="status" aria-live="polite"></p>
+            <p class="collector-access__legal">Collector Starter lasts 30 days and does not renew automatically. Beat2Lotto and LottoMind are entertainment and creative number-generation tools. Generated numbers do not predict or guarantee lottery results.</p>
+          </section>
+        </div>
       </section>
 
       <section class="membership-statement lm-observatory-section" id="ignition" aria-labelledby="ignitionTitle" data-lm-shape="1" data-lm-bg="#0a0710" data-lm-glow="#ff8a5b" data-lm-epoch="Create" data-lm-time="Music · Games · Journals">
