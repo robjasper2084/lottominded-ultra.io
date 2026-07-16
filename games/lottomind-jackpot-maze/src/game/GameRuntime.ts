@@ -1225,7 +1225,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         if (mover.direction === 'left') sprite.setFlipX(true);
         else if (mover.direction === 'right') sprite.setFlipX(false);
       } else {
-        const rows: Record<GridDirection, number> = { none: 0, down: 1, up: 2, left: 3, right: 4 };
+        const rows: Record<GridDirection, number> = { none: 0, down: 1, up: 2, left: 4, right: 3 };
         const frame = moving ? rows[mover.direction] * 8 + Math.floor(time / 105) % 8 : Math.floor(time / 210) % 8;
         sprite.setFlipX(false).setFrame(frame);
       }
