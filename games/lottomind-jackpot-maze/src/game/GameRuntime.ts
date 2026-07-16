@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
 import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, HEART_GRID_SPACING, HEART_SIZE, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS, VILLAIN_WAVES, villainCountForLevel } from '../config/gameBalance';
 import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } from '../config/detroitEvents';
-import { STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND } from '../config/streetBonuses';
-import type { CompassDirection, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, PlayerCount, PlayStyle, StreetBonusKind } from '../types/game';
+import { EMPTY_MISSION_STATS, evaluateDetroitMissions } from '../config/detroitMissions';
+import { BONUS_TIERS, STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND, bonusTierForSpawn } from '../config/streetBonuses';
+import { COSMETICS } from '../services/playerProgress';
+import type { BonusTier, CompassDirection, ControlBindings, ControlPreset, CosmeticId, GameCheckpoint, GameSnapshot, LevelMissionStats, LotteryDraw, PlayerCount, PlayStyle, RunVariant, StreetBonusKind } from '../types/game';
 import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, shouldSnapLateTurn, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
 import { createPortalNetwork } from './PortalNetwork';
 
@@ -13,6 +15,8 @@ interface RuntimeOptions {
   draw: LotteryDraw;
   playerCount: PlayerCount;
   playStyle: PlayStyle;
+  runVariant: RunVariant;
+  cosmetic: CosmeticId;
   muted: boolean;
   effectsVolume: number;
   reducedMotion: boolean;
@@ -28,7 +32,7 @@ interface RuntimeOptions {
   onSnapshot: (snapshot: GameSnapshot) => void;
   onPausedChange: (paused: boolean) => void;
   onLevelBreak: (completedLevelIndex: number, continueRun: () => void) => void;
-  onComplete: (result: { score: number; villainEncounters: number; powerUpsUsed: number; playerScores: [number, number]; heartsCollected: number; bonusesCollected: number; bestCombo: number; missedBonuses: number; eventsCompleted: number; levelGrades: Array<'S' | 'A' | 'B' | 'C'> }) => void;
+  onComplete: (result: { score: number; villainEncounters: number; powerUpsUsed: number; playerScores: [number, number]; heartsCollected: number; bonusesCollected: number; bestCombo: number; missedBonuses: number; eventsCompleted: number; levelGrades: Array<'S' | 'A' | 'B' | 'C'>; missionsCompleted: number; timeAttackBonus: number }) => void;
 }
 
 interface GridMover {
@@ -49,6 +53,7 @@ interface Villain extends GridMover {
   releaseAt: number;
   mode: VillainMode;
   baseFrame: number;
+  isBoss: boolean;
 }
 
 interface StreetBonus extends GridMover {
@@ -56,6 +61,7 @@ interface StreetBonus extends GridMover {
   container: Phaser.GameObjects.Container;
   sprite: Phaser.GameObjects.Image;
   expiresAt: number;
+  tier: BonusTier;
 }
 
 export interface GameRuntimeHandle {
@@ -103,6 +109,8 @@ const ENEMY_KINDS: EnemyKind[] = ['tax', 'reaper', 'chaos', 'envy', 'police'];
 type VillainTactic = (typeof VILLAIN_WAVES)[number]['tactic'];
 const LEVEL_PLAYER_SPEED = [1, 1.06, 0.98, 1.08, 1, 1.04, 1.08, 1.05, 1.1, 1.14] as const;
 const LEVEL_VILLAIN_SPEED = [1, 1.04, 0.88, 1.08, 1, 1.04, 1.08, 1.16, 1.12, 1.24] as const;
+const TIME_ATTACK_LEVEL_MS = [110_000, 105_000, 100_000, 95_000, 95_000, 90_000, 90_000, 85_000, 85_000, 90_000] as const;
+const DISTRICT_CAPTAINS = new Map<number, EnemyKind>([[1, 'chaos'], [3, 'police'], [5, 'reaper'], [7, 'police'], [9, 'chaos']]);
 const controls: { directions: [CardinalDirection | null, CardinalDirection | null]; activate: boolean } = { directions: [null, null], activate: false };
 let sceneRef: { scene: Phaser.Scenes.ScenePlugin; disposeAudio: () => void; saveProgressCheckpoint: () => void; restartCurrentLevel: () => void } | null = null;
 
@@ -174,6 +182,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private revivesCompleted = 0;
     private bossHealth = 0;
     private bossMaxHealth = 0;
+    private bossLabel = '';
+    private districtBossKind?: EnemyKind;
     private lastCheckpointAt = 0;
     private worldStartScore = 0;
     private lastStormCycle = -1;
@@ -189,6 +199,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private nextBonusAt = 0;
     private bonusSpawnIndex = 0;
     private bonusEffect?: StreetBonusKind;
+    private bonusEffectTier?: BonusTier;
     private bonusEffectUntil = 0;
     private doubleScoreUntil = 0;
     private bonusesCollected = 0;
@@ -204,6 +215,13 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private bonusCueArmed = true;
     private lastHudTick = -1;
     private focusDimmed = false;
+    private levelTimeRemainingMs: number = TIME_ATTACK_LEVEL_MS[0];
+    private timeAttackBonus = 0;
+    private portalComboUntil = 0;
+    private portalComboChain = 0;
+    private levelMissionStats: LevelMissionStats = { ...EMPTY_MISSION_STATS };
+    private missionRewardsClaimed = new Set<string>();
+    private missionsCompleted = 0;
 
     constructor() { super('lotto-grid-maze'); }
 
@@ -242,6 +260,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         this.missedBonuses = checkpoint.missedBonuses ?? 0;
         this.levelGrades = [...(checkpoint.levelGrades ?? [])];
         this.bossHealth = checkpoint.bossHealth ?? 0;
+        this.missionsCompleted = checkpoint.missionsCompleted ?? 0;
       }
       this.playerShadows[0] = this.add.ellipse(0, 0, 30, 10, 0x000000, 0.58).setDepth(19);
       this.player = this.add.sprite(0, 0, 'mascot', 0).setDisplaySize(52, 52).setDepth(20);
@@ -268,19 +287,26 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.portalPoints = portalNetwork.portals;
       this.portalLinks = portalNetwork.links;
       this.portalCooldownUntil = [0, 0];
+      this.portalComboUntil = 0; this.portalComboChain = 0;
       this.cityDepthLights = [];
       this.streetDecor = [];
       this.worldCollected = options.initialCheckpoint?.world === this.world ? options.initialCheckpoint.worldCollected ?? 0 : 0;
       this.worldRevealStart = this.quotas.slice(0, this.world).reduce((sum, quota) => sum + quota, 0); this.frightenedUntil = 0; this.frightenedCombo = 0;
       this.usedPortal = false;
-      this.bonusEffect = undefined; this.bonusEffectUntil = 0; this.doubleScoreUntil = 0; this.forceFieldUntil = [0, 0];
+      this.bonusEffect = undefined; this.bonusEffectTier = undefined; this.bonusEffectUntil = 0; this.doubleScoreUntil = 0; this.forceFieldUntil = [0, 0];
       this.forceFields.forEach(field => field?.setVisible(false));
       this.nextBonusAt = this.time.now + STREET_BONUS_SPAWN_INTERVAL_MS;
       this.bonusCueArmed = true;
       this.nextDetroitEventAt = this.time.now + DETROIT_EVENT_INTERVAL_MS;
       this.eventActiveUntil = 0; this.eventName = ''; this.lastHudTick = -1;
-      this.bossMaxHealth = this.world === MAZE_LEVEL_COUNT - 1 ? 3 : 0;
+      this.districtBossKind = DISTRICT_CAPTAINS.get(this.world);
+      this.bossMaxHealth = this.districtBossKind ? this.world === MAZE_LEVEL_COUNT - 1 ? 3 : 2 : 0;
       this.bossHealth = this.bossMaxHealth ? options.initialCheckpoint?.world === this.world ? options.initialCheckpoint.bossHealth ?? this.bossMaxHealth : this.bossMaxHealth : 0;
+      this.bossLabel = this.bossMaxHealth ? this.world === MAZE_LEVEL_COUNT - 1 ? 'VAULT BOSS' : `DISTRICT ${this.world + 1} CAPTAIN` : '';
+      const restoringWorld = options.initialCheckpoint?.world === this.world;
+      this.levelTimeRemainingMs = restoringWorld ? options.initialCheckpoint?.levelTimeRemainingMs ?? TIME_ATTACK_LEVEL_MS[this.world] : TIME_ATTACK_LEVEL_MS[this.world];
+      this.levelMissionStats = restoringWorld ? { ...EMPTY_MISSION_STATS, ...options.initialCheckpoint?.levelMissionStats } : { ...EMPTY_MISSION_STATS };
+      this.missionRewardsClaimed = new Set(restoringWorld ? options.initialCheckpoint?.missionRewardsClaimed ?? [] : []);
       this.worldStartScore = this.score;
       const treatment = DETROIT_LEVELS[this.world] ?? DETROIT_LEVELS[0];
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
@@ -301,7 +327,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.worldObjects.push(cityLabel);
       this.applyPlayerStyle();
       this.drawMaze(); this.createPellets(); this.createVillains(); this.resetMovers(this.time.now, 2300);
-      this.setWarning(`${options.playStyle === 'coop' ? 'CO-OP • ' : options.playStyle === 'alternating' ? `PLAYER ${this.activePlayer + 1} • ` : ''}LEVEL ${this.world + 1} READY!`, 2300);
+      this.setWarning(`${options.runVariant === 'timeAttack' ? 'TIME ATTACK • ' : options.runVariant === 'daily' ? 'DAILY DETROIT • ' : ''}${options.playStyle === 'coop' ? 'CO-OP • ' : options.playStyle === 'alternating' ? `PLAYER ${this.activePlayer + 1} • ` : ''}LEVEL ${this.world + 1} READY!`, 2300);
       this.emitSnapshot();
     }
 
@@ -403,9 +429,12 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         }
       };
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      const cosmetic = COSMETICS.find(item => item.id === options.cosmetic) ?? COSMETICS[0];
+      const portalLeft = cosmetic.portalBoost || palette.portalLeft;
+      const portalRight = cosmetic.portalBoost || palette.portalRight;
       this.portalPoints.forEach((point, index) => {
         const first = index % 2 === 0;
-        makePortal(point, first ? palette.portalLeft : palette.portalRight, first ? palette.portalRight : palette.portalLeft, first ? 'left' : 'right', Math.floor(index / 2));
+        makePortal(point, first ? portalLeft : portalRight, first ? portalRight : portalLeft, first ? 'left' : 'right', Math.floor(index / 2));
       });
     }
 
@@ -529,8 +558,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         if (kind === 'envy' || kind === 'police') sprite.setDisplaySize(42, 55); else sprite.setDisplaySize(48, 48);
         const label = this.add.text(0, 0, '', {}).setVisible(false);
         const spawn = this.maze.villainSpawns[index];
-        const villain: Villain = { ...createMover(spawn, 4.15), kind, sprite, shadow, label, spawn: copyPoint(spawn), releaseAt: this.time.now + releaseDelay[index], mode: 'normal', baseFrame };
-        if (this.world === MAZE_LEVEL_COUNT - 1 && kind === 'chaos') sprite.setDisplaySize(62, 62).setDepth(19);
+        const isBoss = kind === this.districtBossKind;
+        const villain: Villain = { ...createMover(spawn, 4.15), kind, sprite, shadow, label, spawn: copyPoint(spawn), releaseAt: this.time.now + releaseDelay[index], mode: 'normal', baseFrame, isBoss };
+        if (isBoss) sprite.setDisplaySize(kind === 'envy' || kind === 'police' ? 54 : this.world === MAZE_LEVEL_COUNT - 1 ? 62 : 57, kind === 'envy' || kind === 'police' ? 70 : this.world === MAZE_LEVEL_COUNT - 1 ? 62 : 57).setDepth(19);
         this.applyVillainOutline(villain);
         this.villains.push(villain);
       });
@@ -570,6 +600,11 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         this.villains.forEach(villain => { this.positionSprite(villain.sprite, villain); this.animateVillain(villain, time); villain.sprite.setAlpha(0); villain.shadow.setAlpha(0); villain.label.setAlpha(0); });
         return;
       }
+      if (options.runVariant === 'timeAttack' && this.hasMoved) {
+        this.levelTimeRemainingMs -= Math.min(delta, 100);
+        if (this.levelTimeRemainingMs <= 0) this.handleTimeAttackExpired(time);
+      }
+      if (this.portalComboUntil && time >= this.portalComboUntil) { this.portalComboUntil = 0; this.portalComboChain = 0; }
       this.updateDetroitEvent(time);
       const powerDown = this.bindingPowerDown() || this.gamepadPowerDown();
       if (controls.activate || (powerDown && !this.gamepadPowerPressed)) { controls.activate = false; this.activatePowerUp(); }
@@ -612,6 +647,31 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.streetDecor.forEach(object => object.setAlpha(shouldDim ? 0.62 : 1));
     }
 
+    private handleTimeAttackExpired(time: number): void {
+      this.levelTimeRemainingMs = Math.max(45_000, TIME_ATTACK_LEVEL_MS[this.world] - 20_000);
+      const penalty = Math.min(1500, this.score);
+      this.score -= penalty;
+      const owner = options.playStyle === 'coop' ? 0 : this.activePlayer;
+      this.playerScores[owner] = Math.max(0, this.playerScores[owner] - penalty);
+      this.combo = 1; this.portalComboChain = 0; this.portalComboUntil = 0;
+      this.resetMovers(time, 1600);
+      this.setWarning(`TIME EXPIRED • -${penalty} • CLOCK RESET`, 1800);
+      this.saveProgressCheckpoint();
+    }
+
+    private updateMissionProgress(owner: 0 | 1): void {
+      const newlyCompleted = evaluateDetroitMissions(this.world, this.levelMissionStats)
+        .filter(mission => mission.complete && !this.missionRewardsClaimed.has(mission.id));
+      newlyCompleted.forEach(mission => {
+        this.missionRewardsClaimed.add(mission.id);
+        this.missionsCompleted += 1;
+        this.score += mission.reward;
+        this.playerScores[owner] += mission.reward;
+        this.setWarning(`MISSION COMPLETE • ${mission.label} • +${mission.reward}`, 1450);
+        this.tone(900 + this.missionsCompleted * 18, 0.13);
+      });
+    }
+
     private updateDetroitEvent(time: number): void {
       if (this.eventName && time >= this.eventActiveUntil) { this.eventName = ''; this.eventActiveUntil = 0; }
       if (!this.hasMoved) return;
@@ -634,7 +694,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private updateStreetBonuses(time: number, dt: number): void {
       if (this.bonusEffect && time >= this.bonusEffectUntil) {
-        this.bonusEffect = undefined; this.bonusEffectUntil = 0; this.emitSnapshot();
+        this.bonusEffect = undefined; this.bonusEffectTier = undefined; this.bonusEffectUntil = 0; this.emitSnapshot();
       }
       if (this.activeBonus && time >= this.activeBonus.expiresAt) {
         this.activeBonus.container.destroy(); this.activeBonus = undefined; this.missedBonuses += 1;
@@ -713,67 +773,74 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       }
       if (!candidates.length) { this.nextBonusAt = time + 3000; this.bonusCueArmed = true; return; }
       const kind = STREET_BONUS_ORDER[(this.world + this.bonusSpawnIndex) % STREET_BONUS_ORDER.length];
+      const tier = bonusTierForSpawn(this.world, this.bonusSpawnIndex, portalRunSeed);
       this.bonusSpawnIndex += 1;
       const definition = STREET_BONUSES[kind];
+      const tierDefinition = BONUS_TIERS[tier];
       const powerColor = this.currentPowerColor();
       const tile = Phaser.Utils.Array.GetRandom(candidates);
       const x = this.pixelX(tile.x); const y = this.pixelY(tile.y);
-      const ring = this.add.circle(0, 1, 17, powerColor, 0.1).setStrokeStyle(1.5, powerColor, 0.92);
+      const ring = this.add.circle(0, 1, tier === 'gold' ? 20 : tier === 'silver' ? 18.5 : 17, tierDefinition.color, 0.12).setStrokeStyle(tier === 'gold' ? 2.8 : 1.8, tierDefinition.color, 0.98);
       const sprite = this.add.image(0, 0, definition.texture).setDepth(1).setTint(0xffffff, powerColor, 0xffffff, powerColor);
       if (kind === 'cash') sprite.setDisplaySize(32, 26);
       else if (kind === 'ticket') sprite.setDisplaySize(36, 24);
       else sprite.setDisplaySize(30, 30);
-      const label = this.add.text(0, 20, definition.pickupLabel, {
-        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '6px', color: this.currentPowerColorCss(),
+      const label = this.add.text(0, 20, `${tierDefinition.label} ${definition.pickupLabel}`, {
+        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '6px', color: tierDefinition.colorCss,
         backgroundColor: '#050812', padding: { x: 2, y: 1 }, stroke: '#050812', strokeThickness: 1
       }).setOrigin(0.5).setDepth(2);
       const container = this.add.container(x, y, [ring, sprite, label]).setDepth(14).setScale(0.72).setAlpha(0);
-      this.activeBonus = { ...createMover(tile, STREET_BONUS_SPEED_TILES_PER_SECOND), kind, container, sprite, expiresAt: time + STREET_BONUS_SPAWN_INTERVAL_MS };
+      this.activeBonus = { ...createMover(tile, STREET_BONUS_SPEED_TILES_PER_SECOND), kind, container, sprite, expiresAt: time + STREET_BONUS_SPAWN_INTERVAL_MS, tier };
       this.bonusCueArmed = false;
       if (options.reducedMotion) container.setScale(1).setAlpha(1);
       else this.tweens.add({ targets: container, scaleX: 1, scaleY: 1, alpha: 1, duration: 320, ease: 'Back.Out' });
-      this.setWarning(`MOVING STREET BONUS • ${definition.label} • CATCH IT!`, 1400);
+      this.setWarning(`${tierDefinition.label.toUpperCase()} MOVING BONUS • ${definition.label} • CATCH IT!`, 1400);
       this.tone(kind === 'cash' ? 520 : kind === 'ticket' ? 690 : 420, 0.12);
     }
 
     private collectStreetBonus(time: number, playerIndex: 0 | 1): void {
       const bonus = this.activeBonus; if (!bonus) return;
       const definition = STREET_BONUSES[bonus.kind];
+      const tierDefinition = BONUS_TIERS[bonus.tier];
+      const award = Math.round(definition.score * tierDefinition.scoreMultiplier);
+      const duration = Math.round(definition.durationMs * tierDefinition.durationMultiplier);
       const owner = this.scoringPlayer(playerIndex);
       const x = bonus.container.x; const y = bonus.container.y;
       const syncGate = this.syncGateReady();
       bonus.container.destroy(); this.activeBonus = undefined; this.nextBonusAt = time + STREET_BONUS_SPAWN_INTERVAL_MS; this.bonusCueArmed = true;
       this.bonusesCollected += 1; this.powerUpsUsed += 1;
-      this.score += definition.score; this.playerScores[owner] += definition.score;
+      this.levelMissionStats.bonuses += 1;
+      this.score += award; this.playerScores[owner] += award;
       if (options.playStyle === 'coop' && syncGate) {
         this.score += 313; this.playerScores[0] += 157; this.playerScores[1] += 156; this.teamCombo = Math.min(10, this.teamCombo + 2);
       }
-      this.bonusEffect = bonus.kind; this.bonusEffectUntil = time + definition.durationMs;
+      this.bonusEffect = bonus.kind; this.bonusEffectTier = bonus.tier; this.bonusEffectUntil = time + duration;
       if (bonus.kind === 'cash') {
-        this.doubleScoreUntil = time + definition.durationMs;
-        this.setWarning(`CASH STACK • +${definition.score} • DOUBLE HEART POINTS`, 1700);
+        this.doubleScoreUntil = time + duration;
+        this.setWarning(`${tierDefinition.label.toUpperCase()} CASH • +${award} • DOUBLE HEART POINTS`, 1700);
       } else if (bonus.kind === 'ticket') {
-        this.luckyRushUntil = Math.max(this.luckyRushUntil, time + definition.durationMs);
-        this.setWarning(`LUCKY TICKET • +${definition.score} • HERO SPEED BOOST`, 1700);
+        this.luckyRushUntil = Math.max(this.luckyRushUntil, time + duration);
+        this.setWarning(`${tierDefinition.label.toUpperCase()} TICKET • +${award} • HERO SPEED BOOST`, 1700);
       } else {
         const shieldOwner = options.playStyle === 'alternating' ? this.activePlayer : playerIndex;
         this.playerShields[shieldOwner] = true;
         if (options.playStyle !== 'coop') this.shielded = true;
-        this.forceFieldUntil[playerIndex] = time + definition.durationMs;
-        this.setWarning(`SCRATCH-OFF WIN • +${definition.score} • FORCE FIELD`, 1700);
+        this.forceFieldUntil[playerIndex] = time + duration;
+        this.setWarning(`${tierDefinition.label.toUpperCase()} SCRATCH-OFF • +${award} • FORCE FIELD`, 1700);
       }
       if (syncGate) this.setWarning(`313 SYNC GATE • ${definition.label} • TEAM +313`, 1800);
-      this.spawnStreetBonusFx(x, y, bonus.kind, definition.score, playerIndex);
+      this.spawnStreetBonusFx(x, y, bonus.kind, award, playerIndex, bonus.tier);
+      this.updateMissionProgress(owner);
       this.saveProgressCheckpoint(); this.emitSnapshot();
     }
 
-    private spawnStreetBonusFx(x: number, y: number, kind: StreetBonusKind, award: number, playerIndex: 0 | 1): void {
+    private spawnStreetBonusFx(x: number, y: number, kind: StreetBonusKind, award: number, playerIndex: 0 | 1, tier: BonusTier): void {
       const definition = STREET_BONUSES[kind];
-      const powerColor = this.currentPowerColor();
+      const powerColor = BONUS_TIERS[tier].color;
       const color = Phaser.Display.Color.IntegerToColor(powerColor);
       const icon = this.add.image(x, y, definition.texture).setDisplaySize(kind === 'ticket' ? 42 : 36, kind === 'scratch' ? 36 : 32).setDepth(35).setTint(0xffffff, powerColor, 0xffffff, powerColor);
-      const label = this.add.text(x, y - 20, `${definition.label} +${award}`, {
-        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '10px', color: this.currentPowerColorCss(), stroke: '#020207', strokeThickness: 3
+      const label = this.add.text(x, y - 20, `${BONUS_TIERS[tier].label.toUpperCase()} ${definition.label} +${award}`, {
+        fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '10px', color: BONUS_TIERS[tier].colorCss, stroke: '#020207', strokeThickness: 3
       }).setOrigin(0.5).setDepth(36);
       const collector = playerIndex === 1 && this.player2 ? this.player2 : this.player;
       collector.setTint(powerColor);
@@ -922,10 +989,14 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       mover.progress = 0;
       this.portalCooldownUntil[playerIndex] = time + 850;
       this.usedPortal = true;
+      this.portalComboChain = time < this.portalComboUntil ? Math.min(4, this.portalComboChain + 1) : 1;
+      this.portalComboUntil = time + 4500;
+      this.levelMissionStats.portals += 1;
       const pair = Math.floor(Math.max(0, this.portalPoints.findIndex(point => tileKey(point) === tileKey(source))) / 2) + 1;
       this.spawnPortalJumpFx(source, destination, playerIndex);
-      this.setWarning(`P${playerIndex + 1} PORTAL ${pair} JUMP`, 850);
+      this.setWarning(`P${playerIndex + 1} PORTAL ${pair} • HEARTS x${1 + this.portalComboChain}`, 1100);
       this.tone(460 + pair * 110, 0.11);
+      this.updateMissionProgress(this.scoringPlayer(playerIndex));
       return destination;
     }
 
@@ -1034,6 +1105,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.lastPelletAt = time;
       const isPower = this.powerPellets.delete(key);
       let award = (isPower ? 50 : 10) * this.combo;
+      if (time < this.portalComboUntil) award *= 1 + this.portalComboChain;
       if (time < this.doubleScoreUntil) award *= 2;
       const teamPass = options.playStyle === 'coop' && this.lastCollector !== null && this.lastCollector !== playerIndex && time - this.lastTeamCollectAt < 1500;
       if (teamPass) award += 25 * this.combo;
@@ -1048,10 +1120,14 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         this.frightenedUntil = time + MIND_COIN_FRIGHTENED_MS[this.world]; this.frightenedCombo = 0; this.setWarning('MIND COIN ACTIVE — VILLAINS VULNERABLE!', 1600); this.tone(240, 0.22);
         this.reverseVillains();
       } else { this.tone(620 + this.combo * 18, 0.035); }
-      this.combo = Math.min(7, this.combo + 1); this.bestCombo = Math.max(this.bestCombo, this.combo); this.revealNumbers(owner); this.emitSnapshot();
+      this.combo = Math.min(7, this.combo + 1); this.bestCombo = Math.max(this.bestCombo, this.combo);
+      this.levelMissionStats.hearts += 1;
+      this.levelMissionStats.bestStreak = Math.max(this.levelMissionStats.bestStreak, this.combo);
+      this.updateMissionProgress(owner);
+      this.revealNumbers(owner); this.emitSnapshot();
       if (time - this.lastCheckpointAt > 500 || this.pelletObjects.size === 0) { this.lastCheckpointAt = time; this.saveProgressCheckpoint(); }
       if (this.pelletObjects.size === 0) {
-        if (this.bossHealth > 0) this.setWarning(`VAULT BOSS REMAINS • ${this.bossHealth}/${this.bossMaxHealth} • USE MIND COINS`, 2200);
+        if (this.bossHealth > 0) this.setWarning(`${this.bossLabel} REMAINS • ${this.bossHealth}/${this.bossMaxHealth} • USE MIND COINS`, 2200);
         else this.completeWorld();
       }
     }
@@ -1089,13 +1165,16 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (this.completed) return;
       options.onCheckpoint({
         version: 1, savedAt: new Date().toISOString(), world: this.world, draw: options.draw, playStyle: options.playStyle,
+        runVariant: options.runVariant,
         score: this.score, activePlayer: this.activePlayer, playerScores: [...this.playerScores] as [number, number],
         playerLives: [...this.playerLives] as [number, number], playerShields: [...this.playerShields] as [boolean, boolean],
         lives: this.lives, shielded: this.shielded, revealed: [...this.revealed], nextReveal: this.nextReveal,
         pellets: this.pellets, villainEncounters: this.villainEncounters, powerUpsUsed: this.powerUpsUsed, bonusesCollected: this.bonusesCollected,
         remainingHeartKeys: [...this.pelletObjects.keys()], remainingPowerKeys: [...this.powerPellets], worldCollected: this.worldCollected,
         bossHealth: this.bossHealth, bestCombo: this.bestCombo, eventsCompleted: this.eventsCompleted,
-        missedBonuses: this.missedBonuses, levelGrades: [...this.levelGrades]
+        missedBonuses: this.missedBonuses, levelGrades: [...this.levelGrades],
+        levelTimeRemainingMs: this.levelTimeRemainingMs, levelMissionStats: { ...this.levelMissionStats },
+        missionRewardsClaimed: [...this.missionRewardsClaimed], missionsCompleted: this.missionsCompleted
       });
     }
 
@@ -1113,6 +1192,13 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private completeWorld(): void {
       while (this.nextReveal < this.worldRevealStart + this.quotas[this.world]) { this.revealed[this.nextReveal] = values[this.nextReveal]; this.nextReveal += 1; }
+      if (options.runVariant === 'timeAttack') {
+        const clockBonus = Math.max(0, Math.ceil(this.levelTimeRemainingMs / 1000) * 50);
+        this.timeAttackBonus += clockBonus;
+        this.score += clockBonus;
+        if (options.playStyle === 'coop') { this.playerScores[0] += Math.ceil(clockBonus / 2); this.playerScores[1] += Math.floor(clockBonus / 2); }
+        else this.playerScores[this.activePlayer] += clockBonus;
+      }
       const completionBonus = 2500 + this.lives * 500;
       this.score += completionBonus;
       if (options.playStyle === 'coop') {
@@ -1146,7 +1232,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         score: this.score, villainEncounters: this.villainEncounters, powerUpsUsed: this.powerUpsUsed,
         playerScores: [...this.playerScores] as [number, number], heartsCollected: this.pellets,
         bonusesCollected: this.bonusesCollected, bestCombo: this.bestCombo, missedBonuses: this.missedBonuses,
-        eventsCompleted: this.eventsCompleted, levelGrades: [...this.levelGrades]
+        eventsCompleted: this.eventsCompleted, levelGrades: [...this.levelGrades],
+        missionsCompleted: this.missionsCompleted, timeAttackBonus: this.timeAttackBonus
       }));
     }
 
@@ -1162,20 +1249,24 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           const owner = this.scoringPlayer(player.index);
           if (options.playStyle !== 'alternating') this.activePlayer = player.index;
           if (villain.mode === 'frightened') {
-            const isBoss = this.world === MAZE_LEVEL_COUNT - 1 && villain.kind === 'chaos';
-            if (isBoss && this.bossHealth > 0) {
+            if (villain.isBoss && this.bossHealth > 0) {
               this.bossHealth -= 1;
               const bossAward = 1777; this.score += bossAward; this.playerScores[owner] += bossAward;
               Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + BOSS_RECOVERY_MS, mode: 'returning' as VillainMode });
               this.positionSprite(villain.sprite, villain);
-              this.setWarning(this.bossHealth > 0 ? `VAULT BOSS HIT • ${this.bossHealth}/${this.bossMaxHealth} • +${bossAward}` : `VAULT BOSS DEFEATED • +${bossAward}`, 1700);
+              this.setWarning(this.bossHealth > 0 ? `${this.bossLabel} HIT • ${this.bossHealth}/${this.bossMaxHealth} • +${bossAward}` : `${this.bossLabel} DEFEATED • +${bossAward}`, 1700);
+              if (this.bossHealth === 0) {
+                this.levelMissionStats.villains += 1;
+                this.updateMissionProgress(owner);
+              }
               this.tone(this.bossHealth > 0 ? 520 : 1040, .24); this.saveProgressCheckpoint(); this.emitSnapshot();
               if (this.bossHealth === 0 && this.pelletObjects.size === 0) this.completeWorld();
               return;
             }
             const award = [200, 400, 800, 1600][Math.min(this.frightenedCombo, 3)]; this.frightenedCombo += 1; this.score += award; this.playerScores[owner] += award;
             Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + VILLAIN_RECOVERY_MS[this.world], mode: 'returning' as VillainMode });
-            this.positionSprite(villain.sprite, villain); this.setWarning(`${villain.kind.toUpperCase()} DEFEATED • ${award}`, 900); this.tone(860, 0.12); this.emitSnapshot(); return;
+            this.levelMissionStats.villains += 1;
+            this.positionSprite(villain.sprite, villain); this.setWarning(`${villain.kind.toUpperCase()} DEFEATED • ${award}`, 900); this.tone(860, 0.12); this.updateMissionProgress(owner); this.emitSnapshot(); return;
           }
           this.villainEncounters += 1;
           if (options.playStyle === 'coop') {
@@ -1245,6 +1336,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           this.luckyRushUntil = this.time.now + 5000;
           this.setWarning('TEAM MIND COIN RUSH • SPEED BOOSTED!', 1200);
         }
+        this.chargeDistrictCaptain();
         this.tone(777, 0.18); this.saveProgressCheckpoint(); this.emitSnapshot(); return;
       }
       if (!this.shielded) {
@@ -1253,7 +1345,16 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         this.setWarning('MIND COIN SHIELD RESTORED', 1200);
       }
       else { this.luckyRushUntil = this.time.now + 5000; this.setWarning('MIND COIN RUSH — SPEED BOOSTED!', 1200); }
+      this.chargeDistrictCaptain();
       this.tone(777, 0.18); this.saveProgressCheckpoint(); this.emitSnapshot();
+    }
+
+    private chargeDistrictCaptain(): void {
+      if (this.bossHealth <= 0) return;
+      this.frightenedUntil = Math.max(this.frightenedUntil, this.time.now + 4200);
+      this.frightenedCombo = 0;
+      this.reverseVillains();
+      this.setWarning(`${this.bossLabel} VULNERABLE • HIT NOW!`, 1300);
     }
 
     private reverseVillains(): void {
@@ -1280,7 +1381,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (this.bonusEffect === 'cash' && time < this.bonusEffectUntil) sprite.setTint(0xffe49b);
       else if (this.bonusEffect === 'ticket' && time < this.bonusEffectUntil) sprite.setTint(playerIndex === 1 ? 0xffb0e8 : 0xa9f7ff);
       else if (time < this.forceFieldUntil[playerIndex]) sprite.setTint(playerIndex === 1 ? 0xffc2ed : 0xc5fbff);
-      else sprite.clearTint();
+      else {
+        const cosmetic = COSMETICS.find(item => item.id === options.cosmetic) ?? COSMETICS[0];
+        sprite.setTint(dogHero ? cosmetic.dogTint : cosmetic.heroTint);
+      }
     }
 
     private animateVillain(villain: Villain, time: number): void {
@@ -1316,7 +1420,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (villain) {
         const moving = villain.direction !== 'none';
         villain.shadow.setPosition(sprite.x + (moving ? 1 : 0), sprite.y + (villain.kind === 'envy' || villain.kind === 'police' ? 21 : 18)).setScale(moving ? 1.08 : 1, moving ? 0.82 : 1).setAlpha(villain.mode === 'frightened' ? 0.34 : 0.56);
-        villain.label.setPosition(sprite.x, sprite.y - (this.world === MAZE_LEVEL_COUNT - 1 && villain.kind === 'chaos' ? 31 : villain.kind === 'envy' || villain.kind === 'police' ? 28 : 24)).setAlpha(villain.mode === 'frightened' ? .62 : 1);
+        villain.label.setPosition(sprite.x, sprite.y - (villain.isBoss ? 31 : villain.kind === 'envy' || villain.kind === 'police' ? 28 : 24)).setAlpha(villain.mode === 'frightened' ? .62 : 1);
       }
       const playerIndex: 0 | 1 | null = sprite === this.player ? 0 : sprite === this.player2 ? 1 : null;
       if (playerIndex !== null) {
@@ -1357,9 +1461,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private applyPlayerStyle(): void {
       if (!this.player) return;
       const dogTurn = options.playStyle === 'alternating' && this.activePlayer === 1;
-      this.player.setTexture(dogTurn ? 'player2Dog' : 'mascot', dogTurn ? 20 : 0).setDisplaySize(dogTurn ? 68 : 52, dogTurn ? 54 : 52).setFlipX(false).clearTint();
+      const cosmetic = COSMETICS.find(item => item.id === options.cosmetic) ?? COSMETICS[0];
+      this.player.setTexture(dogTurn ? 'player2Dog' : 'mascot', dogTurn ? 20 : 0).setDisplaySize(dogTurn ? 68 : 52, dogTurn ? 54 : 52).setFlipX(false).setTint(dogTurn ? cosmetic.dogTint : cosmetic.heroTint);
       this.playerShadows[0]?.setDisplaySize(dogTurn ? 38 : 30, 10);
-      if (this.player2) this.player2.setTexture('player2Dog', 20).setDisplaySize(68, 54).setFlipX(false).clearTint();
+      if (this.player2) this.player2.setTexture('player2Dog', 20).setDisplaySize(68, 54).setFlipX(false).setTint(cosmetic.dogTint);
       try {
         this.player.postFX.clear();
         this.player2?.postFX.clear();
@@ -1391,7 +1496,12 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         bestCombo: this.bestCombo, teamCombo: this.teamCombo, heartsCollected: this.pellets, levelHeartsTotal: this.initialPellets,
         bonusSeconds, bonusActive: Boolean(this.activeBonus), bonusDirection, syncGateReady: this.syncGateReady(), teammateDirections,
         eventName: this.eventName || undefined, eventSeconds: this.eventName ? Math.max(0, Math.ceil((this.eventActiveUntil - now) / 1000)) : Math.max(0, Math.ceil((this.nextDetroitEventAt - now) / 1000)),
-        eventsCompleted: this.eventsCompleted, missedBonuses: this.missedBonuses });
+        eventsCompleted: this.eventsCompleted, missedBonuses: this.missedBonuses,
+        runVariant: options.runVariant, timeAttackSeconds: Math.max(0, Math.ceil(this.levelTimeRemainingMs / 1000)),
+        portalCombo: now < this.portalComboUntil ? 1 + this.portalComboChain : 0,
+        portalComboSeconds: now < this.portalComboUntil ? Math.max(0, Math.ceil((this.portalComboUntil - now) / 1000)) : 0,
+        bonusTier: this.bonusEffectTier ?? this.activeBonus?.tier, missions: evaluateDetroitMissions(this.world, this.levelMissionStats),
+        missionsCompleted: this.missionsCompleted, bossLabel: this.bossLabel || undefined });
     }
 
     private tone(frequency: number, duration: number): void {

@@ -1,4 +1,4 @@
-import type { StreetBonusKind } from '../types/game';
+import type { BonusTier, StreetBonusKind } from '../types/game';
 
 export interface StreetBonusDefinition {
   kind: StreetBonusKind;
@@ -14,6 +14,22 @@ export interface StreetBonusDefinition {
 export const STREET_BONUS_ORDER: StreetBonusKind[] = ['cash', 'ticket', 'scratch'];
 export const STREET_BONUS_SPAWN_INTERVAL_MS = 30_000;
 export const STREET_BONUS_SPEED_TILES_PER_SECOND = 1.65;
+
+export const BONUS_TIERS: Record<BonusTier, { label: string; scoreMultiplier: number; durationMultiplier: number; color: number; colorCss: string }> = {
+  bronze: { label: 'BRONZE', scoreMultiplier: 1, durationMultiplier: 1, color: 0xc9854d, colorCss: '#c9854d' },
+  silver: { label: 'SILVER', scoreMultiplier: 1.5, durationMultiplier: 1.25, color: 0xd9f3ff, colorCss: '#d9f3ff' },
+  gold: { label: 'GOLD', scoreMultiplier: 2.5, durationMultiplier: 1.6, color: 0xffdf59, colorCss: '#ffdf59' }
+};
+
+export function bonusTierForSpawn(level: number, spawnIndex: number, runSeed: number): BonusTier {
+  let value = (runSeed ^ Math.imul(level + 1, 0x9e3779b9) ^ Math.imul(spawnIndex + 1, 0x45d9f3b)) >>> 0;
+  value ^= value << 13; value ^= value >>> 17; value ^= value << 5;
+  const roll = (value >>> 0) % 100;
+  const goldChance = Math.min(22, 8 + Math.max(0, level));
+  if (roll < goldChance) return 'gold';
+  if (roll < goldChance + 30) return 'silver';
+  return 'bronze';
+}
 
 export const STREET_BONUSES: Record<StreetBonusKind, StreetBonusDefinition> = {
   cash: {
