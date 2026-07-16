@@ -26,3 +26,10 @@ export const GAME_BALANCE = {
     police: 'JACKPOT PATROL — Speed trap detected!'
   }
 };
+
+// Early maps give new players a longer Mind Coin window. Later maps tighten the
+// timer gradually, but defeated villains always spend several seconds recovering
+// in the house before they can chase again.
+export const MIND_COIN_FRIGHTENED_MS = [9500, 9300, 9100, 8900, 8700, 8500, 8300, 8100, 7900, 7700] as const;
+export const VILLAIN_RECOVERY_MS = [6800, 6600, 6400, 6200, 6000, 5800, 5700, 5600, 5500, 5400] as const;
+export const BOSS_RECOVERY_MS = 5200;

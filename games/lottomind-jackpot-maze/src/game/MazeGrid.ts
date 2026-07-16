@@ -101,6 +101,26 @@ export function chooseForgivingDirection(
   return slideOrder.find(direction => stepTile(maze, point, direction)) ?? validDirections(maze, point)[0] ?? null;
 }
 
+/**
+ * Classic maze games let a player turn a little after crossing an intersection.
+ * This keeps fast characters from feeling stuck on a corner while preserving the
+ * tile grid as the source of truth.
+ */
+export function shouldSnapLateTurn(
+  maze: MazeDefinition,
+  point: GridPoint,
+  queued: CardinalDirection,
+  current: GridDirection,
+  progress: number,
+  window = 0.34
+): boolean {
+  if (current === 'none' || queued === current || queued === OPPOSITE[current]) return false;
+  if (progress <= 0 || progress > window) return false;
+  const currentIsHorizontal = current === 'left' || current === 'right';
+  const queuedIsHorizontal = queued === 'left' || queued === 'right';
+  return currentIsHorizontal !== queuedIsHorizontal && Boolean(stepTile(maze, point, queued));
+}
+
 export function projectTile(maze: MazeDefinition, point: GridPoint, direction: GridDirection, distance: number): GridPoint {
   let current = { ...point };
   if (direction === 'none') return current;

@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
-import { DETROIT_LEVELS, GAME_BALANCE } from '../config/gameBalance';
+import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS } from '../config/gameBalance';
 import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } from '../config/detroitEvents';
 import { STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND } from '../config/streetBonuses';
 import type { CompassDirection, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, PlayerCount, PlayStyle, StreetBonusKind } from '../types/game';
-import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
+import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, shouldSnapLateTurn, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
 
 type EnemyKind = 'tax' | 'reaper' | 'chaos' | 'envy' | 'police';
 type VillainMode = 'normal' | 'frightened' | 'returning';
@@ -76,7 +76,19 @@ const ORIGIN_X = 50;
 const ORIGIN_Y = 20;
 const GAME_WIDTH = 520;
 const GAME_HEIGHT = 540;
-const WORLD_ACCENTS = [0x35dfff, 0xffd45d, 0xff5d9e, 0x75ff8d, 0xb07cff, 0xff873d, 0x42f5e9, 0xffef68, 0x6b9cff, 0xf46bff] as const;
+const LEVEL_PALETTES = [
+  { primary: 0x35dfff, secondary: 0xffd45d, lane: 0xffe27a, road: 0x061826, portalLeft: 0x54eaff, portalRight: 0xb06cff },
+  { primary: 0xffa33d, secondary: 0x48e6ff, lane: 0xffcf54, road: 0x211106, portalLeft: 0xffb04e, portalRight: 0x36d9ff },
+  { primary: 0x4d9dff, secondary: 0xbdeeff, lane: 0x8bd7ff, road: 0x071a32, portalLeft: 0x62c9ff, portalRight: 0x8c7cff },
+  { primary: 0xff5d9e, secondary: 0xffb35a, lane: 0xff799f, road: 0x250914, portalLeft: 0xff6fb4, portalRight: 0xffb347 },
+  { primary: 0xffd45d, secondary: 0xb07cff, lane: 0xffe680, road: 0x1d1504, portalLeft: 0xffd75d, portalRight: 0x9e78ff },
+  { primary: 0xff873d, secondary: 0xff70ca, lane: 0xffbf68, road: 0x281006, portalLeft: 0xff874e, portalRight: 0xff68cc },
+  { primary: 0x42f5a1, secondary: 0x42dff5, lane: 0x8dffbf, road: 0x052018, portalLeft: 0x43f5ae, portalRight: 0x3cd7ff },
+  { primary: 0x49b8ff, secondary: 0xff4d65, lane: 0xffe05b, road: 0x07182a, portalLeft: 0x42c8ff, portalRight: 0xff526f },
+  { primary: 0xb574ff, secondary: 0x61efff, lane: 0xe2a4ff, road: 0x160925, portalLeft: 0xb66dff, portalRight: 0x53efff },
+  { primary: 0xffd84d, secondary: 0xf46bff, lane: 0xffffff, road: 0x241c04, portalLeft: 0xffdd55, portalRight: 0xf067ff }
+] as const;
+const WORLD_ACCENTS = LEVEL_PALETTES.map(palette => palette.primary);
 const DETROIT_STREETS = [
   'GRATIOT', 'MACK', 'E. WARREN', 'JEFFERSON', 'HARPER', 'VAN DYKE', 'CONNER', 'CHALMERS',
   'CADIEUX', 'KERCHEVAL', '6 MILE', '7 MILE', '8 MILE', 'WOODWARD', 'MORANG', 'KELLY',
@@ -259,6 +271,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.bossHealth = this.bossMaxHealth ? options.initialCheckpoint?.world === this.world ? options.initialCheckpoint.bossHealth ?? this.bossMaxHealth : this.bossMaxHealth : 0;
       this.worldStartScore = this.score;
       const treatment = DETROIT_LEVELS[this.world] ?? DETROIT_LEVELS[0];
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
       const background = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'world1').setDisplaySize(GAME_WIDTH + 34, GAME_HEIGHT + 34).setAlpha(0.72).setDepth(-10);
       background.setCrop(80 + (this.world * 67) % 620, 0, 868, 900);
       const cityNear = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'world1').setDisplaySize(GAME_WIDTH + 58, GAME_HEIGHT + 58).setAlpha(0.12).setDepth(-7).setBlendMode(Phaser.BlendModes.SCREEN);
@@ -266,7 +279,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       const shade = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x02060a, 0.28).setDepth(-9);
       const colorWash = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, treatment.wash, 0.13).setDepth(-8);
       const lightLeft = this.add.rectangle(88, GAME_HEIGHT / 2, 82, GAME_HEIGHT * 1.2, WORLD_ACCENTS[this.world], 0.045).setAngle(-5).setDepth(-6).setData('baseX', 88).setData('depth', 1);
-      const lightRight = this.add.rectangle(GAME_WIDTH - 82, GAME_HEIGHT / 2, 72, GAME_HEIGHT * 1.2, 0xffd45d, 0.035).setAngle(6).setDepth(-6).setData('baseX', GAME_WIDTH - 82).setData('depth', -1);
+      const lightRight = this.add.rectangle(GAME_WIDTH - 82, GAME_HEIGHT / 2, 72, GAME_HEIGHT * 1.2, palette.secondary, 0.045).setAngle(6).setDepth(-6).setData('baseX', GAME_WIDTH - 82).setData('depth', -1);
       this.cityBackground = background; this.cityNear = cityNear; this.cityWash = colorWash; this.cityDepthLights = [lightLeft, lightRight];
       this.worldObjects.push(background, shade, colorWash, cityNear, lightLeft, lightRight);
       this.drawRoadSurface();
@@ -280,8 +293,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private drawRoadSurface(): void {
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
       const roads = this.add.graphics().setDepth(-4);
-      roads.fillStyle(0x01060b, 0.62);
+      roads.fillStyle(palette.road, 0.72);
       for (let y = 0; y < this.maze.height; y += 1) for (let x = 0; x < this.maze.width; x += 1) {
         if (this.maze.rows[y][x] === '#') continue;
         roads.fillRect(ORIGIN_X + x * TILE - 1, ORIGIN_Y + y * TILE - 1, TILE + 2, TILE + 2);
@@ -325,21 +339,27 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private drawMaze(): void {
-      const accent = WORLD_ACCENTS[this.world];
-      const outerStreet = 0xd8ded8;
-      const innerStreet = 0x15845c;
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      const accent = palette.primary;
+      const outerStreet = palette.secondary;
+      const innerStreet = palette.primary;
       const walls = this.add.graphics().setDepth(2);
       const drawWall = (left: number, top: number, width: number, height: number, radius = 8, fill = true) => {
         if (fill) { walls.fillStyle(0x03070b, 0.88); walls.fillRoundedRect(left, top, width, height, radius); }
-        walls.lineStyle(3, accent, 0.1); walls.strokeRoundedRect(left, top, width, height, radius);
-        walls.lineStyle(2.2, outerStreet, 0.9); walls.strokeRoundedRect(left + 1.5, top + 1.5, width - 3, height - 3, Math.max(2, radius - 1));
-        walls.lineStyle(1.2, innerStreet, 0.8); walls.strokeRoundedRect(left + 4.5, top + 4.5, width - 9, height - 9, Math.max(2, radius - 4));
+        walls.lineStyle(3, accent, 0.28); walls.strokeRoundedRect(left, top, width, height, radius);
+        walls.lineStyle(2.2, outerStreet, 0.94); walls.strokeRoundedRect(left + 1.5, top + 1.5, width - 3, height - 3, Math.max(2, radius - 1));
+        walls.lineStyle(1.2, innerStreet, 0.92); walls.strokeRoundedRect(left + 4.5, top + 4.5, width - 9, height - 9, Math.max(2, radius - 4));
       };
       drawWall(ORIGIN_X + 2, ORIGIN_Y + 2, this.maze.width * TILE - 4, this.maze.height * TILE - 4, 13, false);
       this.drawDetroitRoadMarkings(walls);
       const tunnelY = this.pixelY(this.maze.tunnelRow);
-      this.maze.wallBlocks.forEach(block => drawWall(ORIGIN_X + block.x * TILE + 6, ORIGIN_Y + block.y * TILE + 6, block.width * TILE - 12, block.height * TILE - 12, 6));
-      drawWall(this.pixelX(7) - TILE / 2 + 6, this.pixelY(9) - TILE / 2 + 6, TILE * 7 - 12, TILE * 5 - 12, 8);
+      // A larger gutter makes one-tile turns look open enough for the oversized
+      // character sprites, matching the forgiving logical collision grid.
+      this.maze.wallBlocks.forEach(block => {
+        const gutter = block.width === 1 || block.height === 1 ? 6 : 8;
+        drawWall(ORIGIN_X + block.x * TILE + gutter, ORIGIN_Y + block.y * TILE + gutter, block.width * TILE - gutter * 2, block.height * TILE - gutter * 2, 6);
+      });
+      drawWall(this.pixelX(7) - TILE / 2 + 8, this.pixelY(9) - TILE / 2 + 8, TILE * 7 - 16, TILE * 5 - 16, 8);
       this.worldObjects.push(walls);
       this.createTunnelPortals(tunnelY);
       const door = this.add.rectangle(this.pixelX(10), this.pixelY(9), TILE - 3, 4, 0xffb8d9, 1).setDepth(5);
@@ -369,12 +389,14 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           this.tweens.add({ targets: orbit, angle: direction === 'left' ? -360 : 360, duration: 1900, repeat: -1 });
         }
       };
-      makePortal(this.pixelX(0), 0x54eaff, 0xb06cff, 'left');
-      makePortal(this.pixelX(this.maze.width - 1), 0xb06cff, 0x54eaff, 'right');
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      makePortal(this.pixelX(0), palette.portalLeft, palette.portalRight, 'left');
+      makePortal(this.pixelX(this.maze.width - 1), palette.portalRight, palette.portalLeft, 'right');
     }
 
     private drawDetroitRoadMarkings(roads: Phaser.GameObjects.Graphics): void {
-      roads.fillStyle(0xf2c85d, 0.2);
+      const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      roads.fillStyle(palette.lane, 0.3);
       for (let x = 1; x < this.maze.width - 1; x += 2) {
         roads.fillRect(this.pixelX(x) - 4, this.pixelY(1) - 1, 8, 2);
         roads.fillRect(this.pixelX(x) - 4, this.pixelY(this.maze.height - 2) - 1, 8, 2);
@@ -383,8 +405,21 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         roads.fillRect(this.pixelX(1) - 1, this.pixelY(y) - 4, 2, 8);
         roads.fillRect(this.pixelX(this.maze.width - 2) - 1, this.pixelY(y) - 4, 2, 8);
       }
-      roads.fillStyle(0xffffff, 0.16);
+      roads.fillStyle(palette.secondary, 0.22);
       for (let stripe = -3; stripe <= 3; stripe += 1) roads.fillRect(this.pixelX(10) + stripe * 3 - 1, this.pixelY(19) - 8, 2, 16);
+
+      // Each map gets a distinct colored cross-route. Only walkable tiles are
+      // marked, so the treatment reinforces the route rather than covering signs.
+      const routeRow = 2 + (this.world * 3) % (this.maze.height - 4);
+      const routeColumn = 2 + (this.world * 4) % (this.maze.width - 4);
+      roads.fillStyle(palette.primary, 0.28);
+      for (let x = 1; x < this.maze.width - 1; x += 1) {
+        if (this.maze.rows[routeRow][x] !== '#') roads.fillRect(this.pixelX(x) - 5, this.pixelY(routeRow) - 1, 10, 2);
+      }
+      roads.fillStyle(palette.secondary, 0.24);
+      for (let y = 1; y < this.maze.height - 1; y += 1) {
+        if (this.maze.rows[y][routeColumn] !== '#') roads.fillRect(this.pixelX(routeColumn) - 1, this.pixelY(y) - 5, 2, 10);
+      }
     }
 
     private createDetroitStreetLabels(): void {
@@ -826,6 +861,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (mover.direction !== 'none' && OPPOSITE[mover.direction] === direction && mover.next) {
         const old = mover.tile; mover.tile = mover.next; mover.next = old;
         mover.progress = 1 - mover.progress; mover.direction = direction;
+      } else if (mover.next && shouldSnapLateTurn(this.maze, mover.tile, direction, mover.direction, mover.progress)) {
+        // Pull the hero back to the intersection by at most 34% of a tile. This
+        // is visually tiny, but removes the frustrating missed-corner stop.
+        mover.next = null; mover.progress = 0; mover.direction = 'none';
       }
       mover.queued = direction;
     }
@@ -852,9 +891,13 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private updateVillains(time: number, dt: number): void {
       this.villains.forEach((villain, index) => {
         if (time < villain.releaseAt) {
+          this.positionSprite(villain.sprite, villain);
           this.animateVillain(villain, time);
-          villain.sprite.setAlpha(0); villain.shadow.setAlpha(0); villain.label.setAlpha(0);
           return;
+        }
+        if (villain.mode === 'returning') {
+          villain.mode = time < this.frightenedUntil ? 'frightened' : 'normal';
+          this.applyVillainOutline(villain);
         }
         const previousMode = villain.mode;
         villain.mode = time < this.frightenedUntil ? 'frightened' : villain.mode === 'frightened' ? 'normal' : villain.mode;
@@ -917,7 +960,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.spawnCollectFx(tile, award, isPower, this.combo, playerIndex);
       if (teamPass && !isPower) this.setWarning(`TEAMWORK PASS • +${25 * this.combo}`, 650);
       if (isPower) {
-        this.frightenedUntil = time + 7000; this.frightenedCombo = 0; this.setWarning('MIND COIN ACTIVE — VILLAINS VULNERABLE!', 1600); this.tone(240, 0.22);
+        this.frightenedUntil = time + MIND_COIN_FRIGHTENED_MS[this.world]; this.frightenedCombo = 0; this.setWarning('MIND COIN ACTIVE — VILLAINS VULNERABLE!', 1600); this.tone(240, 0.22);
         this.reverseVillains();
       } else { this.tone(620 + this.combo * 18, 0.035); }
       this.combo = Math.min(7, this.combo + 1); this.bestCombo = Math.max(this.bestCombo, this.combo); this.revealNumbers(owner); this.emitSnapshot();
@@ -1019,6 +1062,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       for (const player of players) {
         if (this.downedPlayers[player.index]) continue;
         for (const villain of this.villains) {
+          if (time < villain.releaseAt || villain.mode === 'returning') continue;
           if (Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, villain.sprite.x, villain.sprite.y) > TILE * 0.72) continue;
           const owner = this.scoringPlayer(player.index);
           if (options.playStyle !== 'alternating') this.activePlayer = player.index;
@@ -1027,7 +1071,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
             if (isBoss && this.bossHealth > 0) {
               this.bossHealth -= 1;
               const bossAward = 1777; this.score += bossAward; this.playerScores[owner] += bossAward;
-              Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + 2400, mode: 'normal' as VillainMode });
+              Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + BOSS_RECOVERY_MS, mode: 'returning' as VillainMode });
               this.positionSprite(villain.sprite, villain);
               this.setWarning(this.bossHealth > 0 ? `VAULT BOSS HIT • ${this.bossHealth}/${this.bossMaxHealth} • +${bossAward}` : `VAULT BOSS DEFEATED • +${bossAward}`, 1700);
               this.tone(this.bossHealth > 0 ? 520 : 1040, .24); this.saveProgressCheckpoint(); this.emitSnapshot();
@@ -1035,7 +1079,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
               return;
             }
             const award = [200, 400, 800, 1600][Math.min(this.frightenedCombo, 3)]; this.frightenedCombo += 1; this.score += award; this.playerScores[owner] += award;
-            Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + 1700, mode: 'normal' as VillainMode });
+            Object.assign(villain, createMover(villain.spawn, 4.15), { releaseAt: time + VILLAIN_RECOVERY_MS[this.world], mode: 'returning' as VillainMode });
             this.positionSprite(villain.sprite, villain); this.setWarning(`${villain.kind.toUpperCase()} DEFEATED • ${award}`, 900); this.tone(860, 0.12); this.emitSnapshot(); return;
           }
           this.villainEncounters += 1;
@@ -1145,8 +1189,17 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private animateVillain(villain: Villain, time: number): void {
-      if (!this.hasMoved || time < this.roundReadyUntil || time < villain.releaseAt) {
+      if (!this.hasMoved || time < this.roundReadyUntil) {
         villain.sprite.setAlpha(0); villain.shadow.setAlpha(0); villain.label.setAlpha(0);
+        return;
+      }
+      if (time < villain.releaseAt) {
+        if (villain.mode === 'returning') {
+          villain.sprite.setFrame(villain.baseFrame).setTint(0x74bfff).setAlpha(0.42 + Math.sin(time / 170) * 0.08);
+          villain.shadow.setAlpha(0.2); villain.label.setAlpha(0);
+        } else {
+          villain.sprite.setAlpha(0); villain.shadow.setAlpha(0); villain.label.setAlpha(0);
+        }
         return;
       }
       const cycle = villain.kind === 'chaos' ? 1 : villain.kind === 'envy' || villain.kind === 'police' ? 5 : 4;
