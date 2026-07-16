@@ -388,6 +388,40 @@ body.memberships-page .membership-hero-copy h1 {
   mix-blend-mode: screen;
 }
 
+body.memberships-page #dust.lm-hero-particle-fold .membership-hero-copy h1 {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+body.memberships-page #dust.lm-hero-particle-fold #membershipHeroTitle > div {
+  overflow: visible !important;
+}
+
+body.memberships-page #dust.lm-hero-particle-fold .lm-hero-char {
+  display: inline-block;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  text-shadow:
+    0 0 7px rgba(238, 242, 247, 0.46),
+    0 0 20px rgba(91, 233, 255, 0.32),
+    0 0 36px rgba(255, 61, 138, 0.12);
+}
+
+body.memberships-page #dust.lm-hero-particle-fold .membership-hero-copy > :is(.membership-temporal-subtitle, .membership-collectible-offer) {
+  will-change: transform, opacity, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.memberships-page #dust .lm-hero-char,
+  body.memberships-page #dust .membership-hero-copy > :is(.membership-temporal-subtitle, .membership-collectible-offer) {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    will-change: auto;
+  }
+}
+
 body.memberships-page .membership-hero-copy > p:not(.studio-boot-sequence) {
   max-width: 64ch;
   color: var(--lm-muted);
@@ -609,6 +643,17 @@ body.memberships-page .membership-collectible-card .membership-signal-orbit img 
   filter: saturate(1.06) contrast(1.06) drop-shadow(0 0 28px rgba(53, 231, 255, 0.2));
 }
 
+body.memberships-page .membership-collectible-card .membership-signal-orbit-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 390px;
+  border-radius: inherit;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.06) contrast(1.04) drop-shadow(0 0 28px rgba(53, 231, 255, 0.2));
+}
+
 body.memberships-page .membership-collectible-card .membership-signal-card-copy {
   margin-top: -88px;
   padding: 20px;
@@ -647,6 +692,650 @@ body.memberships-page .membership-collectible-cta:hover,
 body.memberships-page .membership-collectible-cta:focus-visible {
   transform: translateY(-2px);
   box-shadow: 0 0 24px rgba(91, 233, 255, 0.24);
+}
+
+/* Membership film trilogy: one cinematic player, three lightweight chapters. */
+body.memberships-page .membership-broadcast {
+  position: relative;
+  z-index: 4;
+  width: min(1480px, calc(100% - clamp(28px, 7vw, 112px)));
+  margin: clamp(44px, 7vw, 104px) auto;
+  padding: clamp(24px, 4vw, 58px);
+  overflow: hidden;
+  border: 1px solid rgba(91, 233, 255, 0.3);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(4, 18, 34, 0.94), rgba(8, 7, 22, 0.93)) padding-box,
+    linear-gradient(130deg, rgba(91, 233, 255, 0.74), rgba(255, 61, 138, 0.34), rgba(242, 200, 91, 0.58)) border-box;
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.38), inset 0 0 70px rgba(91, 233, 255, 0.035);
+  isolation: isolate;
+}
+
+body.memberships-page .membership-broadcast::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgba(91, 233, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 233, 255, 0.09) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(120deg, #000, transparent 72%);
+  content: "";
+}
+
+body.memberships-page .membership-broadcast__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+  align-items: end;
+  gap: clamp(20px, 5vw, 84px);
+  margin-bottom: clamp(22px, 3.5vw, 46px);
+}
+
+body.memberships-page .membership-broadcast__header span,
+body.memberships-page .membership-broadcast__footer {
+  color: var(--lm-cyan);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-broadcast__header h2 {
+  max-width: 12ch;
+  margin: 12px 0 0;
+  color: var(--lm-ice);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: clamp(2.55rem, 6vw, 6.7rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-broadcast__header h2 em {
+  color: var(--lm-cyan);
+  font-style: normal;
+  font-weight: 300;
+}
+
+body.memberships-page .membership-broadcast__header p {
+  max-width: 46ch;
+  margin: 0 0 6px;
+  color: var(--lm-muted);
+  font-size: clamp(0.94rem, 1.2vw, 1.08rem);
+  line-height: 1.65;
+}
+
+body.memberships-page .membership-broadcast__grid {
+  display: grid;
+  grid-template: repeat(2, minmax(0, 1fr)) / minmax(0, 1.42fr) minmax(320px, 0.58fr);
+  gap: 12px;
+  min-height: clamp(520px, 46vw, 720px);
+}
+
+body.memberships-page .membership-broadcast-card {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(238, 242, 247, 0.18);
+  border-radius: 10px;
+  color: var(--lm-ice);
+  background: #030711;
+  box-shadow: inset 0 0 0 1px rgba(4, 6, 10, 0.72);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 280ms var(--lm-ease), box-shadow 280ms var(--lm-ease), transform 280ms var(--lm-ease);
+}
+
+body.memberships-page .membership-broadcast-card.is-featured {
+  grid-row: 1 / 3;
+}
+
+body.memberships-page .membership-broadcast-card::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(1, 4, 10, 0.02) 24%, rgba(2, 6, 14, 0.28) 52%, rgba(2, 5, 13, 0.98) 100%);
+  content: "";
+  pointer-events: none;
+}
+
+body.memberships-page .membership-broadcast-card:hover,
+body.memberships-page .membership-broadcast-card:focus-visible {
+  border-color: rgba(91, 233, 255, 0.78);
+  box-shadow: 0 0 38px rgba(91, 233, 255, 0.18), inset 0 0 0 1px rgba(242, 200, 91, 0.16);
+  transform: translateY(-4px);
+}
+
+body.memberships-page .membership-broadcast-card__media,
+body.memberships-page .membership-broadcast-card__media img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+body.memberships-page .membership-broadcast-card__media img {
+  object-fit: cover;
+  transition: filter 620ms var(--lm-ease), transform 900ms var(--lm-ease);
+}
+
+body.memberships-page .membership-broadcast-card:not(.is-featured) .membership-broadcast-card__media img {
+  object-position: center 42%;
+}
+
+body.memberships-page .membership-broadcast-card:hover img,
+body.memberships-page .membership-broadcast-card:focus-visible img {
+  filter: saturate(1.09) contrast(1.04);
+  transform: scale(1.035);
+}
+
+body.memberships-page .membership-broadcast-card__play {
+  position: absolute;
+  z-index: 3;
+  top: clamp(14px, 2vw, 24px);
+  right: clamp(14px, 2vw, 24px);
+  display: grid;
+  width: clamp(42px, 4.5vw, 62px);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(242, 200, 91, 0.74);
+  border-radius: 50%;
+  background: rgba(2, 7, 16, 0.78);
+  box-shadow: 0 0 28px rgba(91, 233, 255, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+body.memberships-page .membership-broadcast-card__play::before {
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid var(--lm-gold-hot);
+  content: "";
+}
+
+body.memberships-page .membership-broadcast-card__copy {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  gap: 7px;
+  padding: clamp(18px, 3vw, 42px);
+}
+
+body.memberships-page .membership-broadcast-card__copy b {
+  color: var(--lm-gold-hot);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.61rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-broadcast-card__copy strong {
+  max-width: 13ch;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: clamp(1.5rem, 2.8vw, 3.4rem);
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-broadcast-card:not(.is-featured) .membership-broadcast-card__copy strong {
+  font-size: clamp(1.22rem, 1.85vw, 2rem);
+}
+
+body.memberships-page .membership-broadcast-card__copy small {
+  max-width: 48ch;
+  color: rgba(238, 242, 247, 0.7);
+  font-size: clamp(0.72rem, 1vw, 0.92rem);
+  line-height: 1.45;
+}
+
+body.memberships-page .membership-broadcast__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 18px;
+}
+
+body.memberships-page .membership-broadcast__footer a {
+  color: var(--lm-ice);
+  text-underline-offset: 5px;
+}
+
+body.memberships-page .membership-collectible-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+body.memberships-page .membership-commercial-trigger {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 48px;
+  align-items: center;
+  padding: 7px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 233, 255, 0.46);
+  border-radius: 8px;
+  color: var(--lm-ice);
+  background: linear-gradient(110deg, rgba(5, 19, 35, 0.94), rgba(16, 9, 36, 0.92));
+  box-shadow: inset 0 0 22px rgba(91, 233, 255, 0.07);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  isolation: isolate;
+}
+
+body.memberships-page .membership-commercial-trigger::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 18%, rgba(91, 233, 255, 0.16) 48%, transparent 74%);
+  content: "";
+  transform: translateX(-110%);
+  transition: transform 680ms var(--lm-ease);
+}
+
+body.memberships-page .membership-commercial-trigger:hover::before,
+body.memberships-page .membership-commercial-trigger:focus-visible::before {
+  transform: translateX(110%);
+}
+
+body.memberships-page .membership-commercial-trigger:hover,
+body.memberships-page .membership-commercial-trigger:focus-visible {
+  border-color: rgba(242, 200, 91, 0.75);
+  box-shadow: 0 0 25px rgba(91, 233, 255, 0.16), inset 0 0 22px rgba(242, 200, 91, 0.08);
+}
+
+body.memberships-page .membership-commercial-trigger__icon {
+  position: relative;
+  display: grid;
+  width: 32px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(242, 200, 91, 0.66);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 200, 91, 0.24), rgba(91, 233, 255, 0.08) 65%, transparent 68%);
+  box-shadow: 0 0 16px rgba(242, 200, 91, 0.18);
+}
+
+body.memberships-page .membership-commercial-trigger__icon::before {
+  width: 0;
+  height: 0;
+  margin-left: 3px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid var(--lm-gold-hot);
+  content: "";
+}
+
+body.memberships-page .membership-commercial-trigger > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+
+body.memberships-page .membership-commercial-trigger b {
+  overflow: hidden;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.memberships-page .membership-commercial-trigger small {
+  color: var(--lm-cyan);
+  font-size: 0.57rem;
+  letter-spacing: 0.08em;
+}
+
+body.memberships-page .membership-commercial-hero-launch {
+  display: none;
+}
+
+body.memberships-page .membership-commercial-modal {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 42px);
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(14, 88, 118, 0.25), transparent 43%),
+    linear-gradient(rgba(1, 5, 12, 0.93), rgba(1, 3, 9, 0.985));
+  backdrop-filter: blur(20px);
+  transition: opacity 360ms var(--lm-ease);
+}
+
+body.memberships-page .membership-commercial-modal[hidden] {
+  display: none;
+}
+
+body.memberships-page .membership-commercial-modal.is-open {
+  opacity: 1;
+}
+
+body.memberships-page .membership-commercial-modal__panel {
+  width: min(1160px, 100%);
+  max-height: calc(100dvh - clamp(24px, 6vw, 84px));
+  overflow: auto;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(rgba(3, 9, 20, 0.96), rgba(4, 6, 16, 0.985)) padding-box,
+    linear-gradient(125deg, var(--lm-cyan), rgba(255, 61, 138, 0.72), var(--lm-gold-hot)) border-box;
+  box-shadow: 0 0 90px rgba(91, 233, 255, 0.18), 0 0 140px rgba(157, 87, 255, 0.12);
+  transform: translateY(24px) scale(0.975);
+  transition: transform 520ms var(--lm-ease);
+}
+
+body.memberships-page .membership-commercial-modal.is-open .membership-commercial-modal__panel {
+  transform: none;
+}
+
+body.memberships-page .membership-commercial-modal__header,
+body.memberships-page .membership-commercial-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: clamp(14px, 2vw, 24px);
+}
+
+body.memberships-page .membership-commercial-modal__header span {
+  color: var(--lm-cyan);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-commercial-modal__header h2 {
+  margin: 4px 0 0;
+  color: var(--lm-ice);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+body.memberships-page .membership-commercial-modal__header button,
+body.memberships-page .membership-commercial-modal__footer button,
+body.memberships-page .membership-commercial-modal__footer a {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(91, 233, 255, 0.52);
+  border-radius: 8px;
+  color: var(--lm-ice);
+  background: rgba(5, 15, 29, 0.92);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+body.memberships-page .membership-commercial-modal__stage {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid rgba(91, 233, 255, 0.2);
+  background: #01040a;
+  aspect-ratio: 16 / 9;
+}
+
+body.memberships-page .membership-commercial-modal__stage video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #01040a;
+}
+
+body.memberships-page .membership-commercial-modal__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 44%, rgba(91, 233, 255, 0.08) 49%, transparent 54% 100%);
+  mix-blend-mode: screen;
+  animation: lm-membership-commercial-scan 4.6s linear infinite;
+}
+
+@keyframes lm-membership-commercial-scan {
+  from { transform: translateY(-54%); }
+  to { transform: translateY(54%); }
+}
+
+body.memberships-page .membership-commercial-modal__telemetry {
+  position: absolute;
+  inset: 14px 16px auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(238, 242, 247, 0.72);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: clamp(0.48rem, 0.8vw, 0.66rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 12px rgba(91, 233, 255, 0.7);
+}
+
+body.memberships-page .membership-commercial-modal__chapters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border-bottom: 1px solid rgba(91, 233, 255, 0.2);
+  background: rgba(91, 233, 255, 0.14);
+}
+
+body.memberships-page .membership-commercial-modal__chapters button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 10px clamp(12px, 2vw, 24px);
+  border: 0;
+  color: rgba(238, 242, 247, 0.56);
+  background: rgba(3, 9, 20, 0.97);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: clamp(0.54rem, 0.8vw, 0.7rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 220ms var(--lm-ease), background 220ms var(--lm-ease), box-shadow 220ms var(--lm-ease);
+}
+
+body.memberships-page .membership-commercial-modal__chapters button b {
+  color: var(--lm-gold-hot);
+  font-size: 0.7rem;
+}
+
+body.memberships-page .membership-commercial-modal__chapters button:is(:hover, :focus-visible, .is-active) {
+  color: var(--lm-ice);
+  background: linear-gradient(110deg, rgba(91, 233, 255, 0.12), rgba(255, 61, 138, 0.07)), rgba(3, 9, 20, 0.98);
+  box-shadow: inset 0 -2px var(--lm-cyan);
+}
+
+body.memberships-page .membership-commercial-modal__footer p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--lm-muted);
+  line-height: 1.55;
+}
+
+body.memberships-page .membership-commercial-modal__footer > div {
+  display: flex;
+  flex: none;
+  gap: 10px;
+}
+
+body.memberships-page .membership-commercial-modal__footer a {
+  display: inline-flex;
+  align-items: center;
+  color: #03060d;
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--lm-gold-hot), var(--lm-cyan));
+}
+
+body.memberships-page .membership-commercial-enter {
+  color: #03060d !important;
+  border-color: transparent !important;
+  background: linear-gradient(120deg, var(--lm-gold-hot), var(--lm-cyan)) !important;
+  box-shadow: 0 0 26px rgba(91, 233, 255, 0.18);
+}
+
+body.memberships-page.has-membership-commercial {
+  overflow: hidden;
+}
+
+body.memberships-page.has-membership-commercial .lm-signal-entity {
+  opacity: 0.16;
+}
+
+@media (max-width: 1000px) {
+  body.memberships-page .membership-broadcast__header {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  body.memberships-page .membership-broadcast__grid {
+    grid-template: none;
+    min-height: 0;
+  }
+
+  body.memberships-page .membership-broadcast-card,
+  body.memberships-page .membership-broadcast-card.is-featured {
+    grid-row: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 720px) {
+  body.memberships-page .membership-broadcast {
+    width: calc(100% - 20px);
+    padding: 20px;
+  }
+
+  body.memberships-page .membership-broadcast__header {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  body.memberships-page .membership-broadcast__header h2 {
+    font-size: clamp(2.45rem, 14vw, 4.5rem);
+  }
+
+  body.memberships-page .membership-broadcast__grid {
+    grid-template: none;
+    min-height: 0;
+  }
+
+  body.memberships-page .membership-broadcast-card,
+  body.memberships-page .membership-broadcast-card.is-featured {
+    grid-row: auto;
+    min-height: 0;
+    aspect-ratio: 16 / 11;
+  }
+
+  body.memberships-page .membership-broadcast-card__copy {
+    padding: 18px;
+  }
+
+  body.memberships-page .membership-broadcast-card__copy strong,
+  body.memberships-page .membership-broadcast-card:not(.is-featured) .membership-broadcast-card__copy strong {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+
+  body.memberships-page .membership-broadcast__footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  body.memberships-page .membership-hero-actions .membership-commercial-hero-launch {
+    display: inline-flex;
+    border-color: rgba(242, 200, 91, 0.62);
+    color: var(--lm-ice);
+    background: linear-gradient(110deg, rgba(242, 200, 91, 0.16), rgba(91, 233, 255, 0.12));
+    box-shadow: inset 0 0 24px rgba(91, 233, 255, 0.06);
+  }
+
+  body.memberships-page .membership-collectible-actions {
+    grid-template-columns: 1fr;
+  }
+
+  body.memberships-page .membership-commercial-modal {
+    padding: 0;
+  }
+
+  body.memberships-page .membership-commercial-modal__panel {
+    display: grid;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    align-content: center;
+    border-radius: 0;
+  }
+
+  body.memberships-page .membership-commercial-modal__header,
+  body.memberships-page .membership-commercial-modal__footer {
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  body.memberships-page .membership-commercial-modal__header h2 {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+
+  body.memberships-page .membership-commercial-modal__footer {
+    display: grid;
+  }
+
+  body.memberships-page .membership-commercial-modal__chapters {
+    overflow-x: auto;
+  }
+
+  body.memberships-page .membership-commercial-modal__chapters button {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    min-width: 112px;
+    padding: 9px 11px;
+  }
+
+  body.memberships-page .membership-commercial-modal__footer > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  body.memberships-page .membership-commercial-modal__footer .membership-commercial-enter {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+
+  body.memberships-page .membership-commercial-modal__footer :is(button, a) {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 body.memberships-page .membership-disclaimer {
@@ -1104,7 +1793,7 @@ body.memberships-page .membership-water__media::after {
   pointer-events: none;
 }
 
-body.memberships-page .membership-water__media img {
+body.memberships-page .membership-water__media :is(img, video) {
   --lm-water-pan: 0%;
   --lm-water-drift: 0px;
   --lm-water-scale: 1;
@@ -1118,6 +1807,33 @@ body.memberships-page .membership-water__media img {
   transform: translate3d(0, calc(var(--lm-water-pan) + var(--lm-water-drift)), 0) scale(var(--lm-water-scale));
   transform-origin: 50% 22%;
   will-change: transform;
+}
+
+body.memberships-page .membership-water__media video {
+  filter: saturate(1.04) contrast(1.04) brightness(0.9);
+}
+
+body.memberships-page .membership-water-commercial-launch {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(242, 200, 91, 0.66);
+  border-radius: 999px;
+  color: #03060d;
+  background: linear-gradient(115deg, var(--lm-gold-hot), var(--lm-cyan));
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.42), 0 0 24px rgba(91, 233, 255, 0.14);
+  font: 700 0.68rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+body.memberships-page .membership-water-commercial-launch:is(:hover, :focus-visible) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.48), 0 0 32px rgba(91, 233, 255, 0.24);
 }
 
 body.memberships-page .membership-water__figure figcaption {
@@ -2433,7 +3149,7 @@ body.memberships-page .lm-line-mask {
     clip-path: none !important;
   }
 
-  body.memberships-page .membership-water__media img {
+  body.memberships-page .membership-water__media :is(img, video) {
     transform: none !important;
   }
 

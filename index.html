@@ -11,7 +11,12 @@
     <meta name="theme-color" content="#03050a" />
     <link rel="icon" href="./assets/brand/lm-orb-mark.webp" type="image/webp" />
     <link rel="canonical" href="https://robjasper2084.github.io/lottominded-ultra.io/" />
-<link rel="stylesheet" href="./styles.css?v=home-audit-fixes-25" />
+<link rel="stylesheet" href="./styles.css?v=refined-commercial-2" />
+    <link rel="stylesheet" href="./assets/features-app/css/feature-particle-organism.css?v=earth-sound-polish-1" />
+    <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=earth-sound-polish-1" />
+    <script type="importmap">
+      {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
+    </script>
     <script>
       try {
         if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
@@ -22,7 +27,7 @@
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
   </head>
-  <body class="home-page has-sphere-header">
+  <body class="home-page has-sphere-header feature-earth-home">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
       <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
@@ -30,6 +35,7 @@
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
     </div>
+    <canvas id="featureEntity" class="feature-entity" data-entity-mode="earth" aria-hidden="true"></canvas>
     <header class="site-header home-like-header home-sphere-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./" aria-label="LOTTOMINDED ULTRA home">
@@ -39,8 +45,8 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Home sphere navigation">
-        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./memberships.html" data-icon="MB">Memberships</a>
+        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./news/" data-icon="NW">News</a>
         <a href="./live-events.html" data-icon="EV">Events</a>
@@ -168,7 +174,7 @@
           </div>
           <div class="home-spheres-copy">
             <p class="section-kicker">Beat2Lotto+&trade; Signal Room</p>
-            <h2 class="kinetic-word" data-kinetic="LOTTERY SPHERES IN MOTION" aria-label="Lottery Spheres in Motion" tabindex="0">Lottery Spheres in Motion</h2>
+            <h2>Lottery Spheres in Motion</h2>
             <p>
               Guide the glowing balls, reroll a creative set, and send the signal back into the LOTTOMINDED ULTRA&trade;
               studio. Creative number generation only. Not a prediction.
@@ -258,10 +264,20 @@
 
       <section class="refined-app-band marketing-section reveal-section" id="lottomind-refined" data-reveal>
         <div class="refined-app-copy">
-          <video class="refined-copy-video-bg" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
-            <source src="./assets/video/bloom-through-gloom-hero.opt.mp4" type="video/mp4" />
-            <source src="./assets/video/home-prompt-bloom-blend.opt.mp4" type="video/mp4" />
-          </video>
+          <div class="refined-app-film" data-inline-sound-card>
+            <video
+              muted
+              playsinline
+              preload="metadata"
+              poster="./assets/video/lottomind-refined-commercial-poster-20260716.png"
+              data-inline-sound-video
+              data-inline-sound-volume="0.78"
+              aria-label="LottoMind Refined membership commercial">
+              <source src="./assets/video/lottomind-refined-commercial-20260716.mp4" type="video/mp4" />
+            </video>
+            <button class="inline-sound-button" type="button" data-inline-sound-button>Play with sound</button>
+            <span class="refined-app-film__label">Refined App / Membership film</span>
+          </div>
           <p class="eyebrow">Ultra Studio -> LottoMind Refined App -> Vault Membership</p>
           <h2 class="kinetic-word refined-explode-heading" data-kinetic="ENTER THE LOTTOMIND REFINED APP" aria-label="Enter the LottoMind Refined App" tabindex="0">Enter the LottoMind Refined App</h2>
           <p>
@@ -319,7 +335,9 @@
 
 <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
 <script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
-    <script src="./site.js?v=startup-video-restore-1" defer></script>
+    <script src="./site.js?v=startup-video-delay-10s-1" defer></script>
     <script src="./lottery-spheres.js?v=spheres-bottom-orbit-2" defer></script>
+    <script src="./assets/vendor/gsap/gsap.min.js?v=3.13.0" defer></script>
+    <script type="module" src="./assets/features-app/js/main.js?v=earth-sound-polish-1"></script>
   </body>
 </html>

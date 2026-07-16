@@ -37,6 +37,217 @@
     telemetry: { x: 0.5, y: 0.5, status: "ARRAY STABLE" },
   };
 
+  const commercialModal = document.querySelector("[data-membership-commercial-modal]");
+  const commercialVideo = commercialModal?.querySelector("[data-membership-commercial-video]");
+  const heroCommercialVideo = document.querySelector("[data-membership-hero-commercial]");
+  const waterCommercialVideo = document.querySelector("[data-membership-water-commercial]");
+  const commercialOpeners = [...document.querySelectorAll("[data-membership-commercial-open]")];
+  const commercialClose = commercialModal?.querySelector("[data-membership-commercial-close]");
+  const commercialEnter = commercialModal?.querySelector("[data-membership-commercial-enter]");
+  const commercialReplay = commercialModal?.querySelector("[data-membership-commercial-replay]");
+  const commercialChapters = [...(commercialModal?.querySelectorAll("[data-membership-commercial-chapter]") || [])];
+  const commercialTitle = commercialModal?.querySelector("[data-membership-commercial-title]");
+  const commercialSignal = commercialModal?.querySelector("[data-membership-commercial-signal]");
+  const commercialCopy = commercialModal?.querySelector("[data-membership-commercial-copy]");
+  const commercialTelemetry = commercialModal?.querySelector("[data-membership-commercial-telemetry]");
+  const commercialFilms = [
+    {
+      src: "./assets/merch/lottomind-guardian-commercial-reveal-20260716.mp4",
+      poster: "./assets/merch/lottomind-guardian-commercial-reveal-poster-20260716.png",
+      signal: "Film 01 / Product signal",
+      title: "Meet the Guardian.",
+      telemetry: "LM-GUARDIAN / REVEAL",
+      copy: "Meet the $19.95 Little Man Luggage Charm and Backpack Guardian. Every purchase includes three complimentary months of LottoMind app membership.",
+    },
+    {
+      src: "./assets/merch/lottomind-guardian-commercial-clip-on-20260716.mp4",
+      poster: "./assets/merch/lottomind-guardian-commercial-clip-on-poster-20260716.png",
+      signal: "Film 02 / Field setup",
+      title: "Clip on your mindset.",
+      telemetry: "LM-GUARDIAN / DEPLOY",
+      copy: "Clip the Guardian onto a backpack or luggage route, then carry the LottoMind signal with you.",
+    },
+    {
+      src: "./assets/merch/lottomind-merch-commercial-20260716.mp4",
+      poster: "./assets/merch/lottomind-merch-commercial-poster-20260716.png",
+      signal: "Film 03 / Mobile signal",
+      title: "Carry the signal.",
+      telemetry: "LM-GUARDIAN / IN TRANSIT",
+      copy: "The Guardian goes wherever the next idea begins, with three months of LottoMind membership included.",
+    },
+  ];
+  const commercialFocusables = () => commercialModal
+    ? [...commercialModal.querySelectorAll("button, a[href], video[controls]")].filter((node) => !node.hidden && node.getClientRects().length)
+    : [];
+  let commercialReturnFocus = null;
+  let commercialFilmIndex = 0;
+
+  const setCommercialFilm = (index, { restart = true, play = false, muted = false } = {}) => {
+    if (!commercialVideo) return;
+    const normalizedIndex = Math.max(0, Math.min(commercialFilms.length - 1, Number(index) || 0));
+    const film = commercialFilms[normalizedIndex];
+    const sourceChanged = commercialVideo.getAttribute("src") !== film.src;
+    commercialFilmIndex = normalizedIndex;
+    if (sourceChanged) {
+      commercialVideo.pause();
+      commercialVideo.setAttribute("src", film.src);
+      commercialVideo.poster = film.poster;
+      commercialVideo.load();
+    } else if (restart) {
+      commercialVideo.currentTime = 0;
+    }
+    if (commercialSignal) commercialSignal.textContent = film.signal;
+    if (commercialTitle) commercialTitle.textContent = film.title;
+    if (commercialCopy) commercialCopy.textContent = film.copy;
+    if (commercialTelemetry) commercialTelemetry.textContent = film.telemetry;
+    commercialChapters.forEach((button) => {
+      const active = Number(button.dataset.commercialIndex) === normalizedIndex;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-current", active ? "true" : "false");
+    });
+    if (play) {
+      commercialVideo.muted = muted;
+      commercialVideo.volume = 0.72;
+      commercialVideo.play().catch(() => {});
+    }
+  };
+
+  let heroCommercialInView = false;
+  let waterCommercialInView = false;
+  const syncHeroCommercialPlayback = () => {
+    if (!heroCommercialVideo) return;
+    const modalIsOpen = commercialModal && !commercialModal.hidden;
+    if (reducedMotion.matches || document.hidden || !heroCommercialInView || modalIsOpen) {
+      heroCommercialVideo.pause();
+      return;
+    }
+    heroCommercialVideo.muted = true;
+    heroCommercialVideo.play().catch(() => {});
+  };
+  if (heroCommercialVideo) {
+    const heroCommercialObserver = new IntersectionObserver((entries) => {
+      heroCommercialInView = Boolean(entries[0]?.isIntersecting && entries[0].intersectionRatio >= 0.28);
+      syncHeroCommercialPlayback();
+    }, { threshold: [0, 0.28, 0.65] });
+    heroCommercialObserver.observe(heroCommercialVideo);
+    document.addEventListener("visibilitychange", syncHeroCommercialPlayback);
+    reducedMotion.addEventListener?.("change", syncHeroCommercialPlayback);
+  }
+
+  const syncWaterCommercialPlayback = () => {
+    if (!waterCommercialVideo) return;
+    const modalIsOpen = commercialModal && !commercialModal.hidden;
+    if (reducedMotion.matches || document.hidden || !waterCommercialInView || modalIsOpen) {
+      waterCommercialVideo.pause();
+      return;
+    }
+    waterCommercialVideo.muted = true;
+    waterCommercialVideo.play().catch(() => {});
+  };
+  if (waterCommercialVideo) {
+    const waterCommercialObserver = new IntersectionObserver((entries) => {
+      waterCommercialInView = Boolean(entries[0]?.isIntersecting && entries[0].intersectionRatio >= 0.28);
+      syncWaterCommercialPlayback();
+    }, { threshold: [0, 0.28, 0.65] });
+    waterCommercialObserver.observe(waterCommercialVideo);
+    document.addEventListener("visibilitychange", syncWaterCommercialPlayback);
+    reducedMotion.addEventListener?.("change", syncWaterCommercialPlayback);
+  }
+
+  const closeCommercial = ({ restoreFocus = true } = {}) => {
+    if (!commercialModal || commercialModal.hidden) return;
+    commercialVideo?.pause();
+    commercialModal.classList.remove("is-open");
+    commercialModal.setAttribute("aria-hidden", "true");
+    commercialModal.hidden = true;
+    commercialModal.classList.remove("is-entry");
+    body.classList.remove("has-membership-commercial");
+    delete body.dataset.membershipCommercialEntry;
+    root.inert = false;
+    document.querySelector("[data-site-header]")?.removeAttribute("inert");
+    state.lenis?.start();
+    syncHeroCommercialPlayback();
+    syncWaterCommercialPlayback();
+    if (commercialClose) commercialClose.textContent = "Close";
+    if (restoreFocus) commercialReturnFocus?.focus?.({ preventScroll: true });
+  };
+
+  const openCommercial = (trigger, options = {}) => {
+    if (!commercialModal || !commercialVideo) return;
+    const entry = options.entry === true;
+    const requestedIndex = options.index ?? trigger?.dataset.commercialIndex;
+    commercialReturnFocus = trigger || document.activeElement;
+    setCommercialFilm(requestedIndex, { restart: true, play: false });
+    commercialModal.hidden = false;
+    commercialModal.setAttribute("aria-hidden", "false");
+    commercialModal.classList.toggle("is-entry", entry);
+    body.classList.add("has-membership-commercial");
+    if (entry) body.dataset.membershipCommercialEntry = "true";
+    else delete body.dataset.membershipCommercialEntry;
+    heroCommercialVideo?.pause();
+    waterCommercialVideo?.pause();
+    root.inert = true;
+    document.querySelector("[data-site-header]")?.setAttribute("inert", "");
+    state.lenis?.stop();
+    requestAnimationFrame(() => commercialModal.classList.add("is-open"));
+    if (commercialClose) commercialClose.textContent = entry ? "Skip & Enter" : "Close";
+    setCommercialFilm(commercialFilmIndex, { restart: true, play: true, muted: entry });
+    commercialClose?.focus({ preventScroll: true });
+  };
+
+  commercialOpeners.forEach((button) => button.addEventListener("click", () => openCommercial(button)));
+  commercialClose?.addEventListener("click", () => closeCommercial());
+  commercialEnter?.addEventListener("click", () => closeCommercial());
+  commercialReplay?.addEventListener("click", () => {
+    if (!commercialVideo) return;
+    commercialVideo.currentTime = 0;
+    commercialVideo.play().catch(() => {});
+  });
+  commercialChapters.forEach((button) => button.addEventListener("click", () => {
+    setCommercialFilm(button.dataset.commercialIndex, { restart: true, play: true });
+  }));
+  commercialVideo?.addEventListener("ended", () => {
+    if (commercialFilmIndex < commercialFilms.length - 1) {
+      setCommercialFilm(commercialFilmIndex + 1, { restart: true, play: true });
+    }
+  });
+  const chooseEntryCommercial = () => {
+    let previous = -1;
+    try {
+      previous = Number.parseInt(window.localStorage.getItem("lm-membership-entry-film") || "-1", 10);
+    } catch (_) {}
+    const choices = commercialFilms.map((_, index) => index).filter((index) => index !== previous);
+    const index = choices[Math.floor(Math.random() * choices.length)] ?? 0;
+    try {
+      window.localStorage.setItem("lm-membership-entry-film", String(index));
+    } catch (_) {}
+    return index;
+  };
+  openCommercial(null, { entry: true, index: chooseEntryCommercial() });
+  commercialModal?.addEventListener("click", (event) => {
+    if (event.target === commercialModal) closeCommercial();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (!commercialModal || commercialModal.hidden) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeCommercial();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusables = commercialFocusables();
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
   const setChromeHeight = () => {
     const header = document.querySelector("[data-site-header]");
     const ribbon = document.querySelector(".home-signal-marquee");
@@ -371,10 +582,70 @@
       heroSplit = SplitText.create
         ? SplitText.create(heroTitle, { type: "lines,chars", mask: "lines", charsClass: "lm-hero-char" })
         : new SplitText(heroTitle, { type: "lines,chars", mask: "lines", charsClass: "lm-hero-char" });
-      gsap.set(heroSplit.chars, { yPercent: 112, opacity: 0 });
+      document.getElementById("dust")?.classList.add("lm-hero-particle-fold");
+      gsap.set(heroSplit.chars, {
+        x: (index) => ((index % 7) - 3) * 22,
+        y: (index) => ((index % 5) - 2) * 18,
+        z: (index) => -120 + (index % 6) * 24,
+        rotationX: (index) => ((index % 4) - 1.5) * 28,
+        rotationY: (index) => (index % 2 ? -1 : 1) * (68 + (index % 4) * 7),
+        scale: 0.12,
+        opacity: 0,
+        filter: "blur(8px)",
+        transformOrigin: "50% 50%",
+        force3D: true,
+      });
     } catch (error) {
       heroSplit = null;
     }
+  }
+
+  let heroFoldTimeline = null;
+  let heroFoldTrigger = null;
+  const heroSection = document.getElementById("dust");
+  const heroFoldCopy = root.querySelectorAll(
+    ".membership-hero-copy > :is(.membership-temporal-subtitle, .membership-collectible-offer)"
+  );
+  if (gsap && ScrollTrigger && heroSection && heroSplit?.chars?.length && !reducedMotion.matches) {
+    const heroChars = heroSplit.chars;
+    heroFoldTimeline = gsap.timeline({ paused: true })
+      .to(heroChars, {
+        x: (index) => (index < heroChars.length / 2 ? -1 : 1) * (38 + (index % 7) * 10),
+        y: (index) => ((index % 5) - 2) * 14,
+        z: (index) => -80 - (index % 6) * 22,
+        rotationX: (index) => ((index % 3) - 1) * 48,
+        rotationY: (index) => (index % 2 ? -1 : 1) * 88,
+        scale: 0.08,
+        opacity: 0.06,
+        filter: "blur(5px)",
+        duration: 1,
+        stagger: { amount: 0.18, from: "edges" },
+        ease: "none",
+      }, 0)
+      .to(heroFoldCopy, {
+        x: 34,
+        scaleX: 0.18,
+        opacity: 0.12,
+        filter: "blur(3px)",
+        transformOrigin: "0% 50%",
+        duration: 0.72,
+        stagger: 0.05,
+        ease: "none",
+      }, 0.16);
+    heroFoldTrigger = ScrollTrigger.create({
+      id: "lm-hero-particle-fold",
+      trigger: heroSection,
+      start: "top 20%",
+      end: "top -30%",
+      scrub: 0.65,
+      animation: heroFoldTimeline,
+      invalidateOnRefresh: true,
+    });
+    window.__lmHeroParticleFold = {
+      get progress() { return heroFoldTimeline.progress(); },
+      get triggerProgress() { return heroFoldTrigger.progress; },
+      get charOpacity() { return Number.parseFloat(getComputedStyle(heroChars[0]).opacity); },
+    };
   }
 
   if (gsap && SplitText && ScrollTrigger && !reducedMotion.matches) {
@@ -392,7 +663,20 @@
     if (!gsap || reducedMotion.matches) return;
     const supporting = root.querySelectorAll(".membership-hero-copy > :not(h1)");
     gsap.timeline()
-      .to(heroSplit?.chars || heroTitle, { yPercent: 0, opacity: 1, duration: 1.05, stagger: { each: 0.025, from: "center" }, ease: "expo.out" })
+      .to(heroSplit?.chars || heroTitle, {
+        x: 0,
+        y: 0,
+        z: 0,
+        yPercent: 0,
+        rotationX: 0,
+        rotationY: 0,
+        scale: 1,
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1.28,
+        stagger: { each: 0.024, from: "center" },
+        ease: "expo.out",
+      })
       .fromTo(supporting, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.72, stagger: 0.07, ease: "expo.out" }, "-=0.68");
   };
 

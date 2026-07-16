@@ -11091,6 +11091,56 @@ body.universal-menu-open {
   pointer-events: none;
 }
 
+.refined-app-film {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.48);
+  border-radius: 14px;
+  background: #02060c;
+  box-shadow:
+    0 20px 54px rgba(0, 0, 0, 0.38),
+    0 0 30px rgba(41, 247, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 224, 113, 0.08);
+  aspect-ratio: 16 / 9;
+}
+
+.refined-app-film::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 58%, rgba(2, 6, 12, 0.82));
+  content: "";
+  pointer-events: none;
+}
+
+.refined-app-film video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #02060c;
+}
+
+.refined-app-film__label {
+  position: absolute;
+  z-index: 3;
+  right: 16px;
+  bottom: 13px;
+  left: 16px;
+  color: rgba(248, 251, 255, 0.82);
+  font-family: var(--mono-font, ui-monospace, monospace);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.refined-app-film .inline-sound-button {
+  top: 12px;
+  right: 12px;
+}
+
 .refined-app-copy::before {
   position: absolute;
   inset: 0;
@@ -16595,5 +16645,152 @@ html.lm-mobile-performance body.home-page .kinetic-word::after {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-areas: "brand" "nav" !important;
     min-height: 145px !important;
+  }
+}
+/* Home Collector Access — moved from memberships and scoped to the home flow. */
+.home-page .home-collector-access-section {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: min(calc(100% - 32px), 1500px);
+  max-width: 1500px;
+  align-items: center;
+  gap: clamp(24px, 4vw, 64px);
+  margin: clamp(24px, 4vw, 54px) auto;
+  padding: clamp(24px, 3.5vw, 48px);
+  overflow: visible;
+  border: 1px solid rgba(53, 231, 255, 0.4);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 85% 20%, rgba(242, 200, 91, 0.13), transparent 30%),
+    linear-gradient(115deg, rgba(53, 231, 255, 0.1), transparent 48%),
+    rgba(5, 18, 35, 0.93);
+  box-shadow: inset 0 0 50px rgba(53, 231, 255, 0.04), 0 24px 80px rgba(0, 0, 0, 0.36);
+  isolation: isolate;
+  scroll-margin-top: clamp(9rem, 18vw, 12rem);
+}
+
+.home-page .home-collector-access-section::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 25%, rgba(255, 255, 255, 0.07) 48%, transparent 70%);
+  content: "";
+  pointer-events: none;
+  transform: translateX(-76%);
+  animation: home-collector-scan 9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes home-collector-scan {
+  0%, 64% { transform: translateX(-76%); opacity: 0; }
+  72% { opacity: 1; }
+  100% { transform: translateX(78%); opacity: 0; }
+}
+
+.home-page .home-collector-access-section__heading > span {
+  display: block;
+  color: #f2c85b;
+  font: 800 0.68rem/1.2 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.home-page .home-collector-access-section__heading h2 {
+  max-width: 13ch;
+  margin: 0.65rem 0 0;
+  color: #eefbff;
+  font-family: "Space Grotesk", "Segoe UI", Arial, sans-serif;
+  font-size: clamp(2.4rem, 5vw, 5.25rem);
+  font-weight: 850;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  text-wrap: balance;
+}
+
+.home-page .home-collector-access-section__heading p {
+  max-width: 70ch;
+  margin: 1rem 0 0;
+  color: rgba(238, 251, 255, 0.7);
+  font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+  line-height: 1.65;
+}
+
+.home-page .home-collector-access-section .collector-access {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.home-page .home-collector-access-section .collector-access__trigger {
+  min-width: 210px;
+  min-height: 48px;
+  border-color: rgba(242, 200, 91, 0.64);
+  background: linear-gradient(135deg, rgba(242, 200, 91, 0.17), rgba(53, 231, 255, 0.09));
+  box-shadow: 0 0 28px rgba(242, 200, 91, 0.12);
+}
+
+@media (max-width: 760px) {
+  .home-page .home-collector-access-section {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    width: min(calc(100% - 24px), 1500px);
+    margin-block: 18px 28px;
+    padding: 22px 18px;
+    scroll-margin-top: 13.5rem;
+  }
+
+  .home-page .home-collector-access-section .collector-access,
+  .home-page .home-collector-access-section .collector-access__trigger {
+    width: 100%;
+  }
+
+  .home-page .home-collector-access-section .collector-access__trigger span {
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-page .home-collector-access-section::after {
+    animation: none;
+  }
+}
+
+/* Home signal banner: 30% larger while preserving its original scroll speed. */
+body.home-page.has-sphere-header .home-signal-marquee {
+  top: calc(clamp(4rem, 5.7vw, 5.12rem) + 2.125rem);
+  min-height: 57.2px;
+}
+
+body.home-page.has-sphere-header .home-signal-marquee::before,
+body.home-page.has-sphere-header .home-signal-marquee::after {
+  width: clamp(57.2px, 13vw, 169px);
+}
+
+body.home-page.has-sphere-header .home-signal-marquee-track {
+  animation-duration: 24.7s;
+}
+
+body.home-page.has-sphere-header .home-signal-marquee-track span {
+  min-height: 57.2px;
+  padding-inline: clamp(28.6px, 4.992vw, 84.5px);
+  font-size: clamp(1.3rem, 3.12vw, 2.405rem);
+}
+
+body.home-page.has-sphere-header .home-signal-marquee-track span::after {
+  right: -10.4px;
+  width: 13px;
+  height: 13px;
+}
+
+@media (max-width: 1100px) {
+  body.home-page.has-sphere-header .home-signal-marquee {
+    top: 154px;
+  }
+}
+
+@media (max-width: 640px) {
+  body.home-page.has-sphere-header .home-signal-marquee {
+    top: 148px;
   }
 }

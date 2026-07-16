@@ -1,0 +1,263 @@
+:root {
+  --lm-commercial-cyan: #5be9ff;
+  --lm-commercial-gold: #f2c85b;
+  --lm-commercial-ice: #eef2f7;
+  --lm-commercial-muted: rgba(238, 242, 247, 0.68);
+  --lm-commercial-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.has-lm-commercial-gate {
+  overflow: hidden;
+}
+
+.lm-commercial-gate {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 42px);
+  opacity: 0;
+  color: var(--lm-commercial-ice);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(14, 88, 118, 0.25), transparent 43%),
+    linear-gradient(rgba(1, 5, 12, 0.93), rgba(1, 3, 9, 0.985));
+  backdrop-filter: blur(20px);
+  transition: opacity 360ms var(--lm-commercial-ease);
+}
+
+.lm-commercial-gate.is-open {
+  opacity: 1;
+}
+
+.lm-commercial-gate__panel {
+  width: min(1160px, 100%);
+  max-height: calc(100dvh - clamp(24px, 6vw, 84px));
+  overflow: auto;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(rgba(3, 9, 20, 0.96), rgba(4, 6, 16, 0.985)) padding-box,
+    linear-gradient(125deg, var(--lm-commercial-cyan), rgba(255, 61, 138, 0.72), var(--lm-commercial-gold)) border-box;
+  box-shadow: 0 0 90px rgba(91, 233, 255, 0.18), 0 0 140px rgba(157, 87, 255, 0.12);
+  transform: translateY(24px) scale(0.975);
+  transition: transform 520ms var(--lm-commercial-ease);
+}
+
+.lm-commercial-gate.is-open .lm-commercial-gate__panel {
+  transform: none;
+}
+
+.lm-commercial-gate__header,
+.lm-commercial-gate__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: clamp(14px, 2vw, 24px);
+}
+
+.lm-commercial-gate__signal {
+  color: var(--lm-commercial-cyan);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.lm-commercial-gate__header h2 {
+  margin: 4px 0 0;
+  color: var(--lm-commercial-ice);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.lm-commercial-gate :is(button, .lm-commercial-gate__shop) {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(91, 233, 255, 0.52);
+  border-radius: 8px;
+  color: var(--lm-commercial-ice);
+  background: rgba(5, 15, 29, 0.92);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.lm-commercial-gate :is(button, .lm-commercial-gate__shop):focus-visible {
+  outline: 2px solid var(--lm-commercial-gold);
+  outline-offset: 3px;
+}
+
+.lm-commercial-gate__stage {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid rgba(91, 233, 255, 0.2);
+  background: #01040a;
+  aspect-ratio: 16 / 9;
+}
+
+.lm-commercial-gate__stage video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #01040a;
+}
+
+.lm-commercial-gate__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 44%, rgba(91, 233, 255, 0.08) 49%, transparent 54% 100%);
+  mix-blend-mode: screen;
+  animation: lm-commercial-gate-scan 4.6s linear infinite;
+}
+
+@keyframes lm-commercial-gate-scan {
+  from { transform: translateY(-54%); }
+  to { transform: translateY(54%); }
+}
+
+.lm-commercial-gate__telemetry {
+  position: absolute;
+  inset: 14px 16px auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(238, 242, 247, 0.72);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: clamp(0.48rem, 0.8vw, 0.66rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 12px rgba(91, 233, 255, 0.7);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.lm-commercial-gate__chapters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border-bottom: 1px solid rgba(91, 233, 255, 0.2);
+  background: rgba(91, 233, 255, 0.14);
+}
+
+.lm-commercial-gate__chapters button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  padding: 10px clamp(12px, 2vw, 24px);
+  border: 0;
+  border-radius: 0;
+  color: rgba(238, 242, 247, 0.56);
+  background: rgba(3, 9, 20, 0.97);
+  font-size: clamp(0.54rem, 0.8vw, 0.7rem);
+  text-align: left;
+}
+
+.lm-commercial-gate__chapters button b {
+  color: var(--lm-commercial-gold);
+  font-size: 0.7rem;
+}
+
+.lm-commercial-gate__chapters button:is(:hover, :focus-visible, .is-active) {
+  color: var(--lm-commercial-ice);
+  background: linear-gradient(110deg, rgba(91, 233, 255, 0.12), rgba(255, 61, 138, 0.07)), rgba(3, 9, 20, 0.98);
+  box-shadow: inset 0 -2px var(--lm-commercial-cyan);
+}
+
+.lm-commercial-gate__footer p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--lm-commercial-muted);
+  line-height: 1.55;
+}
+
+.lm-commercial-gate__actions {
+  display: flex;
+  flex: none;
+  gap: 10px;
+}
+
+.lm-commercial-gate__actions .lm-commercial-gate__enter,
+.lm-commercial-gate__actions .lm-commercial-gate__shop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #03060d;
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--lm-commercial-gold), var(--lm-commercial-cyan));
+  box-shadow: 0 0 26px rgba(91, 233, 255, 0.18);
+}
+
+@media (max-width: 720px) {
+  .lm-commercial-gate {
+    padding: 0;
+  }
+
+  .lm-commercial-gate__panel {
+    display: grid;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    align-content: center;
+    border-radius: 0;
+  }
+
+  .lm-commercial-gate__header,
+  .lm-commercial-gate__footer {
+    align-items: flex-start;
+    padding: 15px;
+  }
+
+  .lm-commercial-gate__header h2 {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+  }
+
+  .lm-commercial-gate__footer {
+    display: grid;
+  }
+
+  .lm-commercial-gate__chapters {
+    overflow-x: auto;
+  }
+
+  .lm-commercial-gate__chapters button {
+    grid-template-columns: 1fr;
+    gap: 3px;
+    min-width: 112px;
+    padding: 9px 11px;
+  }
+
+  .lm-commercial-gate__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .lm-commercial-gate__actions .lm-commercial-gate__enter {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lm-commercial-gate,
+  .lm-commercial-gate__panel {
+    transition: none;
+  }
+
+  .lm-commercial-gate__scan {
+    animation: none;
+  }
+}

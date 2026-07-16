@@ -24,8 +24,8 @@ if (cinematicDesktop) {
 
 const STYLE = [
   { color: "#7fd4ff", cameraZ: 14.5, x: 0 },
-  { color: "#d8a2ff", cameraZ: 13.5, x: 0 },
-  { color: "#7fd4ff", cameraZ: 14.5, x: 2.0 },
+  { color: "#ff8a5b", cameraZ: 13.5, x: 0 },
+  { color: "#c9a06a", cameraZ: 14.5, x: 2.0 },
   { color: "#4fb6e0", cameraZ: 13.0, x: 2.4 },
   { color: "#5bf0d8", cameraZ: 12.5, x: 1.8 },
   { color: "#e08ab8", cameraZ: 13.5, x: -0.8 },
@@ -39,11 +39,6 @@ const HERO_RING_RADII = [6.4, 5.3, 4.2];
 const HERO_RING_TILTS = [[-0.5, 0], [0.9, 0.7], [0.25, -1.1]];
 const HERO_GIMBAL_AXES = [[1, 0.18, 0], [0, 1, 0.22], [0.25, 0, 1]];
 const HERO_GIMBAL_SPEEDS = [0.24, -0.38, 0.55];
-const HERO_MASCOT_SOURCE = new URL("../cursor/lm-mascot-front.png", import.meta.url);
-const HERO_BRAIN_SOURCE = new URL("../brand/membership-brain-coin-particle-source.webp", import.meta.url);
-const HERO_MASCOT_COLORS = ["#7fd4ff", "#ffffff", "#ff3d8a"];
-const IGNITION_PARTICLE_SOURCE = new URL("../brand/membership-lottomind-reporter-particle-mask.png", import.meta.url);
-const GAMING_PARTICLE_SOURCE = new URL("../brand/membership-hooded-brain-particle-mask.jpg", import.meta.url);
 const BACKGROUNDS = Array.from({ length: 8 }, (_, shape) => {
   const exact = sections.find((section) => Number(section.dataset.lmShape) === shape);
   if (exact) return exact.dataset.lmBg || "#04060a";
@@ -100,198 +95,6 @@ const createGyroscopeRoles = (count) => {
   }
   return roles;
 };
-
-const sampleEllipsoid = (random, center, radius) => {
-  const direction = unitDirection(random);
-  const distance = Math.cbrt(random());
-  return [
-    center[0] + direction[0] * radius[0] * distance,
-    center[1] + direction[1] * radius[1] * distance,
-    center[2] + direction[2] * radius[2] * distance,
-  ];
-};
-
-function generateMascotFallback(count, seed = 101) {
-  const random = mulberry32(seed);
-  const target = new Float32Array(count * 3);
-  const roles = new Float32Array(count);
-  const parts = [
-    { end: 0.24, center: [0, 2.65, 0], radius: [2.15, 2.0, 1.05], role: 1 },
-    { end: 0.33, center: [0, 4.35, 0], radius: [2.25, 0.72, 1.02], role: 0 },
-    { end: 0.37, center: [-2.02, 2.7, 0], radius: [0.52, 0.68, 0.44], role: 1 },
-    { end: 0.41, center: [2.02, 2.7, 0], radius: [0.52, 0.68, 0.44], role: 1 },
-    { end: 0.66, center: [0, -0.15, 0], radius: [1.75, 2.2, 0.86], role: 2 },
-    { end: 0.74, center: [-1.85, -0.15, 0], radius: [0.5, 1.95, 0.46], role: 2 },
-    { end: 0.82, center: [1.85, -0.15, 0], radius: [0.5, 1.95, 0.46], role: 2 },
-    { end: 0.89, center: [-0.78, -3.25, 0], radius: [0.72, 1.65, 0.58], role: 3 },
-    { end: 0.96, center: [0.78, -3.25, 0], radius: [0.72, 1.65, 0.58], role: 3 },
-  ];
-  for (let index = 0; index < count; index += 1) {
-    const selector = random();
-    const part = parts.find(({ end }) => selector < end);
-    if (part) {
-      const [x, y, z] = sampleEllipsoid(random, part.center, part.radius);
-      setPoint(target, index, x, y, z);
-      roles[index] = part.role;
-    } else {
-      const direction = unitDirection(random);
-      const radius = 6.3 + random() * 4.2;
-      setPoint(target, index, direction[0] * radius, direction[1] * radius, direction[2] * radius);
-      roles[index] = 4;
-    }
-  }
-  return { target, roles, source: "procedural-fallback" };
-}
-
-async function loadMascotParticleData(count, seed = 101) {
-  try {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = HERO_MASCOT_SOURCE.href;
-    await image.decode();
-
-    const sampler = document.createElement("canvas");
-    const sampleHeight = 320;
-    const sampleWidth = Math.max(96, Math.round(sampleHeight * image.naturalWidth / image.naturalHeight));
-    sampler.width = sampleWidth;
-    sampler.height = sampleHeight;
-    const context = sampler.getContext("2d", { willReadFrequently: true });
-    if (!context) throw new Error("Mascot sampler canvas unavailable");
-    context.clearRect(0, 0, sampler.width, sampler.height);
-    context.drawImage(image, 0, 0, sampleWidth, sampleHeight);
-    const pixels = context.getImageData(0, 0, sampler.width, sampler.height).data;
-    const candidates = [];
-    let minX = sampler.width;
-    let maxX = 0;
-    let minY = sampler.height;
-    let maxY = 0;
-    for (let y = 0; y < sampler.height; y += 1) {
-      for (let x = 0; x < sampler.width; x += 1) {
-        const offset = (y * sampler.width + x) * 4;
-        const alpha = pixels[offset + 3];
-        if (alpha < 42) continue;
-        const luminance = pixels[offset] * 0.2126 + pixels[offset + 1] * 0.7152 + pixels[offset + 2] * 0.0722;
-        if (luminance < 14 && alpha < 180) continue;
-        candidates.push([x, y]);
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-      }
-    }
-    if (candidates.length < 500) throw new Error("Mascot source has too few opaque pixels");
-
-    const random = mulberry32(8241);
-    const target = new Float32Array(count * 3);
-    const roles = new Float32Array(count);
-    const centerX = (minX + maxX) * 0.5;
-    const centerY = (minY + maxY) * 0.5;
-    const scale = 10.8 / Math.max(1, maxY - minY);
-
-    for (let index = 0; index < count; index += 1) {
-      const [pixelX, pixelY] = candidates[Math.floor(random() * candidates.length)];
-      const x = (pixelX - centerX + random() - 0.5) * scale;
-      const y = (centerY - pixelY + random() - 0.5) * scale;
-      const z = (random() - 0.5) * (0.28 + random() * 0.42);
-      setPoint(target, index, x, y, z);
-      roles[index] = 0;
-    }
-    return {
-      target,
-      roles,
-      source: HERO_MASCOT_SOURCE.pathname,
-      bounds: { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY },
-    };
-  } catch (error) {
-    console.warn("Membership mascot particle source unavailable; using the procedural Little Man silhouette.", error);
-    return generateMascotFallback(count, seed);
-  }
-}
-
-const mascotParticleDataPromise = loadMascotParticleData(pointCount);
-
-async function loadArtworkParticleTarget(source, count, seed, luminanceFloor = 48) {
-  try {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = source.href;
-    await image.decode();
-
-    const size = 420;
-    const sampler = document.createElement("canvas");
-    sampler.width = size;
-    sampler.height = size;
-    const context = sampler.getContext("2d", { willReadFrequently: true });
-    if (!context) throw new Error("Artwork particle sampler canvas unavailable");
-    context.drawImage(image, 0, 0, size, size);
-    const pixels = context.getImageData(0, 0, size, size).data;
-    const luminanceMap = new Float32Array(size * size);
-    const chromaMap = new Float32Array(size * size);
-    for (let index = 0; index < size * size; index += 1) {
-      const offset = index * 4;
-      const red = pixels[offset];
-      const green = pixels[offset + 1];
-      const blue = pixels[offset + 2];
-      luminanceMap[index] = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-      chromaMap[index] = Math.max(red, green, blue) - Math.min(red, green, blue);
-    }
-    const candidates = [];
-    let minX = size;
-    let maxX = 0;
-    let minY = size;
-    let maxY = 0;
-
-    for (let y = 1; y < size - 1; y += 1) {
-      for (let x = 1; x < size - 1; x += 1) {
-        const index = y * size + x;
-        if (pixels[index * 4 + 3] < 40) continue;
-        const luminance = luminanceMap[index];
-        const edgeX = Math.abs(luminanceMap[index + 1] - luminanceMap[index - 1]);
-        const edgeY = Math.abs(luminanceMap[index + size] - luminanceMap[index - size]);
-        const edge = edgeX + edgeY;
-        const highlight = Math.max(0, luminance - luminanceFloor) * 0.24;
-        const signal = edge * 1.55 + highlight + chromaMap[index] * 0.18;
-        if (signal < luminanceFloor) continue;
-        candidates.push([x, y, Math.min(1, (signal - luminanceFloor + 18) / 125)]);
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
-      }
-    }
-    if (candidates.length < 1000) throw new Error("Artwork particle mask contains too few highlighted pixels");
-
-    const random = mulberry32(seed);
-    const target = new Float32Array(count * 3);
-    const centerX = (minX + maxX) * 0.5;
-    const centerY = (minY + maxY) * 0.5;
-    const scale = 11.6 / Math.max(1, maxY - minY);
-    for (let index = 0; index < count; index += 1) {
-      let candidate;
-      do {
-        candidate = candidates[Math.floor(random() * candidates.length)];
-      } while (random() > candidate[2]);
-      const x = (candidate[0] - centerX + random() - 0.5) * scale;
-      const y = (centerY - candidate[1] + random() - 0.5) * scale;
-      const z = (random() - 0.5) * (0.34 + candidate[2] * 0.58);
-      setPoint(target, index, x, y, z);
-    }
-    return {
-      target,
-      source: source.pathname,
-      bounds: { minX, maxX, minY, maxY, width: maxX - minX, height: maxY - minY },
-    };
-  } catch (error) {
-    console.warn(`Membership artwork particle mask unavailable: ${source.pathname}`, error);
-    return null;
-  }
-}
-
-const artworkParticleDataPromise = Promise.all([
-  loadArtworkParticleTarget(HERO_BRAIN_SOURCE, pointCount, 2249, 42),
-  loadArtworkParticleTarget(IGNITION_PARTICLE_SOURCE, pointCount, 3169, 46),
-  loadArtworkParticleTarget(GAMING_PARTICLE_SOURCE, pointCount, 4271, 42),
-]);
 
 function generateGyroscope(count, seed = 11, roles = createGyroscopeRoles(count)) {
   const random = mulberry32(seed);
@@ -546,7 +349,7 @@ const buildConstellationTarget = (shape, sampleSize = 420, linkLimit = 300, maxD
   return positions;
 };
 
-function initializeEntity(runtime, particleArtwork) {
+function initializeEntity(runtime) {
   if (!canvas || reducedMotion.matches || sections.length < 2) {
     document.body.classList.add("lm-no-webgl");
     return;
@@ -591,19 +394,17 @@ function initializeEntity(runtime, particleArtwork) {
       scales[index] = seed > 0.985 ? 2.4 : 0.5 + random() * 0.9;
     }
 
-    const mascotParticleData = particleArtwork.mascot;
-    const heroParticleData = particleArtwork.heroBrain?.target
-      ? { ...particleArtwork.heroBrain, roles: new Float32Array(pointCount) }
-      : mascotParticleData;
-    const heroRoles = heroParticleData.roles;
+    const heroRoles = createGyroscopeRoles(pointCount);
+    const heroParticleData = {
+      target: generateGyroscope(pointCount, 11, heroRoles),
+      roles: heroRoles,
+      source: "procedural-gyroscope",
+    };
     const heroRoleCounts = [0, 0, 0, 0, 0];
     heroRoles.forEach((role) => { heroRoleCounts[Math.floor(role)] += 1; });
     const shapes = generators.map((generator, index) => (
       index === 0 ? heroParticleData.target : generator(pointCount, 101 + index * 137)
     ));
-    if (particleArtwork.ignition?.target) shapes[1] = particleArtwork.ignition.target;
-    if (particleArtwork.gaming?.target) shapes[2] = particleArtwork.gaming.target;
-    shapes[4] = mascotParticleData.target;
     const heroRoleRadiusBounds = Array.from({ length: 5 }, () => ({ min: Infinity, max: 0 }));
     for (let index = 0; index < pointCount; index += 1) {
       const offset = index * 3;
@@ -748,13 +549,13 @@ function initializeEntity(runtime, particleArtwork) {
           float tt = smoothTwice(departure);
           vec3 rotatedHero = aPosA;
           if (uHero > 0.001) {
-            float coinRadius = length(aPosA.xy);
-            float coinBreath = sin(uGimbalTime * 0.82 + aSeed * 0.9) * 0.006;
-            float circuitRipple = sin(coinRadius * 1.15 - uGimbalTime * 1.1 + aSeed * 2.0) * 0.018;
-            rotatedHero.xy *= 1.0 + coinBreath + circuitRipple;
-            float coinTurn = sin(uGimbalTime * 0.23) * 0.055;
-            rotatedHero.xy = mat2(cos(coinTurn), -sin(coinTurn), sin(coinTurn), cos(coinTurn)) * rotatedHero.xy;
-            rotatedHero.z += sin(uGimbalTime * 0.9 + aSeed * 18.0) * 0.055;
+            if (aRing < 0.5) {
+              rotatedHero = rodrigues(aPosA, vec3(1.0, 0.18, 0.0), uGimbalTime * 0.24);
+            } else if (aRing < 1.5) {
+              rotatedHero = rodrigues(aPosA, vec3(0.0, 1.0, 0.22), uGimbalTime * -0.38);
+            } else if (aRing < 2.5) {
+              rotatedHero = rodrigues(aPosA, vec3(0.25, 0.0, 1.0), uGimbalTime * 0.55);
+            }
           }
           vec3 heroSource = mix(aPosA, rotatedHero, uHero);
           vec3 base = mix(heroSource, aPosB, tt);
@@ -847,6 +648,18 @@ function initializeEntity(runtime, particleArtwork) {
             * (1.0 + uHeat * 0.35);
           vec3 color = mix(uColorFrom, uColorTo, vTravel);
           vec3 heroColor = vec3(0.4980, 0.8314, 1.0);
+          if (vRing < 0.5) {
+            heroColor = vec3(1.0, 0.2941, 0.2941);
+          } else if (vRing < 1.5) {
+            heroColor = vec3(0.4980, 0.8314, 1.0);
+          } else if (vRing < 2.5) {
+            heroColor = vec3(0.7255, 0.9412, 0.8941);
+          } else if (vRing < 3.5) {
+            float emberMask = smoothstep(2.5, 1.4, vHeroRadius);
+            heroColor = mix(vec3(0.4980, 0.8314, 1.0), vec3(1.0, 0.5412, 0.3569), emberMask);
+          } else {
+            heroColor *= 0.72;
+          }
           color = mix(color, heroColor, vHero);
           color = mix(color, vec3(1.0, 0.32, 0.12), uHeat * 0.6);
           if (vSeed > 0.985) color = vec3(1.0);
@@ -1180,11 +993,11 @@ function initializeEntity(runtime, particleArtwork) {
       entityState.orbitDolly = orbitDolly;
       const regularSwayY = Math.sin(now * 0.00013) * 0.09;
       const regularSwayX = Math.cos(now * 0.00011) * 0.045;
-      const mascotFacingSway = Math.sin(entityState.gimbalTime * 0.45) * 0.08;
-      const mascotNod = Math.sin(entityState.gimbalTime * 0.31) * 0.028;
-      const baseRotationY = THREE.MathUtils.lerp(regularSwayY, mascotFacingSway, heroWeight)
+      const heroDrift = entityState.gimbalTime * 0.06;
+      const heroPrecession = Math.sin(entityState.gimbalTime * 0.23) * 0.1;
+      const baseRotationY = THREE.MathUtils.lerp(regularSwayY, heroDrift, heroWeight)
         + entityState.pointerX * 0.14 + orbitYaw;
-      const baseRotationX = THREE.MathUtils.lerp(regularSwayX, mascotNod, heroWeight)
+      const baseRotationX = THREE.MathUtils.lerp(regularSwayX, heroPrecession, heroWeight)
         - entityState.pointerY * 0.1;
       const baseRotationZ = Math.sin(now * 0.000071) * 0.035 * (1 - heroWeight) + entityState.introSpin;
       const lifeYaw = Math.sin(now * 0.00034) * 0.12;
@@ -1300,12 +1113,12 @@ function initializeEntity(runtime, particleArtwork) {
       get heroRoleCounts() { return [...heroRoleCounts]; },
       get heroSource() { return heroParticleData.source; },
       get heroBounds() { return heroParticleData.bounds ? { ...heroParticleData.bounds } : null; },
-      get heroColors() { return [...HERO_MASCOT_COLORS]; },
+      get heroColors() { return [...HERO_RING_COLORS, HERO_CORE_COLOR]; },
       get artworkParticleSources() {
         return {
-          ignition: particleArtwork.ignition?.source || null,
-          gaming: particleArtwork.gaming?.source || null,
-          life: mascotParticleData.source || null,
+          ignition: null,
+          gaming: null,
+          life: null,
         };
       },
       get heroRoleRadiusBounds() { return heroRoleRadiusBounds.map(({ min, max }) => ({ min, max })); },
@@ -1512,16 +1325,12 @@ function initializeEntity(runtime, particleArtwork) {
 }
 
 let initialized = false;
-const connectRuntime = async (runtime) => {
+const connectRuntime = (runtime) => {
   if (initialized) return;
   initialized = true;
-  const [mascot, [heroBrain, ignition, gaming]] = await Promise.all([
-    mascotParticleDataPromise,
-    artworkParticleDataPromise,
-  ]);
-  initializeEntity(runtime, { mascot, heroBrain, ignition, gaming });
+  initializeEntity(runtime);
 };
 window.addEventListener("lm:membership-runtime-ready", (event) => connectRuntime(event.detail), { once: true });
 
-await import("./memberships-cinematic.js?v=membership-runtime-ready-3");
+await import("./memberships-cinematic.js?v=membership-films-2");
 if (window.__lmMembershipRuntime) connectRuntime(window.__lmMembershipRuntime);
