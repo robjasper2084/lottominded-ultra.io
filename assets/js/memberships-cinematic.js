@@ -21,6 +21,7 @@
     ["worlds", "Worlds", "T − 4.6 Gyr"],
     ["water", "Water", "T − 3.8 Gyr"],
     ["life", "Life", "T − 0.54 Gyr"],
+    ["flight", "Flight", "Member program"],
     ["signal", "Signal", "T − 0.00 Gyr"],
     ["lm-final", "Return", "Now"],
   ].map(([id, label, time], index) => ({ id, label, time, index, node: document.getElementById(id) })).filter((item) => item.node);
@@ -247,7 +248,7 @@
   }
 
   const revealTargets = [...root.querySelectorAll(
-    ".membership-section-heading, .membership-signal-card, .membership-plan-card, .membership-feature-grid article, .credit-pack-grid article, .membership-steps li, .membership-vault-copy, .membership-vault-visual, .membership-final"
+    ".membership-section-heading, .membership-signal-card, .membership-plan-card, .membership-feature-grid article, .credit-pack-grid article, .membership-steps li, .membership-program__row, .membership-vault-copy, .membership-vault-visual, .membership-final"
   )];
   revealTargets.forEach((node) => node.classList.add("lm-reveal"));
   body.classList.add("lm-cinematic-ready");

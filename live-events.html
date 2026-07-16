@@ -65,7 +65,11 @@
     </script>
     <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
     <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-badge-above-player-1" />
+    <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=lottoman-particles-5" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
+    <script type="importmap">
+      {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
+    </script>
   </head>
   <body class="live-events-page lm-live-page has-sphere-tabs">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
@@ -75,6 +79,7 @@
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
     </div>
+    <canvas id="featureEntity" class="feature-entity" aria-hidden="true"></canvas>
     <header class="site-header home-like-header home-sphere-header global-sphere-header sphere-tabs-header" data-site-header>
       <div class="site-header-main">
         <a class="brand" href="./index.html#top" aria-label="LOTTOMINDED ULTRA home">
@@ -84,8 +89,8 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Ultra sphere navigation">
-        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./memberships.html" data-icon="MB">Memberships</a>
+        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./news/" data-icon="NW">News</a>
         <a class="nav-signal-active" href="./live-events.html" data-icon="EV" aria-current="page">Events</a>
@@ -101,7 +106,7 @@
     </header>
 
     <main class="lm-live-grid">
-      <section class="lm-live-hero panel-glow">
+      <section class="lm-live-hero panel-glow" data-shape="0" data-entity-label="Live signal" data-bg="#04060a" data-glow="#5be9ff">
         <div class="lm-live-hero-copy">
           <p class="status-live"><span></span>Live Now</p>
           <p class="started"><span></span>Started 00:12:45 ago</p>
@@ -128,7 +133,7 @@
         </article>
       </section>
 
-      <section class="lm-section panel-glow" id="upcoming">
+      <section class="lm-section panel-glow" id="upcoming" data-shape="1" data-entity-label="Upcoming" data-bg="#09070f" data-glow="#ffe66d">
         <header class="section-head"><h2>Upcoming Streams</h2><a href="#upcoming">View All</a></header>
         <article class="twitch-live-card" id="twitch-live" aria-label="LottoMinded Twitch live stream">
           <div class="twitch-live-copy">
@@ -154,7 +159,7 @@
         </div>
       </section>
 
-      <section class="lm-section panel-glow live-ballpass-section" id="featured">
+      <section class="lm-section panel-glow live-ballpass-section" id="featured" data-shape="2" data-entity-label="Featured" data-bg="#060912" data-glow="#7fd4ff">
         <canvas class="live-ballpass-field" data-live-ballpass-bg aria-hidden="true"></canvas>
         <header class="section-head"><h2>Featured Live Events</h2><a href="#featured">View All</a></header>
         <div class="event-card-row">
@@ -217,7 +222,7 @@
         </div>
       </aside>
 
-      <section class="lm-category-grid panel-glow">
+      <section class="lm-category-grid panel-glow" data-shape="3" data-entity-label="Categories" data-bg="#04080d" data-glow="#4fb6e0">
         <header class="section-head"><h2>Event Categories</h2><a href="#featured">View All</a></header>
         <button type="button">Music<span>Concerts</span></button>
         <button type="button">VIP<span>Festivals</span></button>
@@ -229,7 +234,7 @@
         <button type="button">Star<span>Specials</span></button>
       </section>
 
-      <section class="lm-spotlight panel-glow">
+      <section class="lm-spotlight panel-glow" data-shape="4" data-entity-label="Spotlight" data-bg="#050a0a" data-glow="#5bf0d8">
         <a class="artist-art video-spotlight-link local-video-spotlight" href="./assets/video/luna-vex-spotlight.mp4" target="_blank" rel="noopener noreferrer" aria-label="Watch Luna Vex spotlight video">
           <video muted loop playsinline preload="none" aria-label="Luna Vex spotlight video" data-autoplay-on-visible="true">
             <source data-src="./assets/video/luna-vex-spotlight.mp4" type="video/mp4" />
@@ -244,12 +249,12 @@
         </div>
       </section>
 
-      <section class="lm-passes panel-glow">
+      <section class="lm-passes panel-glow" data-shape="5" data-entity-label="Passes" data-bg="#0a070c" data-glow="#e08ab8">
         <article><p>All Access Pass</p><h2>$19.99</h2><span>3-Day Pass</span><ul><li>All stage access</li><li>HD quality</li><li>Replay access</li></ul><button type="button">Get Pass</button></article>
         <article class="vip"><p>Ultra VIP Pass</p><h2>$49.99</h2><span>3-Day Pass</span><ul><li>Backstage</li><li>VIP lounge</li><li>Merch discounts</li></ul><button type="button">Get Pass</button></article>
       </section>
 
-      <section class="lm-replay panel-glow" id="replays">
+      <section class="lm-replay panel-glow" id="replays" data-shape="6" data-entity-label="Replays" data-bg="#0a0812" data-glow="#a78bfa">
         <header class="section-head"><h2>Replay Library</h2><a href="#replays">View All</a></header>
         <article class="video-replay-card">
           <a class="replay-video-link" href="https://www.youtube.com/watch?v=vEh16ncnw9U" target="_blank" rel="noopener noreferrer" aria-label="Watch Neon Horizons 2025 replay on YouTube">
@@ -277,7 +282,7 @@
         </article>
       </section>
 
-      <section class="lm-interactions panel-glow">
+      <section class="lm-interactions panel-glow" data-shape="7" data-entity-label="React" data-bg="#030408" data-glow="#3d7fd6">
         <button type="button">React<span>Reactions</span></button>
         <button type="button">Signal<span>Predict</span></button>
         <button type="button">Poll<span>Polls</span></button>
@@ -303,5 +308,9 @@
     <script src="./site.js?v=original-page-wipe-3" defer></script>
     <script src="./assets/live-events/js/live-events-redesign.js?v=shadow-ops-removed-2" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
+    <script src="./assets/vendor/gsap/gsap.min.js?v=3.13.0" defer></script>
+    <script src="./assets/vendor/gsap/ScrollTrigger.min.js?v=3.13.0" defer></script>
+    <script src="./assets/vendor/lenis/lenis.min.js?v=1.1.20" defer></script>
+    <script type="module" src="./assets/features-app/js/main.js?v=comet-flight-1"></script>
   </body>
 </html>

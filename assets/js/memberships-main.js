@@ -40,10 +40,10 @@ const HERO_RING_TILTS = [[-0.5, 0], [0.9, 0.7], [0.25, -1.1]];
 const HERO_GIMBAL_AXES = [[1, 0.18, 0], [0, 1, 0.22], [0.25, 0, 1]];
 const HERO_GIMBAL_SPEEDS = [0.24, -0.38, 0.55];
 const HERO_MASCOT_SOURCE = new URL("../cursor/lm-mascot-front.png", import.meta.url);
+const HERO_BRAIN_SOURCE = new URL("../brand/membership-brain-coin-particle-source.webp", import.meta.url);
 const HERO_MASCOT_COLORS = ["#7fd4ff", "#ffffff", "#ff3d8a"];
 const IGNITION_PARTICLE_SOURCE = new URL("../brand/membership-lottomind-reporter-particle-mask.png", import.meta.url);
 const GAMING_PARTICLE_SOURCE = new URL("../brand/membership-hooded-brain-particle-mask.jpg", import.meta.url);
-const LIFE_PARTICLE_SOURCE = new URL("../brand/membership-circuit-brain-particle-mask.jpg", import.meta.url);
 const BACKGROUNDS = Array.from({ length: 8 }, (_, shape) => {
   const exact = sections.find((section) => Number(section.dataset.lmShape) === shape);
   if (exact) return exact.dataset.lmBg || "#04060a";
@@ -71,6 +71,12 @@ const unitDirection = (random) => {
   const angle = random() * Math.PI * 2;
   const radius = Math.sqrt(Math.max(0, 1 - z * z));
   return [Math.cos(angle) * radius, z, Math.sin(angle) * radius];
+};
+
+const gaussian = (random) => {
+  const first = Math.max(1e-7, random());
+  const second = random();
+  return Math.sqrt(-2 * Math.log(first)) * Math.cos(Math.PI * 2 * second);
 };
 
 const rotateX = (x, y, z, angle) => {
@@ -282,9 +288,9 @@ async function loadArtworkParticleTarget(source, count, seed, luminanceFloor = 4
 }
 
 const artworkParticleDataPromise = Promise.all([
+  loadArtworkParticleTarget(HERO_BRAIN_SOURCE, pointCount, 2249, 42),
   loadArtworkParticleTarget(IGNITION_PARTICLE_SOURCE, pointCount, 3169, 46),
   loadArtworkParticleTarget(GAMING_PARTICLE_SOURCE, pointCount, 4271, 42),
-  loadArtworkParticleTarget(LIFE_PARTICLE_SOURCE, pointCount, 6187, 50),
 ]);
 
 function generateGyroscope(count, seed = 11, roles = createGyroscopeRoles(count)) {
@@ -415,22 +421,44 @@ function generateDnaHelix(count, seed = 67) {
 function generateComet(count, seed = 79) {
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
+  const headEnd = Math.floor(count * 0.2);
+  const tailEnd = headEnd + Math.floor(count * 0.72);
+  const start = [4.4, 2.2, 0];
+  const control = [0.4, 3.0, 0.9];
+  const end = [-8.2, -3.0, -0.6];
   for (let index = 0; index < count; index += 1) {
     let x;
     let y;
     let z;
-    if (random() < 0.24) {
+    if (index < headEnd) {
       const direction = unitDirection(random);
-      const radius = 2.3 * Math.cbrt(random());
-      x = 2.6 + direction[0] * radius;
+      const radius = Math.cbrt(random());
+      x = start[0] + direction[0] * radius;
+      y = start[1] + direction[1] * radius;
+      z = start[2] + direction[2] * radius;
+    } else if (index < tailEnd) {
+      const t = Math.pow(random(), 1.35);
+      const inverse = 1 - t;
+      const spread = 0.12 + t * 2.3;
+      const curveX = inverse * inverse * start[0] + 2 * inverse * t * control[0] + t * t * end[0];
+      const curveY = inverse * inverse * start[1] + 2 * inverse * t * control[1] + t * t * end[1];
+      const curveZ = inverse * inverse * start[2] + 2 * inverse * t * control[2] + t * t * end[2];
+      const tangentX = 2 * inverse * (control[0] - start[0]) + 2 * t * (end[0] - control[0]);
+      const tangentY = 2 * inverse * (control[1] - start[1]) + 2 * t * (end[1] - control[1]);
+      const tangentLength = Math.hypot(tangentX, tangentY) || 1;
+      const alongX = tangentX / tangentLength;
+      const alongY = tangentY / tangentLength;
+      const crossSpread = gaussian(random) * spread;
+      const alongSpread = gaussian(random) * spread * 0.18;
+      x = curveX - alongY * crossSpread + alongX * alongSpread;
+      y = curveY + alongX * crossSpread + alongY * alongSpread;
+      z = curveZ + gaussian(random) * spread * 0.5;
+    } else {
+      const direction = unitDirection(random);
+      const radius = 8 + random() * 5;
+      x = direction[0] * radius;
       y = direction[1] * radius;
       z = direction[2] * radius;
-    } else {
-      const t = Math.pow(random(), 0.72);
-      const width = 0.18 + t * 1.08;
-      x = 2.3 - t * 9.2 + (random() - 0.5) * width;
-      y = Math.sin(t * Math.PI * 1.2) * 1.15 + (random() - 0.5) * width;
-      z = Math.cos(t * Math.PI * 0.9) * 0.72 + (random() - 0.5) * width;
     }
     setPoint(target, index, x, y, z);
   }
@@ -564,15 +592,18 @@ function initializeEntity(runtime, particleArtwork) {
     }
 
     const mascotParticleData = particleArtwork.mascot;
-    const heroRoles = mascotParticleData.roles;
+    const heroParticleData = particleArtwork.heroBrain?.target
+      ? { ...particleArtwork.heroBrain, roles: new Float32Array(pointCount) }
+      : mascotParticleData;
+    const heroRoles = heroParticleData.roles;
     const heroRoleCounts = [0, 0, 0, 0, 0];
     heroRoles.forEach((role) => { heroRoleCounts[Math.floor(role)] += 1; });
     const shapes = generators.map((generator, index) => (
-      index === 0 ? mascotParticleData.target : generator(pointCount, 101 + index * 137)
+      index === 0 ? heroParticleData.target : generator(pointCount, 101 + index * 137)
     ));
     if (particleArtwork.ignition?.target) shapes[1] = particleArtwork.ignition.target;
     if (particleArtwork.gaming?.target) shapes[2] = particleArtwork.gaming.target;
-    if (particleArtwork.life?.target) shapes[4] = particleArtwork.life.target;
+    shapes[4] = mascotParticleData.target;
     const heroRoleRadiusBounds = Array.from({ length: 5 }, () => ({ min: Infinity, max: 0 }));
     for (let index = 0; index < pointCount; index += 1) {
       const offset = index * 3;
@@ -598,6 +629,8 @@ function initializeEntity(runtime, particleArtwork) {
       uHeat: { value: 0 },
       uWave: { value: 0 },
       uTide: { value: 0 },
+      uLife: { value: 0 },
+      uComet: { value: 0 },
       uSignal: { value: 0 },
       uDrift: { value: 1 },
       uLiveliness: { value: LIVELINESS[0] },
@@ -630,6 +663,8 @@ function initializeEntity(runtime, particleArtwork) {
         uniform float uHeat;
         uniform float uWave;
         uniform float uTide;
+        uniform float uLife;
+        uniform float uComet;
         uniform float uSignal;
         uniform float uDrift;
         uniform float uLiveliness;
@@ -713,14 +748,19 @@ function initializeEntity(runtime, particleArtwork) {
           float tt = smoothTwice(departure);
           vec3 rotatedHero = aPosA;
           if (uHero > 0.001) {
-            float mascotBreath = sin(uGimbalTime * 1.45) * 0.012;
-            float headWeight = smoothstep(1.3, 4.1, aPosA.y);
-            rotatedHero.x *= 1.0 + mascotBreath;
-            rotatedHero.y += sin(uGimbalTime * 1.1) * 0.045;
-            rotatedHero.x += sin(uGimbalTime * 0.72) * 0.035 * headWeight;
+            float coinRadius = length(aPosA.xy);
+            float coinBreath = sin(uGimbalTime * 0.82 + aSeed * 0.9) * 0.006;
+            float circuitRipple = sin(coinRadius * 1.15 - uGimbalTime * 1.1 + aSeed * 2.0) * 0.018;
+            rotatedHero.xy *= 1.0 + coinBreath + circuitRipple;
+            float coinTurn = sin(uGimbalTime * 0.23) * 0.055;
+            rotatedHero.xy = mat2(cos(coinTurn), -sin(coinTurn), sin(coinTurn), cos(coinTurn)) * rotatedHero.xy;
+            rotatedHero.z += sin(uGimbalTime * 0.9 + aSeed * 18.0) * 0.055;
           }
           vec3 heroSource = mix(aPosA, rotatedHero, uHero);
           vec3 base = mix(heroSource, aPosB, tt);
+          float lifeShimmer = sin(uTime2 * 1.18 + aSeed * 31.0);
+          base.x += lifeShimmer * 0.035 * uLife;
+          base.y += cos(uTime2 * 0.84 + aSeed * 23.0) * 0.045 * uLife;
           vec3 waveNormal = vec3(0.0, 0.8776, -0.4794);
           vec3 waveDepth = vec3(0.0, 0.4794, 0.8776);
           float waveX = base.x;
@@ -729,6 +769,14 @@ function initializeEntity(runtime, particleArtwork) {
             + sin(waveX * 1.1 + waveZ * 0.6 - uTime2 * 0.6 - uTide * 4.2) * 0.3
             + snoise(vec3(waveX * 0.25, waveZ * 0.3, uTime2 * 0.18)) * 0.45;
           base += waveNormal * swell * uWave;
+          vec3 cometHead = vec3(4.4, 2.2, 0.0);
+          float cometWake = smoothstep(1.2, 9.0, distance(base, cometHead));
+          float cometPhase = dot(base.xy, vec2(-0.92, -0.4));
+          float cometNoiseOne = snoise(vec3(cometPhase * 0.42 - uTime2 * 0.72, aSeed * 5.0, 7.1));
+          float cometNoiseTwo = snoise(vec3(cometPhase * 0.9 - uTime2 * 1.16, aSeed * 9.0, 19.7));
+          vec3 cometFlutter = vec3(-0.4, 0.92, 0.15) * (cometNoiseOne * 0.45 + cometNoiseTwo * 0.2);
+          vec3 cometSurge = vec3(-0.92, -0.4, 0.0) * cometNoiseTwo * 0.3;
+          base += (cometFlutter + cometSurge) * cometWake * uComet;
           float signalRadius = length(base);
           float signalShellMask = step(1.6, signalRadius) * (1.0 - step(8.8, signalRadius));
           float radiatedRadius = mod(signalRadius - 1.8 + uTime2 * 0.9, 6.75) + 1.8;
@@ -861,7 +909,11 @@ function initializeEntity(runtime, particleArtwork) {
       orbit: 0,
       charge: 0,
       tide: 0,
+      flight: 0.5,
+      lifeProgress: 0.5,
       waveWeight: 0,
+      lifeWeight: 0,
+      cometWeight: 0,
       signalWeight: 0,
       heat: 0,
       starWeight: 0,
@@ -1078,11 +1130,14 @@ function initializeEntity(runtime, particleArtwork) {
       const starWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 1));
       const waveWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 3));
       const helixWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 4));
+      const cometWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 5));
       const signalWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 6));
       entityState.heroWeight = heroWeight;
       entityState.starWeight = starWeight;
       entityState.helixWeight = helixWeight;
+      entityState.lifeWeight += (helixWeight - entityState.lifeWeight) * (1 - Math.exp(-dt * 7));
       entityState.waveWeight += (waveWeight - entityState.waveWeight) * (1 - Math.exp(-dt * 7));
+      entityState.cometWeight += (cometWeight - entityState.cometWeight) * (1 - Math.exp(-dt * 7));
       entityState.signalWeight += (signalWeight - entityState.signalWeight) * (1 - Math.exp(-dt * 7));
       entityState.heat += (entityState.charge * starWeight - entityState.heat) * (1 - Math.exp(-dt * 7));
       entityState.heroDrift += (heroWeight - entityState.heroDrift) * (1 - Math.exp(-dt * 4.5));
@@ -1104,6 +1159,8 @@ function initializeEntity(runtime, particleArtwork) {
       uniforms.uHeat.value = entityState.heat;
       uniforms.uWave.value = entityState.waveWeight;
       uniforms.uTide.value = entityState.tide;
+      uniforms.uLife.value = entityState.lifeWeight;
+      uniforms.uComet.value = entityState.cometWeight;
       uniforms.uSignal.value = entityState.signalWeight;
       uniforms.uDrift.value = entityState.heroDrift;
       uniforms.uLiveliness.value = liveliness;
@@ -1130,13 +1187,23 @@ function initializeEntity(runtime, particleArtwork) {
       const baseRotationX = THREE.MathUtils.lerp(regularSwayX, mascotNod, heroWeight)
         - entityState.pointerY * 0.1;
       const baseRotationZ = Math.sin(now * 0.000071) * 0.035 * (1 - heroWeight) + entityState.introSpin;
-      group.rotation.y = THREE.MathUtils.lerp(baseRotationY, entityState.helixSpin, helixWeight);
-      group.rotation.x = baseRotationX * (1 - helixWeight);
-      group.rotation.z = baseRotationZ * (1 - helixWeight) + 0.28 * helixWeight;
+      const lifeYaw = Math.sin(now * 0.00034) * 0.12;
+      const lifeNod = Math.sin(now * 0.00027) * 0.025;
+      const lifeTilt = Math.sin(now * 0.00021) * 0.035;
+      group.rotation.y = THREE.MathUtils.lerp(baseRotationY, lifeYaw, entityState.lifeWeight);
+      group.rotation.x = THREE.MathUtils.lerp(baseRotationX, lifeNod, entityState.lifeWeight);
+      group.rotation.z = THREE.MathUtils.lerp(baseRotationZ, lifeTilt, entityState.lifeWeight);
       const chargeBreath = Math.sin(now * 0.001 * 1.1) * 0.012 * (1 + entityState.charge);
       entityState.groupScale = 1 + starWeight * (entityState.charge * 0.07 + chargeBreath);
       group.scale.setScalar(entityState.groupScale);
-      group.position.x = THREE.MathUtils.lerp(STYLE[segment].x, STYLE[segment + 1].x, fraction);
+      const flightTravel = (entityState.flight - 0.5) * 9 * entityState.cometWeight;
+      const flightBob = Math.sin(now * 0.001 * 0.45) * 0.18 * entityState.cometWeight;
+      const lifeTravel = (entityState.lifeProgress - 0.5) * entityState.lifeWeight;
+      const lifeBob = Math.sin(now * 0.001 * 0.58) * 0.14 * entityState.lifeWeight;
+      group.position.x = THREE.MathUtils.lerp(STYLE[segment].x, STYLE[segment + 1].x, fraction)
+        + flightTravel * 0.92
+        + lifeTravel * 0.8;
+      group.position.y = flightTravel * 0.38 + flightBob + lifeTravel * 1.1 + lifeBob;
       camera.position.z = THREE.MathUtils.lerp(STYLE[segment].cameraZ, STYLE[segment + 1].cameraZ, fraction)
         + Math.sin(fraction * Math.PI) * 1.3
         - orbitDolly
@@ -1204,6 +1271,8 @@ function initializeEntity(runtime, particleArtwork) {
       setOrbit(progress) { entityState.orbit = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
       setCharge(progress) { entityState.charge = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
       setTide(progress) { entityState.tide = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
+      setLife(progress) { entityState.lifeProgress = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
+      setFlight(progress) { entityState.flight = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
       get currentShape() { return entityState.shapeFloat; },
       get shapeFloat() { return entityState.shapeFloat; },
       get morph() { return uniforms.uMorph.value; },
@@ -1215,8 +1284,10 @@ function initializeEntity(runtime, particleArtwork) {
       get gimbalTime() { return entityState.gimbalTime; },
       get heroWeight() { return entityState.heroWeight; },
       get heroDrift() { return entityState.heroDrift; },
-      get helixWeight() { return entityState.helixWeight; },
+      get helixWeight() { return entityState.lifeWeight; },
       get helixSpin() { return entityState.helixSpin; },
+      get lifeWeight() { return entityState.lifeWeight; },
+      get lifeProgress() { return entityState.lifeProgress; },
       get groupRotation() { return [group.rotation.x, group.rotation.y, group.rotation.z]; },
       get rotationOrder() { return group.rotation.order; },
       get heroOnScreen() { return entityState.heroOnScreen; },
@@ -1227,14 +1298,14 @@ function initializeEntity(runtime, particleArtwork) {
       get introSpin() { return entityState.introSpin; },
       get introTurbulence() { return entityState.introTurbulence; },
       get heroRoleCounts() { return [...heroRoleCounts]; },
-      get heroSource() { return mascotParticleData.source; },
-      get heroBounds() { return mascotParticleData.bounds ? { ...mascotParticleData.bounds } : null; },
+      get heroSource() { return heroParticleData.source; },
+      get heroBounds() { return heroParticleData.bounds ? { ...heroParticleData.bounds } : null; },
       get heroColors() { return [...HERO_MASCOT_COLORS]; },
       get artworkParticleSources() {
         return {
           ignition: particleArtwork.ignition?.source || null,
           gaming: particleArtwork.gaming?.source || null,
-          life: particleArtwork.life?.source || null,
+          life: mascotParticleData.source || null,
         };
       },
       get heroRoleRadiusBounds() { return heroRoleRadiusBounds.map(({ min, max }) => ({ min, max })); },
@@ -1246,6 +1317,7 @@ function initializeEntity(runtime, particleArtwork) {
       get heroGimbalSpeeds() { return [...HERO_GIMBAL_SPEEDS]; },
       get cameraZ() { return camera.position.z; },
       get groupX() { return group.position.x; },
+      get groupY() { return group.position.y; },
       get orbit() { return entityState.orbit; },
       get orbitWeight() { return entityState.orbitWeight; },
       get orbitYaw() { return entityState.orbitYaw; },
@@ -1255,6 +1327,8 @@ function initializeEntity(runtime, particleArtwork) {
       get starWeight() { return entityState.starWeight; },
       get wave() { return uniforms.uWave.value; },
       get tide() { return uniforms.uTide.value; },
+      get flight() { return entityState.flight; },
+      get cometWeight() { return entityState.cometWeight; },
       get signal() { return uniforms.uSignal.value; },
       get transmissionRoleCounts() {
         const core = Math.floor(pointCount * 0.12);
@@ -1393,6 +1467,32 @@ function initializeEntity(runtime, particleArtwork) {
       });
       api.waterTrigger = waterTrigger;
     }
+    const lifeSection = document.getElementById("life");
+    if (lifeSection) {
+      const lifeTrigger = ScrollTrigger.create({
+        id: "lm-mascot-life-scroll",
+        trigger: lifeSection,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true,
+        onUpdate: (self) => api.setLife(self.progress),
+        onRefresh: (self) => api.setLife(self.progress),
+      });
+      api.lifeTrigger = lifeTrigger;
+    }
+    const flightSection = document.getElementById("flight");
+    if (flightSection) {
+      const flightTrigger = ScrollTrigger.create({
+        id: "lm-comet-flight",
+        trigger: flightSection,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: true,
+        onUpdate: (self) => api.setFlight(self.progress),
+        onRefresh: (self) => api.setFlight(self.progress),
+      });
+      api.flightTrigger = flightTrigger;
+    }
     const refreshScrollGeometry = () => {
       ScrollTrigger.sort();
       ScrollTrigger.refresh();
@@ -1415,11 +1515,11 @@ let initialized = false;
 const connectRuntime = async (runtime) => {
   if (initialized) return;
   initialized = true;
-  const [mascot, [ignition, gaming, life]] = await Promise.all([
+  const [mascot, [heroBrain, ignition, gaming]] = await Promise.all([
     mascotParticleDataPromise,
     artworkParticleDataPromise,
   ]);
-  initializeEntity(runtime, { mascot, ignition, gaming, life });
+  initializeEntity(runtime, { mascot, heroBrain, ignition, gaming });
 };
 window.addEventListener("lm:membership-runtime-ready", (event) => connectRuntime(event.detail), { once: true });
 
