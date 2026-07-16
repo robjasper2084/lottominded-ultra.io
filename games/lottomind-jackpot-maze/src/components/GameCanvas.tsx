@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import type { GameRuntimeHandle } from '../game/GameRuntime';
 import { NumberSlots } from './NumberSlots';
 import { DETROIT_LEVELS } from '../config/gameBalance';
 import { STREET_BONUSES } from '../config/streetBonuses';
-import type { ControlAction, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, PlayerCount, PlayStyle } from '../types/game';
+import { commercialForCompletedLevel, shouldShowCommercialAfterLevel } from '../config/levelCommercials';
+import { LOTTERY_RULES } from '../config/lotteryRules';
+import { generateLotteryDraw } from '../services/secureRandom';
+import type { ControlAction, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, LotteryMode, PlayerCount, PlayStyle } from '../types/game';
 import type { GameSettings } from '../services/settings';
 
 const initialSnapshot: GameSnapshot = { world: 0, score: 0, playerCount: 1, activePlayer: 0, playerScores: [0, 0], playerLives: [3, 3], playerShields: [true, true], downedPlayers: [false, false], reviveProgress: [0, 0], coins: 0, remainingHearts: 0, lives: 3, combo: 1, revealed: [], totalSlots: 0, powerUp: 'Mind Coin Shield', hasMoved: false, usedPortal: false, powerUpsUsed: 0, villainEncounters: 0, revivesCompleted: 0, bossHealth: 0, bossMaxHealth: 0, mechanic: '', bonusesCollected: 0, bestCombo: 1, teamCombo: 0, heartsCollected: 0, levelHeartsTotal: 0, bonusSeconds: 30, bonusActive: false, syncGateReady: false, eventSeconds: 50, eventsCompleted: 0, missedBonuses: 0 };
 const IN_GAME_TRACK = 'untitled-14-gameplay-96.mp3';
+const COMMERCIAL_LOTTERY_MODES: LotteryMode[] = ['pick3', 'pick4', 'megaMillions', 'powerball'];
 const keyLabel = (code: string) => code.replace(/^Key/, '').replace(/^Arrow/, '').replace('Space', 'SPACE').replace('Enter', 'ENTER');
 const directionArrow = { N: '↑', NE: '↗', E: '→', SE: '↘', S: '↓', SW: '↙', W: '←', NW: '↖' } as const;
 
@@ -39,6 +43,8 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
   const host = useRef<HTMLDivElement>(null);
   const runtime = useRef<GameRuntimeHandle | null>(null);
   const soundtrack = useRef<HTMLAudioElement | null>(null);
+  const commercialVideo = useRef<HTMLVideoElement | null>(null);
+  const continueRunAfterCommercial = useRef<(() => void) | null>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [paused, setPaused] = useState(false);
@@ -47,11 +53,14 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
   const [confirmExit, setConfirmExit] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [gamepads, setGamepads] = useState<[string | null, string | null]>([null, null]);
+  const [commercialLevel, setCommercialLevel] = useState<number | null>(null);
+  const [commercialDraws, setCommercialDraws] = useState<LotteryDraw[]>([]);
   const pauseDialog = useRef<HTMLElement>(null);
   const pauseButton = useRef<HTMLButtonElement>(null);
   const pauseWasOpen = useRef(false);
   const level = DETROIT_LEVELS[snapshot.world] ?? DETROIT_LEVELS[0];
   const isLevelIntro = Boolean(snapshot.warning?.includes('LEVEL') && snapshot.warning.includes('READY'));
+  const levelCommercial = commercialLevel === null ? null : commercialForCompletedLevel(commercialLevel);
   const tutorialSteps = [
     { title: 'MOVE THROUGH DETROIT', text: 'Use your selected keys, a gamepad stick, or the touch pad. Turns queue early so the hero slides cleanly around walls.' },
     { title: 'COLLECT LOVE IN THE STREETS', text: 'Follow the glowing hearts. Nearby hearts magnet toward the hero and build a score combo.' },
@@ -62,6 +71,21 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
     ...(playStyle === 'coop' ? [{ title: 'REVIVE YOUR TEAMMATE', text: 'P1 and P2 score together. Stand beside a downed teammate to revive them and earn a teamwork bonus.' }] : [])
   ];
   const finishTutorial = () => { setTutorialStep(-1); onTutorialComplete(); };
+  const showLevelCommercial = useCallback((completedLevelIndex: number, continueRun: () => void) => {
+    if (!shouldShowCommercialAfterLevel(completedLevelIndex)) {
+      continueRun();
+      return;
+    }
+    continueRunAfterCommercial.current = continueRun;
+    setCommercialDraws(COMMERCIAL_LOTTERY_MODES.map(mode => generateLotteryDraw(mode)));
+    setCommercialLevel(completedLevelIndex);
+  }, []);
+  const finishLevelCommercial = useCallback(() => {
+    const continueRun = continueRunAfterCommercial.current;
+    continueRunAfterCommercial.current = null;
+    setCommercialLevel(null);
+    window.setTimeout(() => continueRun?.(), 0);
+  }, []);
 
   useEffect(() => {
     const id = window.setInterval(() => {
@@ -112,15 +136,30 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
   }, [musicVolume, muted, IN_GAME_TRACK]);
 
   useEffect(() => {
+    const audio = soundtrack.current;
+    if (!audio) return;
+    if (commercialLevel !== null) audio.pause();
+    else if (!muted && musicVolume > 0) void audio.play().catch(() => undefined);
+  }, [commercialLevel, musicVolume, muted]);
+
+  useEffect(() => {
+    const video = commercialVideo.current;
+    if (!video || commercialLevel === null) return;
+    video.muted = muted;
+    video.volume = muted ? 0 : musicVolume;
+    void video.play().catch(() => undefined);
+  }, [commercialLevel, musicVolume, muted]);
+
+  useEffect(() => {
     if (!host.current) return;
     window.scrollTo(0, 0);
     let cancelled = false;
     const currentHost = host.current;
     import('../game/GameRuntime').then(({ createGameRuntime }) => {
-      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: setSnapshot, onPausedChange: setPaused, onComplete });
+      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: setSnapshot, onPausedChange: setPaused, onLevelBreak: showLevelCommercial, onComplete });
     });
-    return () => { cancelled = true; runtime.current?.destroy(); runtime.current = null; };
-  }, [draw, gameSpeed, initialCheckpoint, onCheckpoint, onComplete, playerCount, playStyle, reducedMotion, screenShake]);
+    return () => { cancelled = true; continueRunAfterCommercial.current = null; runtime.current?.destroy(); runtime.current = null; };
+  }, [draw, gameSpeed, initialCheckpoint, onCheckpoint, onComplete, playerCount, playStyle, reducedMotion, screenShake, showLevelCommercial]);
 
   useEffect(() => { runtime.current?.setEffectsVolume(effectsVolume); }, [effectsVolume]);
   useEffect(() => { runtime.current?.setMuted(muted); }, [muted]);
@@ -209,6 +248,44 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
           <button className="danger" onClick={() => setConfirmExit(true)}>Save & Exit</button>
         </div>}
         {confirmExit && <div className="exit-confirm"><span><strong>Return to the command deck?</strong><small>Your exact level progress is saved.</small></span><button onClick={() => setConfirmExit(false)}>Keep Playing</button><button className="danger" onClick={() => { runtime.current?.saveCheckpoint(); onQuit(); }}>Confirm Save & Exit</button></div>}
+      </section>}
+      {levelCommercial && commercialLevel !== null && <section className="level-commercial" role="dialog" aria-modal="true" aria-labelledby="commercial-title">
+        <div className="commercial-frame">
+          <header>
+            <span>LM.TV // DETROIT BROADCAST</span>
+            <strong id="commercial-title">LEVEL {commercialLevel + 1} CLEAR</strong>
+            <em>UP NEXT: LEVEL {commercialLevel + 2} / 10</em>
+          </header>
+          <div className="commercial-content">
+            <video
+              ref={commercialVideo}
+              key={levelCommercial.id}
+              src={`${import.meta.env.BASE_URL}${levelCommercial.file}`}
+              poster={`${import.meta.env.BASE_URL}${levelCommercial.poster}`}
+              aria-label={levelCommercial.label}
+              autoPlay
+              controls
+              playsInline
+              preload="auto"
+              onEnded={finishLevelCommercial}
+              onError={finishLevelCommercial}
+            />
+            <aside className="commercial-picks" aria-label="Generated lottery fun picks">
+              <header><small>LOTTOMIND NUMBER LAB</small><strong>GENERATED FUN PICKS</strong><span>NOT OFFICIAL RESULTS</span></header>
+              {commercialDraws.map(generatedDraw => <div className={`commercial-draw ${generatedDraw.mode}`} key={generatedDraw.mode}>
+                <b>{LOTTERY_RULES[generatedDraw.mode].label}</b>
+                <div>{generatedDraw.main.map((value, index) => <i key={`${generatedDraw.mode}-${index}`}>{value}</i>)}
+                  {generatedDraw.special !== undefined && <><em>+</em><i className="special">{generatedDraw.special}</i></>}
+                </div>
+              </div>)}
+              <p>For entertainment only. Save your favorites after the run.</p>
+            </aside>
+          </div>
+          <footer>
+            <span>COMMERCIAL BREAK // RUN PAUSED</span>
+            <button type="button" autoFocus onClick={finishLevelCommercial}>Skip Commercial</button>
+          </footer>
+        </div>
       </section>}
       <div className="arcade-footer">
         <div className="arcade-lives" aria-label={`${playStyle === 'coop' ? 'Co-op team' : `Player ${snapshot.activePlayer + 1}`}, ${snapshot.lives} lives remaining`}>

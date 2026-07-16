@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS } from '../config/gameBalance';
+import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, HEART_GRID_SPACING, HEART_SIZE, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS, VILLAIN_WAVES, villainCountForLevel } from '../config/gameBalance';
 import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } from '../config/detroitEvents';
 import { STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND } from '../config/streetBonuses';
 import type { CompassDirection, ControlBindings, ControlPreset, GameCheckpoint, GameSnapshot, LotteryDraw, PlayerCount, PlayStyle, StreetBonusKind } from '../types/game';
@@ -26,6 +26,7 @@ interface RuntimeOptions {
   onCheckpoint: (checkpoint: GameCheckpoint) => void;
   onSnapshot: (snapshot: GameSnapshot) => void;
   onPausedChange: (paused: boolean) => void;
+  onLevelBreak: (completedLevelIndex: number, continueRun: () => void) => void;
   onComplete: (result: { score: number; villainEncounters: number; powerUpsUsed: number; playerScores: [number, number]; heartsCollected: number; bonusesCollected: number; bestCombo: number; missedBonuses: number; eventsCompleted: number; levelGrades: Array<'S' | 'A' | 'B' | 'C'> }) => void;
 }
 
@@ -70,8 +71,6 @@ export interface GameRuntimeHandle {
 }
 
 const TILE = 20;
-const HEART_GRID_SPACING = 6;
-const HEART_SIZE = 22;
 const ORIGIN_X = 50;
 const ORIGIN_Y = 20;
 const GAME_WIDTH = 520;
@@ -100,6 +99,7 @@ const WESTSIDE_STREETS = [
   'PURITAN', 'MEYERS', 'EVERGREEN', 'LAHSER', 'W. GRAND BLVD', 'FULLERTON', 'SCHOOLCRAFT', 'W. 7 MILE', 'W. 8 MILE'
 ] as const;
 const ENEMY_KINDS: EnemyKind[] = ['tax', 'reaper', 'chaos', 'envy', 'police'];
+type VillainTactic = (typeof VILLAIN_WAVES)[number]['tactic'];
 const LEVEL_PLAYER_SPEED = [1, 1.06, 0.98, 1.08, 1, 1.04, 1.08, 1.05, 1.1, 1.14] as const;
 const LEVEL_VILLAIN_SPEED = [1, 1.04, 0.88, 1.08, 1, 1.04, 1.08, 1.16, 1.12, 1.24] as const;
 const controls: { directions: [CardinalDirection | null, CardinalDirection | null]; activate: boolean } = { directions: [null, null], activate: false };
@@ -154,6 +154,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private worldRevealStart = 0;
     private frightenedUntil = 0;
     private frightenedCombo = 0;
+    private villainTactic: VillainTactic = 'scatter';
+    private villainWaveIndex = 0;
+    private villainWaveRemainingMs: number = VILLAIN_WAVES[0].durationMs;
     private luckyRushUntil = 0;
     private hitUntil = 0;
     private hasMoved = false;
@@ -505,7 +508,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private createVillains(): void {
       const releaseDelay = [1800, 3600, 5400, 7200, 9000];
-      ENEMY_KINDS.forEach((kind, index) => {
+      ENEMY_KINDS.slice(0, villainCountForLevel(this.world)).forEach((kind, index) => {
         const texture = kind === 'envy' ? 'envy' : kind === 'police' ? 'police' : 'villains';
         const baseFrame = kind === 'tax' ? 0 : kind === 'reaper' ? 4 : kind === 'chaos' ? 8 : 0;
         const shadow = this.add.ellipse(0, 0, kind === 'envy' || kind === 'police' ? 28 : 30, 9, 0x000000, 0.56).setDepth(17);
@@ -521,6 +524,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private resetMovers(now: number, readyDelay = 1200): void {
+      this.resetVillainWaves();
       Object.assign(this.playerMover, createMover(this.maze.playerSpawn, 5.7));
       this.positionSprite(this.player, this.playerMover);
       if (this.player2) {
@@ -575,7 +579,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         const stormCycle = Math.floor(time / 9000);
         if (stormCycle !== this.lastStormCycle) { this.lastStormCycle = stormCycle; this.frightenedUntil = Math.max(this.frightenedUntil, time + 1600); this.setWarning('NEON STORM • VILLAINS JAMMED', 1200); }
       }
-      this.updateVillains(time, dt); this.resolveCollisions(time);
+      this.updateVillainWave(time, delta); this.updateVillains(time, dt); this.resolveCollisions(time);
       if (options.playStyle === 'coop' && this.teamCombo > 0 && time - this.lastTeamCollectAt > 3500) this.teamCombo = 0;
       const hudTick = Math.floor(time / 1000);
       if (hudTick !== this.lastHudTick) { this.lastHudTick = hudTick; this.emitSnapshot(); }
@@ -588,7 +592,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.cityBackground?.setAlpha(shouldDim ? 0.5 : 0.72);
       this.cityNear?.setAlpha(shouldDim ? 0.055 : 0.12);
       this.cityWash?.setAlpha(shouldDim ? 0.08 : 0.13);
-      this.streetDecor.forEach(object => object.setAlpha(shouldDim ? 0.7 : 1));
+      this.streetDecor.forEach(object => object.setAlpha(shouldDim ? 0.62 : 1));
     }
 
     private updateDetroitEvent(time: number): void {
@@ -909,18 +913,52 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       });
     }
 
+    private resetVillainWaves(): void {
+      this.villainWaveIndex = 0;
+      this.villainTactic = VILLAIN_WAVES[0].tactic;
+      this.villainWaveRemainingMs = VILLAIN_WAVES[0].durationMs;
+    }
+
+    private updateVillainWave(time: number, deltaMs: number): void {
+      if (!this.hasMoved || time < this.roundReadyUntil || time < this.frightenedUntil) return;
+      if (!Number.isFinite(this.villainWaveRemainingMs)) return;
+      this.villainWaveRemainingMs -= Math.min(deltaMs, 50);
+      if (this.villainWaveRemainingMs > 0) return;
+
+      const previousTactic = this.villainTactic;
+      this.villainWaveIndex = Math.min(this.villainWaveIndex + 1, VILLAIN_WAVES.length - 1);
+      const nextWave = VILLAIN_WAVES[this.villainWaveIndex];
+      this.villainTactic = nextWave.tactic;
+      this.villainWaveRemainingMs = nextWave.durationMs;
+      if (previousTactic !== this.villainTactic) this.reverseVillains();
+    }
+
     private chooseVillainDirection(villain: Villain, tile: GridPoint, time: number, index: number): CardinalDirection {
       if (villain.mode === 'frightened') {
         const choices = validDirections(this.maze, tile).filter(direction => villain.direction === 'none' || direction !== OPPOSITE[villain.direction]);
         return choices[(Math.floor(time / 420) + index * 3) % Math.max(1, choices.length)] ?? 'left';
       }
       const corners = [{ x: 1, y: 1 }, { x: this.maze.width - 2, y: 1 }, { x: 1, y: this.maze.height - 2 }, { x: this.maze.width - 2, y: this.maze.height - 2 }];
+      if (this.villainTactic === 'scatter') {
+        const cornerByKind: Record<EnemyKind, GridPoint> = {
+          tax: corners[1],
+          reaper: corners[0],
+          chaos: corners[3],
+          envy: corners[2],
+          police: { x: Math.floor(time / 2400) % 2 ? 0 : this.maze.width - 1, y: this.maze.tunnelRow }
+        };
+        return shortestDirection(this.maze, tile, cornerByKind[villain.kind], villain.direction);
+      }
       const chaseMover = this.nearestPlayerMover(villain.tile);
       let target = chaseMover.tile;
       if (villain.kind === 'reaper') target = projectTile(this.maze, chaseMover.tile, chaseMover.direction, 4);
-      if (villain.kind === 'chaos') target = Math.floor(time / 1800) % 2 ? corners[(Math.floor(time / 900) + index) % corners.length] : projectTile(this.maze, chaseMover.tile, chaseMover.direction, 2);
-      if (villain.kind === 'envy') target = this.distanceTiles(villain.tile, chaseMover.tile) < 5 ? corners[2] : chaseMover.tile;
-      if (villain.kind === 'police') target = this.pelletObjects.size < this.initialPellets * 0.35 ? chaseMover.tile : corners[Math.floor(time / 2200) % corners.length];
+      if (villain.kind === 'chaos') target = projectTile(this.maze, chaseMover.tile, chaseMover.direction, 2);
+      if (villain.kind === 'envy') target = this.distanceTiles(villain.tile, chaseMover.tile) < 6 ? corners[2] : chaseMover.tile;
+      if (villain.kind === 'police') {
+        const projected = projectTile(this.maze, chaseMover.tile, chaseMover.direction, 6);
+        const portal = { x: chaseMover.tile.x < this.maze.width / 2 ? this.maze.width - 1 : 0, y: this.maze.tunnelRow };
+        target = this.pelletObjects.size < this.initialPellets * 0.35 ? chaseMover.tile : Math.floor(time / 3000) % 2 ? projected : portal;
+      }
       return shortestDirection(this.maze, tile, target, villain.direction);
     }
 
@@ -1038,11 +1076,20 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.levelGrades[this.world] = levelGrade;
       this.emitSnapshot();
       if (this.world < MAZE_LEVEL_COUNT - 1) {
-        this.world += 1;
-        if (options.playStyle === 'alternating') this.selectPlayer(this.activePlayer === 0 ? 1 : 0);
-        this.syncActivePlayer();
-        this.createWorld();
-        this.saveProgressCheckpoint();
+        const completedLevelIndex = this.world;
+        let advanced = false;
+        const continueRun = () => {
+          if (advanced || this.completed) return;
+          advanced = true;
+          this.scene.resume();
+          this.world += 1;
+          if (options.playStyle === 'alternating') this.selectPlayer(this.activePlayer === 0 ? 1 : 0);
+          this.syncActivePlayer();
+          this.createWorld();
+          this.saveProgressCheckpoint();
+        };
+        this.scene.pause();
+        options.onLevelBreak(completedLevelIndex, continueRun);
         return;
       }
       this.completed = true; this.setWarning('JACKPOT MAZE COMPLETE!', 1800);

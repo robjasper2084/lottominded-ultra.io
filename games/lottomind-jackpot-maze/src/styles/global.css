@@ -182,6 +182,29 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
 .game-actions button:hover { color: #fff; border-color: #e9bf55; }
 .game-shell .arcade-scoreboard small, .game-shell .arcade-scoreboard strong, .game-shell .arcade-level, .game-shell .game-actions { font-size: calc(1em * var(--hud-scale, 1)); }
 .pause-command { position: fixed; z-index: 60; inset: 50% auto auto 50%; width: min(920px, calc(100vw - 2rem)); max-height: min(92dvh, 820px); transform: translate(-50%, -50%); overflow: auto; display: grid; gap: .85rem; padding: 1.1rem; border: 2px solid #43dcff; clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px); color: #eefcff; background: radial-gradient(circle at 50% 0, #183b5b, transparent 38%), linear-gradient(145deg, #04111dfc, #100819fc); box-shadow: 0 0 0 9999px #000c, 0 0 54px #43dcff66, inset 0 0 32px #43dcff16; font-family: ui-monospace, "Courier New", monospace; touch-action: auto; }
+.level-commercial { position: fixed; z-index: 90; inset: 0; display: grid; place-items: center; padding: clamp(.6rem, 2.5vw, 1.6rem); color: #effcff; background: radial-gradient(circle at 50% 18%, #103659 0, #050914 46%, #020307 100%); font-family: ui-monospace, "Courier New", monospace; touch-action: auto; }
+.commercial-frame { width: min(1180px, 100%); display: grid; gap: .55rem; padding: clamp(.55rem, 1.5vw, 1rem); border: 2px solid #4ee8ff; background: #030a12; box-shadow: 0 0 0 1px #e9bd5577 inset, 0 0 60px #35cfff50; clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px); }
+.commercial-frame > header, .commercial-frame > footer { display: flex; align-items: center; gap: .8rem; min-height: 42px; padding: .45rem .7rem; border: 1px solid #43dcff55; background: linear-gradient(90deg, #061a2c, #12081d); }
+.commercial-frame > header span, .commercial-frame > footer span { color: #71ecff; font-size: clamp(.58rem, 1.4vw, .78rem); font-weight: 950; letter-spacing: .12em; }
+.commercial-frame > header strong { margin-left: auto; color: #ffe078; font-size: clamp(.75rem, 2vw, 1.05rem); }
+.commercial-frame > header em { color: #f3a6dc; font-size: clamp(.58rem, 1.35vw, .76rem); font-style: normal; }
+.commercial-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 330px); gap: .65rem; align-items: stretch; }
+.commercial-frame video { width: 100%; max-height: calc(100dvh - 150px); aspect-ratio: 16 / 9; display: block; object-fit: contain; background: #000; border: 1px solid #e9bd5588; }
+.commercial-picks { display: grid; align-content: start; gap: .42rem; padding: .65rem; border: 1px solid #43dcff66; background: radial-gradient(circle at 50% 0, #12426866, transparent 38%), #06101b; }
+.commercial-picks header { display: grid; gap: .1rem; padding-bottom: .45rem; border-bottom: 1px solid #43dcff44; }
+.commercial-picks header small { color: #73efff; font-size: .58rem; font-weight: 950; letter-spacing: .13em; }
+.commercial-picks header strong { color: #ffe078; font-size: 1rem; }
+.commercial-picks header span { color: #ff9fdc; font-size: .55rem; font-weight: 900; letter-spacing: .08em; }
+.commercial-draw { display: grid; gap: .25rem; padding: .38rem .45rem; border: 1px solid #ffffff16; background: #081a29cc; }
+.commercial-draw > b { color: #dffbff; font-size: .64rem; letter-spacing: .06em; }
+.commercial-draw > div { display: flex; align-items: center; gap: .25rem; }
+.commercial-draw i { width: 28px; height: 28px; display: grid; place-items: center; flex: 0 0 28px; border: 1px solid #a9efff; border-radius: 50%; color: #06101a; background: radial-gradient(circle at 35% 30%, #fff, #a8e9ff 52%, #4e7aa4 100%); box-shadow: 0 0 10px #5edfff55; font-size: .66rem; font-style: normal; font-weight: 950; }
+.commercial-draw em { color: #ffe078; font-style: normal; font-weight: 950; }
+.commercial-draw.megaMillions i.special { border-color: #fff0a8; background: radial-gradient(circle at 35% 30%, #fffbe1, #ffd65d 52%, #a8640a 100%); }
+.commercial-draw.powerball i.special { border-color: #ffb5c3; background: radial-gradient(circle at 35% 30%, #fff, #ff6b82 52%, #8f1633 100%); }
+.commercial-picks p { margin: .1rem 0 0; color: #99aebe; font-size: .52rem; line-height: 1.35; }
+.commercial-frame > footer { justify-content: space-between; }
+.commercial-frame > footer button { min-height: 40px; padding: .55rem 1rem; border-color: #ffe078; color: #07111e; background: linear-gradient(120deg, #ffe88a, #f6b63e); font-weight: 950; }
 .pause-header { display: grid; gap: .15rem; padding-bottom: .65rem; border-bottom: 1px solid #43dcff44; }
 .pause-header span { color: #75ecff; font-size: .62rem; font-weight: 950; letter-spacing: .14em; }
 .pause-header h2 { margin: 0; color: #ffe278; font-size: clamp(1.35rem, 4vw, 2.1rem); }
@@ -279,6 +302,16 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
   .game-actions button { width: min(100%, 180px); min-height: 42px; }
 }
 @media (max-width: 760px), (pointer: coarse) {
+  .level-commercial { padding: .35rem; }
+  .commercial-frame { gap: .3rem; padding: .4rem; }
+  .commercial-frame > header { flex-wrap: wrap; gap: .2rem .6rem; }
+  .commercial-frame > header strong { margin-left: auto; }
+  .commercial-frame > header em { width: 100%; }
+  .commercial-frame > footer { min-height: 46px; }
+  .commercial-content { grid-template-columns: 1fr; max-height: calc(100dvh - 132px); overflow: auto; }
+  .commercial-frame video { max-height: none; }
+  .commercial-picks { grid-template-columns: 1fr; gap: .3rem; padding: .45rem; }
+  .commercial-draw i { width: 24px; height: 24px; flex-basis: 24px; font-size: .58rem; }
   .start-screen { padding: 0 .7rem .7rem; align-items: flex-start; }
   .hero-art { background: linear-gradient(#030207b5, #030207e8), url('/assets/environments/world-1-detroit-city.webp') center/cover no-repeat; filter: saturate(.82) brightness(.62); }
   .start-panel { margin-top: .7rem; border-radius: 18px; }

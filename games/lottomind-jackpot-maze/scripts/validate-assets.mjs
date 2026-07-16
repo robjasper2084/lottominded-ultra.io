@@ -21,7 +21,11 @@ const required = [
   'public/assets/ui/icon-512.png',
   'public/assets/bonuses/cash-bonus.webp',
   'public/assets/bonuses/lottery-ticket-bonus.webp',
-  'public/assets/bonuses/scratch-off-bonus.webp'
+  'public/assets/bonuses/scratch-off-bonus.webp',
+  'public/assets/video/detroit-commercial-01.mp4',
+  'public/assets/video/detroit-commercial-01-poster.webp',
+  'public/assets/video/detroit-commercial-02.mp4',
+  'public/assets/video/detroit-commercial-02-poster.webp'
 ];
 
 for (const item of required) {

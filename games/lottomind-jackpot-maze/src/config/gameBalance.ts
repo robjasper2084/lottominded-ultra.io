@@ -27,6 +27,31 @@ export const GAME_BALANCE = {
   }
 };
 
+// A classic maze-chase rhythm: villains patrol their corners, then switch to
+// their individual chase personalities. The final chase lasts until the round
+// resets, while Mind Coin frightened time pauses this clock in the runtime.
+export const VILLAIN_WAVES = [
+  { tactic: 'scatter', durationMs: 7000 },
+  { tactic: 'chase', durationMs: 20000 },
+  { tactic: 'scatter', durationMs: 7000 },
+  { tactic: 'chase', durationMs: 20000 },
+  { tactic: 'scatter', durationMs: 5000 },
+  { tactic: 'chase', durationMs: 20000 },
+  { tactic: 'scatter', durationMs: 5000 },
+  { tactic: 'chase', durationMs: Number.POSITIVE_INFINITY }
+] as const;
+
+// Medium hearts appear every three walkable tiles. This keeps the route easy
+// to read while making collection feel steady instead of empty or cluttered.
+export const HEART_GRID_SPACING = 3;
+export const HEART_SIZE = 18;
+
+// The first two levels teach the four core personalities. Jackpot Patrol joins
+// on level three, after the player has learned movement and Mind Coins.
+export function villainCountForLevel(levelIndex: number): number {
+  return levelIndex < 2 ? 4 : 5;
+}
+
 // Early maps give new players a longer Mind Coin window. Later maps tighten the
 // timer gradually, but defeated villains always spend several seconds recovering
 // in the house before they can chase again.
