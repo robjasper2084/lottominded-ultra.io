@@ -98,7 +98,10 @@ export function App() {
         <p className="eyebrow">VAULT OPEN • {LOTTERY_RULES[result.mode].label}</p>
         <h1>Jackpot Maze Complete</h1>
         <div className={`result-grade grade-${result.grade}`} aria-label={`Run grade ${result.grade}`}><small>RUN GRADE</small><strong>{result.grade}</strong></div>
-        <img src={`${import.meta.env.BASE_URL}assets/mascot/mascot-reference.webp`} alt="LottoMind mascot celebrating" className="result-mascot" />
+        <div className={`result-heroes ${result.playerCount === 2 ? 'two-heroes' : ''}`}>
+          <img src={`${import.meta.env.BASE_URL}assets/mascot/mascot-reference.webp`} alt="LottoMind mascot celebrating" className="result-mascot" />
+          {result.playerCount === 2 && <img src={`${import.meta.env.BASE_URL}assets/heroes/player2-dog-reference.webp`} alt="Player 2 dog hero celebrating" className="result-mascot dog" />}
+        </div>
         <NumberSlots mode={result.mode} values={values} />
         <p className="result-meta">Score {result.score.toLocaleString()} • 5 villain types • {result.villainEncounters} encounters</p>
         <div className="run-recap" aria-label="Run recap">
@@ -151,8 +154,8 @@ export function App() {
         <fieldset className="mode-grid"><legend>Select lottery mode</legend>{Object.values(LOTTERY_RULES).map((rule, index) => <button key={rule.id} data-node={`0${index + 1}`} className={mode === rule.id ? 'selected' : ''} onClick={() => setMode(rule.id)} aria-pressed={mode === rule.id}><strong>{rule.label}</strong><small>{rule.mainCount} {rule.mainCount === 3 || rule.mainCount === 4 ? 'digits' : 'main balls'}{rule.special ? ` + ${rule.special.label}` : ''}</small></button>)}</fieldset>
         <fieldset className="player-grid"><legend>Players</legend>
           <button className={playStyle === 'solo' ? 'selected' : ''} onClick={() => setPlayStyle('solo')} aria-pressed={playStyle === 'solo'}><strong>1 Player</strong><small>Solo jackpot run</small></button>
-          <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Classic alternating turns</small></button>
-          <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Play together at the same time</small></button>
+          <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Mascot + dog • alternating turns</small></button>
+          <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Mascot + dog together in the maze</small></button>
         </fieldset>
         <div className="launch-row">
           <button className="primary launch" onClick={begin}><span>Enter the Maze</span><small>Initialize Run • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>

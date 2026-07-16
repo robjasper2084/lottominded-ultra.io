@@ -213,7 +213,10 @@ export function GameCanvas({ draw, playerCount, playStyle, muted, musicVolume, e
       <div className="arcade-footer">
         <div className="arcade-lives" aria-label={`${playStyle === 'coop' ? 'Co-op team' : `Player ${snapshot.activePlayer + 1}`}, ${snapshot.lives} lives remaining`}>
           {snapshot.playerCount === 2 && <span className="arcade-turn">{playStyle === 'coop' ? 'TEAM' : `P${snapshot.activePlayer + 1}`}</span>}
-          {Array.from({ length: Math.max(0, snapshot.lives - 1) }, (_, index) => <img key={index} src={`${import.meta.env.BASE_URL}assets/mascot/mascot-reference.webp`} alt="" />)}
+          {playStyle === 'coop' ? <div className="coop-life-pair" aria-hidden="true">
+            <span><img src={`${import.meta.env.BASE_URL}assets/mascot/mascot-reference.webp`} alt="" /><b>{snapshot.playerLives[0]}</b></span>
+            <span><img className="dog-life" src={`${import.meta.env.BASE_URL}assets/heroes/player2-dog-reference.webp`} alt="" /><b>{snapshot.playerLives[1]}</b></span>
+          </div> : Array.from({ length: Math.max(0, snapshot.lives - 1) }, (_, index) => <img className={snapshot.activePlayer === 1 ? 'dog-life' : ''} key={index} src={`${import.meta.env.BASE_URL}${snapshot.activePlayer === 1 ? 'assets/heroes/player2-dog-reference.webp' : 'assets/mascot/mascot-reference.webp'}`} alt="" />)}
         </div>
         <div className="arcade-numbers" aria-label="Collected lottery number slots"><NumberSlots mode={draw.mode} values={snapshot.revealed} scrambled={snapshot.warning?.includes('scrambled')} /></div>
         <span className="arcade-level"><b>LEVEL {snapshot.world + 1} / 10</b><small>{level.name}</small><em>{snapshot.remainingHearts} HEARTS</em></span>

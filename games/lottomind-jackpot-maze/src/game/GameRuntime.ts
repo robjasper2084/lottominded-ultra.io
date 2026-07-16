@@ -190,6 +190,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     preload(): void {
       const base = import.meta.env.BASE_URL;
       this.load.spritesheet('mascot', `${base}assets/mascot/mascot-atlas.webp`, { frameWidth: 181, frameHeight: 181 });
+      this.load.spritesheet('player2Dog', `${base}assets/heroes/player2-dog-atlas.webp`, { frameWidth: 256, frameHeight: 256 });
       this.load.spritesheet('villains', `${base}assets/villains/villains-atlas.webp`, { frameWidth: 362, frameHeight: 362 });
       this.load.spritesheet('envy', `${base}assets/villains/envy-crew-strip.webp`, { frameWidth: 362, frameHeight: 724 });
       this.load.spritesheet('police', `${base}assets/villains/jackpot-patrol-strip.webp`, { frameWidth: 362, frameHeight: 724 });
@@ -226,8 +227,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.player = this.add.sprite(0, 0, 'mascot', 0).setDisplaySize(52, 52).setDepth(20);
       this.forceFields[0] = this.add.circle(0, 0, 27, 0x43dcff, 0.06).setStrokeStyle(2, 0x9bf6ff, 0.95).setDepth(22).setVisible(false);
       if (options.playStyle === 'coop') {
-        this.playerShadows[1] = this.add.ellipse(0, 0, 30, 10, 0x000000, 0.58).setDepth(19);
-        this.player2 = this.add.sprite(0, 0, 'mascot', 0).setDisplaySize(52, 52).setDepth(21);
+        this.playerShadows[1] = this.add.ellipse(0, 0, 38, 10, 0x000000, 0.58).setDepth(19);
+        this.player2 = this.add.sprite(0, 0, 'player2Dog', 20).setDisplaySize(68, 54).setDepth(21);
         this.forceFields[1] = this.add.circle(0, 0, 27, 0xff5dcb, 0.05).setStrokeStyle(2, 0xffa1e7, 0.95).setDepth(23).setVisible(false);
       }
       this.playerLabels[0] = this.add.text(0, 0, '', {}).setVisible(false);
@@ -1124,14 +1125,22 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private animatePlayer(sprite: Phaser.GameObjects.Sprite, mover: GridMover, time: number): void {
-      const rows: Record<GridDirection, number> = { none: 0, down: 1, up: 2, left: 3, right: 4 };
-      const moving = mover.direction !== 'none'; const frame = moving ? rows[mover.direction] * 8 + Math.floor(time / 105) % 8 : Math.floor(time / 210) % 8;
-      sprite.setFrame(frame);
       const playerIndex: 0 | 1 = sprite === this.player2 ? 1 : 0;
+      const dogHero = sprite.texture.key === 'player2Dog';
+      const moving = mover.direction !== 'none';
+      if (dogHero) {
+        const frame = this.downedPlayers[playerIndex] ? 0 : moving ? 12 + Math.floor(time / 95) % 6 : 20;
+        sprite.setFrame(frame);
+        if (mover.direction === 'left') sprite.setFlipX(true);
+        else if (mover.direction === 'right') sprite.setFlipX(false);
+      } else {
+        const rows: Record<GridDirection, number> = { none: 0, down: 1, up: 2, left: 3, right: 4 };
+        const frame = moving ? rows[mover.direction] * 8 + Math.floor(time / 105) % 8 : Math.floor(time / 210) % 8;
+        sprite.setFlipX(false).setFrame(frame);
+      }
       if (this.bonusEffect === 'cash' && time < this.bonusEffectUntil) sprite.setTint(0xffe49b);
       else if (this.bonusEffect === 'ticket' && time < this.bonusEffectUntil) sprite.setTint(playerIndex === 1 ? 0xffb0e8 : 0xa9f7ff);
       else if (time < this.forceFieldUntil[playerIndex]) sprite.setTint(playerIndex === 1 ? 0xffc2ed : 0xc5fbff);
-      else if (options.playStyle === 'alternating' && this.activePlayer === 1) sprite.setTint(0xd8f8ff);
       else sprite.clearTint();
     }
 
@@ -1197,8 +1206,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private applyPlayerStyle(): void {
       if (!this.player) return;
-      if (options.playStyle === 'alternating' && this.activePlayer === 1) this.player.setTint(0xd8f8ff); else this.player.clearTint();
-      if (this.player2) this.player2.clearTint();
+      const dogTurn = options.playStyle === 'alternating' && this.activePlayer === 1;
+      this.player.setTexture(dogTurn ? 'player2Dog' : 'mascot', dogTurn ? 20 : 0).setDisplaySize(dogTurn ? 68 : 52, dogTurn ? 54 : 52).setFlipX(false).clearTint();
+      this.playerShadows[0]?.setDisplaySize(dogTurn ? 38 : 30, 10);
+      if (this.player2) this.player2.setTexture('player2Dog', 20).setDisplaySize(68, 54).setFlipX(false).clearTint();
       try {
         this.player.postFX.clear();
         this.player2?.postFX.clear();

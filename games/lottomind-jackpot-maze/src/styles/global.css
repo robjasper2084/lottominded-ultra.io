@@ -166,6 +166,10 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
 .arcade-lives { min-height: 50px; display: flex; gap: .28rem; align-items: center; }
 .arcade-turn { display: grid; place-items: center; min-width: 52px; height: 32px; padding-inline: .3rem; border: 2px solid #43dcff; border-radius: 6px; color: #fff000; background: #07131d; box-shadow: 0 0 12px #43dcff55; font-size: .74rem; font-weight: 950; }
 .arcade-lives img { width: 48px; height: 48px; object-fit: cover; object-position: center 8%; filter: saturate(1.2) contrast(1.08) drop-shadow(0 0 7px #43dcffaa); }
+.arcade-lives img.dog-life { object-fit: contain; object-position: center; filter: saturate(1.08) contrast(1.08) drop-shadow(0 5px 4px #000a); }
+.coop-life-pair { display: flex; align-items: center; gap: .36rem; }
+.coop-life-pair span { display: flex; align-items: center; gap: .1rem; color: #fff; font-size: .82rem; }
+.coop-life-pair span:last-child { color: #ffdc74; }
 .arcade-numbers { --orb-gold-light: #fff4ae; --orb-gold-mid: #e4a51d; --orb-gold-dark: #5b3003; }
 .arcade-numbers .number-slots { flex-wrap: nowrap; gap: .38rem; }
 .arcade-numbers .number-slot { width: clamp(28px, 4vw, 40px); border: 2px solid var(--orb-gold-light); font-size: clamp(.72rem, 1.2vw, .92rem); background: radial-gradient(circle at 28% 22%, #fffde9 0 8%, var(--orb-gold-light) 15%, #f7c94f 31%, var(--orb-gold-mid) 55%, #9b5e08 74%, var(--orb-gold-dark) 91%, #1b0d00 100%); box-shadow: 0 3px 0 #4a2602, 0 0 0 1px #a76b0c, 0 0 17px #ffc63599, inset -5px -7px 9px #42200099, inset 3px 4px 8px #fff1a866; }
@@ -210,7 +214,11 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
 .exit-confirm button { min-height: 42px; }
 .results-card { width: min(900px, 100%); padding: 2rem; text-align: center; overflow: hidden; }
 .results-card h1 { font-size: clamp(2.3rem, 6vw, 4.8rem); }
+.result-heroes { display: flex; justify-content: center; align-items: end; min-height: 220px; }
+.result-heroes.two-heroes { gap: .4rem; }
 .result-mascot { height: 250px; width: 210px; object-fit: cover; object-position: center 15%; mask-image: linear-gradient(#000 78%, transparent); margin: -1rem 0; }
+.result-heroes.two-heroes .result-mascot { width: 165px; height: 220px; }
+.result-mascot.dog { object-fit: contain; object-position: center bottom; mask-image: linear-gradient(#000 88%, transparent); }
 .result-meta { color: #cabddd; }
 .run-recap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; margin: .8rem 0; }
 .run-recap span { min-height: 64px; display: grid; place-items: center; align-content: center; gap: .15rem; padding: .55rem; border: 1px solid #43dcff3d; background: #061426; }

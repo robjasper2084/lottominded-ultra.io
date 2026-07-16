@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 
 const required = [
   'public/assets/mascot/mascot-atlas.webp',
+  'public/assets/heroes/player2-dog-atlas.webp',
+  'public/assets/heroes/player2-dog-reference.webp',
   'public/assets/villains/villains-atlas.webp',
   'public/assets/villains/envy-crew-strip.webp',
   'public/assets/villains/jackpot-patrol-strip.webp',
