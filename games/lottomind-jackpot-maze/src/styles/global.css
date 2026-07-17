@@ -38,6 +38,28 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
 .mission-strip small { color: #f2c95d; font-weight: 950; }
 .mission-strip strong { justify-self: center; color: #d9faff; }
 .mission-strip span { padding: .2rem .36rem; border: 1px solid #55e7ff77; color: #69efff; background: #083148; box-shadow: 0 0 9px #43dcff2d; }
+.quick-launch-row { width: min(100%, 940px); margin: .55rem auto .35rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .55rem; }
+.quick-launch { min-height: 72px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1rem; padding: .7rem 1rem; border: 1px solid #fff0a4; border-radius: 0; clip-path: polygon(14px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 8px 100%, 0 calc(100% - 8px), 0 14px); text-align: left; box-shadow: 0 0 30px #e9bd5557, inset 0 0 18px #fff5bd73; }
+.quick-launch > span { min-width: 0; display: grid; gap: .08rem; }
+.quick-launch small { color: #5a3608; font: 950 .58rem/1 ui-monospace, "Courier New", monospace; letter-spacing: .13em; }
+.quick-launch strong { color: #130b05; font: 950 1.18rem/1.05 ui-monospace, "Courier New", monospace; text-transform: uppercase; }
+.quick-launch em { overflow: hidden; color: #4f2a07; font-size: .68rem; font-style: normal; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.quick-launch > b { width: 48px; aspect-ratio: 1; display: grid; place-items: center; border: 1px solid #5e3105; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); color: #fff9d2; background: #201005; box-shadow: inset 0 0 12px #ffb93866; font: 950 1rem/1 ui-monospace, "Courier New", monospace; }
+.next-unlock-line { width: min(100%, 940px); min-height: 32px; margin: 0 auto .45rem; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .35rem .6rem; border-inline: 1px solid #43dcff4d; color: #c8f8ff; background: linear-gradient(90deg, #061d30c7, #10091ac7); font: 850 .58rem/1.1 ui-monospace, "Courier New", monospace; letter-spacing: .06em; }
+.next-unlock-line small { color: #70eaff; font-weight: 950; }
+.next-unlock-line strong { overflow: hidden; color: #fff; text-overflow: ellipsis; white-space: nowrap; }
+.next-unlock-line span { color: #ffe36e; font-weight: 950; white-space: nowrap; }
+.run-customizer { width: min(100%, 940px); margin: 0 auto .55rem; border: 1px solid #43dcff55; background: linear-gradient(135deg, #061626eb, #100819eb); font-family: ui-monospace, "Courier New", monospace; }
+.run-customizer > summary { min-height: 48px; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: .75rem; padding: .55rem .7rem; cursor: pointer; list-style: none; }
+.run-customizer > summary::-webkit-details-marker { display: none; }
+.run-customizer > summary::after { content: '+'; color: #68eaff; font-size: 1.2rem; font-weight: 950; }
+.run-customizer[open] > summary { border-bottom: 1px solid #43dcff35; }
+.run-customizer[open] > summary::after { content: '−'; }
+.run-customizer > summary span { display: grid; gap: .08rem; }
+.run-customizer > summary small { color: #68eaff; font-size: .54rem; font-weight: 950; letter-spacing: .12em; }
+.run-customizer > summary strong { color: #fff; font-size: .75rem; }
+.run-customizer > summary em { overflow: hidden; max-width: 420px; color: #ffe36e; font-size: .58rem; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
+.run-customizer-body { padding: .35rem .7rem .75rem; }
 .mascot-hero { position: absolute; right: -2%; top: -3%; width: min(34%, 300px); height: 390px; object-fit: cover; object-position: center 18%; filter: drop-shadow(0 0 28px #a74dff55); mask-image: linear-gradient(#000 75%, transparent); }
 .mode-grid { border: 0; padding: .75rem 0; width: min(100%, 940px); margin-inline: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; }
 .mode-grid legend { color: #aaf4ff; font-family: ui-monospace, "Courier New", monospace; font-weight: 950; margin-bottom: .3rem; letter-spacing: .09em; text-transform: uppercase; }
@@ -330,19 +352,19 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
 .local-leaderboard em { color: #ffe36e; font-style: normal; font-weight: 950; }
 .high-contrast { filter: contrast(1.2) saturate(1.05); }
 @media (min-width: 960px) and (min-height: 601px) and (orientation: landscape) and (pointer: fine) {
-  :root { --arcade-live-width: min(calc((100dvh - 1rem) * 26 / 27), calc(100vw - 400px), var(--arcade-frame)); }
-  .game-shell { display: grid; grid-template-columns: minmax(192px, 1fr) var(--arcade-live-width) minmax(192px, 1fr); grid-template-rows: auto 1fr auto; gap: .7rem; align-items: center; padding: .5rem .75rem; }
+  :root { --arcade-live-width: min(calc((100dvh - .5rem) * 26 / 27), calc(100vw - 330px), var(--arcade-frame)); }
+  .game-shell { display: grid; grid-template-columns: minmax(145px, 205px) var(--arcade-live-width) minmax(145px, 205px); grid-template-rows: auto 1fr auto; justify-content: center; gap: .45rem; align-items: center; padding: .25rem .5rem; }
   .arcade-scoreboard { grid-column: 1; grid-row: 1; width: 100%; min-height: 72px; align-self: start; padding: .65rem .8rem; border: 1px solid #43dcff44; background: linear-gradient(145deg, #061522, #08040e); }
   .arcade-scoreboard.two-player { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-inline: .6rem; }
   .arcade-scoreboard.two-player > div:last-child { grid-column: 1 / -1; }
   .arcade-scoreboard small { font-size: clamp(.72rem, 1vw, 1rem); }
   .arcade-scoreboard strong { font-size: clamp(.9rem, 1.25vw, 1.18rem); }
-  .live-mission-strip { grid-column: 1; grid-row: 2 / 4; width: 100%; min-height: 0; align-self: stretch; grid-template-columns: 1fr; align-content: center; gap: 2px; border: 1px solid #43dcff44; }
-  .live-mission-strip > span { min-height: 66px; padding: .65rem .8rem; }
+  .live-mission-strip { grid-column: 1; grid-row: 2; width: 100%; min-height: 0; max-height: 420px; align-self: center; grid-template-columns: 1fr; align-content: center; gap: 2px; border: 1px solid #43dcff44; }
+  .live-mission-strip > span { min-height: 54px; padding: .5rem .65rem; }
   .live-mission-strip small { font-size: clamp(.52rem, .72vw, .64rem); }
   .live-mission-strip b { font-size: clamp(.68rem, .92vw, .84rem); }
   .playfield-wrap { grid-column: 2; grid-row: 1 / -1; width: var(--arcade-live-width); align-self: center; }
-  .arcade-footer { grid-column: 3; grid-row: 1 / -1; width: 100%; height: 100%; min-height: 0; grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; align-content: center; justify-items: center; gap: 1rem; padding: 1rem; border: 1px solid #43dcff35; background: linear-gradient(160deg, #061522, #020305 60%); }
+  .arcade-footer { grid-column: 3; grid-row: 1 / -1; width: 100%; height: auto; min-height: 0; align-self: center; grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; align-content: center; justify-items: center; gap: .7rem; padding: .75rem; border: 1px solid #43dcff35; background: linear-gradient(160deg, #061522, #020305 60%); }
   .arcade-footer > span { justify-self: center; }
   .arcade-lives { justify-content: center; }
   .arcade-numbers .number-slots { max-width: 190px; flex-wrap: wrap; }
@@ -380,6 +402,15 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
   .command-status { grid-template-columns: 1fr auto; font-size: .52rem; }
   .command-status b { display: none; }
   .mission-strip { display: none; }
+  .quick-launch-row { grid-template-columns: 1fr; margin-top: .4rem; }
+  .quick-launch { min-height: 64px; padding: .6rem .7rem; }
+  .quick-launch strong { font-size: 1rem; }
+  .quick-launch > b { width: 44px; }
+  .next-unlock-line { grid-template-columns: auto minmax(0, 1fr); }
+  .next-unlock-line span { grid-column: 1 / -1; padding-left: 0; }
+  .run-customizer > summary { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; }
+  .run-customizer > summary em { display: none; }
+  .run-customizer-body { padding-inline: .45rem; }
   .launch-primary-row { grid-template-columns: 1fr; }
   .difficulty-picker { grid-template-columns: 1fr; }
   .difficulty-picker > div { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -420,8 +451,8 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
   .dpad button:nth-child(1) { grid-column: 2; } .dpad button:nth-child(2) { grid-column: 1; } .dpad button:nth-child(3) { grid-column: 2; } .dpad button:nth-child(4) { grid-column: 3; }
   .dpad button, .power-button { min-width: 48px; min-height: 48px; border-radius: 50%; background: #171020de; border-color: #e8bf55; }
   .mobile-controls.coop { left: calc(.35rem + env(safe-area-inset-left)); right: calc(.35rem + env(safe-area-inset-right)); gap: .25rem; }
-  .mobile-controls.coop .dpad { width: 112px; gap: .15rem; }
-  .mobile-controls.coop .dpad button { min-width: 35px; min-height: 35px; padding: .25rem; font-size: .7rem; }
+  .mobile-controls.coop .dpad { width: 138px; gap: .15rem; }
+  .mobile-controls.coop .dpad button { min-width: 44px; min-height: 44px; padding: .25rem; font-size: .72rem; }
   .mobile-controls.coop .player-two-touch .dpad button { border-color: #62eaff; }
   .mobile-controls.coop .power-button { width: 58px; height: 58px; min-width: 58px; min-height: 58px; }
   .power-button { position: relative; width: 78px; height: 78px; padding: 0; overflow: hidden; color: #fff; background: #020b18; border: 2px solid #a9efff; box-shadow: 0 0 20px #20dfff80, inset 0 0 10px #ffffff42; font-size: .62rem; font-weight: 950; }
@@ -471,8 +502,8 @@ h1 span { color: #eec85c; text-shadow: 0 0 32px #f2c84c55; }
   .mobile-controls button { pointer-events: auto; user-select: none; }
   .dpad { width: 142px; }
   .power-button { width: 66px; height: 66px; }
-  .mobile-controls.coop .dpad { width: 106px; }
-  .mobile-controls.coop .dpad button { min-width: 34px; min-height: 34px; }
+  .mobile-controls.coop .dpad { width: 138px; }
+  .mobile-controls.coop .dpad button { min-width: 44px; min-height: 44px; }
   .mobile-controls.coop .power-button { width: 54px; height: 54px; min-width: 54px; min-height: 54px; }
 }
 @keyframes player-pulse { 50% { opacity: .45; } }

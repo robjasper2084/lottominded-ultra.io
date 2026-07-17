@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import type { GameRuntimeHandle } from '../game/GameRuntime';
 import { NumberSlots } from './NumberSlots';
-import { DETROIT_LEVELS } from '../config/gameBalance';
+import { DETROIT_LEVELS, LEVEL_ONE_HEART_CAP } from '../config/gameBalance';
 import { BONUS_TIERS, STREET_BONUSES } from '../config/streetBonuses';
 import { commercialForCompletedLevel, shouldShowCommercialAfterLevel } from '../config/levelCommercials';
 import { LOTTERY_RULES } from '../config/lotteryRules';
@@ -15,6 +15,19 @@ const IN_GAME_TRACK = 'untitled-14-gameplay-96.mp3';
 const COMMERCIAL_LOTTERY_MODES: LotteryMode[] = ['pick3', 'pick4', 'megaMillions', 'powerball'];
 const keyLabel = (code: string) => code.replace(/^Key/, '').replace(/^Arrow/, '').replace('Space', 'SPACE').replace('Enter', 'ENTER');
 const directionArrow = { N: '↑', NE: '↗', E: '→', SE: '↘', S: '↓', SW: '↙', W: '←', NW: '↖' } as const;
+
+function snapshotForNewRun(draw: LotteryDraw, playerCount: PlayerCount, runVariant: RunVariant): GameSnapshot {
+  const totalSlots = draw.main.length + (draw.special === undefined ? 0 : 1);
+  return {
+    ...initialSnapshot,
+    playerCount,
+    runVariant,
+    remainingHearts: LEVEL_ONE_HEART_CAP,
+    levelHeartsTotal: LEVEL_ONE_HEART_CAP,
+    totalSlots,
+    missions: evaluateDetroitMissions(0, { ...EMPTY_MISSION_STATS })
+  };
+}
 
 function snapshotFromCheckpoint(checkpoint: GameCheckpoint, playerCount: PlayerCount, runVariant: RunVariant): GameSnapshot {
   const totalSlots = checkpoint.draw.main.length + (checkpoint.draw.special === undefined ? 0 : 1);
@@ -85,8 +98,8 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
   const commercialVideo = useRef<HTMLVideoElement | null>(null);
   const continueRunAfterCommercial = useRef<(() => void) | null>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
-  const [snapshot, setSnapshot] = useState(() => initialCheckpoint ? snapshotFromCheckpoint(initialCheckpoint, playerCount, runVariant) : { ...initialSnapshot, playerCount, runVariant });
-  const [restoringRun, setRestoringRun] = useState(Boolean(initialCheckpoint));
+  const [snapshot, setSnapshot] = useState(() => initialCheckpoint ? snapshotFromCheckpoint(initialCheckpoint, playerCount, runVariant) : snapshotForNewRun(draw, playerCount, runVariant));
+  const [runtimeReady, setRuntimeReady] = useState(false);
   const [liveSummary, setLiveSummary] = useState('');
   const [paused, setPaused] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(tutorialSeen ? -1 : 0);
@@ -245,7 +258,7 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
     let cancelled = false;
     const currentHost = host.current;
     import('../game/GameRuntime').then(({ createGameRuntime }) => {
-      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, runVariant, cosmetic, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: next => { setSnapshot(next); setRestoringRun(false); }, onPausedChange: setPaused, onLevelBreak: showLevelCommercial, onComplete });
+      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, runVariant, cosmetic, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: next => { setSnapshot(next); setRuntimeReady(true); }, onPausedChange: setPaused, onLevelBreak: showLevelCommercial, onComplete });
     });
     return () => { cancelled = true; continueRunAfterCommercial.current = null; runtime.current?.destroy(); runtime.current = null; };
   }, [cosmetic, draw, gameSpeed, initialCheckpoint, onCheckpoint, onComplete, playerCount, playStyle, reducedMotion, runVariant, screenShake, showLevelCommercial]);
@@ -290,7 +303,11 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
       </div>
       <div className="screen-reader-stats" aria-live="polite" aria-atomic="true">{liveSummary}</div>
       <div className="playfield-wrap" onPointerDown={startSwipe} onPointerUp={finishSwipe} onPointerCancel={() => { swipeStart.current = null; }}>
-        {restoringRun && <div className="restore-run" role="status"><small>CHECKPOINT LINKED</small><strong>Restoring Detroit Run</strong><span>Rebuilding Level {snapshot.world + 1} • {snapshot.remainingHearts} hearts remain</span></div>}
+        {!runtimeReady && <div className={`restore-run ${initialCheckpoint ? 'restore-checkpoint' : 'boot-run'}`} role="status">
+          <small>{initialCheckpoint ? 'CHECKPOINT LINKED' : 'LM.OS // GRID BOOT'}</small>
+          <strong>{initialCheckpoint ? 'Restoring Detroit Run' : 'Initializing Detroit Grid'}</strong>
+          <span>{initialCheckpoint ? `Rebuilding Level ${snapshot.world + 1} • ${snapshot.remainingHearts} hearts remain` : `${LOTTERY_RULES[draw.mode].label} • ${snapshot.totalSlots} secure number slots`}</span>
+        </div>}
         {isLevelIntro && <div className="level-intro" role="status">
           <small>LEVEL {snapshot.world + 1} / 10</small>
           <strong>{level.name.toUpperCase()}</strong>

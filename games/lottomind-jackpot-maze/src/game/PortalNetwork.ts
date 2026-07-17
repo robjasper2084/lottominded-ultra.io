@@ -25,6 +25,24 @@ export function portalCountForLevel(level: number): 2 | 4 {
   return PORTAL_COUNTS_BY_LEVEL[index];
 }
 
+function waveRandom(seed: number, wave: number, salt: number): number {
+  return createRandom((seed ^ Math.imul(wave + 1, 0x9e3779b9) ^ salt) >>> 0)();
+}
+
+export function portalPairForWave(pairCount: number, seed: number, wave: number, previousPair = -1): number {
+  if (pairCount <= 0) return -1;
+  if (pairCount === 1) return 0;
+  if (previousPair < 0) return Math.floor(waveRandom(seed, wave, 0x3130aa55) * pairCount);
+  const offset = 1 + Math.floor(waveRandom(seed, wave, 0x77c0ffee) * (pairCount - 1));
+  return (previousPair + offset) % pairCount;
+}
+
+export function portalGateDurationMs(seed: number, wave: number, phase: 'closed' | 'open'): number {
+  const minimum = phase === 'open' ? 7_000 : 3_500;
+  const range = phase === 'open' ? 4_001 : 3_001;
+  return minimum + Math.floor(waveRandom(seed, wave, phase === 'open' ? 0x0f3a911 : 0x0c105ed) * range);
+}
+
 function distance(a: GridPoint, b: GridPoint): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }

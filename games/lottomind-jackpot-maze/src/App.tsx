@@ -33,6 +33,18 @@ function presetBindings(preset: ControlPreset, power: string): ControlBindings {
   return { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', power };
 }
 
+function nextUnlockStatus(progress: ReturnType<typeof loadPlayerProgress>): { label: string; progress: string } {
+  const candidates = [
+    { id: 'motorGold', label: 'Motor City Gold', current: progress.totalScore, target: 25_000, unit: 'points' },
+    { id: 'riverIce', label: 'Riverfront Ice', current: progress.completedRuns, target: 1, unit: 'run' },
+    { id: 'purple313', label: '313 Purple', current: progress.missionsCompleted, target: 10, unit: 'missions' },
+    { id: 'jackpotChrome', label: 'Jackpot Chrome', current: Object.keys(progress.dailyBest).length, target: 1, unit: 'daily run' }
+  ].filter(item => !progress.unlocked.includes(item.id as (typeof progress.unlocked)[number]));
+  if (!candidates.length) return { label: 'All hero styles unlocked', progress: 'VAULT COMPLETE' };
+  const next = candidates.sort((a, b) => (b.current / b.target) - (a.current / a.target))[0];
+  return { label: next.label, progress: `${Math.min(next.current, next.target).toLocaleString()} / ${next.target.toLocaleString()} ${next.unit}` };
+}
+
 export function App() {
   const [screen, setScreen] = useState<'start' | 'game' | 'results' | 'history'>('start');
   const [mode, setMode] = useState<LotteryMode>('pick3');
@@ -47,6 +59,9 @@ export function App() {
   const [runVariant, setRunVariant] = useState<RunVariant>('classic');
   const [progress, setProgress] = useState(loadPlayerProgress);
   const menuAudio = useRef<HTMLAudioElement | null>(null);
+  const nextUnlock = useMemo(() => nextUnlockStatus(progress), [progress]);
+  const playStyleLabel = playStyle === 'coop' ? '2 Player Co-op' : playStyle === 'alternating' ? '2 Player' : '1 Player';
+  const selectedRunLabel = `${LOTTERY_RULES[mode].label} • ${playStyleLabel} • ${runVariantLabel(runVariant)}`;
 
   useEffect(() => {
     const startup = menuAudio.current ??= new Audio(`${import.meta.env.BASE_URL}assets/audio/digital-static-menu-96.mp3`);
@@ -156,21 +171,30 @@ export function App() {
         <p className="eyebrow">LOTTOMIND ARCADE ORIGINAL</p>
         <p className="lede">Collect secure number reveals. Outsmart five comic villains. Open the vault.</p>
         <div className="mission-strip" aria-hidden="true"><small>ACTIVE MISSION</small><strong>LOCK NUMBERS // EVADE VILLAINS // OPEN THE VAULT</strong><span>RUN READY</span></div>
-        <fieldset className="mode-grid"><legend>Select lottery mode</legend>{Object.values(LOTTERY_RULES).map((rule, index) => <button key={rule.id} data-node={`0${index + 1}`} className={mode === rule.id ? 'selected' : ''} onClick={() => setMode(rule.id)} aria-pressed={mode === rule.id}><strong>{rule.label}</strong><small>{rule.mainCount} {rule.mainCount === 3 || rule.mainCount === 4 ? 'digits' : 'main balls'}{rule.special ? ` + ${rule.special.label}` : ''}</small></button>)}</fieldset>
-        <fieldset className="player-grid"><legend>Players</legend>
-          <button className={playStyle === 'solo' ? 'selected' : ''} onClick={() => setPlayStyle('solo')} aria-pressed={playStyle === 'solo'}><strong>1 Player</strong><small>Solo jackpot run</small></button>
-          <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Mascot + dog • alternating turns</small></button>
-          <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Mascot + dog together in the maze</small></button>
-        </fieldset>
-        <fieldset className="run-mode-grid"><legend>Run mode</legend>
-          <button className={runVariant === 'classic' ? 'selected' : ''} onClick={() => setRunVariant('classic')} aria-pressed={runVariant === 'classic'}><strong>Classic</strong><small>Ten Detroit districts</small></button>
-          <button className={runVariant === 'timeAttack' ? 'selected' : ''} onClick={() => setRunVariant('timeAttack')} aria-pressed={runVariant === 'timeAttack'}><strong>Time Attack</strong><small>Beat the district clock</small></button>
-          <button className={runVariant === 'daily' ? 'selected' : ''} onClick={() => setRunVariant('daily')} aria-pressed={runVariant === 'daily'}><strong>Daily Detroit</strong><small>Best {(progress.dailyBest[dailyChallengeKey()] ?? 0).toLocaleString()}</small></button>
-        </fieldset>
-        <div className="launch-row">
-          <button className="primary launch" onClick={() => startRun(runVariant)}><span>Enter the Maze</span><small>{runVariantLabel(runVariant)} • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>
+        <div className="quick-launch-row">
+          <button className="primary quick-launch" onClick={() => startRun(runVariant)}>
+            <span><small>QUICK RUN // CURRENT LOADOUT</small><strong>Enter the Maze</strong><em>{selectedRunLabel}</em></span><b>GO</b>
+          </button>
           {checkpoint && <button className="resume-run" onClick={resume}><strong>Resume Level {checkpoint.world + 1}</strong><small>{runVariantLabel(checkpoint.runVariant ?? 'classic')} • {checkpoint.playStyle === 'coop' ? 'Co-op' : checkpoint.playStyle === 'alternating' ? '2 Player' : 'Solo'} • {checkpoint.score.toLocaleString()} points</small></button>}
         </div>
+        <div className="next-unlock-line"><small>NEXT UNLOCK</small><strong>{nextUnlock.label}</strong><span>{nextUnlock.progress}</span></div>
+        <details className="run-customizer">
+          <summary><span><small>CUSTOMIZE RUN</small><strong>Lottery, players and challenge mode</strong></span><em>{selectedRunLabel}</em></summary>
+          <div className="run-customizer-body">
+            <fieldset className="mode-grid"><legend>Select lottery mode</legend>{Object.values(LOTTERY_RULES).map((rule, index) => <button key={rule.id} data-node={`0${index + 1}`} className={mode === rule.id ? 'selected' : ''} onClick={() => setMode(rule.id)} aria-pressed={mode === rule.id}><strong>{rule.label}</strong><small>{rule.mainCount} {rule.mainCount === 3 || rule.mainCount === 4 ? 'digits' : 'main balls'}{rule.special ? ` + ${rule.special.label}` : ''}</small></button>)}</fieldset>
+            <fieldset className="player-grid"><legend>Players</legend>
+              <button className={playStyle === 'solo' ? 'selected' : ''} onClick={() => setPlayStyle('solo')} aria-pressed={playStyle === 'solo'}><strong>1 Player</strong><small>Solo jackpot run</small></button>
+              <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Mascot + dog • alternating turns</small></button>
+              <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Mascot + dog together in the maze</small></button>
+            </fieldset>
+            <fieldset className="run-mode-grid"><legend>Run mode</legend>
+              <button className={runVariant === 'classic' ? 'selected' : ''} onClick={() => setRunVariant('classic')} aria-pressed={runVariant === 'classic'}><strong>Classic</strong><small>Ten Detroit districts</small></button>
+              <button className={runVariant === 'timeAttack' ? 'selected' : ''} onClick={() => setRunVariant('timeAttack')} aria-pressed={runVariant === 'timeAttack'}><strong>Time Attack</strong><small>Beat the district clock</small></button>
+              <button className={runVariant === 'daily' ? 'selected' : ''} onClick={() => setRunVariant('daily')} aria-pressed={runVariant === 'daily'}><strong>Daily Detroit</strong><small>Best {(progress.dailyBest[dailyChallengeKey()] ?? 0).toLocaleString()}</small></button>
+            </fieldset>
+            <div className="launch-row"><button className="primary launch" onClick={() => startRun(runVariant)}><span>Launch Customized Run</span><small>{runVariantLabel(runVariant)} • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button></div>
+          </div>
+        </details>
         <details className="cosmetic-locker">
           <summary><span><small>PLAYER PROGRESS</small><strong>Detroit Hero Locker</strong></span><em>{progress.totalScore.toLocaleString()} lifetime • {progress.missionsCompleted} missions • {progress.completedRuns} runs</em></summary>
           <div className="cosmetic-grid">{COSMETICS.map(item => {

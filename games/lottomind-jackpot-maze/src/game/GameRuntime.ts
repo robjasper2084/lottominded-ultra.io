@@ -6,7 +6,7 @@ import { BONUS_TIERS, STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INT
 import { COSMETICS } from '../services/playerProgress';
 import type { BonusTier, CompassDirection, ControlBindings, ControlPreset, CosmeticId, GameCheckpoint, GameSnapshot, LevelMissionStats, LotteryDraw, PlayerCount, PlayStyle, RunVariant, StreetBonusKind } from '../types/game';
 import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, shouldSnapLateTurn, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
-import { createPortalNetwork, tunnelPortalPair } from './PortalNetwork';
+import { createPortalNetwork, portalGateDurationMs, portalPairForWave, tunnelPortalPair, type PortalPair } from './PortalNetwork';
 
 type EnemyKind = 'tax' | 'reaper' | 'chaos' | 'envy' | 'police';
 type VillainMode = 'normal' | 'frightened' | 'returning';
@@ -64,6 +64,19 @@ interface StreetBonus extends GridMover {
   tier: BonusTier;
 }
 
+interface PortalVisual {
+  container: Phaser.GameObjects.Container;
+  halo: Phaser.GameObjects.Ellipse;
+  core: Phaser.GameObjects.Ellipse;
+  outer: Phaser.GameObjects.Ellipse;
+  middle: Phaser.GameObjects.Ellipse;
+  orbit: Phaser.GameObjects.Container;
+  label: Phaser.GameObjects.Text;
+  labelText: string;
+  color: number;
+  orbitColor: number;
+}
+
 export interface GameRuntimeHandle {
   destroy: () => void;
   setDirection: (direction: 'up' | 'down' | 'left' | 'right' | null, player?: 0 | 1) => void;
@@ -77,9 +90,9 @@ export interface GameRuntimeHandle {
   restartLevel: () => void;
 }
 
-const TILE = 20;
-const ORIGIN_X = 50;
-const ORIGIN_Y = 20;
+const TILE = 21;
+const ORIGIN_X = 39.5;
+const ORIGIN_Y = 7.5;
 const GAME_WIDTH = 520;
 const GAME_HEIGHT = 540;
 const LEVEL_PALETTES = [
@@ -145,7 +158,15 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private pelletObjects = new Map<string, Phaser.GameObjects.GameObject>();
     private powerPellets = new Set<string>();
     private portalPoints: GridPoint[] = [];
+    private portalPairs: PortalPair[] = [];
     private portalLinks = new Map<string, GridPoint>();
+    private activePortalKeys = new Set<string>();
+    private portalVisuals = new Map<string, PortalVisual>();
+    private portalGateSeed = portalRunSeed;
+    private portalWaveIndex = 0;
+    private activePortalPair = -1;
+    private previousPortalPair = -1;
+    private nextPortalGateChangeAt = 0;
     private portalCooldownUntil: [number, number] = [0, 0];
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
     private keys!: Record<string, Phaser.Input.Keyboard.Key>;
@@ -289,10 +310,17 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.activeBonus?.container.destroy(); this.activeBonus = undefined;
       this.worldObjects.forEach(object => object.destroy()); this.worldObjects = [];
       this.villains.forEach(villain => { villain.sprite.destroy(); villain.shadow.destroy(); villain.label.destroy(); }); this.villains = [];
+      this.portalVisuals.clear(); this.activePortalKeys.clear();
       this.pelletObjects.clear(); this.powerPellets.clear(); this.maze = createMazeDefinition(this.world);
       const portalNetwork = createPortalNetwork(this.maze, this.world, portalRunSeed);
       this.portalPoints = portalNetwork.portals;
+      this.portalPairs = portalNetwork.pairs;
       this.portalLinks = portalNetwork.links;
+      this.portalGateSeed = (portalRunSeed ^ Math.imul(this.world + 1, 0x9e3779b9)) >>> 0;
+      this.portalWaveIndex = 0;
+      this.activePortalPair = -1;
+      this.previousPortalPair = -1;
+      this.nextPortalGateChangeAt = 0;
       this.portalCooldownUntil = [0, 0];
       this.portalComboUntil = 0; this.portalComboChain = 0;
       this.cityDepthLights = [];
@@ -413,7 +441,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private createPortals(): void {
-      const makePortal = (point: GridPoint, color: number, orbitColor: number, direction: 'left' | 'right', label: string, sidePortal = false) => {
+      const makePortal = (point: GridPoint, color: number, orbitColor: number, direction: 'left' | 'right', labelText: string, sidePortal = false): PortalVisual => {
         const portal = this.add.container(this.pixelX(point.x), this.pixelY(point.y)).setDepth(12);
         const size = sidePortal ? 1.12 : 1;
         const backplate = this.add.ellipse(0, 0, 38 * size, 50 * size, 0x02030a, 0.98).setStrokeStyle(5, 0x02030a, 0.94);
@@ -426,7 +454,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         const sparkA = this.add.circle(0, -22 * size, 2.4, 0xffffff, 1);
         const sparkB = this.add.circle(0, 22 * size, 2.1, orbitColor, 1);
         const sparkC = this.add.circle(direction === 'left' ? -15 * size : 15 * size, 0, 1.9, color, 1);
-        const pairLabel = this.add.text(0, 0, label, { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: sidePortal ? '9px' : '7px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5);
+        const pairLabel = this.add.text(0, 0, labelText, { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: sidePortal ? '9px' : '7px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5);
         const directionMark = sidePortal
           ? this.add.text(direction === 'left' ? 22 : -22, 0, direction === 'left' ? '<' : '>', { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '11px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5)
           : null;
@@ -439,6 +467,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           this.tweens.add({ targets: middle, scaleX: 0.84, scaleY: 1.08, alpha: 0.68, duration: 430, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
           this.tweens.add({ targets: orbit, angle: direction === 'left' ? -360 : 360, duration: 1900, repeat: -1 });
         }
+        return { container: portal, halo, core, outer, middle, orbit, label: pairLabel, labelText, color, orbitColor };
       };
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
       const cosmetic = COSMETICS.find(item => item.id === options.cosmetic) ?? COSMETICS[0];
@@ -449,8 +478,61 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       makePortal(sidePair.exit, portalRight, portalLeft, 'right', 'S', true);
       this.portalPoints.forEach((point, index) => {
         const first = index % 2 === 0;
-        makePortal(point, first ? portalLeft : portalRight, first ? portalRight : portalLeft, first ? 'left' : 'right', `${Math.floor(index / 2) + 1}`);
+        const visual = makePortal(point, first ? portalLeft : portalRight, first ? portalRight : portalLeft, first ? 'left' : 'right', `${Math.floor(index / 2) + 1}`);
+        this.portalVisuals.set(tileKey(point), visual);
       });
+      this.setActivePortalPair(-1, false);
+      this.nextPortalGateChangeAt = this.time.now + portalGateDurationMs(this.portalGateSeed, this.portalWaveIndex, 'closed');
+    }
+
+    private applyPortalVisualState(visual: PortalVisual, active: boolean, animate = true): void {
+      this.tweens.killTweensOf(visual.container);
+      visual.orbit.setVisible(active);
+      visual.label.setText(active ? visual.labelText : 'OFF').setColor(active ? '#ffffff' : '#8c9aa8').setFontSize(active ? 7 : 5);
+      visual.halo.setFillStyle(active ? visual.color : 0x26343f, active ? 0.18 : 0.06).setStrokeStyle(active ? 4 : 2, active ? visual.color : 0x53606c, active ? 0.58 : 0.32);
+      visual.core.setFillStyle(active ? 0x01020a : 0x07101a, 1).setStrokeStyle(1.5, active ? 0xffffff : 0x53606c, active ? 0.62 : 0.35);
+      visual.outer.setStrokeStyle(active ? 3.5 : 2, active ? visual.color : 0x53606c, active ? 1 : 0.45);
+      visual.middle.setStrokeStyle(active ? 2.5 : 2, active ? visual.orbitColor : 0x33414d, active ? 1 : 0.35);
+      const scale = active ? 1 : 0.82;
+      const alpha = active ? 1 : 0.58;
+      if (animate && !options.reducedMotion) {
+        this.tweens.add({ targets: visual.container, scaleX: scale, scaleY: scale, alpha, duration: 240, ease: active ? 'Back.Out' : 'Sine.Out' });
+      } else {
+        visual.container.setScale(scale).setAlpha(alpha);
+      }
+    }
+
+    private setActivePortalPair(pairIndex: number, animate = true): void {
+      this.activePortalPair = pairIndex;
+      this.activePortalKeys.clear();
+      this.portalPairs.forEach((pair, index) => {
+        const active = index === pairIndex;
+        for (const point of [pair.entry, pair.exit]) {
+          const key = tileKey(point);
+          if (active) this.activePortalKeys.add(key);
+          const visual = this.portalVisuals.get(key);
+          if (visual) this.applyPortalVisualState(visual, active, animate);
+        }
+      });
+    }
+
+    private updatePortalGates(time: number): void {
+      if (!this.portalPairs.length || time < this.nextPortalGateChangeAt) return;
+      if (this.activePortalPair >= 0) {
+        const sealedPair = this.activePortalPair;
+        this.setActivePortalPair(-1);
+        this.nextPortalGateChangeAt = time + portalGateDurationMs(this.portalGateSeed, this.portalWaveIndex, 'closed');
+        this.setWarning(`PORTAL ${sealedPair + 1} SEALED • NETWORK REROUTING`, 850);
+        return;
+      }
+      const pair = portalPairForWave(this.portalPairs.length, this.portalGateSeed, this.portalWaveIndex, this.previousPortalPair);
+      this.previousPortalPair = pair;
+      this.setActivePortalPair(pair);
+      const openFor = portalGateDurationMs(this.portalGateSeed, this.portalWaveIndex, 'open');
+      this.nextPortalGateChangeAt = time + openFor;
+      this.portalWaveIndex += 1;
+      this.setWarning(`PORTAL ${pair + 1} OPEN • ${Math.round(openFor / 1000)}s`, 1200);
+      this.tone(620 + pair * 90, 0.12);
     }
 
     private drawDetroitRoadMarkings(roads: Phaser.GameObjects.Graphics): void {
@@ -616,6 +698,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (requested1 && !this.downedPlayers[0]) this.queuePlayerDirection(requested1, 0);
       if (requested2 && !this.downedPlayers[1]) this.queuePlayerDirection(requested2, 1);
       if (this.warningUntil && time >= this.warningUntil) { this.warning = ''; this.warningUntil = 0; this.emitSnapshot(); }
+      this.updatePortalGates(time);
       if (time < this.roundReadyUntil) {
         this.positionSprite(this.player, this.playerMover); this.animatePlayer(this.player, this.playerMover, time);
         if (this.player2) { this.positionSprite(this.player2, this.player2Mover); this.animatePlayer(this.player2, this.player2Mover, time); }
@@ -1025,7 +1108,9 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private teleportPlayerAtPortal(mover: GridMover, tile: GridPoint, time: number, playerIndex: 0 | 1): GridPoint | null {
       if (time < this.portalCooldownUntil[playerIndex]) return null;
-      const destination = this.portalLinks.get(tileKey(tile));
+      const sourceKey = tileKey(tile);
+      if (!this.activePortalKeys.has(sourceKey)) return null;
+      const destination = this.portalLinks.get(sourceKey);
       if (!destination) return null;
       const source = { ...tile };
       mover.tile = { ...destination };
