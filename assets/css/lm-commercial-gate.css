@@ -30,6 +30,12 @@ body.has-lm-commercial-gate {
   opacity: 1;
 }
 
+.lm-commercial-gate.is-handing-off {
+  opacity: 0;
+  transition-duration: 140ms;
+  transition-timing-function: ease-out;
+}
+
 .lm-commercial-gate__panel {
   width: min(1160px, 100%);
   max-height: calc(100dvh - clamp(24px, 6vw, 84px));
@@ -46,6 +52,12 @@ body.has-lm-commercial-gate {
 
 .lm-commercial-gate.is-open .lm-commercial-gate__panel {
   transform: none;
+}
+
+.lm-commercial-gate.is-handing-off .lm-commercial-gate__panel {
+  transform: translateY(-8px) scale(1.006);
+  transition-duration: 140ms;
+  transition-timing-function: ease-out;
 }
 
 .lm-commercial-gate__header,

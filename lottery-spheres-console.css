@@ -1,6 +1,6 @@
-/* Spheres-only floating studio console. */
+/* Spheres-only compact studio console. */
 body.lottery-spheres-page {
-  padding-bottom: clamp(38rem, 54vh, 46rem);
+  padding-bottom: clamp(9.5rem, 18vh, 11rem);
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console {
@@ -13,15 +13,17 @@ body.lottery-spheres-page .ultra-page-instrument-console {
   bottom: max(1rem, env(safe-area-inset-bottom));
   z-index: 90;
   display: grid;
-  grid-template-columns: minmax(11rem, 0.8fr) minmax(39rem, 2.7fr) minmax(16rem, 1fr) minmax(19rem, 1.35fr) minmax(11rem, 0.8fr);
-  gap: clamp(0.72rem, 1.1vw, 1.05rem);
+  grid-template-columns: minmax(5.5rem, 0.52fr) minmax(27rem, 2.15fr) minmax(14rem, 1.05fr) minmax(9.5rem, 0.72fr) minmax(13rem, 1fr);
+  gap: clamp(0.45rem, 0.65vw, 0.7rem);
   align-items: stretch;
   width: calc(100vw - clamp(0.75rem, 1.4vw, 1.75rem));
-  min-height: clamp(8.5rem, 12vw, 11.4rem);
+  height: clamp(8rem, 10.4vw, 9rem);
+  min-height: 0;
   margin: 0;
-  padding: clamp(0.85rem, 1.35vw, 1.25rem);
+  padding: clamp(0.45rem, 0.7vw, 0.65rem);
   border: 1px solid rgba(33, 247, 255, 0.78);
-  border-radius: clamp(1.3rem, 2vw, 2rem);
+  border-radius: clamp(0.9rem, 1.35vw, 1.25rem);
+  overflow: hidden;
   background:
     linear-gradient(135deg, rgba(4, 18, 34, 0.95), rgba(8, 18, 41, 0.91)),
     radial-gradient(circle at 18% 10%, rgba(33, 247, 255, 0.24), transparent 18rem),
@@ -37,6 +39,11 @@ body.lottery-spheres-page .ultra-page-instrument-console {
 
 body.lottery-spheres-page .vault-credit-badge {
   z-index: 96;
+}
+
+body.lottery-spheres-page .vault-credit-badge,
+body.lottery-spheres-page .universal-menu-toggle {
+  bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 9.5rem);
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console::before {
@@ -55,13 +62,157 @@ body.lottery-spheres-page .ultra-page-instrument-console > * {
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-pill,
+body.lottery-spheres-page .ultra-page-instrument-console .console-frequency,
 body.lottery-spheres-page .ultra-page-instrument-console .console-eq,
 body.lottery-spheres-page .ultra-page-instrument-console .console-knobs,
 body.lottery-spheres-page .ultra-page-instrument-console .console-status,
 body.lottery-spheres-page .ultra-page-instrument-console .console-keyboard {
+  min-height: 0;
+  overflow: hidden;
   border: 1px solid rgba(130, 200, 255, 0.2);
   border-radius: 1.05rem;
   background: rgba(0, 0, 0, 0.32);
+}
+
+body.lottery-spheres-page .ultra-page-instrument-console .console-status {
+  display: none !important;
+}
+
+body.lottery-spheres-page .ultra-page-instrument-console .console-frequency {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 0.28rem;
+  min-width: 0;
+  padding: clamp(0.38rem, 0.52vw, 0.55rem);
+}
+
+body.lottery-spheres-page .console-frequency__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+body.lottery-spheres-page .console-frequency__header small,
+body.lottery-spheres-page .console-frequency__header strong {
+  display: block;
+}
+
+body.lottery-spheres-page .console-frequency__header small {
+  color: rgba(213, 236, 255, 0.68);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.lottery-spheres-page .console-frequency__header strong {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.35rem;
+  margin-top: 0.2rem;
+  color: var(--lm-console-gold);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+body.lottery-spheres-page .console-frequency__header strong b,
+body.lottery-spheres-page .console-frequency__header strong i {
+  font: inherit;
+}
+
+body.lottery-spheres-page .console-frequency__header strong i {
+  color: var(--lm-console-mint);
+  font-style: normal;
+}
+
+body.lottery-spheres-page .console-frequency__signal {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--lm-console-mint);
+  box-shadow: 0 0 1rem rgba(142, 255, 212, 0.9);
+}
+
+body.lottery-spheres-page .console-frequency__presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+body.lottery-spheres-page .console-frequency__presets button {
+  display: grid;
+  place-content: center;
+  gap: 0.08rem;
+  min-width: 0;
+  min-height: 1.65rem;
+  padding: 0.15rem;
+  border: 1px solid rgba(130, 200, 255, 0.24);
+  border-radius: 0.48rem;
+  color: #e9fbff;
+  background: linear-gradient(180deg, rgba(30, 111, 167, 0.65), rgba(5, 31, 64, 0.9));
+  cursor: pointer;
+}
+
+body.lottery-spheres-page .console-frequency__presets button b,
+body.lottery-spheres-page .console-frequency__presets button span {
+  display: block;
+  font-size: 0.5rem;
+  line-height: 1.05;
+}
+
+body.lottery-spheres-page .console-frequency__presets button[aria-pressed="true"] {
+  border-color: var(--lm-console-gold);
+  color: #fff8c9;
+  box-shadow: 0 0 0.9rem rgba(248, 217, 107, 0.25);
+}
+
+body.lottery-spheres-page .console-frequency__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+body.lottery-spheres-page .console-frequency__controls label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.36rem;
+  align-items: center;
+  color: rgba(213, 236, 255, 0.68);
+  font-size: 0.55rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+body.lottery-spheres-page .console-frequency__controls input {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--lm-console-gold);
+}
+
+body.lottery-spheres-page .console-frequency__controls button {
+  min-height: 1.7rem;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid var(--lm-console-gold);
+  border-radius: 0.5rem;
+  color: #04121b;
+  background: linear-gradient(135deg, #fff1a9, var(--lm-console-mint));
+  font-size: 0.54rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+body.lottery-spheres-page .console-frequency > p {
+  align-self: end;
+  margin: 0;
+  color: rgba(213, 236, 255, 0.62);
+  overflow: hidden;
+  font-size: 0.48rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-pill,
@@ -69,14 +220,14 @@ body.lottery-spheres-page .ultra-page-instrument-console .console-status {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.5rem;
-  padding: clamp(1rem, 1.4vw, 1.35rem);
+  gap: 0.35rem;
+  padding: clamp(0.6rem, 0.85vw, 0.85rem);
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console :is(.console-pill, .console-status) small,
 body.lottery-spheres-page .ultra-page-instrument-console .console-eq small {
   color: rgba(213, 236, 255, 0.72);
-  font-size: clamp(0.68rem, 0.7vw, 0.8rem);
+  font-size: clamp(0.58rem, 0.62vw, 0.7rem);
   font-weight: 900;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -84,21 +235,26 @@ body.lottery-spheres-page .ultra-page-instrument-console .console-eq small {
 
 body.lottery-spheres-page .ultra-page-instrument-console :is(.console-pill, .console-status) strong {
   color: var(--lm-console-mint);
-  font-size: clamp(0.92rem, 1vw, 1.12rem);
+  font-size: clamp(0.78rem, 0.84vw, 0.95rem);
   text-transform: uppercase;
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-keyboard {
   display: grid;
-  grid-template-rows: clamp(2.25rem, 2.5vw, 2.9rem) 1fr;
-  gap: 0.55rem;
-  padding: clamp(0.6rem, 0.85vw, 0.9rem);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: clamp(1.7rem, 1.9vw, 2rem) 1fr;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: clamp(0.35rem, 0.5vw, 0.5rem);
+  overflow: hidden;
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .mode-tabs {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.45rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.28rem;
+  width: 100%;
+  min-width: 0;
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .mode-tabs button,
@@ -113,8 +269,10 @@ body.lottery-spheres-page .ultra-page-instrument-console .console-knobs button {
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .mode-tabs button {
-  min-height: clamp(2rem, 2.4vw, 2.7rem);
-  font-size: clamp(0.68rem, 0.7vw, 0.8rem);
+  min-width: 0;
+  min-height: 1.7rem;
+  padding-inline: 0.3rem;
+  font-size: clamp(0.58rem, 0.6vw, 0.68rem);
   font-weight: 900;
   text-transform: uppercase;
   cursor: pointer;
@@ -129,11 +287,11 @@ body.lottery-spheres-page .ultra-page-instrument-console .mode-tabs button.is-ac
 
 body.lottery-spheres-page .ultra-page-instrument-console .playable-piano {
   display: grid;
-  grid-template-columns: repeat(18, minmax(2rem, 1fr));
+  grid-template-columns: repeat(18, minmax(0, 1fr));
   align-items: stretch;
-  gap: clamp(0.3rem, 0.48vw, 0.52rem);
-  min-height: clamp(5rem, 6.1vw, 7rem);
-  padding: clamp(0.42rem, 0.6vw, 0.62rem);
+  gap: clamp(0.12rem, 0.2vw, 0.24rem);
+  min-height: 0;
+  padding: clamp(0.28rem, 0.4vw, 0.4rem);
   border-radius: 0.95rem;
   perspective: 620px;
   touch-action: none;
@@ -148,15 +306,15 @@ body.lottery-spheres-page .ultra-page-instrument-console .piano-key {
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: clamp(4.45rem, 5.3vw, 6.3rem);
+  min-height: 3.65rem;
   align-items: flex-end;
   justify-content: center;
-  padding: 0 0.15rem 0.62rem;
+  padding: 0 0.1rem 0.4rem;
   border: 1px solid rgba(197, 235, 255, 0.48);
   border-radius: 0 0 0.62rem 0.62rem;
   color: #03121c;
   cursor: pointer;
-  font: 900 clamp(0.66rem, 0.68vw, 0.82rem)/1 var(--display-font, serif);
+  font: 900 clamp(0.56rem, 0.58vw, 0.66rem)/1 var(--display-font, serif);
   text-transform: uppercase;
   background: linear-gradient(180deg, #f7fcff, #bfeeff 58%, #6ed9ff);
   box-shadow: inset 0 -0.85rem 1.2rem rgba(3, 18, 28, 0.2), 0 0 1rem rgba(33, 247, 255, 0.18);
@@ -164,7 +322,7 @@ body.lottery-spheres-page .ultra-page-instrument-console .piano-key {
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .piano-key.is-accidental {
-  min-height: clamp(3.7rem, 4.55vw, 5.35rem);
+  min-height: 3.15rem;
   color: #eafcff;
   border-color: rgba(154, 100, 255, 0.58);
   background: linear-gradient(180deg, #182f45, #070b12 68%, #11192d);
@@ -187,8 +345,9 @@ body.lottery-spheres-page .ultra-page-instrument-console .piano-key:is(:hover, :
 body.lottery-spheres-page .ultra-page-instrument-console .console-eq {
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 0.55rem;
-  padding: clamp(0.65rem, 0.8vw, 0.9rem);
+  gap: 0.3rem;
+  min-width: 0;
+  padding: clamp(0.38rem, 0.52vw, 0.55rem);
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .live-eq-meter {
@@ -196,8 +355,8 @@ body.lottery-spheres-page .ultra-page-instrument-console .live-eq-meter {
   grid-template-columns: repeat(16, minmax(0.35rem, 1fr));
   align-items: end;
   gap: 0.32rem;
-  min-height: clamp(4.2rem, 5vw, 5.8rem);
-  padding: 0.8rem 0.75rem 0.65rem;
+  min-height: 3.6rem;
+  padding: 0.45rem 0.42rem 0.35rem;
   border-radius: 0.95rem;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.66));
   box-shadow: inset 0 0 0 1px rgba(130, 200, 255, 0.13), 0 0 1.2rem rgba(33, 247, 255, 0.15);
@@ -224,23 +383,25 @@ body.lottery-spheres-page .ultra-page-instrument-console .eq-source-status {
 body.lottery-spheres-page .ultra-page-instrument-console .console-knobs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(0.5rem, 0.7vw, 0.8rem);
-  padding: clamp(0.65rem, 0.8vw, 0.9rem);
+  gap: clamp(0.28rem, 0.4vw, 0.45rem);
+  min-width: 0;
+  padding: clamp(0.38rem, 0.52vw, 0.55rem);
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-knobs button {
   display: grid;
   place-items: center;
-  gap: 0.42rem;
-  min-height: clamp(6rem, 6.8vw, 8rem);
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 0;
   cursor: ns-resize;
   touch-action: none;
   user-select: none;
 }
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-knobs i {
-  width: clamp(3.8rem, 4.25vw, 5rem);
-  height: clamp(3.8rem, 4.25vw, 5rem);
+  width: clamp(2.25rem, 2.7vw, 2.75rem);
+  height: clamp(2.25rem, 2.7vw, 2.75rem);
   border: 2px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
   background:
@@ -252,7 +413,7 @@ body.lottery-spheres-page .ultra-page-instrument-console .console-knobs i {
 
 body.lottery-spheres-page .ultra-page-instrument-console .console-knobs span {
   color: rgba(213, 236, 255, 0.74);
-  font-size: clamp(0.62rem, 0.66vw, 0.78rem);
+  font-size: clamp(0.52rem, 0.54vw, 0.62rem);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -265,43 +426,39 @@ body.lottery-spheres-page .ultra-page-instrument-console .status-wave {
 
 @media (max-width: 1320px) {
   body.lottery-spheres-page .ultra-page-instrument-console {
-    grid-template-columns: minmax(8rem, 0.7fr) minmax(31rem, 2.2fr) minmax(13rem, 0.95fr) minmax(16rem, 1.1fr);
-  }
-
-  body.lottery-spheres-page .ultra-page-instrument-console .console-status {
-    display: none;
+    grid-template-columns: minmax(5rem, 0.5fr) minmax(23rem, 2fr) minmax(13rem, 1.05fr) minmax(8.5rem, 0.72fr) minmax(12rem, 1fr);
   }
 }
 
 @media (max-width: 920px) {
   body.lottery-spheres-page {
-    padding-bottom: clamp(40rem, 86vh, 52rem);
+    padding-bottom: 9.25rem;
   }
 
   body.lottery-spheres-page .ultra-page-instrument-console {
-    grid-template-columns: 1fr;
-    bottom: 0.75rem;
+    grid-template-columns: 4.5rem 23rem 13rem 9rem 12rem;
+    bottom: max(0.35rem, env(safe-area-inset-bottom));
+    height: 8.5rem;
     min-height: 0;
-    max-height: min(72vh, 38rem);
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-color: rgba(33, 247, 255, 0.72) rgba(3, 12, 24, 0.84);
   }
 
   body.lottery-spheres-page .ultra-page-instrument-console .playable-piano {
-    grid-template-columns: repeat(9, minmax(2.15rem, 1fr));
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+  }
+
+  body.lottery-spheres-page .vault-credit-badge,
+  body.lottery-spheres-page .universal-menu-toggle {
+    bottom: calc(max(0.35rem, env(safe-area-inset-bottom)) + 9rem);
   }
 }
 
 @media (max-width: 560px) {
   body.lottery-spheres-page .ultra-page-instrument-console {
     width: calc(100% - 0.75rem);
-    padding: 0.7rem;
-  }
-
-  body.lottery-spheres-page .ultra-page-instrument-console .mode-tabs {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  body.lottery-spheres-page .ultra-page-instrument-console .console-knobs {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 0.4rem;
   }
 }

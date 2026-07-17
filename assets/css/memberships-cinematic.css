@@ -1765,7 +1765,7 @@ body.memberships-page .membership-water__stats dd {
 body.memberships-page .membership-water__figure {
   position: relative;
   z-index: 1;
-  width: min(100%, 610px);
+  width: min(100%, 720px);
   margin: 0;
   justify-self: end;
   filter: drop-shadow(0 32px 58px rgba(0, 0, 0, 0.46));
@@ -1773,7 +1773,7 @@ body.memberships-page .membership-water__figure {
 
 body.memberships-page .membership-water__media {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border: 1px solid rgba(91, 233, 255, 0.28);
   border-radius: 10px;
@@ -1810,6 +1810,9 @@ body.memberships-page .membership-water__media :is(img, video) {
 }
 
 body.memberships-page .membership-water__media video {
+  height: 100%;
+  object-fit: contain;
+  background: #02050a;
   filter: saturate(1.04) contrast(1.04) brightness(0.9);
 }
 

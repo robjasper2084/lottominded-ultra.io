@@ -1,0 +1,60 @@
+version: 2.1
+
+jobs:
+  verify-game:
+    docker:
+      - image: cimg/node:22.14-browsers
+    resource_class: medium
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v2-node22-npm-{{ checksum "lottominded-ultra.io/games/gothtechnology2/package-lock.json" }}
+      - run:
+          name: Install dependencies
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: npm ci
+      - save_cache:
+          key: v2-node22-npm-{{ checksum "lottominded-ultra.io/games/gothtechnology2/package-lock.json" }}
+          paths:
+            - ~/.npm
+      - restore_cache:
+          keys:
+            - v2-playwright-{{ checksum "lottominded-ultra.io/games/gothtechnology2/package-lock.json" }}
+      - run:
+          name: Install Chromium
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: npx playwright install chromium
+      - save_cache:
+          key: v2-playwright-{{ checksum "lottominded-ultra.io/games/gothtechnology2/package-lock.json" }}
+          paths:
+            - ~/.cache/ms-playwright
+      - run:
+          name: Prepare test results
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: mkdir -p output/test-results
+      - run:
+          name: Validate syntax and assets
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: npm run check
+      - run:
+          name: Unit tests
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: npm run test:unit:ci
+      - run:
+          name: Browser playtests
+          working_directory: lottominded-ultra.io/games/gothtechnology2
+          command: npm run test:browser
+      - store_test_results:
+          path: lottominded-ultra.io/games/gothtechnology2/output/test-results
+      - store_artifacts:
+          path: lottominded-ultra.io/games/gothtechnology2/output/test-results
+          destination: test-results
+      - store_artifacts:
+          path: lottominded-ultra.io/games/gothtechnology2/output/playwright
+          destination: playwright
+
+workflows:
+  verify:
+    jobs:
+      - verify-game

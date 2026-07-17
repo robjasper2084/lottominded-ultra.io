@@ -63,9 +63,9 @@
         }
       })();
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
-    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=live-badge-above-player-1" />
-    <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=lottoman-particles-5" />
+<link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-exit-audit-4" />
+    <link rel="stylesheet" href="./assets/live-events/css/live-events-redesign.css?v=featured-title-background-3" />
+  <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=featured-singer-film-1" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <script type="importmap">
       {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
@@ -74,7 +74,7 @@
   <body class="live-events-page lm-live-page has-sphere-tabs">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
@@ -108,8 +108,8 @@
     <main class="lm-live-grid">
       <section class="lm-live-hero panel-glow" data-shape="0" data-entity-label="Live signal" data-bg="#04060a" data-glow="#5be9ff">
         <div class="lm-live-hero-copy">
-          <p class="status-live"><span></span>Live Now</p>
-          <p class="started"><span></span>Started 00:12:45 ago</p>
+          <p class="status-live" data-scramble><span></span>Live Now</p>
+          <p class="started" data-scramble><span></span>Started 00:12:45 ago</p>
           <h1>Featured Stream Events</h1>
           <p>Watch live concerts, comedy, festivals, conferences, and special events inside a futuristic music-instrument event hub.</p>
           <div class="hero-actions">
@@ -120,17 +120,35 @@
             <a class="live-btn" href="./lottomind-stem-studio/index.html">Launch Studio</a>
           </div>
         </div>
-        <article class="lm-stage-card">
-          <p>Main Stage</p>
-          <h2>Neon Horizons Festival 2025</h2>
-          <ul>
-            <li>Electronic - Festival - 3 days</li>
-            <li>May 24 - May 26, 2025</li>
-            <li>7:00 PM - 2:00 AM</li>
-            <li>Cyber Dome Arena, Virtual</li>
-          </ul>
-          <strong>128K watching</strong>
-        </article>
+        <figure class="lm-live-hero-film">
+          <div class="lm-live-hero-film__stage">
+            <video
+              muted
+              autoplay
+              loop
+              controls
+              playsinline
+              preload="metadata"
+              data-lm-video-unmanaged="true"
+              data-live-hero-film-video
+              aria-label="Bloom Through Gloom singer performance"
+            >
+              <source src="./assets/video/merch-hero-blended.mp4" type="video/mp4" />
+            </video>
+            <span class="lm-live-hero-film__status" data-scramble>Archive performance</span>
+            <button
+              class="lm-live-hero-film__sound"
+              type="button"
+              data-live-hero-film-sound
+              aria-pressed="false"
+            >Sound on</button>
+          </div>
+          <figcaption>
+            <span data-scramble>Bloom Through Gloom</span>
+            <strong>Limited Signal Capsule</strong>
+            <small>Original LottoMind merch-store performance</small>
+          </figcaption>
+        </figure>
       </section>
 
       <section class="lm-section panel-glow" id="upcoming" data-shape="1" data-entity-label="Upcoming" data-bg="#09070f" data-glow="#ffe66d">
@@ -249,7 +267,7 @@
         </div>
       </section>
 
-      <section class="lm-passes panel-glow" data-shape="5" data-entity-label="Passes" data-bg="#0a070c" data-glow="#e08ab8">
+      <section class="lm-passes panel-glow" id="flight" data-flight-section data-shape="5" data-entity-label="Flight" data-bg="#0a070c" data-glow="#e08ab8" aria-label="Scroll-driven featured-event flight">
         <article><p>All Access Pass</p><h2>$19.99</h2><span>3-Day Pass</span><ul><li>All stage access</li><li>HD quality</li><li>Replay access</li></ul><button type="button">Get Pass</button></article>
         <article class="vip"><p>Ultra VIP Pass</p><h2>$49.99</h2><span>3-Day Pass</span><ul><li>Backstage</li><li>VIP lounge</li><li>Merch discounts</li></ul><button type="button">Get Pass</button></article>
       </section>
@@ -267,7 +285,7 @@
         <article class="video-replay-card">
           <a class="replay-video-link" href="https://www.youtube.com/watch?v=dGnqHj6w5Z4" target="_blank" rel="noopener noreferrer" aria-label="Watch Comedy Ultra Live replay on YouTube">
             <span class="mini-thumb youtube-thumb">
-              <img src="https://img.youtube.com/vi/dGnqHj6w5Z4/hqdefault.jpg" alt="" loading="lazy" />
+              <img src="./assets/live-events/references/neon-cyberpunk-streaming-platform-mockup.png" alt="" loading="lazy" />
             </span>
             <span><h3>Comedy Ultra Live</h3><p>May Special - 1:18:45</p></span>
           </a>
@@ -282,7 +300,12 @@
         </article>
       </section>
 
-      <section class="lm-interactions panel-glow" data-shape="7" data-entity-label="React" data-bg="#030408" data-glow="#3d7fd6">
+      <section class="lm-interactions panel-glow lm-earth-finale" data-shape="7" data-entity-label="Earth online" data-bg="#030408" data-glow="#3d7fd6">
+        <header class="lm-earth-finale__heading">
+          <p data-scramble>Global live signal · Earth online</p>
+          <h2>One world.<br /><em>Every event, live.</em></h2>
+          <span>Concerts, festivals, comedy, replays, and creative signals resolve into one connected LottoMind network.</span>
+        </header>
         <button type="button">React<span>Reactions</span></button>
         <button type="button">Signal<span>Predict</span></button>
         <button type="button">Poll<span>Polls</span></button>
@@ -304,13 +327,13 @@
     </footer>
 
 <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
-<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-exit-audit-4" defer></script>
     <script src="./site.js?v=original-page-wipe-3" defer></script>
-    <script src="./assets/live-events/js/live-events-redesign.js?v=shadow-ops-removed-2" defer></script>
+    <script src="./assets/live-events/js/live-events-redesign.js?v=featured-singer-film-2" defer></script>
     <script src="./assets/live-events/js/live-events-console.js?v=live-console-1" defer></script>
     <script src="./assets/vendor/gsap/gsap.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/gsap/ScrollTrigger.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/lenis/lenis.min.js?v=1.1.20" defer></script>
-    <script type="module" src="./assets/features-app/js/main.js?v=comet-flight-1"></script>
+    <script type="module" src="./assets/features-app/js/main.js?v=earth-sound-polish-4"></script>
   </body>
 </html>

@@ -2,5 +2,7 @@ node_modules/
 output/
 playwright-report/
 test-results/
+__pycache__/
+*.pyc
 debug.log
 .DS_Store

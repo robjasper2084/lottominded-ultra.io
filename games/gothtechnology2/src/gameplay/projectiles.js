@@ -1,12 +1,27 @@
-import { drawSheetFrame } from "../engine/assets.js?v=fighter-prop2";
-import { rectsOverlap } from "../engine/math.js";
-import { SpriteEffect } from "./effects.js";
-import { sliceAttackForHit } from "./hits.js";
+import { drawSheetFrame } from "../engine/assets.js?v=heartline36-leash-wrist";
+import { rectsOverlap } from "../engine/math.js?v=heartline36-leash-wrist";
+import { LovePulseEffect, SpriteEffect } from "./effects.js?v=heartline36-leash-wrist";
+import { sliceAttackForHit } from "./hits.js?v=heartline36-leash-wrist";
 
 const hexAlpha = (color, alpha) => {
   if (!color?.startsWith("#") || color.length !== 7) return color;
   return `${color}${Math.round(Math.max(0, Math.min(1, alpha)) * 255).toString(16).padStart(2, "0")}`;
 };
+
+const fighterEffectColor = (owner, alpha = 1) => {
+  const key = owner.config?.manifestKey;
+  const color = key === "KALYX"
+    ? "#9f62ff"
+    : key?.startsWith("DETROIT_LENS")
+      ? "#e7c36a"
+      : key === "AMARA_VALENTINE"
+        ? "#ff58bd"
+        : "#8bd4ff";
+  return alpha >= 1 ? color : hexAlpha(color, alpha);
+};
+
+const COMPANION_PROJECTILES = new Set(["shadow-raven", "arcane-owl"]);
+const LOVE_PROJECTILES = new Set(["heartline-pulse", "heartbreak-nova"]);
 
 export class Projectile {
   constructor({ owner, x, y, direction, attack, image, kind = "projectile", color = "#9ed8ff" }) {
@@ -41,12 +56,14 @@ export class Projectile {
   update(dt, game) {
     this.age += dt;
     this.hitCooldown = Math.max(0, this.hitCooldown - dt);
-    this.trail.unshift({
-      x: this.x,
-      y: this.y + Math.sin(this.age * 14 + this.seed) * Math.min(18, this.radius * 0.32),
-      age: this.age
-    });
-    this.trail.length = Math.min(this.trail.length, this.kind === "super" ? 12 : 8);
+    if (!COMPANION_PROJECTILES.has(this.kind)) {
+      this.trail.unshift({
+        x: this.x,
+        y: this.y + Math.sin(this.age * 14 + this.seed) * Math.min(18, this.radius * 0.32),
+        age: this.age
+      });
+      this.trail.length = Math.min(this.trail.length, this.kind === "super" || this.kind === "heartbreak-nova" ? 12 : 8);
+    }
     this.x += this.direction * this.speed * dt;
     if (this.x < -140 || this.x > 1420 || this.age > 3.2) {
       this.spawnBurst(game, this.x, this.y, false);
@@ -61,7 +78,9 @@ export class Projectile {
         box: this.rect,
         projectile: true,
         level: this.attack.level ?? "mid",
-        sourceName: this.kind,
+        sourceName: this.kind === "eye-laser" || this.kind === "heartbreak-nova"
+          ? "super"
+          : this.kind,
         hitIndex: this.hitCount,
         maxHits
       });
@@ -70,15 +89,26 @@ export class Projectile {
         this.dead = true;
       } else {
         this.hitCooldown = this.attack.hitInterval ?? 0.075;
-        game.effects.push(new SpriteEffect({
-          x: target.x - this.direction * 24,
-          y: this.y + this.radius * 0.7,
-          image: this.image,
-          duration: 0.18,
-          scale: Math.max(0.3, this.radius / 120),
-          flip: this.direction < 0,
-          alpha: 0.62
-        }));
+        if (LOVE_PROJECTILES.has(this.kind)) {
+          game.effects.push(new LovePulseEffect({
+            x: target.x - this.direction * 24,
+            y: this.y,
+            duration: 0.22,
+            scale: Math.max(0.5, this.radius / 90),
+            direction: this.direction,
+            burst: true
+          }));
+        } else {
+          game.effects.push(new SpriteEffect({
+            x: target.x - this.direction * 24,
+            y: this.y + this.radius * 0.7,
+            image: this.image,
+            duration: 0.18,
+            scale: Math.max(0.3, this.radius / 120),
+            flip: this.direction < 0,
+            alpha: 0.62
+          }));
+        }
       }
     }
   }
@@ -86,9 +116,23 @@ export class Projectile {
   spawnBurst(game, x, y, impact = false) {
     if (this.burstDone || !game?.effects) return;
     this.burstDone = true;
-    const image = this.owner.id === "KALYX"
+    const manifestKey = this.owner.config?.manifestKey;
+    if (manifestKey === "AMARA_VALENTINE") {
+      game.effects.push(new LovePulseEffect({
+        x,
+        y,
+        duration: impact ? 0.42 : 0.28,
+        scale: (this.radius / 74) * (impact ? 1.1 : 0.72),
+        direction: this.direction,
+        burst: impact
+      }));
+      return;
+    }
+    const image = manifestKey === "KALYX"
       ? game.assets.images.kalyxShadowClaw
-      : game.assets.images.ezraBlueBurst;
+      : manifestKey?.startsWith("DETROIT_LENS")
+        ? game.assets.images.hitSpark
+        : game.assets.images.ezraBlueBurst;
     game.effects.push(new SpriteEffect({
       x,
       y: y + this.radius * 0.75,
@@ -132,11 +176,89 @@ export class Projectile {
     ctx.restore();
   }
 
+  renderEyeLaser(ctx, visualY) {
+    const length = this.radius * 7.4;
+    const startX = this.x - this.direction * length;
+    const endX = this.x + this.direction * this.radius * 0.9;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    const beam = ctx.createLinearGradient(startX, visualY, endX, visualY);
+    beam.addColorStop(0, "rgba(90, 0, 0, 0)");
+    beam.addColorStop(0.38, "rgba(210, 24, 32, 0.4)");
+    beam.addColorStop(0.82, "rgba(255, 48, 54, 0.96)");
+    beam.addColorStop(1, "rgba(255, 245, 220, 1)");
+    ctx.strokeStyle = beam;
+    ctx.lineCap = "round";
+    ctx.lineWidth = this.radius * (0.32 + Math.sin(this.age * 46) * 0.05);
+    ctx.shadowColor = "#ff2838";
+    ctx.shadowBlur = 30;
+    ctx.beginPath();
+    ctx.moveTo(startX, visualY);
+    ctx.lineTo(endX, visualY);
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(255, 246, 226, 0.95)";
+    ctx.lineWidth = Math.max(2, this.radius * 0.09);
+    ctx.beginPath();
+    ctx.moveTo(startX + this.direction * length * 0.34, visualY);
+    ctx.lineTo(endX, visualY);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  renderLoveProjectile(ctx, visualY) {
+    const superMove = this.kind === "heartbreak-nova";
+    const pulse = 1 + Math.sin(this.age * (superMove ? 18 : 24)) * 0.08;
+    const size = this.radius * (superMove ? 0.62 : 0.52) * pulse;
+    ctx.save();
+    ctx.translate(this.x, visualY);
+    ctx.globalCompositeOperation = "lighter";
+    ctx.shadowColor = "#ff3cad";
+    ctx.shadowBlur = superMove ? 38 : 24;
+    ctx.fillStyle = superMove ? "rgba(255, 88, 184, 0.9)" : "rgba(255, 116, 202, 0.92)";
+    ctx.beginPath();
+    ctx.moveTo(0, size * 0.38);
+    ctx.bezierCurveTo(-size * 0.9, -size * 0.2, -size * 0.5, -size, 0, -size * 0.5);
+    ctx.bezierCurveTo(size * 0.5, -size, size * 0.9, -size * 0.2, 0, size * 0.38);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255, 235, 247, 0.95)";
+    ctx.lineWidth = Math.max(2, size * 0.08);
+    ctx.stroke();
+    for (let ring = 0; ring < (superMove ? 3 : 2); ring += 1) {
+      ctx.globalAlpha = 0.5 - ring * 0.12;
+      ctx.beginPath();
+      ctx.arc(0, 0, size * (1.45 + ring * 0.52 + Math.sin(this.age * 11 + ring) * 0.08), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   render(ctx) {
+    if (COMPANION_PROJECTILES.has(this.kind)) {
+      const frame = Math.floor(this.age * 14) % 6;
+      const visualY = this.y + Math.sin(this.age * 13 + this.seed) * 8;
+      ctx.save();
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur = 18;
+      drawSheetFrame(ctx, this.image, frame, 256, 256, this.x, visualY + this.radius * 1.45, {
+        scale: this.kind === "shadow-raven" ? 0.68 : 0.72,
+        flip: this.direction < 0,
+        alpha: 1
+      });
+      ctx.restore();
+      return;
+    }
     const frame = Math.floor(this.age * 18) % 8;
     const flip = this.direction < 0;
     const visualY = this.y + Math.sin(this.age * 14 + this.seed) * Math.min(18, this.radius * 0.26);
+    if (this.kind === "eye-laser") {
+      this.renderEyeLaser(ctx, visualY);
+      return;
+    }
     this.renderTrail(ctx, visualY);
+    if (LOVE_PROJECTILES.has(this.kind)) {
+      this.renderLoveProjectile(ctx, visualY);
+      return;
+    }
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
@@ -192,6 +314,130 @@ export class Projectile {
   }
 }
 
+const BOERBOEL_PHASES = {
+  summon: { row: 0, duration: 0.24, frameRate: 12 },
+  run: { row: 1, duration: Infinity, frameRate: 14 },
+  attack: { row: 2, duration: 0.46, frameRate: 13 },
+  recover: { row: 3, duration: 0.44, frameRate: 12 }
+};
+
+export class BoerboelStrike extends Projectile {
+  constructor({ owner, x, y, direction, attack, image }) {
+    super({ owner, x, y, direction, attack, image, kind: "boerboel-rush", color: "#c88946" });
+    this.phase = "summon";
+    this.phaseAge = 0;
+    this.hitApplied = false;
+    this.speed = attack.speed ?? 760;
+    this.radius = attack.radius ?? 66;
+  }
+
+  get rect() {
+    return {
+      x: this.x - 82,
+      y: this.y - 112,
+      w: 164,
+      h: 108
+    };
+  }
+
+  setPhase(phase) {
+    this.phase = phase;
+    this.phaseAge = 0;
+  }
+
+  update(dt, game) {
+    this.age += dt;
+    this.phaseAge += dt;
+    const target = game.fighters.find((fighter) => fighter.id !== this.owner.id);
+
+    if (this.phase === "summon") {
+      if (this.phaseAge >= BOERBOEL_PHASES.summon.duration) this.setPhase("run");
+      return;
+    }
+
+    if (this.phase === "run") {
+      this.x += this.direction * this.speed * dt;
+      const distance = target ? this.direction * (target.x - this.x) : Infinity;
+      if (target && distance <= 126 && distance >= -76) {
+        this.x = target.x - this.direction * 94;
+        this.setPhase("attack");
+        return;
+      }
+      if (this.x < -160 || this.x > 1440 || this.age > 2.4) this.setPhase("recover");
+      return;
+    }
+
+    if (this.phase === "attack") {
+      if (!this.hitApplied && this.phaseAge >= 0.15) {
+        this.hitApplied = true;
+        if (target && !target.isKO && rectsOverlap(this.rect, target.hurtbox)) {
+          game.resolveIncomingHit(this.owner, target, this.attack, {
+            box: this.rect,
+            projectile: false,
+            level: this.attack.level ?? "mid",
+            sourceName: "boerboelRush",
+            hitIndex: 1,
+            maxHits: 1
+          });
+          game.effects.push(new SpriteEffect({
+            x: target.x - this.direction * 24,
+            y: target.y - 78,
+            image: game.assets.images.hitSpark,
+            duration: 0.26,
+            scale: 0.46,
+            flip: this.direction < 0,
+            alpha: 0.86
+          }));
+        }
+      }
+      if (this.phaseAge >= BOERBOEL_PHASES.attack.duration) this.setPhase("recover");
+      return;
+    }
+
+    this.x += this.direction * this.speed * 0.42 * dt;
+    if (this.phaseAge >= BOERBOEL_PHASES.recover.duration) this.dead = true;
+  }
+
+  render(ctx) {
+    if (!this.image) return;
+    const layout = BOERBOEL_PHASES[this.phase];
+    const frame = this.phase === "run"
+      ? Math.floor(this.phaseAge * layout.frameRate) % 6
+      : Math.min(5, Math.floor((this.phaseAge / layout.duration) * 6));
+    const alpha = this.phase === "recover"
+      ? Math.max(0, 1 - this.phaseAge / layout.duration)
+      : 1;
+    const scale = 0.86;
+
+    ctx.save();
+    ctx.globalAlpha = 0.34 * alpha;
+    ctx.fillStyle = "#050403";
+    ctx.beginPath();
+    ctx.ellipse(this.x, this.y + 5, 74, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.translate(this.x, this.y + 3);
+    if (this.direction < 0) ctx.scale(-1, 1);
+    ctx.globalAlpha = alpha;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(
+      this.image,
+      frame * 192,
+      layout.row * 192,
+      192,
+      192,
+      -96 * scale,
+      -192 * scale,
+      192 * scale,
+      192 * scale
+    );
+    ctx.restore();
+  }
+}
+
 export class AssistStrike extends Projectile {
   constructor({ owner, x, y, direction, spec, image }) {
     super({
@@ -200,8 +446,8 @@ export class AssistStrike extends Projectile {
       y,
       direction,
       image,
-      kind: spec.name,
-      color: owner.id === "KALYX" ? "#c08cff" : "#9ed8ff",
+      kind: spec.render === "lovePulse" ? "heartline-pulse" : spec.name,
+      color: fighterEffectColor(owner),
       attack: {
         damage: spec.damage,
         chip: 6,
@@ -319,7 +565,7 @@ export class AssistStrike extends Projectile {
       const sy = (layout.sourceY ?? 0) + (layout.row ?? 0) * layout.cellHeight;
       const scale = layout.visualScale ?? this.radius / 96;
       const flip = this.direction < 0;
-      const color = this.owner.id === "KALYX" ? "#9f62ff" : "#8bd4ff";
+      const color = fighterEffectColor(this.owner);
       const visualY = this.y + Math.sin(this.age * 12 + this.seed) * 18;
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
@@ -327,7 +573,7 @@ export class AssistStrike extends Projectile {
         const p = this.trail[i];
         const t = 1 - i / Math.max(1, this.trail.length);
         ctx.globalAlpha = 0.06 + t * 0.22;
-        ctx.fillStyle = this.owner.id === "KALYX" ? "rgba(110, 66, 210, 0.5)" : "rgba(139, 212, 255, 0.44)";
+        ctx.fillStyle = fighterEffectColor(this.owner, 0.44);
         ctx.shadowColor = color;
         ctx.shadowBlur = 10 + t * 18;
         ctx.beginPath();
@@ -337,13 +583,13 @@ export class AssistStrike extends Projectile {
       ctx.restore();
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.fillStyle = this.owner.id === "KALYX" ? "rgba(150, 88, 255, 0.22)" : "rgba(139, 212, 255, 0.2)";
+      ctx.fillStyle = fighterEffectColor(this.owner, 0.22);
       ctx.shadowColor = color;
       ctx.shadowBlur = 28;
       ctx.beginPath();
       ctx.ellipse(this.x - this.direction * 46, visualY + this.radius - 72, 138, 42, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = this.owner.id === "KALYX" ? "rgba(202, 172, 255, 0.46)" : "rgba(255, 226, 146, 0.38)";
+      ctx.strokeStyle = fighterEffectColor(this.owner, 0.46);
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(this.x - this.direction * 156, visualY + this.radius - 96);
@@ -355,7 +601,7 @@ export class AssistStrike extends Projectile {
       ctx.translate(this.x, visualY + this.radius);
       if (flip) ctx.scale(-1, 1);
       ctx.globalAlpha = 0.96;
-      ctx.shadowColor = this.owner.id === "KALYX" ? "rgba(156, 95, 255, 0.55)" : "rgba(139, 212, 255, 0.5)";
+      ctx.shadowColor = fighterEffectColor(this.owner, 0.55);
       ctx.shadowBlur = 22;
       ctx.drawImage(
         this.image,

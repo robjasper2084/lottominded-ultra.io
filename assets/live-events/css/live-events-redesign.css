@@ -915,35 +915,43 @@ body.has-shadow-ops-frame-expanded {
 .lm-live-hero {
   grid-column: span 1;
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, .72fr) minmax(320px, .28fr);
-  min-height: 330px;
+  align-self: start;
+  display: block;
+  min-height: clamp(560px, 54vw, 720px);
   overflow: hidden;
   border-radius: 18px;
   background:
-    linear-gradient(90deg, rgba(3,5,10,.94) 0 28%, rgba(3,5,10,.34) 56%, rgba(3,5,10,.82) 100%),
-    url("../references/neon-horizons-streaming-dashboard.png") center / cover;
+    radial-gradient(circle at 72% 38%, rgba(41, 247, 255, 0.15), transparent 42%),
+    #02060c;
 }
 
 .lm-live-hero::before {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background:
-    radial-gradient(circle at 55% 45%, rgba(255,79,216,.25), transparent 18rem),
-    radial-gradient(circle at 70% 42%, rgba(41,247,255,.22), transparent 22rem);
+    linear-gradient(90deg, rgba(2, 6, 13, 0.98) 0%, rgba(2, 6, 13, 0.9) 32%, rgba(2, 6, 13, 0.22) 66%, rgba(2, 6, 13, 0.42) 100%),
+    linear-gradient(180deg, rgba(2, 6, 13, 0.16) 42%, rgba(2, 6, 13, 0.9) 100%),
+    radial-gradient(circle at 72% 45%, transparent 0 27%, rgba(41, 247, 255, 0.12) 72%, transparent 100%);
   pointer-events: none;
 }
 
 .lm-live-hero-copy,
-.lm-stage-card {
+.lm-stage-card,
+.lm-live-hero-film {
   position: relative;
   z-index: 1;
 }
 
 .lm-live-hero-copy {
-  align-self: center;
-  padding: clamp(24px, 4vw, 52px);
+  z-index: 4;
+  width: min(50%, 620px);
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 5vw, 72px);
 }
 
 .status-live,
@@ -977,7 +985,7 @@ body.has-shadow-ops-frame-expanded {
 .lm-live-hero h1 {
   margin: 0;
   max-width: 760px;
-  font-size: clamp(2.2rem, 5.4vw, 5.2rem);
+  font-size: clamp(2.2rem, 4.6vw, 4.5rem);
   line-height: .9;
   text-transform: uppercase;
   text-shadow: 0 0 30px rgba(41,247,255,.26), 0 20px 56px rgba(0,0,0,.74);
@@ -1126,6 +1134,128 @@ body.has-shadow-ops-frame-expanded {
 
 .lm-stage-card strong {
   color: var(--lm-live-green);
+}
+
+.lm-live-hero-film {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  background: #02060c;
+  box-shadow: none;
+}
+
+.lm-live-hero-film__stage {
+  position: absolute;
+  inset: 0;
+  min-height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(41, 247, 255, 0.16), transparent 62%),
+    #03070e;
+}
+
+.lm-live-hero-film__stage::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(1, 5, 12, 0.78) 0%, rgba(1, 5, 12, 0.28) 48%, transparent 78%),
+    linear-gradient(180deg, rgba(1, 5, 12, 0.04) 45%, rgba(1, 5, 12, 0.82) 100%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px);
+}
+
+.lm-live-hero-film video {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: 66% 38%;
+  background: #02060c;
+  filter: contrast(1.05) saturate(0.88);
+}
+
+.lm-live-hero-film__status,
+.lm-live-hero-film__sound {
+  position: absolute;
+  z-index: 5;
+  top: 14px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(41, 247, 255, 0.48);
+  background: rgba(2, 9, 19, 0.78);
+  color: #e9fbff;
+  font: 800 0.62rem/1 var(--lm-live-mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.lm-live-hero-film__status {
+  left: auto;
+  right: 92px;
+  padding: 0 12px;
+  color: var(--lm-live-cyan);
+}
+
+.lm-live-hero-film__sound {
+  right: 14px;
+  padding: 0 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lm-live-hero-film__sound:hover,
+.lm-live-hero-film__sound:focus-visible,
+.lm-live-hero-film__sound.is-active {
+  border-color: rgba(255, 224, 113, 0.9);
+  color: #fff4b8;
+  box-shadow: 0 0 22px rgba(255, 224, 113, 0.24);
+}
+
+.lm-live-hero-film figcaption {
+  position: absolute;
+  z-index: 4;
+  right: clamp(18px, 3vw, 42px);
+  bottom: clamp(44px, 4vw, 64px);
+  width: min(38%, 430px);
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(41, 247, 255, 0.32);
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(41, 247, 255, 0.08), transparent 54%),
+    rgba(3, 8, 18, 0.82);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.46), inset 0 0 24px rgba(41, 247, 255, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.lm-live-hero-film figcaption span,
+.lm-live-hero-film figcaption small {
+  color: var(--lm-live-cyan);
+  font: 800 0.6rem/1.35 var(--lm-live-mono, "IBM Plex Mono", monospace);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lm-live-hero-film figcaption strong {
+  color: #eef7ff;
+  font-size: clamp(1rem, 1.45vw, 1.35rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.lm-live-hero-film figcaption small {
+  color: var(--lm-live-muted);
 }
 
 .panel-glow {
@@ -2167,11 +2297,38 @@ body.live-events-page .vault-credit-badge {
     grid-template-columns: 1fr;
   }
   .lm-live-hero {
-    grid-template-columns: 1fr;
+    min-height: 720px;
   }
   .lm-stage-card {
     border-left: 0;
     border-top: 1px solid rgba(41,247,255,.18);
+  }
+  .lm-live-hero-film {
+    height: 100%;
+    min-height: 100%;
+    border-left: 0;
+    border-top: 0;
+  }
+  .lm-live-hero::before {
+    background:
+      linear-gradient(180deg, rgba(2, 6, 13, 0.16) 0%, rgba(2, 6, 13, 0.56) 48%, rgba(2, 6, 13, 0.98) 78%),
+      radial-gradient(circle at 50% 22%, transparent 0 28%, rgba(41, 247, 255, 0.1) 72%, transparent 100%);
+  }
+  .lm-live-hero-copy {
+    width: 100%;
+    min-height: 720px;
+    justify-content: flex-end;
+    padding: 26px 22px 84px;
+  }
+  .lm-live-hero-film video {
+    object-position: 54% 28%;
+  }
+  .lm-live-hero-film figcaption {
+    display: none;
+  }
+  .lm-live-hero-film__status {
+    left: 14px;
+    right: auto;
   }
   .event-card-row,
   .lm-category-grid,

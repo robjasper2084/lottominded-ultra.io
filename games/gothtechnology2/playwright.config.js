@@ -5,6 +5,7 @@ export default defineConfig({
   globalSetup: "./tests/global-setup.js",
   outputDir: "./output/playwright",
   timeout: 30_000,
+  workers: 1,
   fullyParallel: false,
   reporter: process.env.CI
     ? [["line"], ["junit", { outputFile: "output/test-results/playwright.xml" }]]

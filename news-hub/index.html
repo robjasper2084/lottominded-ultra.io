@@ -10,11 +10,27 @@
     <link rel="stylesheet" href="../styles.css?v=startup-music-banner-wide-20" />
     <link rel="stylesheet" href="../assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <title>LottoMind News Intelligence</title>
+    <script>
+      try {
+        if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
+          document.documentElement.classList.add("lm-transition-arriving");
+        }
+      } catch (error) {}
+    </script>
+<link rel="stylesheet" href="../assets/css/lm-page-transition.css?v=transition-exit-audit-4" />
   </head>
   <body>
+    <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
+      <div class="lm-page-transition__flash"></div>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+      <div class="lm-page-transition__vignette"></div>
+      <div class="lm-page-transition__scanlines"></div>
+      <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  <script src="../assets/js/lm-page-transition-audio.js?v=transition-audio-original-wipe-4" defer></script>
+  <script src="../assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
+<script src="../assets/js/lm-page-transition.js?v=transition-exit-audit-4" defer></script>
   <script src="../site.js?v=original-page-wipe-3" defer></script>
     <script src="../assets/js/lm-healing-frequency.js?v=magic-eight-float-1" defer></script>
   </body>

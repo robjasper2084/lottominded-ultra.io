@@ -75,6 +75,8 @@ body.features-cinematic-page.feature-entity-fallback .feature-entity {
 
 @media (prefers-reduced-motion: reduce) {
   .feature-entity {
-    display: none !important;
+    display: block !important;
+    opacity: 0.82 !important;
+    transition: none !important;
   }
 }

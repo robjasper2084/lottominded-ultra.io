@@ -41,6 +41,7 @@
   const commercialVideo = commercialModal?.querySelector("[data-membership-commercial-video]");
   const heroCommercialVideo = document.querySelector("[data-membership-hero-commercial]");
   const waterCommercialVideo = document.querySelector("[data-membership-water-commercial]");
+  const waterCommercialSound = document.querySelector("[data-membership-water-sound]");
   const commercialOpeners = [...document.querySelectorAll("[data-membership-commercial-open]")];
   const commercialClose = commercialModal?.querySelector("[data-membership-commercial-close]");
   const commercialEnter = commercialModal?.querySelector("[data-membership-commercial-enter]");
@@ -52,26 +53,10 @@
   const commercialTelemetry = commercialModal?.querySelector("[data-membership-commercial-telemetry]");
   const commercialFilms = [
     {
-      src: "./assets/merch/lottomind-guardian-commercial-reveal-20260716.mp4",
-      poster: "./assets/merch/lottomind-guardian-commercial-reveal-poster-20260716.png",
-      signal: "Film 01 / Product signal",
-      title: "Meet the Guardian.",
-      telemetry: "LM-GUARDIAN / REVEAL",
-      copy: "Meet the $19.95 Little Man Luggage Charm and Backpack Guardian. Every purchase includes three complimentary months of LottoMind app membership.",
-    },
-    {
-      src: "./assets/merch/lottomind-guardian-commercial-clip-on-20260716.mp4",
-      poster: "./assets/merch/lottomind-guardian-commercial-clip-on-poster-20260716.png",
-      signal: "Film 02 / Field setup",
-      title: "Clip on your mindset.",
-      telemetry: "LM-GUARDIAN / DEPLOY",
-      copy: "Clip the Guardian onto a backpack or luggage route, then carry the LottoMind signal with you.",
-    },
-    {
       src: "./assets/merch/lottomind-merch-commercial-20260716.mp4",
       poster: "./assets/merch/lottomind-merch-commercial-poster-20260716.png",
       signal: "Film 03 / Mobile signal",
-      title: "Carry the signal.",
+      title: "Carry the Signal.",
       telemetry: "LM-GUARDIAN / IN TRANSIT",
       copy: "The Guardian goes wherever the next idea begins, with three months of LottoMind membership included.",
     },
@@ -81,6 +66,8 @@
     : [];
   let commercialReturnFocus = null;
   let commercialFilmIndex = 0;
+  let commercialIsClosing = false;
+  let waterCommercialSoundEnabled = false;
 
   const setCommercialFilm = (index, { restart = true, play = false, muted = false } = {}) => {
     if (!commercialVideo) return;
@@ -141,7 +128,7 @@
       waterCommercialVideo.pause();
       return;
     }
-    waterCommercialVideo.muted = true;
+    waterCommercialVideo.muted = !waterCommercialSoundEnabled;
     waterCommercialVideo.play().catch(() => {});
   };
   if (waterCommercialVideo) {
@@ -153,27 +140,54 @@
     document.addEventListener("visibilitychange", syncWaterCommercialPlayback);
     reducedMotion.addEventListener?.("change", syncWaterCommercialPlayback);
   }
+  waterCommercialSound?.addEventListener("click", () => {
+    if (!waterCommercialVideo) return;
+    waterCommercialSoundEnabled = !waterCommercialSoundEnabled;
+    waterCommercialVideo.muted = !waterCommercialSoundEnabled;
+    waterCommercialVideo.volume = 0.72;
+    waterCommercialSound.setAttribute("aria-pressed", String(waterCommercialSoundEnabled));
+    waterCommercialSound.textContent = waterCommercialSoundEnabled ? "Sound on" : "Play with sound";
+    if (waterCommercialSoundEnabled) waterCommercialVideo.play().catch(() => {});
+  });
 
   const closeCommercial = ({ restoreFocus = true } = {}) => {
-    if (!commercialModal || commercialModal.hidden) return;
+    if (!commercialModal || commercialModal.hidden || commercialIsClosing) return;
+    commercialIsClosing = true;
     commercialVideo?.pause();
-    commercialModal.classList.remove("is-open");
-    commercialModal.setAttribute("aria-hidden", "true");
-    commercialModal.hidden = true;
-    commercialModal.classList.remove("is-entry");
-    body.classList.remove("has-membership-commercial");
-    delete body.dataset.membershipCommercialEntry;
-    root.inert = false;
-    document.querySelector("[data-site-header]")?.removeAttribute("inert");
-    state.lenis?.start();
-    syncHeroCommercialPlayback();
-    syncWaterCommercialPlayback();
-    if (commercialClose) commercialClose.textContent = "Close";
-    if (restoreFocus) commercialReturnFocus?.focus?.({ preventScroll: true });
+
+    window.dispatchEvent(new CustomEvent("lottomind:commercial-dismissed", {
+      detail: {
+        label: "Memberships",
+        source: "membership-commercial",
+        theme: "memberships"
+      }
+    }));
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        commercialModal.classList.remove("is-open");
+        window.setTimeout(() => {
+          commercialModal.setAttribute("aria-hidden", "true");
+          commercialModal.hidden = true;
+          commercialModal.classList.remove("is-entry");
+          body.classList.remove("has-membership-commercial");
+          delete body.dataset.membershipCommercialEntry;
+          root.inert = false;
+          document.querySelector("[data-site-header]")?.removeAttribute("inert");
+          state.lenis?.start();
+          syncHeroCommercialPlayback();
+          syncWaterCommercialPlayback();
+          if (commercialClose) commercialClose.textContent = "Close";
+          if (restoreFocus) commercialReturnFocus?.focus?.({ preventScroll: true });
+          commercialIsClosing = false;
+        }, 140);
+      });
+    });
   };
 
   const openCommercial = (trigger, options = {}) => {
     if (!commercialModal || !commercialVideo) return;
+    commercialIsClosing = false;
     const entry = options.entry === true;
     const requestedIndex = options.index ?? trigger?.dataset.commercialIndex;
     commercialReturnFocus = trigger || document.activeElement;
@@ -207,23 +221,9 @@
     setCommercialFilm(button.dataset.commercialIndex, { restart: true, play: true });
   }));
   commercialVideo?.addEventListener("ended", () => {
-    if (commercialFilmIndex < commercialFilms.length - 1) {
-      setCommercialFilm(commercialFilmIndex + 1, { restart: true, play: true });
-    }
+    closeCommercial();
   });
-  const chooseEntryCommercial = () => {
-    let previous = -1;
-    try {
-      previous = Number.parseInt(window.localStorage.getItem("lm-membership-entry-film") || "-1", 10);
-    } catch (_) {}
-    const choices = commercialFilms.map((_, index) => index).filter((index) => index !== previous);
-    const index = choices[Math.floor(Math.random() * choices.length)] ?? 0;
-    try {
-      window.localStorage.setItem("lm-membership-entry-film", String(index));
-    } catch (_) {}
-    return index;
-  };
-  openCommercial(null, { entry: true, index: chooseEntryCommercial() });
+  openCommercial(null, { entry: true, index: 0 });
   commercialModal?.addEventListener("click", (event) => {
     if (event.target === commercialModal) closeCommercial();
   });
@@ -489,11 +489,12 @@
   const waterImage = waterFigure?.querySelector("[data-lm-water-image]");
   if (waterSection && waterFigure && waterMedia && waterImage) {
     if (gsap && ScrollTrigger && !reducedMotion.matches) {
+      const waterIsVideo = waterImage instanceof HTMLVideoElement;
       const figureSpeed = Number.parseFloat(waterFigure.dataset.speed || "1.1") || 1.1;
-      const drift = 11 * figureSpeed;
+      const drift = waterIsVideo ? 0 : 11 * figureSpeed;
       gsap.set(waterMedia, { clipPath: "inset(0 0 100% 0)" });
       gsap.set(waterImage, {
-        "--lm-water-scale": 1.25,
+        "--lm-water-scale": waterIsVideo ? 1.04 : 1.25,
         "--lm-water-pan": "0%",
         "--lm-water-drift": `${-drift}px`,
       });
@@ -508,7 +509,7 @@
         },
       });
       gsap.to(waterImage, {
-        "--lm-water-pan": "-12%",
+        "--lm-water-pan": waterIsVideo ? "0%" : "-12%",
         ease: "none",
         scrollTrigger: {
           id: "lm-water-photo-pan",

@@ -8,7 +8,7 @@ const STYLE = [
   { color: "#5bf0d8", cameraZ: 14.6, x: 2.85 },
   { color: "#e08ab8", cameraZ: 15.1, x: 2.55 },
   { color: "#a78bfa", cameraZ: 15.6, x: 3.0 },
-  { color: "#3d7fd6", cameraZ: 16.4, x: 2.8 },
+  { color: "#3d7fd6", cameraZ: 16.0, x: 0 },
 ];
 
 const LIVELINESS = [0.82, 1.0, 0.48, 0.88, 0.7, 1.0, 0.78, 0.42];
@@ -22,6 +22,9 @@ const DEFAULT_BACKGROUNDS = [
   "#0a0812",
   "#030408",
 ];
+
+const DEFAULT_EPOCHS = ["Origin", "Ignition", "Worlds", "Water", "Life", "Flight", "Signal", "Return"];
+const SCRAMBLE_GLYPHS = "█▓▒░<>/\\|=+*#01";
 
 const mulberry32 = (seed) => () => {
   let value = seed += 0x6d2b79f5;
@@ -281,18 +284,106 @@ function generateSignalTransmission(count, seed = 97) {
   return target;
 }
 
-function generateEarth(count, seed = 113) {
+function generateEarthData(count, seed = 113) {
   const random = mulberry32(seed);
-  const target = new Float32Array(count * 3);
+  const positions = new Float32Array(count * 3);
+  const tint = new Float32Array(count);
+  const radius = 4.6;
+  const surfaceCount = Math.floor(count * 0.9);
+  const continentCenters = Array.from({ length: 8 }, () => ({
+    direction: unitDirection(random),
+    threshold: 0.74 + random() * 0.12,
+  }));
 
   for (let index = 0; index < count; index += 1) {
     const direction = unitDirection(random);
-    const atmosphere = random() > 0.93;
-    const radius = atmosphere ? 4.48 + random() * 0.08 : 4.15 + (random() - 0.5) * 0.12;
-    setPoint(target, index, direction[0] * radius, direction[1] * radius * 0.985, direction[2] * radius);
+    const atmosphere = index >= surfaceCount;
+    const pointRadius = atmosphere
+      ? radius + 0.35 + random() * 1.3
+      : radius + (random() - 0.5) * 0.07;
+    setPoint(
+      positions,
+      index,
+      direction[0] * pointRadius,
+      direction[1] * pointRadius,
+      direction[2] * pointRadius,
+    );
+
+    if (!atmosphere) {
+      let land = 0;
+      for (let cap = 0; cap < continentCenters.length; cap += 1) {
+        const center = continentCenters[cap];
+        const dot = direction[0] * center.direction[0]
+          + direction[1] * center.direction[1]
+          + direction[2] * center.direction[2];
+        const rawHash = Math.sin(
+          direction[0] * 127.1
+          + direction[1] * 311.7
+          + direction[2] * 74.7
+          + index * 0.013
+          + cap * 19.19,
+        ) * 43758.5453;
+        const raggedEdge = (rawHash - Math.floor(rawHash) - 0.5) * 0.11;
+        if (dot > center.threshold + raggedEdge) {
+          land = 1;
+          break;
+        }
+      }
+      tint[index] = land;
+    }
   }
 
-  return target;
+  return { positions, tint, surfaceCount };
+}
+
+function generateEarth(count, seed = 113) {
+  return generateEarthData(count, seed).positions;
+}
+
+function generateShortestEarthLinks(positions, surfaceCount) {
+  const sampleCount = Math.min(420, surfaceCount);
+  const sampleIndices = new Uint32Array(sampleCount);
+  for (let sample = 0; sample < sampleCount; sample += 1) {
+    sampleIndices[sample] = Math.min(
+      surfaceCount - 1,
+      Math.floor(sample / Math.max(1, sampleCount - 1) * Math.max(0, surfaceCount - 1)),
+    );
+  }
+
+  const candidates = [];
+  const maxDistanceSquared = 1.7 * 1.7;
+  for (let first = 0; first < sampleCount; first += 1) {
+    const firstIndex = sampleIndices[first];
+    const firstOffset = firstIndex * 3;
+    for (let second = first + 1; second < sampleCount; second += 1) {
+      const secondIndex = sampleIndices[second];
+      const secondOffset = secondIndex * 3;
+      const dx = positions[firstOffset] - positions[secondOffset];
+      const dy = positions[firstOffset + 1] - positions[secondOffset + 1];
+      const dz = positions[firstOffset + 2] - positions[secondOffset + 2];
+      const distanceSquared = dx * dx + dy * dy + dz * dz;
+      if (distanceSquared <= maxDistanceSquared) {
+        candidates.push({ firstIndex, secondIndex, distanceSquared });
+      }
+    }
+  }
+  candidates.sort((first, second) => first.distanceSquared - second.distanceSquared);
+
+  const linkCount = Math.min(300, candidates.length);
+  const linePositions = new Float32Array(linkCount * 6);
+  for (let link = 0; link < linkCount; link += 1) {
+    const candidate = candidates[link];
+    const firstOffset = candidate.firstIndex * 3;
+    const secondOffset = candidate.secondIndex * 3;
+    const lineOffset = link * 6;
+    linePositions[lineOffset] = positions[firstOffset];
+    linePositions[lineOffset + 1] = positions[firstOffset + 1];
+    linePositions[lineOffset + 2] = positions[firstOffset + 2];
+    linePositions[lineOffset + 3] = positions[secondOffset];
+    linePositions[lineOffset + 4] = positions[secondOffset + 1];
+    linePositions[lineOffset + 5] = positions[secondOffset + 2];
+  }
+  return linePositions;
 }
 
 const generators = [
@@ -395,30 +486,267 @@ async function generateMascotTargets(count) {
   });
 }
 
-const waitForRuntime = async () => {
-  if (window.gsap && window.ScrollTrigger) return;
-  if (document.readyState === "complete") return;
-  await new Promise((resolve) => window.addEventListener("load", resolve, { once: true }));
+const waitForRuntime = async (needsScrollTrigger = true) => {
+  const isReady = () => Boolean(window.gsap && (!needsScrollTrigger || window.ScrollTrigger));
+  for (let attempt = 0; attempt < 120 && !isReady(); attempt += 1) {
+    await new Promise((resolve) => window.setTimeout(resolve, 16));
+  }
 };
 
-async function initializeParticleEntity() {
-  await waitForRuntime();
+function createScrambleDecoder(gsap, reducedMotion) {
+  const activeTweens = new WeakMap();
 
-  const canvas = document.getElementById("featureEntity");
-  const arcadeStage = document.querySelector(".arcade-main");
-  if (arcadeStage) {
-    [
-      ".arcade-hero",
-      ".arcade-featured",
-      ".arcade-library",
-      ".arcade-tools",
-      ".motion-rail",
-      ".feature-stack",
-    ].forEach((selector) => {
-      const section = arcadeStage.querySelector(`:scope > ${selector}`);
-      if (section) arcadeStage.append(section);
+  const decode = (element, nextText = element?.dataset?.decodeText || element?.textContent || "") => {
+    if (!element) return;
+    const resolvedText = String(nextText).replace(/\s+/g, " ").trim();
+    if (!resolvedText) return;
+    element.dataset.decodeText = resolvedText;
+    activeTweens.get(element)?.kill?.();
+
+    if (reducedMotion.matches || !gsap) {
+      element.textContent = resolvedText;
+      return;
+    }
+
+    const proxy = { progress: 0 };
+    const tween = gsap.to(proxy, {
+      progress: 1,
+      duration: 1,
+      ease: "power2.out",
+      overwrite: true,
+      onUpdate: () => {
+        const resolvedCount = Math.floor(resolvedText.length * proxy.progress);
+        const cycle = Math.floor(proxy.progress * 24);
+        element.textContent = [...resolvedText].map((character, index) => {
+          if (/\s/.test(character) || index < resolvedCount) return character;
+          return SCRAMBLE_GLYPHS[(index * 7 + cycle * 5) % SCRAMBLE_GLYPHS.length];
+        }).join("");
+      },
+      onComplete: () => {
+        element.textContent = resolvedText;
+        activeTweens.delete(element);
+      },
     });
-  }
+    activeTweens.set(element, tween);
+  };
+
+  const observe = (root = document) => {
+    const targets = [...root.querySelectorAll([
+      ".section-kicker",
+      ".eyebrow",
+      "[data-scramble]",
+      "[class*='kicker']",
+      "[class*='eyebrow']",
+      ".studio-boot-sequence span",
+      ".lm-entity-status",
+      ".lm-entity-chronometer__label",
+    ].join(","))].filter((element) => (
+      element.childElementCount === 0
+      && element.textContent.trim().length > 0
+      && element.textContent.trim().length <= 96
+    ));
+
+    if (reducedMotion.matches || !("IntersectionObserver" in window)) {
+      targets.forEach((element) => {
+        element.dataset.decodeText ||= element.textContent.replace(/\s+/g, " ").trim();
+        element.textContent = element.dataset.decodeText;
+      });
+      return null;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        decode(entry.target, entry.target.textContent);
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8%", threshold: 0.08 });
+    targets.forEach((element) => observer.observe(element));
+    return observer;
+  };
+
+  return { decode, observe };
+}
+
+function createSynthSound(host) {
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "lm-entity-sound-toggle";
+  button.setAttribute("aria-pressed", "false");
+  button.setAttribute("aria-label", "Enable LottoMind particle sound");
+  button.innerHTML = '<span aria-hidden="true"></span><b>SND OFF</b>';
+  (host || document.body).append(button);
+
+  let context = null;
+  let masterGain = null;
+  let humGain = null;
+  let lowpass = null;
+  let oscillatorOne = null;
+  let oscillatorTwo = null;
+  let octave = null;
+  let octaveGain = null;
+  let lfo = null;
+  let lfoDepth = null;
+  let enabled = false;
+  let epoch = 0;
+  let velocity = 0;
+  const detuneRatio = 46.55 / 46;
+
+  const ensureGraph = () => {
+    if (!AudioContextCtor) return false;
+    if (context) return true;
+    context = new AudioContextCtor();
+    masterGain = context.createGain();
+    humGain = context.createGain();
+    lowpass = context.createBiquadFilter();
+    oscillatorOne = context.createOscillator();
+    oscillatorTwo = context.createOscillator();
+    octave = context.createOscillator();
+    octaveGain = context.createGain();
+    lfo = context.createOscillator();
+    lfoDepth = context.createGain();
+
+    masterGain.gain.value = 0.0001;
+    humGain.gain.value = 0.022;
+    octaveGain.gain.value = 0.006;
+    lowpass.type = "lowpass";
+    lowpass.frequency.value = 420;
+    lowpass.Q.value = 0.8;
+    oscillatorOne.type = "sine";
+    oscillatorTwo.type = "sine";
+    octave.type = "triangle";
+    lfo.type = "sine";
+    lfo.frequency.value = 0.065;
+    lfoDepth.gain.value = 0.006;
+
+    const now = context.currentTime;
+    const root = 42 + epoch * 6;
+    oscillatorOne.frequency.setValueAtTime(root, now);
+    oscillatorTwo.frequency.setValueAtTime(root * detuneRatio, now);
+    octave.frequency.setValueAtTime(root * 2, now);
+    oscillatorOne.connect(humGain);
+    oscillatorTwo.connect(humGain);
+    octave.connect(octaveGain);
+    lfo.connect(lfoDepth);
+    lfoDepth.connect(humGain.gain);
+    humGain.connect(lowpass);
+    octaveGain.connect(lowpass);
+    lowpass.connect(masterGain);
+    masterGain.connect(context.destination);
+    oscillatorOne.start();
+    oscillatorTwo.start();
+    octave.start();
+    lfo.start();
+    return true;
+  };
+
+  const playBlip = () => {
+    if (!enabled || !context || !masterGain) return;
+    const now = context.currentTime;
+    const tone = context.createOscillator();
+    const gain = context.createGain();
+    tone.type = "sine";
+    tone.frequency.setValueAtTime(1150, now);
+    tone.frequency.exponentialRampToValueAtTime(520, now + 0.18);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.032, now + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    tone.connect(gain);
+    gain.connect(masterGain);
+    tone.start(now);
+    tone.stop(now + 0.2);
+  };
+
+  const retune = (shape) => {
+    epoch = Math.max(0, Math.min(7, Math.round(Number(shape) || 0)));
+    if (!context || !oscillatorOne) return;
+    const now = context.currentTime;
+    const root = 42 + epoch * 6;
+    oscillatorOne.frequency.setTargetAtTime(root, now, 0.24);
+    oscillatorTwo.frequency.setTargetAtTime(root * detuneRatio, now, 0.24);
+    octave.frequency.setTargetAtTime(root * 2, now, 0.24);
+    playBlip();
+  };
+
+  const burst = () => {
+    if (!enabled || !context || !masterGain) return;
+    const now = context.currentTime;
+    const length = Math.ceil(context.sampleRate * 1.4);
+    const buffer = context.createBuffer(1, length, context.sampleRate);
+    const channel = buffer.getChannelData(0);
+    for (let index = 0; index < channel.length; index += 1) {
+      channel[index] = (Math.random() * 2 - 1) * (1 - index / channel.length * 0.35);
+    }
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    filter.type = "bandpass";
+    filter.Q.value = 1.15;
+    filter.frequency.setValueAtTime(280, now);
+    filter.frequency.exponentialRampToValueAtTime(1800, now + 0.5);
+    filter.frequency.exponentialRampToValueAtTime(120, now + 1.4);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.065, now + 0.14);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+    source.buffer = buffer;
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+    source.start(now);
+    source.stop(now + 1.42);
+  };
+
+  const setEnabled = async (nextEnabled) => {
+    if (nextEnabled && !ensureGraph()) return;
+    enabled = Boolean(nextEnabled);
+    button.setAttribute("aria-pressed", String(enabled));
+    button.setAttribute("aria-label", `${enabled ? "Disable" : "Enable"} LottoMind particle sound`);
+    button.querySelector("b").textContent = enabled ? "SND ON" : "SND OFF";
+    button.classList.toggle("is-on", enabled);
+    if (!context || !masterGain) return;
+    if (context.state === "suspended") await context.resume().catch(() => {});
+    const now = context.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(Math.max(0.0001, masterGain.gain.value), now);
+    masterGain.gain.exponentialRampToValueAtTime(enabled ? 0.82 : 0.0001, now + 0.12);
+    if (enabled) {
+      retune(epoch);
+    } else {
+      window.setTimeout(() => context?.suspend?.().catch(() => {}), 150);
+    }
+    window.dispatchEvent(new CustomEvent("lm:entity-sound", { detail: { enabled } }));
+  };
+
+  button.addEventListener("click", () => setEnabled(!enabled));
+
+  return {
+    button,
+    setEpoch: retune,
+    burst,
+    setVelocity(nextVelocity) { velocity = Math.max(velocity, Math.abs(Number(nextVelocity) || 0)); },
+    tick(dt) {
+      velocity *= Math.exp(-dt * 3.2);
+      if (!enabled || !context || !lowpass) return;
+      const amount = Math.min(1, velocity / 80);
+      lowpass.frequency.setTargetAtTime(420 + amount * 1980, context.currentTime, 0.045);
+    },
+    destroy() {
+      button.remove();
+      context?.close?.().catch(() => {});
+      context = null;
+    },
+    get enabled() { return enabled; },
+    get epoch() { return epoch; },
+    get contextState() { return context?.state || "uninitialized"; },
+  };
+}
+
+async function initializeParticleEntity() {
+  const canvas = document.getElementById("featureEntity");
+  const earthOnly = canvas?.dataset.entityMode === "earth";
+  await waitForRuntime(!earthOnly);
+
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const mobile = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
   const anchors = [...document.querySelectorAll("[data-shape]")]
@@ -426,14 +754,17 @@ async function initializeParticleEntity() {
     .sort((first, second) => Number(first.dataset.shape) - Number(second.dataset.shape));
   const gsap = window.gsap;
   const ScrollTrigger = window.ScrollTrigger;
+  const animatedWalk = !reducedMotion.matches && !earthOnly;
 
-  if (!canvas || reducedMotion.matches || anchors.length < 8 || !gsap || !ScrollTrigger) {
+  if (!canvas || (!earthOnly && anchors.length < 8) || (animatedWalk && (!gsap || !ScrollTrigger))) {
     document.body.classList.add("feature-entity-fallback");
     return;
   }
 
-  gsap.registerPlugin(ScrollTrigger);
-  gsap.ticker.lagSmoothing(0);
+  if (gsap && ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.ticker.lagSmoothing(0);
+  }
 
   const pointCount = mobile ? 5000 : 15000;
   const pointRandom = mulberry32(191);
@@ -446,15 +777,21 @@ async function initializeParticleEntity() {
     scales[index] = seed > 0.985 ? 2.4 : 0.5 + pointRandom() * 0.9;
   }
 
-  let shapes;
-  try {
-    shapes = await generateMascotTargets(pointCount);
-    shapes[5] = generateComet(pointCount, 79);
-    document.body.classList.add("feature-entity-mascot");
-  } catch (error) {
-    console.warn("LottoMan particle mask unavailable; using geometric targets.", error);
-    shapes = generators.map((generator, index) => generator(pointCount, 101 + index * 137));
+  let shapes = null;
+  if (!earthOnly) {
+    try {
+      shapes = await generateMascotTargets(pointCount);
+      document.body.classList.add("feature-entity-mascot");
+    } catch (error) {
+      console.warn("LottoMan particle mask unavailable; using geometric targets.", error);
+    }
   }
+  shapes ||= generators.map((generator, index) => generator(pointCount, 101 + index * 137));
+  const earthData = generateEarthData(pointCount, 113);
+  shapes[5] = generateComet(pointCount, 79);
+  shapes[7] = earthData.positions;
+  const shapeTints = Array.from({ length: 8 }, () => new Float32Array(pointCount));
+  shapeTints[7] = earthData.tint;
   const backgrounds = DEFAULT_BACKGROUNDS.map((fallback, shape) => (
     anchors.find((anchor) => Number(anchor.dataset.shape) === shape)?.dataset.bg || fallback
   ));
@@ -473,13 +810,22 @@ async function initializeParticleEntity() {
     button.textContent = anchor.dataset.entityLabel
       || anchor.querySelector("h1,h2,h3")?.textContent?.trim().split(/\s+/).slice(0, 2).join(" ")
       || `Signal ${shape + 1}`;
+    button.dataset.decodeText = button.textContent;
     button.addEventListener("click", () => anchor.scrollIntoView({ behavior: "smooth", block: "start" }));
     entityRail.append(button);
   });
   const entityStatus = document.createElement("div");
   entityStatus.className = "lm-entity-status";
   entityStatus.textContent = "LottoMan array assembled";
-  document.body.append(entityRail, entityStatus);
+  const entityChronometer = document.createElement("div");
+  entityChronometer.className = "lm-entity-chronometer";
+  entityChronometer.innerHTML = '<span class="lm-entity-chronometer__label">Origin</span><strong>T − 13.8 Gyr</strong>';
+  const chronometerLabel = entityChronometer.querySelector("span");
+  const chronometerTime = entityChronometer.querySelector("strong");
+  if (!earthOnly) document.body.append(entityRail);
+  document.body.append(entityChronometer, entityStatus);
+  const sound = createSynthSound(document.querySelector("[data-site-header]") || document.body);
+  const scramble = createScrambleDecoder(gsap, reducedMotion);
 
   const contextAttributes = {
     alpha: false,
@@ -520,6 +866,8 @@ async function initializeParticleEntity() {
   geometry.setAttribute("aPosB", new THREE.BufferAttribute(shapes[1], 3));
   geometry.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
   geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
+  geometry.setAttribute("aTintA", new THREE.BufferAttribute(shapeTints[0], 1));
+  geometry.setAttribute("aTintB", new THREE.BufferAttribute(shapeTints[1], 1));
 
   const uniforms = {
     uMorph: { value: 0 },
@@ -532,8 +880,10 @@ async function initializeParticleEntity() {
     uMouse: { value: new THREE.Vector2(99, 99) },
     uMouseForce: { value: 0 },
     uComet: { value: 0 },
+    uEarth: { value: earthOnly ? 1 : 0 },
     uColorFrom: { value: new THREE.Color(STYLE[0].color) },
     uColorTo: { value: new THREE.Color(STYLE[1].color) },
+    uEarthLand: { value: new THREE.Color("#66e0b8") },
   };
 
   const material = new THREE.ShaderMaterial({
@@ -546,6 +896,8 @@ async function initializeParticleEntity() {
       attribute vec3 aPosB;
       attribute float aSeed;
       attribute float aScale;
+      attribute float aTintA;
+      attribute float aTintB;
       uniform float uMorph;
       uniform float uTime;
       uniform float uTime2;
@@ -556,8 +908,11 @@ async function initializeParticleEntity() {
       uniform vec2 uMouse;
       uniform float uMouseForce;
       uniform float uComet;
+      uniform float uEarth;
       varying float vSeed;
       varying float vTravel;
+      varying float vTint;
+      varying float vEarthShade;
 
       vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
       vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
@@ -655,14 +1010,22 @@ async function initializeParticleEntity() {
         gl_PointSize = max(1.4, aScale * uPixelRatio * (58.0 / max(1.0, -mvPosition.z)));
         vSeed = aSeed;
         vTravel = tt;
+        vTint = mix(aTintA, aTintB, tt);
+        vec3 earthNormal = normalize(mat3(modelMatrix) * normalize(base));
+        vec3 daylight = normalize(vec3(-0.55, 0.35, 0.75));
+        float dayNight = 0.3 + 0.7 * max(0.0, dot(earthNormal, daylight));
+        vEarthShade = mix(1.0, dayNight, uEarth);
       }
     `,
     fragmentShader: `
       uniform float uTime;
       uniform vec3 uColorFrom;
       uniform vec3 uColorTo;
+      uniform vec3 uEarthLand;
       varying float vSeed;
       varying float vTravel;
+      varying float vTint;
+      varying float vEarthShade;
 
       void main() {
         vec2 center = gl_PointCoord - 0.5;
@@ -672,6 +1035,8 @@ async function initializeParticleEntity() {
         float hotCore = smoothstep(0.17, 0.0, distanceFromCenter);
         float twinkle = 0.68 + 0.32 * sin(uTime * (1.6 + vSeed * 4.2) + vSeed * 73.0);
         vec3 color = mix(uColorFrom, uColorTo, vTravel);
+        color = mix(color, uEarthLand, vTint);
+        color *= vEarthShade;
         if (vSeed > 0.985) color = vec3(1.0);
         if (vSeed > 0.9982) color = vec3(1.0, 0.2392, 0.5412);
         color += hotCore * vec3(0.84);
@@ -685,6 +1050,29 @@ async function initializeParticleEntity() {
   const group = new THREE.Group();
   group.rotation.order = "ZYX";
   group.add(points);
+  let earthLineGeometry = null;
+  let earthLineMaterial = null;
+  let earthLines = null;
+  if (!mobile) {
+    earthLineGeometry = new THREE.BufferGeometry();
+    earthLineGeometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(
+        generateShortestEarthLinks(earthData.positions, earthData.surfaceCount),
+        3,
+      ),
+    );
+    earthLineMaterial = new THREE.LineBasicMaterial({
+      color: "#66e0b8",
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    earthLines = new THREE.LineSegments(earthLineGeometry, earthLineMaterial);
+    earthLines.frustumCulled = false;
+    group.add(earthLines);
+  }
   scene.add(group);
 
   const state = {
@@ -703,13 +1091,38 @@ async function initializeParticleEntity() {
     variableTime: 0,
     flight: 0.5,
     cometWeight: 0,
+    earthWeight: earthOnly ? 1 : 0,
+    earthSpin: 0,
     lastTime: performance.now(),
     currentAnchor: -1,
+    lastGlitchAt: -1000,
+    glitchTimer: 0,
     destroyed: false,
   };
   const progressTable = new Float32Array(8);
   const backgroundFrom = new THREE.Color(backgrounds[0]);
   const backgroundTo = new THREE.Color(backgrounds[1]);
+
+  const formatDeepTime = (progress) => {
+    if (state.shapeFloat >= 6.995 || progress >= 0.9995) return "T − 0 · now";
+    const years = 13.8e9 * Math.pow(1 - progress, 7);
+    if (years >= 1e9) return `T − ${(years / 1e9).toFixed(years >= 10e9 ? 1 : 2)} Gyr`;
+    if (years >= 1e6) return `T − ${(years / 1e6).toFixed(years >= 100e6 ? 0 : 1)} Myr`;
+    if (years >= 1e3) return `T − ${(years / 1e3).toFixed(years >= 100e3 ? 0 : 1)} kyr`;
+    return `T − ${Math.max(0, Math.round(years))} yr`;
+  };
+
+  const syncChronometer = (shape = Math.round(state.shapeFloat)) => {
+    const scrollRange = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    const scrollProgress = earthOnly ? 1 : THREE.MathUtils.clamp(scrollY / scrollRange, 0, 1);
+    const anchor = anchorByShape.get(shape);
+    const label = anchor?.dataset.entityLabel || DEFAULT_EPOCHS[shape] || DEFAULT_EPOCHS[0];
+    if (chronometerLabel.dataset.decodeText !== label) {
+      chronometerLabel.dataset.decodeText = label;
+      scramble.decode(chronometerLabel, label);
+    }
+    chronometerTime.textContent = formatDeepTime(scrollProgress);
+  };
 
   const setCurrentAnchor = (shape) => {
     if (shape === state.currentAnchor) return;
@@ -726,6 +1139,12 @@ async function initializeParticleEntity() {
     });
     document.body.dataset.featureEntityShape = String(shape);
     document.body.style.setProperty("--feature-entity-glow", STYLE[shape].color);
+    document.body.classList.toggle("feature-entity-hud-visible", earthOnly || shape > 0);
+    entityStatus.textContent = shape === 7 ? "Earth network stable" : "LottoMan array assembled";
+    sound.setEpoch(shape);
+    syncChronometer(shape);
+    const activeRailButton = entityRail.querySelector(`[data-entity-rail-shape="${shape}"]`);
+    if (activeRailButton) scramble.decode(activeRailButton, activeRailButton.dataset.decodeText || activeRailButton.textContent);
   };
 
   const bindSegment = (segment) => {
@@ -735,6 +1154,8 @@ async function initializeParticleEntity() {
     geometry.setAttribute("position", new THREE.BufferAttribute(shapes[nextSegment], 3));
     geometry.setAttribute("aPosA", new THREE.BufferAttribute(shapes[nextSegment], 3));
     geometry.setAttribute("aPosB", new THREE.BufferAttribute(shapes[nextSegment + 1], 3));
+    geometry.setAttribute("aTintA", new THREE.BufferAttribute(shapeTints[nextSegment], 1));
+    geometry.setAttribute("aTintB", new THREE.BufferAttribute(shapeTints[nextSegment + 1], 1));
     uniforms.uColorFrom.value.set(STYLE[nextSegment].color);
     uniforms.uColorTo.value.set(STYLE[nextSegment + 1].color);
     backgroundFrom.set(backgrounds[nextSegment]);
@@ -746,7 +1167,10 @@ async function initializeParticleEntity() {
     const segment = Math.min(6, Math.floor(state.shapeFloat));
     bindSegment(segment);
     uniforms.uMorph.value = state.shapeFloat >= 7 ? 1 : state.shapeFloat - segment;
+    state.earthWeight = THREE.MathUtils.clamp(state.shapeFloat - 6, 0, 1);
+    uniforms.uEarth.value = state.earthWeight;
     setCurrentAnchor(Math.round(state.shapeFloat));
+    syncChronometer(Math.round(state.shapeFloat));
   };
 
   const recomputeShapeFloat = () => {
@@ -758,47 +1182,67 @@ async function initializeParticleEntity() {
     setShapeFloat(nextShapeFloat);
   };
 
-  anchors.forEach((anchor) => {
-    const shape = Number(anchor.dataset.shape);
-    if (shape < 1) return;
-    const proxy = { progress: 0 };
-    const animation = gsap.to(proxy, {
-      progress: 1,
-      paused: true,
-      ease: "none",
-      onUpdate: () => {
-        progressTable[shape] = proxy.progress;
-        recomputeShapeFloat();
-      },
+  if (animatedWalk) {
+    anchors.forEach((anchor) => {
+      const shape = Number(anchor.dataset.shape);
+      if (shape < 1) return;
+      const proxy = { progress: 0 };
+      const animation = gsap.to(proxy, {
+        progress: 1,
+        paused: true,
+        ease: "none",
+        onUpdate: () => {
+          progressTable[shape] = proxy.progress;
+          recomputeShapeFloat();
+        },
+      });
+
+      ScrollTrigger.create({
+        id: `feature-entity-shape-${shape}`,
+        trigger: anchor,
+        start: "top 94%",
+        end: "top 34%",
+        scrub: 1.2,
+        animation,
+        invalidateOnRefresh: false,
+      });
     });
 
-    ScrollTrigger.create({
-      id: `feature-entity-shape-${shape}`,
-      trigger: anchor,
-      start: "top 94%",
-      end: "top 34%",
-      scrub: 1.2,
-      animation,
-      invalidateOnRefresh: false,
+    anchors.filter((anchor) => Number(anchor.dataset.shape) === 5).forEach((anchor, index) => {
+      ScrollTrigger.create({
+        id: `feature-comet-flight-${index}`,
+        trigger: anchor,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.6,
+        onUpdate: (self) => { state.flight = self.progress; },
+        onRefresh: (self) => { state.flight = self.progress; },
+      });
     });
-  });
+  }
 
-  anchors.filter((anchor) => Number(anchor.dataset.shape) === 5).forEach((anchor, index) => {
-    ScrollTrigger.create({
-      id: `feature-comet-flight-${index}`,
-      trigger: anchor,
-      start: "top bottom",
-      end: "bottom top",
-      scrub: true,
-      onUpdate: (self) => { state.flight = self.progress; },
-      onRefresh: (self) => { state.flight = self.progress; },
+  const triggerVelocityGlitch = (velocity) => {
+    if (reducedMotion.matches || mobile || Math.abs(velocity) <= 55) return;
+    const now = performance.now();
+    if (now - state.lastGlitchAt < 600) return;
+    state.lastGlitchAt = now;
+    const visibleHeadings = [...document.querySelectorAll("h1,h2,.kinetic-word")].filter((heading) => {
+      const rect = heading.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < innerHeight;
     });
-  });
+    visibleHeadings.forEach((heading) => heading.classList.add("lm-velocity-glitch"));
+    window.clearTimeout(state.glitchTimer);
+    state.glitchTimer = window.setTimeout(() => {
+      visibleHeadings.forEach((heading) => heading.classList.remove("lm-velocity-glitch"));
+    }, 240);
+  };
 
   const kickTurbulence = (velocity = 0) => {
     const kick = Math.min(1.2, Math.abs(velocity) / 80) * 0.3;
     state.scrollTurbulence = Math.max(state.scrollTurbulence, kick);
     state.maxTurbulence = Math.max(state.maxTurbulence, state.scrollTurbulence);
+    sound.setVelocity(velocity);
+    triggerVelocityGlitch(velocity);
   };
 
   let lenis = null;
@@ -808,13 +1252,13 @@ async function initializeParticleEntity() {
   const onNativeScroll = () => {
     const now = performance.now();
     const elapsed = Math.max(16, now - nativeLastTime);
-    const velocity = (window.scrollY - nativeLastY) / elapsed * 16;
+    const velocity = (window.scrollY - nativeLastY) / elapsed * 1000;
     nativeLastY = window.scrollY;
     nativeLastTime = now;
     kickTurbulence(velocity);
   };
 
-  if (window.Lenis) {
+  if (animatedWalk && window.Lenis) {
     lenis = new window.Lenis({
       duration: 1.35,
       smoothWheel: true,
@@ -828,7 +1272,7 @@ async function initializeParticleEntity() {
     lenisTick = (time) => lenis?.raf(time * 1000);
     gsap.ticker.add(lenisTick);
     window.__lmFeatureLenis = lenis;
-  } else {
+  } else if (!reducedMotion.matches) {
     window.addEventListener("scroll", onNativeScroll, { passive: true });
   }
 
@@ -859,19 +1303,23 @@ async function initializeParticleEntity() {
     state.pointerTargetX = 0;
     state.pointerTargetY = 0;
   };
-  window.addEventListener("pointermove", onPointerMove, { passive: true });
-  document.documentElement.addEventListener("pointerleave", onPointerLeave, { passive: true });
+  if (!mobile && !reducedMotion.matches) {
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onPointerLeave, { passive: true });
+  }
 
   let burstTimeline = null;
   const disturb = (amplitude = 1) => {
+    if (reducedMotion.matches) return;
     burstTimeline?.kill();
     document.body.classList.add("feature-entity-disturbed");
     entityStatus.textContent = "LottoMan array disturbed";
+    sound.burst();
     window.dispatchEvent(new CustomEvent("lottoman:burst", { detail: { amplitude } }));
     burstTimeline = gsap.timeline({
       onComplete: () => {
         document.body.classList.remove("feature-entity-disturbed");
-        entityStatus.textContent = "LottoMan array assembled";
+        entityStatus.textContent = state.currentAnchor === 7 ? "Earth network stable" : "LottoMan array assembled";
       },
     });
     burstTimeline
@@ -882,7 +1330,7 @@ async function initializeParticleEntity() {
     if (event.target.closest("a,button,input,select,textarea,label,[role='button'],[contenteditable='true']")) return;
     disturb(1);
   };
-  document.addEventListener("click", onSkyClick);
+  if (!mobile && !reducedMotion.matches) document.addEventListener("click", onSkyClick);
 
   const resize = () => {
     const width = Math.max(1, canvas.clientWidth);
@@ -897,8 +1345,14 @@ async function initializeParticleEntity() {
   resizeObserver?.observe(canvas);
   if (!resizeObserver) window.addEventListener("resize", resize, { passive: true });
 
-  bindSegment(0);
-  setCurrentAnchor(0);
+  if (earthOnly) {
+    setShapeFloat(7);
+  } else {
+    bindSegment(0);
+    setCurrentAnchor(0);
+    syncChronometer(0);
+  }
+  const scrambleObserver = scramble.observe(document);
 
   const render = (tickerTime) => {
     if (state.destroyed || document.hidden) return;
@@ -910,10 +1364,12 @@ async function initializeParticleEntity() {
     const drift = THREE.MathUtils.lerp(LIVELINESS[segment], LIVELINESS[segment + 1], fraction);
     const cometWeight = Math.max(0, 1 - Math.abs(state.shapeFloat - 5));
     state.cometWeight += (cometWeight - state.cometWeight) * (1 - Math.exp(-dt * 7));
+    state.earthSpin += dt * 0.08 * state.earthWeight;
 
     state.variableTime += dt * (0.5 + drift * 1.6);
     state.scrollTurbulence *= Math.exp(-dt * 2.8);
     state.pointerSpeed *= Math.exp(-dt * 5.2);
+    sound.tick(dt);
     uniforms.uTime.value = tickerTime;
     uniforms.uTime2.value = state.variableTime;
     uniforms.uLiveliness.value = drift;
@@ -924,7 +1380,9 @@ async function initializeParticleEntity() {
 
     state.pointerX += (state.pointerTargetX - state.pointerX) * 0.045;
     state.pointerY += (state.pointerTargetY - state.pointerY) * 0.045;
-    group.rotation.y = Math.sin(now * 0.00013) * 0.09 + state.pointerX * 0.14;
+    group.rotation.y = Math.sin(now * 0.00013) * 0.09
+      + state.pointerX * 0.14
+      + state.earthSpin * state.earthWeight;
     group.rotation.x = Math.cos(now * 0.00011) * 0.045 - state.pointerY * 0.1;
     group.rotation.z = Math.sin(now * 0.000071) * 0.035;
     const flightTravel = (state.flight - 0.5) * 9 * state.cometWeight;
@@ -938,9 +1396,20 @@ async function initializeParticleEntity() {
       fraction,
     ) + Math.sin(fraction * Math.PI) * 1.3;
     scene.background.copy(backgroundFrom).lerp(backgroundTo, fraction);
+    if (earthLineMaterial) {
+      const restingEarth = state.shapeFloat >= 6.96 && uniforms.uBurst.value < 0.02;
+      const targetOpacity = restingEarth ? 0.13 * state.earthWeight : 0;
+      earthLineMaterial.opacity = reducedMotion.matches
+        ? targetOpacity
+        : THREE.MathUtils.lerp(earthLineMaterial.opacity, targetOpacity, 1 - Math.exp(-dt * 7));
+    }
     renderer.render(scene, camera);
   };
-  gsap.ticker.add(render);
+  if (reducedMotion.matches) {
+    render(0);
+  } else if (gsap) {
+    gsap.ticker.add(render);
+  }
 
   const onVisibilityChange = () => {
     state.lastTime = performance.now();
@@ -953,7 +1422,19 @@ async function initializeParticleEntity() {
   };
   canvas.addEventListener("webglcontextlost", onContextLost, false);
 
+  const syncArcadeLibraryFlow = () => {
+    const library = document.querySelector(".arcade-library");
+    if (!library) return;
+    const floor = Math.min(760, window.innerHeight * 0.9);
+    const contentHeight = Math.ceil(library.scrollHeight);
+    library.style.setProperty(
+      "--arcade-library-flow-height",
+      `${Math.max(floor, contentHeight)}px`,
+    );
+  };
   const refreshScrollGeometry = () => {
+    if (!animatedWalk || !ScrollTrigger) return;
+    syncArcadeLibraryFlow();
     ScrollTrigger.sort();
     ScrollTrigger.refresh();
   };
@@ -965,18 +1446,28 @@ async function initializeParticleEntity() {
         gridRefreshTimer = window.setTimeout(refreshScrollGeometry, 80);
       })
     : null;
-  gridObserver?.observe(arcadeGrid, { childList: true });
-  window.addEventListener("load", refreshScrollGeometry, { once: true });
-  window.setTimeout(refreshScrollGeometry, 180);
-  window.setTimeout(() => {
-    refreshScrollGeometry();
-  }, 900);
+  const gridResizeObserver = arcadeGrid && "ResizeObserver" in window
+    ? new ResizeObserver(() => {
+        window.clearTimeout(gridRefreshTimer);
+        gridRefreshTimer = window.setTimeout(refreshScrollGeometry, 80);
+      })
+    : null;
+  if (animatedWalk) {
+    gridObserver?.observe(arcadeGrid, { childList: true });
+    gridResizeObserver?.observe(arcadeGrid);
+    window.addEventListener("load", refreshScrollGeometry, { once: true });
+    window.addEventListener("resize", refreshScrollGeometry, { passive: true });
+    window.setTimeout(refreshScrollGeometry, 180);
+    window.setTimeout(() => {
+      refreshScrollGeometry();
+    }, 900);
+  }
 
   const destroy = () => {
     if (state.destroyed) return;
     state.destroyed = true;
-    gsap.ticker.remove(render);
-    if (lenisTick) gsap.ticker.remove(lenisTick);
+    gsap?.ticker?.remove(render);
+    if (lenisTick) gsap?.ticker?.remove(lenisTick);
     lenis?.destroy?.();
     window.removeEventListener("scroll", onNativeScroll);
     window.removeEventListener("pointermove", onPointerMove);
@@ -985,16 +1476,24 @@ async function initializeParticleEntity() {
     document.removeEventListener("click", onSkyClick);
     document.removeEventListener("visibilitychange", onVisibilityChange);
     window.removeEventListener("resize", resize);
+    window.removeEventListener("resize", refreshScrollGeometry);
     canvas.removeEventListener("webglcontextlost", onContextLost);
     resizeObserver?.disconnect();
     gridObserver?.disconnect();
+    gridResizeObserver?.disconnect();
     window.clearTimeout(gridRefreshTimer);
     geometry.dispose();
     material.dispose();
+    earthLineGeometry?.dispose();
+    earthLineMaterial?.dispose();
     burstTimeline?.kill();
+    scrambleObserver?.disconnect?.();
+    window.clearTimeout(state.glitchTimer);
     renderer.dispose();
     entityRail.remove();
+    entityChronometer.remove();
     entityStatus.remove();
+    sound.destroy();
   };
 
   window.__lmFeatureEntity = {
@@ -1020,6 +1519,13 @@ async function initializeParticleEntity() {
     get groupY() { return group.position.y; },
     get flight() { return state.flight; },
     get cometWeight() { return state.cometWeight; },
+    get earthWeight() { return state.earthWeight; },
+    get earthSpin() { return state.earthSpin; },
+    get earthLineOpacity() { return earthLineMaterial?.opacity ?? 0; },
+    get soundEnabled() { return sound.enabled; },
+    get soundState() { return sound.contextState; },
+    get reducedMotion() { return reducedMotion.matches; },
+    get earthOnly() { return earthOnly; },
     get background() { return `#${scene.background.getHexString()}`; },
     get currentColor() { return `#${uniforms.uColorFrom.value.getHexString()}`; },
     get lenisActive() { return Boolean(lenis); },

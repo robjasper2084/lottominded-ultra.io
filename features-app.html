@@ -16,15 +16,16 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-exit-audit-4" />
     <link rel="stylesheet" href="./assets/features-app/css/features-cinematic-raytrace.css?v=compositor-pass-3" />
-    <link rel="stylesheet" href="./assets/features-app/css/feature-particle-organism.css?v=particle-organism-1" />
+    <link rel="stylesheet" href="./assets/features-app/css/feature-particle-organism.css?v=earth-sound-polish-1" />
     <link rel="stylesheet" href="./features-app.css?v=goth-future-hud-1" />
     <link rel="stylesheet" href="./assets/features-app/css/feature-news.css?v=feature-news-1" />
     <link rel="stylesheet" href="./lottomind-button-assets.css?v=ultra-buttons-1" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <link rel="stylesheet" href="./assets/css/arcade.css?v=arcade-directory-1" />
-    <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=lottoman-particles-5" />
+    <link rel="stylesheet" href="./assets/css/lm-mascot-cinematic.css?v=comet-flight-polish-2" />
+    <link rel="stylesheet" href="./assets/css/arcade-command-hud.css?v=arcade-command-hud-2" />
     <script type="importmap">
       {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
     </script>
@@ -129,24 +130,7 @@
     </aside>
 
     <main class="feature-stage arcade-main" id="main-content">
-      <section class="motion-rail neon-panel" id="featureRail" data-cinematic-reveal data-shape="6" data-entity-label="Tool rail" data-bg="#0a0812" data-glow="#a78bfa">
-        <div class="rail-intro"><p class="micro-title">Motion Feature Rail</p><h2>All Tools, One Signal Route</h2><span>01 / 11</span></div>
-        <div class="rail-cards" aria-label="Feature rail">
-          <a href="../lotto%20mind%20refined/?tool=ai-chat" data-no-transition="true" data-member-app-public="true">AI Chat Engine</a>
-          <a href="../lotto%20mind%20refined/powertools" data-no-transition="true" data-member-app-public="true">Smart Number Generator</a>
-          <a href="../lotto%20mind%20refined/?tool=dream-oracle" data-no-transition="true" data-member-app-public="true">Dream Oracle</a>
-          <a href="../lotto%20mind%20refined/heatmap" data-no-transition="true" data-member-app-public="true">Number Radar</a>
-          <a href="../lotto%20mind%20refined/?tool=ticket-scanner" data-no-transition="true" data-member-app-public="true">Ticket Scanner</a>
-          <a href="../lotto%20mind%20refined/?tool=beat2lotto-studio" data-no-transition="true" data-member-app-public="true">Beat2Lotto+ Studio</a>
-          <a href="../lotto%20mind%20refined/?tool=studio-mixer" data-no-transition="true" data-member-app-public="true">Studio Mixer</a>
-          <a href="../lotto%20mind%20refined/powertools" data-no-transition="true" data-member-app-public="true">Daily 3/4 Tools</a>
-          <a href="../lotto%20mind%20refined/?tool=live-data" data-no-transition="true" data-member-app-public="true">Live Data</a>
-          <a href="../lotto%20mind%20refined/?tool=national-lottery-desk" data-no-transition="true" data-member-app-public="true">National Lottery Desk</a>
-          <a href="../lotto%20mind%20refined/?tool=live-events" data-no-transition="true" data-member-app-public="true">Live Events</a>
-        </div>
-      </section>
-
-      <section class="feature-stack" data-cinematic-reveal data-shape="7" data-entity-label="App tools" data-bg="#030408" data-glow="#3d7fd6">
+      <section class="feature-stack" data-cinematic-reveal data-shape="1" data-entity-label="App tools" data-bg="#0a0710" data-glow="#ff8a5b">
         <a class="stack-panel dream neon-panel" href="../lotto%20mind%20refined/?route=dreams" data-no-transition="true" data-member-app-public="true" aria-label="Open Dream Oracle in LottoMind Refined"><span class="stack-panel-action" aria-hidden="true">+</span><p>Dream</p><h3>Interpret dreams. Extract notes. Reveal creative patterns.</h3></a>
         <a class="stack-panel scan neon-panel" href="../lotto%20mind%20refined/?route=ticket-scanner" data-no-transition="true" data-member-app-public="true" aria-label="Open Ticket Scanner in LottoMind Refined"><span class="stack-panel-action" aria-hidden="true">+</span><p>Scan</p><h3>Scan tickets. Analyze notes. Review saved results.</h3></a>
         <a class="stack-panel stream neon-panel" href="../lotto%20mind%20refined/?route=live-results" data-no-transition="true" data-member-app-public="true" aria-label="Open Live Results in LottoMind Refined"><span class="stack-panel-action" aria-hidden="true">+</span><p>Stream</p><h3>Live data. Live events. Live replays.</h3></a>
@@ -154,26 +138,48 @@
         <a class="stack-panel unlock neon-panel" id="members" href="../lotto%20mind%20refined/?route=vip" data-no-transition="true" data-member-app-public="true" aria-label="Open VIP tools in LottoMind Refined"><span class="stack-panel-action" aria-hidden="true">+</span><p>Unlock</p><h3>Premium tools. AI upgrades. Unlimited organization.</h3></a>
       </section>
 
-      <section class="arcade-hero neon-panel" aria-labelledby="arcadeHeroTitle" data-cinematic-reveal data-shape="0" data-entity-label="Arcade" data-bg="#04060a" data-glow="#7fd4ff">
+      <section class="arcade-hero arcade-command-hud neon-panel" aria-labelledby="arcadeHeroTitle" data-cinematic-reveal data-shape="2" data-entity-label="Arcade" data-bg="#070910" data-glow="#c9a06a">
+        <div class="arcade-command-hud__rail" aria-hidden="true">
+          <span>LM // Play system</span>
+          <span>Arcade node 03</span>
+          <span>Link stable</span>
+        </div>
         <div class="arcade-hero__copy">
-          <p class="arcade-kicker">LottoMind playable signal directory</p>
-          <h1 id="arcadeHeroTitle">LottoMind Arcade</h1>
+          <p class="arcade-kicker"><span aria-hidden="true"></span>LottoMind playable signal directory</p>
+          <h1 id="arcadeHeroTitle"><span>LottoMind</span><span>Arcade</span></h1>
           <p class="arcade-hero__lede">Enter the complete LOTTOMINDED ULTRA game vault. Launch action games, number adventures, studio experiences, and creative arcade tools from one fast route.</p>
+          <div class="arcade-command-hud__readouts" aria-label="Arcade system status">
+            <div><span>Featured signal</span><strong>GothTechnology</strong></div>
+            <div><span>Launch mode</span><strong>Instant browser play</strong></div>
+            <div><span>Arcade route</span><strong>Online</strong></div>
+          </div>
           <div class="arcade-hero__actions">
             <button class="arcade-primary" type="button" data-arcade-launch="gothtechnology">Play featured game</button>
             <a class="arcade-secondary" href="#arcade-library">Browse all games</a>
           </div>
         </div>
         <div class="arcade-hero__signal" aria-label="Arcade status">
+          <div class="arcade-command-hud__node">
+            <span>Player node</span>
+            <strong>LM-01</strong>
+          </div>
+          <div class="arcade-command-hud__target" aria-hidden="true"><span>Signal lock</span></div>
           <div class="arcade-hero__counter">
             <span>Vault status</span>
-            <strong data-arcade-count>0</strong>
+            <div class="arcade-hero__count"><strong data-arcade-count>0</strong><b>Live</b></div>
             <small>Games online. No downloads. Choose a signal and play.</small>
+            <div class="arcade-command-hud__meter" aria-hidden="true"><span></span></div>
           </div>
+          <div class="arcade-command-hud__input" aria-hidden="true"><span>Keyboard + pointer</span><strong>Ready</strong></div>
+        </div>
+        <div class="arcade-command-hud__footer" aria-hidden="true">
+          <span>Secure browser launch</span>
+          <span>8 playable worlds detected</span>
+          <span>Entertainment mode</span>
         </div>
       </section>
 
-      <section class="arcade-section arcade-featured" aria-labelledby="featuredGamesTitle" data-cinematic-reveal data-shape="1" data-entity-label="Featured" data-bg="#0a0710" data-glow="#ff8a5b">
+      <section class="arcade-section arcade-featured" aria-labelledby="featuredGamesTitle" data-cinematic-reveal data-shape="3" data-entity-label="Featured" data-bg="#04080d" data-glow="#4fb6e0">
         <div class="arcade-section__header">
           <div>
             <p class="arcade-kicker">Featured transmission</p>
@@ -193,7 +199,7 @@
           <p>Every verified playable route found in the current website.</p>
         </div>
 
-        <div class="arcade-toolbar" aria-label="Arcade search and filters" data-shape="2" data-entity-label="Game vault" data-bg="#070910" data-glow="#c9a06a">
+        <div class="arcade-toolbar" aria-label="Arcade search and filters" data-shape="4" data-entity-label="Game vault" data-bg="#050a0a" data-glow="#5bf0d8">
           <div class="arcade-toolbar__row">
             <label class="arcade-search-wrap">
               <span class="arcade-kicker">Search games</span>
@@ -218,12 +224,29 @@
           <div class="arcade-toolbar__row arcade-categories" data-arcade-categories aria-label="Game categories"></div>
         </div>
 
-        <div class="arcade-grid" data-arcade-grid data-shape="3" data-entity-label="Playable" data-bg="#04080d" data-glow="#4fb6e0"></div>
+        <div class="arcade-grid arcade-flight-program" id="flight" data-arcade-grid data-flight-section data-shape="5" data-entity-label="Flight" data-bg="#0a070c" data-glow="#e08ab8" aria-label="Scroll-driven LottoMind arcade flight"></div>
         <p class="arcade-empty" data-arcade-empty hidden>No games match this signal. Try another search or filter.</p>
-        <p class="arcade-disclaimer" data-shape="4" data-entity-label="Signal note" data-bg="#050a0a" data-glow="#5bf0d8">LottoMind games and number generators are designed for entertainment purposes only. Generated numbers do not predict or guarantee lottery outcomes.</p>
+        <p class="arcade-disclaimer" data-shape="6" data-entity-label="Signal note" data-bg="#0a0812" data-glow="#a78bfa">LottoMind games and number generators are designed for entertainment purposes only. Generated numbers do not predict or guarantee lottery outcomes.</p>
       </section>
 
-      <section class="arcade-section arcade-tools" aria-labelledby="creativeToolsTitle" data-cinematic-reveal data-shape="5" data-entity-label="Creative" data-bg="#0a070c" data-glow="#e08ab8">
+      <section class="motion-rail neon-panel" id="featureRail" data-cinematic-reveal data-shape="6" data-entity-label="Tool rail" data-bg="#0a0812" data-glow="#a78bfa">
+        <div class="rail-intro"><p class="micro-title">Motion Feature Rail</p><h2>All Tools, One Signal Route</h2><span>01 / 11</span></div>
+        <div class="rail-cards" aria-label="Feature rail">
+          <a href="../lotto%20mind%20refined/?tool=ai-chat" data-no-transition="true" data-member-app-public="true">AI Chat Engine</a>
+          <a href="../lotto%20mind%20refined/powertools" data-no-transition="true" data-member-app-public="true">Smart Number Generator</a>
+          <a href="../lotto%20mind%20refined/?tool=dream-oracle" data-no-transition="true" data-member-app-public="true">Dream Oracle</a>
+          <a href="../lotto%20mind%20refined/heatmap" data-no-transition="true" data-member-app-public="true">Number Radar</a>
+          <a href="../lotto%20mind%20refined/?tool=ticket-scanner" data-no-transition="true" data-member-app-public="true">Ticket Scanner</a>
+          <a href="../lotto%20mind%20refined/?tool=beat2lotto-studio" data-no-transition="true" data-member-app-public="true">Beat2Lotto+ Studio</a>
+          <a href="../lotto%20mind%20refined/?tool=studio-mixer" data-no-transition="true" data-member-app-public="true">Studio Mixer</a>
+          <a href="../lotto%20mind%20refined/powertools" data-no-transition="true" data-member-app-public="true">Daily 3/4 Tools</a>
+          <a href="../lotto%20mind%20refined/?tool=live-data" data-no-transition="true" data-member-app-public="true">Live Data</a>
+          <a href="../lotto%20mind%20refined/?tool=national-lottery-desk" data-no-transition="true" data-member-app-public="true">National Lottery Desk</a>
+          <a href="../lotto%20mind%20refined/?tool=live-events" data-no-transition="true" data-member-app-public="true">Live Events</a>
+        </div>
+      </section>
+
+      <section class="arcade-section arcade-tools" aria-labelledby="creativeToolsTitle" data-cinematic-reveal data-shape="7" data-entity-label="Creative" data-bg="#030408" data-glow="#3d7fd6">
         <div class="arcade-section__header">
           <div>
             <p class="arcade-kicker">Creative tool uplink</p>
@@ -314,7 +337,7 @@
       <source src="./assets/audio/digital-static-live-mix.mp3?v=hud-spheres-b2l-8124-3" type="audio/mpeg" />
     </audio>
 <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
-<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-exit-audit-4" defer></script>
     <script src="./site.js?v=original-page-wipe-3" defer></script>
     <script src="./assets/js/arcade-games.js?v=arcade-directory-1" defer></script>
     <script src="./assets/js/arcade.js?v=arcade-directory-1" defer></script>
@@ -323,6 +346,6 @@
     <script src="./assets/vendor/gsap/gsap.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/gsap/ScrollTrigger.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/lenis/lenis.min.js?v=1.1.20" defer></script>
-    <script type="module" src="./assets/features-app/js/main.js?v=comet-flight-1"></script>
+    <script type="module" src="./assets/features-app/js/main.js?v=comet-flight-polish-2"></script>
   </body>
 </html>

@@ -1,0 +1,541 @@
+:root {
+  --arcade-hud-cyan: #5be9ff;
+  --arcade-hud-ice: #eef7ff;
+  --arcade-hud-gold: #ffe66d;
+  --arcade-hud-mint: #66f2c0;
+  --arcade-hud-magenta: #ff4f9a;
+  --arcade-hud-line: rgba(91, 233, 255, 0.28);
+  --arcade-hud-surface: rgba(3, 12, 24, 0.72);
+}
+
+body.features-cinematic-page .arcade-command-hud {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(440px, 0.92fr);
+  min-height: min(850px, calc(100vh - 150px));
+  overflow: hidden;
+  border: 1px solid rgba(91, 233, 255, 0.5) !important;
+  border-radius: 0;
+  clip-path: polygon(0 18px, 18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px));
+  background:
+    linear-gradient(rgba(91, 233, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91, 233, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(112deg, rgba(2, 11, 22, 0.96) 0%, rgba(4, 18, 34, 0.82) 47%, rgba(4, 8, 20, 0.42) 100%) !important;
+  background-size: 46px 46px, 46px 46px, auto !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+    inset 0 0 90px rgba(19, 87, 118, 0.14),
+    0 0 54px rgba(91, 233, 255, 0.09) !important;
+}
+
+body.features-cinematic-page .arcade-command-hud,
+body.features-cinematic-page .arcade-command-hud *,
+body.features-cinematic-page .arcade-command-hud *::before,
+body.features-cinematic-page .arcade-command-hud *::after {
+  box-sizing: border-box;
+}
+
+body.features-cinematic-page .arcade-command-hud::before,
+body.features-cinematic-page .arcade-command-hud::after {
+  position: absolute;
+  z-index: 5;
+  width: 92px;
+  height: 92px;
+  pointer-events: none;
+  content: "";
+}
+
+body.features-cinematic-page .arcade-command-hud::before {
+  top: 12px;
+  left: 12px;
+  border-top: 3px solid var(--arcade-hud-gold);
+  border-left: 3px solid var(--arcade-hud-gold);
+}
+
+body.features-cinematic-page .arcade-command-hud::after {
+  right: 12px;
+  bottom: 12px;
+  border-right: 3px solid var(--arcade-hud-cyan);
+  border-bottom: 3px solid var(--arcade-hud-cyan);
+}
+
+body.features-cinematic-page .arcade-command-hud__rail,
+body.features-cinematic-page .arcade-command-hud__footer {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 32px;
+  color: rgba(210, 241, 255, 0.58);
+  background: rgba(2, 9, 18, 0.78);
+  font: 700 0.64rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+body.features-cinematic-page .arcade-command-hud__rail {
+  top: 0;
+  height: 48px;
+  align-items: center;
+  border-bottom: 1px solid rgba(91, 233, 255, 0.2);
+}
+
+body.features-cinematic-page .arcade-command-hud__rail span:first-child,
+body.features-cinematic-page .arcade-command-hud__rail span:last-child,
+body.features-cinematic-page .arcade-command-hud__footer span:nth-child(2) {
+  color: var(--arcade-hud-cyan);
+}
+
+body.features-cinematic-page .arcade-command-hud__rail span:last-child::before {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--arcade-hud-mint);
+  box-shadow: 0 0 14px var(--arcade-hud-mint);
+  content: "";
+}
+
+body.features-cinematic-page .arcade-command-hud__footer {
+  bottom: 0;
+  min-height: 42px;
+  align-items: center;
+  border-top: 1px solid rgba(91, 233, 255, 0.16);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__copy {
+  z-index: 3;
+  align-self: center;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 94px clamp(42px, 5vw, 82px) 88px;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  color: var(--arcade-hud-gold);
+  font: 700 0.68rem/1.2 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.14em;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-kicker > span {
+  width: 32px;
+  height: 1px;
+  background: var(--arcade-hud-cyan);
+  box-shadow: 0 0 10px rgba(91, 233, 255, 0.8);
+}
+
+body.features-cinematic-page .arcade-command-hud h1 {
+  display: grid;
+  max-width: 8ch;
+  margin: 0;
+  color: var(--arcade-hud-ice);
+  font-family: "Space Grotesk", Inter, Arial, sans-serif;
+  font-size: clamp(4.8rem, 8vw, 8.2rem);
+  font-weight: 800;
+  line-height: 0.76;
+  letter-spacing: -0.075em;
+  text-shadow: 0 0 42px rgba(91, 233, 255, 0.22);
+}
+
+body.features-cinematic-page .arcade-command-hud h1 span:last-child {
+  color: transparent;
+  -webkit-text-stroke: 1.4px var(--arcade-hud-cyan);
+  text-shadow: 0 0 28px rgba(91, 233, 255, 0.2);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__lede {
+  max-width: 58ch;
+  margin: 30px 0 22px;
+  color: rgba(226, 242, 252, 0.78);
+  font-size: clamp(0.98rem, 1.25vw, 1.12rem);
+  line-height: 1.65;
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 760px;
+  margin: 0 0 28px;
+  border-top: 1px solid rgba(91, 233, 255, 0.22);
+  border-bottom: 1px solid rgba(91, 233, 255, 0.22);
+  background: rgba(4, 18, 31, 0.5);
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts > div {
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts > div + div {
+  border-left: 1px solid rgba(91, 233, 255, 0.16);
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts span,
+body.features-cinematic-page .arcade-command-hud__readouts strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts span {
+  margin-bottom: 5px;
+  color: rgba(144, 188, 211, 0.7);
+  font: 700 0.56rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+body.features-cinematic-page .arcade-command-hud__readouts strong {
+  color: var(--arcade-hud-ice);
+  font: 700 0.74rem/1.25 "Space Grotesk", Inter, sans-serif;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__actions {
+  gap: 12px;
+}
+
+body.features-cinematic-page .arcade-command-hud :is(.arcade-primary, .arcade-secondary) {
+  position: relative;
+  min-height: 50px;
+  border-radius: 2px;
+  padding-inline: 22px;
+  font: 800 0.68rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.08em;
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-primary {
+  border-color: var(--arcade-hud-gold);
+  color: #02101a;
+  background: linear-gradient(105deg, var(--arcade-hud-gold), #9bf4bb 54%, var(--arcade-hud-cyan));
+  box-shadow: 0 0 30px rgba(91, 233, 255, 0.14);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-secondary {
+  border-color: rgba(91, 233, 255, 0.48);
+  color: var(--arcade-hud-ice);
+  background: rgba(2, 14, 25, 0.72);
+}
+
+body.features-cinematic-page .arcade-command-hud :is(.arcade-primary, .arcade-secondary):is(:hover, :focus-visible) {
+  border-color: var(--arcade-hud-cyan);
+  box-shadow: 0 0 0 1px rgba(91, 233, 255, 0.28), 0 0 32px rgba(91, 233, 255, 0.2);
+  transform: translateY(-3px);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__signal {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  align-self: stretch;
+  justify-self: stretch;
+  width: auto;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  padding: 72px 40px 62px;
+  overflow: hidden;
+  border-left: 1px solid rgba(91, 233, 255, 0.24);
+  background:
+    linear-gradient(180deg, rgba(91, 233, 255, 0.04), transparent 32%),
+    rgba(1, 8, 18, 0.28) !important;
+  opacity: 1;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__signal::before,
+body.features-cinematic-page .arcade-command-hud .arcade-hero__signal::after {
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__signal::before {
+  width: min(72%, 430px);
+  border-color: rgba(91, 233, 255, 0.38);
+  box-shadow: inset 0 0 60px rgba(91, 233, 255, 0.08), 0 0 40px rgba(91, 233, 255, 0.08);
+  opacity: 0.72;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__signal::after {
+  width: min(44%, 250px);
+  border-color: rgba(255, 230, 109, 0.42);
+  opacity: 0.58;
+}
+
+body.features-cinematic-page .arcade-command-hud__node,
+body.features-cinematic-page .arcade-command-hud__input {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgba(168, 205, 223, 0.7);
+  font: 700 0.58rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.features-cinematic-page .arcade-command-hud__node {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(91, 233, 255, 0.18);
+}
+
+body.features-cinematic-page .arcade-command-hud__node strong,
+body.features-cinematic-page .arcade-command-hud__input strong {
+  color: var(--arcade-hud-cyan);
+}
+
+body.features-cinematic-page .arcade-command-hud__target {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  color: rgba(91, 233, 255, 0.56);
+  font: 700 0.56rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+body.features-cinematic-page .arcade-command-hud__target::before,
+body.features-cinematic-page .arcade-command-hud__target::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  pointer-events: none;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+body.features-cinematic-page .arcade-command-hud__target::before {
+  width: 74%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(91, 233, 255, 0.35), transparent);
+}
+
+body.features-cinematic-page .arcade-command-hud__target::after {
+  width: 1px;
+  height: 72%;
+  background: linear-gradient(transparent, rgba(91, 233, 255, 0.35), transparent);
+}
+
+body.features-cinematic-page .arcade-command-hud__target span {
+  padding: 8px 12px;
+  border: 1px solid rgba(91, 233, 255, 0.24);
+  background: rgba(1, 9, 18, 0.72);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__counter {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  gap: 9px;
+  padding: 20px 22px;
+  border: 1px solid rgba(255, 230, 109, 0.34);
+  background: rgba(2, 10, 21, 0.86);
+  box-shadow: inset 3px 0 0 rgba(255, 230, 109, 0.72), 0 18px 42px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(12px);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__counter > span,
+body.features-cinematic-page .arcade-command-hud .arcade-hero__counter > small {
+  color: rgba(160, 199, 218, 0.74);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.1em;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__counter > span {
+  color: var(--arcade-hud-gold);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__count {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__count strong {
+  color: var(--arcade-hud-ice);
+  font: 800 clamp(4.4rem, 6vw, 6.8rem)/0.8 "Space Grotesk", Inter, sans-serif;
+  text-shadow: 0 0 28px rgba(91, 233, 255, 0.26);
+}
+
+body.features-cinematic-page .arcade-command-hud .arcade-hero__count b {
+  margin-bottom: 8px;
+  color: var(--arcade-hud-mint);
+  font: 700 0.62rem/1 "IBM Plex Mono", Consolas, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+body.features-cinematic-page .arcade-command-hud__meter {
+  height: 3px;
+  overflow: hidden;
+  background: rgba(91, 233, 255, 0.1);
+}
+
+body.features-cinematic-page .arcade-command-hud__meter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--arcade-hud-gold), var(--arcade-hud-mint), var(--arcade-hud-cyan));
+  box-shadow: 0 0 14px rgba(91, 233, 255, 0.7);
+  transform-origin: left center;
+}
+
+body.features-cinematic-page .arcade-command-hud__input {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(91, 233, 255, 0.18);
+}
+
+body.features-cinematic-page .arcade-command-hud:has(.arcade-primary:is(:hover, :focus-visible)) .arcade-command-hud__target span {
+  color: #04131c;
+  border-color: var(--arcade-hud-mint);
+  background: var(--arcade-hud-mint);
+  box-shadow: 0 0 24px rgba(102, 242, 192, 0.4);
+}
+
+@media (max-width: 1100px) {
+  body.features-cinematic-page .arcade-command-hud {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.78fr);
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts {
+    grid-template-columns: 1fr;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts > div + div {
+    border-top: 1px solid rgba(91, 233, 255, 0.14);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  body.features-cinematic-page .arcade-command-hud {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    background:
+      linear-gradient(rgba(91, 233, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91, 233, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(2, 11, 22, 0.94), rgba(3, 13, 27, 0.76) 56%, rgba(3, 8, 20, 0.48)) !important;
+    background-size: 38px 38px, 38px 38px, auto !important;
+  }
+
+  body.features-cinematic-page .arcade-command-hud .arcade-hero__copy {
+    padding: 82px 30px 38px;
+  }
+
+  body.features-cinematic-page .arcade-command-hud h1 {
+    max-width: 100%;
+    font-size: clamp(4rem, 15vw, 6.2rem);
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts > div + div {
+    border-top: 0;
+    border-left: 1px solid rgba(91, 233, 255, 0.14);
+  }
+
+  body.features-cinematic-page .arcade-command-hud .arcade-hero__signal {
+    min-height: 480px;
+    padding: 30px 30px 68px;
+    border-top: 1px solid rgba(91, 233, 255, 0.22);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  body.features-cinematic-page .arcade-command-hud {
+    clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  body.features-cinematic-page .arcade-command-hud::before,
+  body.features-cinematic-page .arcade-command-hud::after {
+    width: 54px;
+    height: 54px;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__rail,
+  body.features-cinematic-page .arcade-command-hud__footer {
+    padding-inline: 18px;
+    font-size: 0.5rem;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__rail span:nth-child(2),
+  body.features-cinematic-page .arcade-command-hud__footer span:first-child {
+    display: none;
+  }
+
+  body.features-cinematic-page .arcade-command-hud .arcade-hero__copy {
+    padding: 72px 20px 30px;
+  }
+
+  body.features-cinematic-page .arcade-command-hud h1 {
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(3rem, 14vw, 4.2rem);
+    letter-spacing: -0.065em;
+  }
+
+  body.features-cinematic-page .arcade-command-hud h1 span {
+    display: block;
+    max-width: 100%;
+  }
+
+  body.features-cinematic-page .arcade-command-hud .arcade-hero__lede {
+    margin-block: 24px 20px;
+    font-size: 0.98rem;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts {
+    grid-template-columns: 1fr;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__readouts > div + div {
+    border-top: 1px solid rgba(91, 233, 255, 0.14);
+    border-left: 0;
+  }
+
+  body.features-cinematic-page .arcade-command-hud :is(.arcade-primary, .arcade-secondary) {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+  }
+
+  body.features-cinematic-page .arcade-command-hud .arcade-hero__signal {
+    min-height: 420px;
+    padding: 24px 20px 64px;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__target {
+    min-height: 190px;
+  }
+
+  body.features-cinematic-page .arcade-command-hud__footer span:last-child {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.features-cinematic-page .arcade-command-hud *,
+  body.features-cinematic-page .arcade-command-hud *::before,
+  body.features-cinematic-page .arcade-command-hud *::after {
+    transition: none !important;
+  }
+}

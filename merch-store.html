@@ -19,14 +19,14 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
-    <link rel="stylesheet" href="./merch-store.css?v=hero-bg-video-1" />
+<link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-exit-audit-4" />
+    <link rel="stylesheet" href="./merch-store.css?v=guardian-commercial-2" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
   </head>
   <body class="merch-store-page has-sphere-tabs" data-lm-healing-disabled>
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
@@ -40,8 +40,8 @@
         <button type="button" class="site-header-toggle" data-header-toggle aria-expanded="true">Menu</button>
       </div>
       <nav aria-label="Merch sphere navigation">
-        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./memberships.html" data-icon="MB">Memberships</a>
+        <a href="./index.html#top" data-icon="HM">Home</a>
         <a href="./features-app.html" data-icon="FX">Features</a>
         <a href="./news/" data-icon="NW">News</a>
         <a href="./live-events.html" data-icon="EV">Events</a>
@@ -74,13 +74,15 @@
             <a class="secondary-action" href="#gallery">View Gallery</a>
           </div>
         </div>
-        <div class="merch-hero-product" data-merch-sound-card>
-          <video class="merch-product-video" muted loop playsinline controls preload="none" poster="./assets/merch/metro-cap-hero.opt.webp" data-merch-sound-video>
-            <source src="./assets/video/E2887E5E-CD89-45E3-ABC2-E32ED00C2652.mobile.mp4" type="video/mp4" />
-            <source src="./assets/video/merch-hero-blended.mp4" type="video/mp4" />
+        <div class="merch-hero-product merch-commercial-capsule" data-merch-sound-card>
+          <video class="merch-product-video" muted loop autoplay playsinline preload="metadata" poster="./assets/merch/lottomind-merch-commercial-poster-20260716.png" data-merch-sound-video data-lm-video-unmanaged="true" aria-label="LottoMind Little Man Guardian commercial preview">
+            <source src="./assets/merch/lottomind-membership-single-commercial-20260716.mp4" type="video/mp4" />
           </video>
-          <button class="merch-sound-toggle" type="button" data-merch-sound-toggle>Play sound</button>
-          <span>Limited Signal Capsule</span>
+          <div class="merch-commercial-actions" aria-label="Commercial controls">
+            <button class="merch-sound-toggle" type="button" data-merch-sound-toggle>Play sound</button>
+            <button class="merch-commercial-expand" type="button" data-merch-commercial-open>Watch commercial</button>
+          </div>
+          <span>Guardian Broadcast &middot; 15-second commercial</span>
         </div>
       </section>
 
@@ -88,7 +90,7 @@
         <div class="merch-strip-track">
           <a href="#hoodies">Hoodies</a>
           <a href="#caps">Caps</a>
-          <a href="#keychains">Keychains</a>
+          <a href="#keychains">Guardians</a>
           <a href="#polos">Polos</a>
           <a href="#gallery">Gallery Prints</a>
           <a href="./live-events.html#featured-stream-events">Live Events</a>
@@ -99,7 +101,7 @@
         <div class="merch-strip-track" aria-hidden="true">
           <a href="#hoodies" tabindex="-1">Hoodies</a>
           <a href="#caps" tabindex="-1">Caps</a>
-          <a href="#keychains" tabindex="-1">Keychains</a>
+          <a href="#keychains" tabindex="-1">Guardians</a>
           <a href="#polos" tabindex="-1">Polos</a>
           <a href="#gallery" tabindex="-1">Gallery Prints</a>
           <a href="./live-events.html#featured-stream-events" tabindex="-1">Live Events</a>
@@ -120,9 +122,9 @@
         </div>
         <div class="merch-section-copy">
           <h2>Drop-ready apparel with a studio signal.</h2>
-          <div class="merch-drop-video" aria-hidden="true">
-            <video muted loop playsinline preload="none" data-autoplay-on-visible="true">
-              <source data-src="./assets/merch/merch-drop-signal-20260518.opt.mp4" type="video/mp4" />
+          <div class="merch-drop-video" role="presentation">
+            <video muted loop playsinline preload="none" aria-hidden="true" data-autoplay-on-visible="true">
+              <source data-src="./assets/merch/lottomind-membership-hero-commercial-20260716.mp4" type="video/mp4" />
             </video>
           </div>
           <p>
@@ -168,12 +170,12 @@
             </div>
           </article>
           <article class="product-card" id="keychains">
-            <img src="./assets/merch/lottomind-keychain-counter-display.webp" alt="LottoMind collectible keychain package displayed on a shop counter" loading="lazy" decoding="async" />
-            <span class="product-hover-price" aria-hidden="true">$25</span>
+            <img src="./assets/brand/lottomind-little-man-membership-hero-v2.png" alt="LottoMind Little Man Luggage Charm and Backpack Guardian in branded packaging" loading="lazy" decoding="async" />
+            <span class="product-hover-price" aria-hidden="true">$29.95</span>
             <div>
-              <h3>LottoMind Collectible Keychain</h3>
-              <p>Counter-ready blister pack with mascot keychain, circuit-card tag, and retail display energy.</p>
-              <div class="product-row"><strong>$25</strong><button type="button" data-add-item="LottoMind Collectible Keychain" data-item-price="25">Add to Cart</button></div>
+              <h3>LottoMind Luggage Charm + Backpack Guardian</h3>
+              <p>Black-and-gold Little Man guardian for luggage or backpacks, with three complimentary months of LottoMind app membership included.</p>
+              <div class="product-row"><strong>$29.95</strong><button type="button" data-add-item="LottoMind Luggage Charm + Backpack Guardian" data-item-price="29.95">Add to Cart</button></div>
             </div>
           </article>
           <article class="product-card" id="polos">
@@ -246,7 +248,7 @@
           </video>
         </div>
         <div class="gallery-grid merch-swipe-rail" data-swipe-rail tabindex="0">
-          <article><img src="./assets/merch/lottomind-keychain-counter-display.webp" alt="LottoMind collectible keychain package gallery artwork" loading="lazy" decoding="async" /><span>Keychain Drop</span><strong class="gallery-price">$25</strong></article>
+          <article><img src="./assets/brand/lottomind-little-man-membership-hero-v2.png" alt="LottoMind Little Man Luggage Charm and Backpack Guardian gallery artwork" loading="lazy" decoding="async" /><span>Guardian Drop</span><strong class="gallery-price">$29.95</strong></article>
           <article><img src="./assets/merch/boogie-man-sweater.opt.webp" alt="Boogie Man knit sweater gallery artwork" loading="lazy" decoding="async" /><span>Boogie Knit</span><strong class="gallery-price">$365</strong></article>
           <article><img src="./assets/merch/city-of-detroit-1701-mark.opt.webp" alt="City of Detroit 1701 gallery artwork" loading="lazy" decoding="async" /><span>City 1701 Mark</span><strong class="gallery-price">$42</strong></article>
           <article><img src="./assets/merch/innovation-floor-model-hoodie.opt.webp" alt="Innovation Floor model hoodie gallery artwork" loading="lazy" decoding="async" /><span>Model Drop</span><strong class="gallery-price">$49</strong></article>
@@ -279,6 +281,31 @@
           <button type="button" data-cart-checkout>Checkout Preview</button>
         </div>
         <p class="cart-note" data-cart-note>Shipping and taxes are not calculated in this local preview.</p>
+      </aside>
+
+      <aside class="merch-commercial-modal is-hidden" data-merch-commercial-modal aria-hidden="true" aria-labelledby="merchCommercialTitle">
+        <div class="merch-commercial-modal__panel" role="dialog" aria-modal="true">
+          <header class="merch-commercial-modal__header">
+            <div>
+              <small>LottoMind commercial premiere</small>
+              <h2 id="merchCommercialTitle">Meet the Little Man Guardian.</h2>
+            </div>
+            <button class="merch-commercial-modal__close" type="button" data-merch-commercial-close aria-label="Close commercial">X</button>
+          </header>
+          <div class="merch-commercial-modal__stage">
+            <video controls playsinline preload="metadata" poster="./assets/merch/lottomind-merch-commercial-poster-20260716.png" data-merch-commercial-modal-video data-lm-video-unmanaged="true">
+              <source src="./assets/merch/lottomind-membership-single-commercial-20260716.mp4" type="video/mp4" />
+            </video>
+            <div class="merch-commercial-modal__scan" aria-hidden="true"></div>
+          </div>
+          <footer class="merch-commercial-modal__footer">
+            <p>A luggage charm and backpack guardian with three complimentary months of LottoMind app membership included.</p>
+            <div>
+              <button type="button" data-merch-commercial-replay>Replay</button>
+              <a href="#keychains" data-merch-commercial-shop>Shop Guardian &middot; $29.95</a>
+            </div>
+          </footer>
+        </div>
       </aside>
 
       <aside class="merch-shadow-popup is-hidden" data-merch-shadow-popup aria-hidden="true" aria-labelledby="merchShadowTitle">
@@ -363,10 +390,10 @@
     </footer>
 
 <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
-<script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+<script src="./assets/js/lm-page-transition.js?v=transition-exit-audit-4" defer></script>
     <script src="./site.js?v=original-page-wipe-3" defer></script>
     <script src="./assets/features-app/js/features-cinematic-motion.js?v=instrument-console-bottom-20260626" defer></script>
     <script src="./live-events.js?v=audio-artlines-2" defer></script>
-    <script src="./merch-store.js?v=hero-bg-video-1" defer></script>
+    <script src="./merch-store.js?v=merch-shadow-auto-return-15s-3" defer></script>
   </body>
 </html>

@@ -50,8 +50,8 @@ const siteUrl = (relativePath) => new URL(relativePath.replace(/^\.\//, ""), SIT
   if (!header) return;
 
   const navItems = [
-    { label: "Home", href: siteUrl("./index.html#top"), icon: "HM" },
     { label: "Memberships", href: siteUrl("./memberships.html"), icon: "MB" },
+    { label: "Home", href: siteUrl("./index.html#top"), icon: "HM" },
     { label: "Features", href: siteUrl("./features-app.html"), icon: "FX" },
     { label: "News", href: siteUrl("./news/"), icon: "NW" },
     { label: "Events", href: siteUrl("./live-events.html"), icon: "EV" },
@@ -274,8 +274,7 @@ const startupVideoModal = document.querySelector("[data-startup-video]");
 const startupVideoCloseButtons = document.querySelectorAll("[data-startup-video-close]");
 const startupMusicStart = document.querySelector("[data-startup-music-start]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
-let startupReturnTimer = 0;
-let startupReturnAutoCloseTimer = 0;
+let startupOpenTimer = 0;
 const domainStrip = document.querySelector(".domain-strip");
 const gamePip = document.querySelector("[data-game-pip]");
 const gamePipClose = document.querySelector("[data-game-pip-close]");
@@ -294,8 +293,7 @@ const compactHeaderLabels =
   document.body.classList.contains("manual-page");
 const conciseSoundtrackLabels = document.body.classList.contains("home-page");
 const HEADER_COLLAPSED_KEY = "lottominded.ultra.siteHeaderCollapsed.v1";
-const STARTUP_MODAL_RETURN_DELAY = 40000;
-const STARTUP_MODAL_RETURN_VISIBLE_MS = 60000;
+const STARTUP_MODAL_OPEN_DELAY = 10_000;
 const GAME_PIP_AUTO_DELAY = 90000;
 const GAME_PIP_AUTO_KEY = "lottominded.ultra.homeGamePipAutoShown.v1";
 const MEMBER_SIGNUP_KEY = "lottominded.ultra.memberSignup.v1";
@@ -719,83 +717,42 @@ setupAccessGateTargets();
 setupPasswordGates();
 
 function initPageTransitions() {
-  if (reducedMotionQuery.matches) return;
   if (document.querySelector("[data-lm-page-transition]")) return;
 
-  const wipe = document.createElement("div");
-  wipe.className = "page-wipe";
-  wipe.setAttribute("aria-hidden", "true");
-  const transitionVideoUrl = new URL("video/lm-transition-open-3s.mp4", SITE_ASSET_BASE_URL).href;
-  const transitionPosterUrl = new URL("video/lm-portal-a-poster.jpg", SITE_ASSET_BASE_URL).href;
-  wipe.innerHTML = `
-    <video class="page-wipe-video" muted playsinline preload="none" poster="${transitionPosterUrl}">
-      <source data-src="${transitionVideoUrl}" type="video/mp4">
-    </video>
-    <div class="page-wipe-signal" aria-hidden="true"></div>
+  try {
+    if (sessionStorage.getItem("lmTransitionArriving") === "yes") {
+      document.documentElement.classList.add("lm-transition-arriving");
+    }
+  } catch {
+    /* A blocked storage API should not disable navigation. */
+  }
+
+  if (!document.querySelector('link[href*="lm-page-transition.css"]')) {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = siteUrl("./assets/css/lm-page-transition.css?v=transition-unified-1");
+    document.head.appendChild(stylesheet);
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "lm-page-transition";
+  overlay.setAttribute("data-lm-page-transition", "");
+  overlay.setAttribute("aria-hidden", "true");
+  overlay.innerHTML = `
+    <div class="lm-page-transition__flash"></div>
+    <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
+    <div class="lm-page-transition__vignette"></div>
+    <div class="lm-page-transition__scanlines"></div>
+    <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
   `;
-  document.body.appendChild(wipe);
-  const wipeVideo = wipe.querySelector(".page-wipe-video");
+  document.body.prepend(overlay);
 
-  let transitionPending = false;
-
-  document.addEventListener("click", (event) => {
-    if (transitionPending) return;
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const link = event.target.closest?.("a[href]");
-    if (!link || link.getAttribute("aria-disabled") === "true" || link.hasAttribute("disabled")) return;
-    if (link.target && link.target !== "_self") return;
-    if (link.hasAttribute("download") || link.dataset.noTransition === "true") return;
-
-    const rawHref = link.getAttribute("href") || "";
-    if (!rawHref || /^(mailto|tel|javascript|data):/i.test(rawHref)) return;
-
-    const destination = new URL(link.href, window.location.href);
-    if (destination.origin !== window.location.origin) return;
-
-    const samePage =
-      destination.pathname === window.location.pathname &&
-      destination.search === window.location.search;
-    if (samePage && destination.hash) return;
-    if (destination.href === window.location.href) return;
-
-    event.preventDefault();
-    transitionPending = true;
-    window.LMPageTransitionAudio?.play?.("open");
-    const audioNavigationDelay = window.LMPageTransitionAudio?.playCloseBeforeNavigate?.() || 0;
-    const navigationDelay = audioNavigationDelay || 320;
-    document.body.classList.add("is-page-leaving");
-    wipe.classList.add("is-active");
-    if (wipeVideo) {
-      try {
-        wipeVideo.querySelectorAll("source[data-src]").forEach((source) => {
-          if (!source.hasAttribute("src")) source.setAttribute("src", source.dataset.src);
-        });
-        wipeVideo.load();
-        wipeVideo.currentTime = 0;
-        wipeVideo.play()?.catch?.(() => {});
-      } catch {
-        /* Transition video is decorative; navigation should never depend on it. */
-      }
-    }
-    window.setTimeout(() => {
-      window.location.href = destination.href;
-    }, Math.max(220, Math.min(navigationDelay, 320)));
-  });
-
-  window.addEventListener("pageshow", () => {
-    transitionPending = false;
-    document.body.classList.remove("is-page-leaving");
-    wipe.classList.remove("is-active");
-    if (wipeVideo) {
-      wipeVideo.pause();
-      try {
-        wipeVideo.currentTime = 0;
-      } catch {
-        /* Some browsers disallow resetting an unloaded decorative video. */
-      }
-    }
-    window.LMPageTransitionAudio?.playCloseOnArrival?.();
-  });
+  if (!document.querySelector('script[src*="lm-page-transition.js"]')) {
+    const controller = document.createElement("script");
+    controller.src = siteUrl("./assets/js/lm-page-transition.js?v=transition-unified-1");
+    controller.async = false;
+    document.body.appendChild(controller);
+  }
 }
 
 initPageTransitions();
@@ -3081,10 +3038,10 @@ function rememberAutoShownGamePip() {
   }
 }
 
-function clearStartupReturnAutoClose() {
-  if (!startupReturnAutoCloseTimer) return;
-  window.clearTimeout(startupReturnAutoCloseTimer);
-  startupReturnAutoCloseTimer = 0;
+function clearStartupOpenTimer() {
+  if (!startupOpenTimer) return;
+  window.clearTimeout(startupOpenTimer);
+  startupOpenTimer = 0;
 }
 
 function prepareStartupVideoAudio(options = {}) {
@@ -3117,7 +3074,7 @@ function stopStartupSoundtrack(options = {}) {
 }
 
 async function closeStartupVideo(options = {}) {
-  clearStartupReturnAutoClose();
+  clearStartupOpenTimer();
   if (options.remember !== false) rememberStartupVideoSeen();
   startupVideoModal?.classList.add("is-hidden");
   startupVideoModal?.setAttribute("aria-hidden", "true");
@@ -3129,6 +3086,7 @@ async function closeStartupVideo(options = {}) {
 }
 
 function showStartupVideo() {
+  clearStartupOpenTimer();
   if (!startupVideoModal) {
     startupVideoModal?.classList.add("is-hidden");
     startupVideoModal?.setAttribute("aria-hidden", "true");
@@ -3145,27 +3103,12 @@ function showStartupVideo() {
   prepareStartupVideoAudio();
 }
 
-function showStartupVideoReturn() {
-  if (!startupVideoModal) return;
-  if (hasSeenStartupVideo()) return;
-  document.body.classList.add("has-startup-modal");
-  startupVideoModal.classList.remove("is-hidden");
-  startupVideoModal.setAttribute("aria-hidden", "false");
-  stopStartupSoundtrack({ reset: true });
-  syncHeroMotionPreference();
-  prepareStartupVideoAudio({ reset: true });
-  clearStartupReturnAutoClose();
-  startupReturnAutoCloseTimer = window.setTimeout(() => {
-    closeStartupVideo({ remember: false, playMusic: false });
-  }, STARTUP_MODAL_RETURN_VISIBLE_MS);
-}
-
-function scheduleStartupVideoReturn() {
-  if (!startupVideoModal || startupReturnTimer) return;
-  startupReturnTimer = window.setTimeout(() => {
-    startupReturnTimer = 0;
-    showStartupVideoReturn();
-  }, STARTUP_MODAL_RETURN_DELAY);
+function scheduleStartupVideoOpen() {
+  if (!startupVideoModal || startupOpenTimer || hasSeenStartupVideo()) return;
+  startupOpenTimer = window.setTimeout(() => {
+    startupOpenTimer = 0;
+    showStartupVideo();
+  }, STARTUP_MODAL_OPEN_DELAY);
 }
 
 function getGamePipOffset() {
@@ -3770,8 +3713,12 @@ function endGamePipDrag(event) {
   gamePipHead?.releasePointerCapture?.(event.pointerId);
 }
 
-showStartupVideo();
-scheduleStartupVideoReturn();
+if (document.readyState === "complete") {
+  scheduleStartupVideoOpen();
+} else {
+  window.addEventListener("load", scheduleStartupVideoOpen, { once: true });
+}
+window.addEventListener("pagehide", clearStartupOpenTimer, { once: true });
 scheduleAutoGamePip();
 
 startupVideoCloseButtons.forEach((button) => {

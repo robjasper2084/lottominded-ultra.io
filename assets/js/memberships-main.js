@@ -27,7 +27,7 @@ const STYLE = [
   { color: "#ff8a5b", cameraZ: 13.5, x: 0 },
   { color: "#c9a06a", cameraZ: 14.5, x: 2.0 },
   { color: "#4fb6e0", cameraZ: 13.0, x: 2.4 },
-  { color: "#5bf0d8", cameraZ: 12.5, x: 1.8 },
+  { color: "#5bf0d8", cameraZ: 14.5, x: 0 },
   { color: "#e08ab8", cameraZ: 13.5, x: -0.8 },
   { color: "#a78bfa", cameraZ: 14.5, x: 0 },
   { color: "#3d7fd6", cameraZ: 16.0, x: 0 },
@@ -73,6 +73,43 @@ const gaussian = (random) => {
   const second = random();
   return Math.sqrt(-2 * Math.log(first)) * Math.cos(Math.PI * 2 * second);
 };
+
+async function loadMascotParticleSource() {
+  const image = new Image();
+  image.decoding = "async";
+  image.src = new URL("../cursor/lm-mascot-front.png", import.meta.url).href;
+  await image.decode();
+
+  const sampleCanvas = document.createElement("canvas");
+  sampleCanvas.width = image.naturalWidth;
+  sampleCanvas.height = image.naturalHeight;
+  const context = sampleCanvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("Mascot particle sampler unavailable");
+  context.clearRect(0, 0, sampleCanvas.width, sampleCanvas.height);
+  context.drawImage(image, 0, 0);
+  const pixels = context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height).data;
+  const samples = [];
+  for (let y = 0; y < sampleCanvas.height; y += 1) {
+    for (let x = 0; x < sampleCanvas.width; x += 1) {
+      const offset = (y * sampleCanvas.width + x) * 4;
+      if (pixels[offset + 3] < 36) continue;
+      samples.push([
+        x / sampleCanvas.width,
+        y / sampleCanvas.height,
+        pixels[offset] / 255,
+        pixels[offset + 1] / 255,
+        pixels[offset + 2] / 255,
+      ]);
+    }
+  }
+  if (samples.length < 100) throw new Error("Mascot particle mask is empty");
+  return samples;
+}
+
+const mascotParticleSource = await loadMascotParticleSource().catch((error) => {
+  console.warn("Mascot particle source unavailable; using the procedural fallback.", error);
+  return null;
+});
 
 const rotateX = (x, y, z, angle) => {
   const cosine = Math.cos(angle);
@@ -164,21 +201,20 @@ function generateRingedPlanet(count, seed = 37) {
   return target;
 }
 
-function generateOceanWaves(count, seed = 51) {
+function generateDetroitSoundWave(count, seed = 51) {
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
-  const cells = 17 * 11;
   for (let index = 0; index < count; index += 1) {
-    const cell = index % cells;
-    const column = cell % 17;
-    const row = Math.floor(cell / 17);
-    let x = (column / 16 * 2 - 1) * 7 + (random() - 0.5) * 0.7;
-    let z = (row / 10 * 2 - 1) * 5 + (random() - 0.5) * 0.7;
-    let y = Math.sin(x * 0.55 + z * 0.35) * 0.9
-      + Math.sin(x * 1.15 - z * 0.6) * 0.45
-      + Math.sin(z * 1.7) * 0.25
-      + (random() - 0.5) * 0.08;
-    [x, y, z] = rotateX(x, y, z, -0.5);
+    const x = (random() * 2 - 1) * 7.4;
+    const band = index % 5;
+    const bandOffset = (band - 2) * 0.34;
+    const envelope = 0.34 + Math.pow(Math.max(0, 1 - Math.abs(x) / 7.4), 1.4) * 1.15;
+    const carrier = Math.sin(x * 1.14 + band * 0.42) * 1.05
+      + Math.sin(x * 2.78 - band * 0.63) * 0.38
+      + Math.sin(x * 0.36 + 1.2) * 0.58;
+    const transient = Math.sin(x * 5.7) * 0.18 * Math.pow(envelope, 1.35);
+    const y = (carrier + transient) * envelope + bandOffset + gaussian(random) * 0.11;
+    const z = gaussian(random) * 0.38 + bandOffset * 0.22;
     setPoint(target, index, x, y, z);
   }
   return target;
@@ -295,27 +331,51 @@ function generateSignalTransmission(count, seed = 97) {
   return target;
 }
 
-function generateEarth(count, seed = 113) {
+function generateMascotParticles(count, seed = 113, source = mascotParticleSource) {
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
   for (let index = 0; index < count; index += 1) {
-    const direction = unitDirection(random);
-    const atmosphere = random() > 0.93;
-    const radius = atmosphere ? 4.48 + random() * 0.08 : 4.15 + (random() - 0.5) * 0.12;
-    setPoint(target, index, direction[0] * radius, direction[1] * radius * 0.985, direction[2] * radius);
+    let x;
+    let y;
+    let z;
+    let red = 0.46;
+    let green = 0.34;
+    let blue = 0.68;
+    if (source?.length) {
+      const sample = source[Math.floor(random() * source.length)];
+      x = (sample[0] - 0.5) * 13.2 + gaussian(random) * 0.025;
+      y = (0.5 - sample[1]) * 11.0 + gaussian(random) * 0.025;
+      z = gaussian(random) * 0.24;
+      red = sample[2];
+      green = sample[3];
+      blue = sample[4];
+    } else {
+      const head = index < count * 0.38;
+      const angle = random() * Math.PI * 2;
+      const radius = Math.sqrt(random());
+      x = Math.cos(angle) * radius * (head ? 2.35 : 2.0);
+      y = (head ? 2.7 : -1.25) + Math.sin(angle) * radius * (head ? 2.1 : 3.5);
+      z = gaussian(random) * 0.28;
+    }
+    setPoint(target, index, x, y, z);
+    const colorOffset = index * 3;
+    colors[colorOffset] = red;
+    colors[colorOffset + 1] = green;
+    colors[colorOffset + 2] = blue;
   }
-  return target;
+  return { target, colors };
 }
 
 const generators = [
   generateGyroscope,
   generateStar,
   generateRingedPlanet,
-  generateOceanWaves,
+  generateDetroitSoundWave,
   generateDnaHelix,
   generateComet,
   generateSignalTransmission,
-  generateEarth,
+  null,
 ];
 
 const buildConstellationTarget = (shape, sampleSize = 420, linkLimit = 300, maxDistance = 1.7) => {
@@ -400,10 +460,15 @@ function initializeEntity(runtime) {
       roles: heroRoles,
       source: "procedural-gyroscope",
     };
+    const mascotParticleData = generateMascotParticles(pointCount, 113);
     const heroRoleCounts = [0, 0, 0, 0, 0];
     heroRoles.forEach((role) => { heroRoleCounts[Math.floor(role)] += 1; });
     const shapes = generators.map((generator, index) => (
-      index === 0 ? heroParticleData.target : generator(pointCount, 101 + index * 137)
+      index === 0
+        ? heroParticleData.target
+        : index === 4 || index === 7
+          ? mascotParticleData.target
+          : generator(pointCount, 101 + index * 137)
     ));
     const heroRoleRadiusBounds = Array.from({ length: 5 }, () => ({ min: Infinity, max: 0 }));
     for (let index = 0; index < pointCount; index += 1) {
@@ -420,6 +485,7 @@ function initializeEntity(runtime) {
     geometry.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
     geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
     geometry.setAttribute("aRing", new THREE.BufferAttribute(heroRoles, 1));
+    geometry.setAttribute("aMascotColor", new THREE.BufferAttribute(mascotParticleData.colors, 3));
 
     const uniforms = {
       uMorph: { value: 0 },
@@ -433,6 +499,7 @@ function initializeEntity(runtime) {
       uLife: { value: 0 },
       uComet: { value: 0 },
       uSignal: { value: 0 },
+      uMascot: { value: 0 },
       uDrift: { value: 1 },
       uLiveliness: { value: LIVELINESS[0] },
       uScrollTurbulence: { value: 0 },
@@ -456,6 +523,7 @@ function initializeEntity(runtime) {
         attribute float aSeed;
         attribute float aScale;
         attribute float aRing;
+        attribute vec3 aMascotColor;
         uniform float uMorph;
         uniform float uTime;
         uniform float uTime2;
@@ -467,6 +535,7 @@ function initializeEntity(runtime) {
         uniform float uLife;
         uniform float uComet;
         uniform float uSignal;
+        uniform float uMascot;
         uniform float uDrift;
         uniform float uLiveliness;
         uniform float uScrollTurbulence;
@@ -481,6 +550,8 @@ function initializeEntity(runtime) {
         varying float vHero;
         varying float vHeroRadius;
         varying float vSignalBrightness;
+        varying vec3 vMascotColor;
+        varying float vMascot;
 
         vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
         vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
@@ -562,13 +633,15 @@ function initializeEntity(runtime) {
           float lifeShimmer = sin(uTime2 * 1.18 + aSeed * 31.0);
           base.x += lifeShimmer * 0.035 * uLife;
           base.y += cos(uTime2 * 0.84 + aSeed * 23.0) * 0.045 * uLife;
-          vec3 waveNormal = vec3(0.0, 0.8776, -0.4794);
-          vec3 waveDepth = vec3(0.0, 0.4794, 0.8776);
+          vec3 waveNormal = vec3(0.0, 1.0, 0.0);
+          vec3 waveDepth = vec3(0.0, 0.0, 1.0);
           float waveX = base.x;
           float waveZ = dot(base, waveDepth);
-          float swell = sin(waveX * 0.5 - uTime2 * 0.9 - uTide * 6.0) * 0.55
-            + sin(waveX * 1.1 + waveZ * 0.6 - uTime2 * 0.6 - uTide * 4.2) * 0.3
-            + snoise(vec3(waveX * 0.25, waveZ * 0.3, uTime2 * 0.18)) * 0.45;
+          float waveEnvelope = 0.35 + (1.0 - smoothstep(0.0, 7.4, abs(waveX))) * 0.65;
+          float swell = sin(waveX * 1.7 - uTime2 * 1.15 - uTide * 6.0) * 0.22
+            + sin(waveX * 3.8 + waveZ * 0.8 - uTime2 * 0.72 - uTide * 4.2) * 0.09
+            + snoise(vec3(waveX * 0.35, waveZ * 0.4, uTime2 * 0.18)) * 0.12;
+          swell *= waveEnvelope;
           base += waveNormal * swell * uWave;
           vec3 cometHead = vec3(4.4, 2.2, 0.0);
           float cometWake = smoothstep(1.2, 9.0, distance(base, cometHead));
@@ -625,6 +698,8 @@ function initializeEntity(runtime) {
           vRing = aRing;
           vHero = uHero;
           vHeroRadius = length(heroSource);
+          vMascotColor = aMascotColor;
+          vMascot = uMascot;
         }
       `,
       fragmentShader: `
@@ -638,6 +713,8 @@ function initializeEntity(runtime) {
         varying float vHero;
         varying float vHeroRadius;
         varying float vSignalBrightness;
+        varying vec3 vMascotColor;
+        varying float vMascot;
         void main() {
           vec2 center = gl_PointCoord - 0.5;
           float distanceFromCenter = length(center);
@@ -661,6 +738,9 @@ function initializeEntity(runtime) {
             heroColor *= 0.72;
           }
           color = mix(color, heroColor, vHero);
+          vec3 mascotColor = max(vMascotColor, vec3(0.16, 0.12, 0.22));
+          mascotColor = mascotColor * 1.18 + vec3(0.035, 0.055, 0.08);
+          color = mix(color, mascotColor, vMascot);
           color = mix(color, vec3(1.0, 0.32, 0.12), uHeat * 0.6);
           if (vSeed > 0.985) color = vec3(1.0);
           if (vSeed > 0.9982) color = vec3(1.0, 0.2392, 0.5412);
@@ -728,6 +808,7 @@ function initializeEntity(runtime) {
       lifeWeight: 0,
       cometWeight: 0,
       signalWeight: 0,
+      mascotWeight: 0,
       heat: 0,
       starWeight: 0,
       groupScale: 1,
@@ -793,6 +874,8 @@ function initializeEntity(runtime) {
       const segment = Math.min(6, Math.floor(entityState.shapeFloat));
       bindSegment(segment);
       uniforms.uMorph.value = entityState.shapeFloat >= 7 ? 1 : entityState.shapeFloat - segment;
+      canvas.dataset.lmShape = entityState.shapeFloat.toFixed(3);
+      canvas.dataset.lmForm = entityState.shapeFloat >= 3.96 ? "lottoman-mascot" : "morphing-array";
     };
 
     const recomputeShapeFloat = () => {
@@ -942,9 +1025,12 @@ function initializeEntity(runtime) {
       const heroWeight = 1 - THREE.MathUtils.smoothstep(entityState.shapeFloat, 0, 1);
       const starWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 1));
       const waveWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 3));
-      const helixWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 4));
+      const helixWeight = 0;
       const cometWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 5));
       const signalWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 6));
+      // The shortened membership walk ends at shape 4, so the former spiral
+      // resolves into the real Little Man silhouette in the final section.
+      const mascotWeight = Math.max(0, 1 - Math.abs(entityState.shapeFloat - 4));
       entityState.heroWeight = heroWeight;
       entityState.starWeight = starWeight;
       entityState.helixWeight = helixWeight;
@@ -952,6 +1038,7 @@ function initializeEntity(runtime) {
       entityState.waveWeight += (waveWeight - entityState.waveWeight) * (1 - Math.exp(-dt * 7));
       entityState.cometWeight += (cometWeight - entityState.cometWeight) * (1 - Math.exp(-dt * 7));
       entityState.signalWeight += (signalWeight - entityState.signalWeight) * (1 - Math.exp(-dt * 7));
+      entityState.mascotWeight += (mascotWeight - entityState.mascotWeight) * (1 - Math.exp(-dt * 7));
       entityState.heat += (entityState.charge * starWeight - entityState.heat) * (1 - Math.exp(-dt * 7));
       entityState.heroDrift += (heroWeight - entityState.heroDrift) * (1 - Math.exp(-dt * 4.5));
       if (entityState.heroOnScreen && entityState.heroIntroStarted) entityState.gimbalTime += dt;
@@ -975,6 +1062,7 @@ function initializeEntity(runtime) {
       uniforms.uLife.value = entityState.lifeWeight;
       uniforms.uComet.value = entityState.cometWeight;
       uniforms.uSignal.value = entityState.signalWeight;
+      uniforms.uMascot.value = entityState.mascotWeight;
       uniforms.uDrift.value = entityState.heroDrift;
       uniforms.uLiveliness.value = liveliness;
       uniforms.uScrollTurbulence.value = renderTurbulence;
@@ -1050,7 +1138,11 @@ function initializeEntity(runtime) {
           constellationGeometry.setAttribute("position", new THREE.BufferAttribute(constellationTargets[restingShape], 3));
           constellationMaterial.color.set(STYLE[restingShape].color);
         }
-        const linesAllowed = restingShape > 0 && restingShape !== 6 && burst < 0.01;
+        const linesAllowed = restingShape > 0
+          && restingShape !== 4
+          && restingShape !== 6
+          && restingShape !== 7
+          && burst < 0.01;
         if (linesAllowed) {
           entityState.constellationOpacity += (0.13 - entityState.constellationOpacity) * (1 - Math.exp(-dt * 7));
           constellationMaterial.opacity = entityState.constellationOpacity;
@@ -1332,5 +1424,5 @@ const connectRuntime = (runtime) => {
 };
 window.addEventListener("lm:membership-runtime-ready", (event) => connectRuntime(event.detail), { once: true });
 
-await import("./memberships-cinematic.js?v=membership-films-2");
+await import("./memberships-cinematic.js?v=membership-commercial-handoff-3");
 if (window.__lmMembershipRuntime) connectRuntime(window.__lmMembershipRuntime);

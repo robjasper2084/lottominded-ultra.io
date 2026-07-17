@@ -20,12 +20,13 @@
         }
       } catch (error) {}
     </script>
-    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-branded-colors-2" />
+    <link rel="stylesheet" href="./assets/css/lm-page-transition.css?v=transition-exit-audit-4" />
 <link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-21" />
     <link rel="stylesheet" href="./assets/css/beat2lotto-collector-access.css?v=collector-memberships-3" />
     <link rel="stylesheet" href="./assets/css/lm-global-orb-header.css?v=site-audit-1" />
     <link rel="stylesheet" href="./assets/vendor/lenis/lenis.css?v=1.1.20" />
-  <link rel="stylesheet" href="./assets/css/memberships-cinematic.css?v=membership-films-2" />
+  <link rel="stylesheet" href="./assets/css/memberships-cinematic.css?v=membership-water-film02-1" />
+    <link rel="stylesheet" href="./assets/css/memberships-hud.css?v=membership-hud-7" />
     <script type="importmap">
       {"imports":{"three":"./assets/vendor/three/three.module.min.js?v=0.160.1"}}
     </script>
@@ -33,7 +34,7 @@
   <body class="memberships-page home-page has-sphere-header has-membership-commercial">
     <div class="lm-page-transition" data-lm-page-transition aria-hidden="true">
       <div class="lm-page-transition__flash"></div>
-      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="none"></video>
+      <video class="lm-page-transition__video" data-lm-transition-video muted playsinline preload="metadata"></video>
       <div class="lm-page-transition__vignette"></div>
       <div class="lm-page-transition__scanlines"></div>
       <p class="lm-page-transition__label" data-lm-transition-label>Opening signal</p>
@@ -83,22 +84,26 @@
       <section class="membership-hero lm-observatory-section" id="dust" aria-labelledby="membershipHeroTitle" data-lm-shape="0" data-lm-bg="#04060a" data-lm-glow="#5be9ff" data-lm-epoch="Dust" data-lm-time="T − 13.8 Gyr">
         <div class="membership-hero-copy">
           <p class="studio-boot-sequence" aria-hidden="true">
-            <span>Temporal Array 09 · Online</span>
-            <span>Membership signal</span>
-            <span>Vault route armed</span>
+            <span>LottoMind membership</span>
+            <span>Guardian signal online</span>
+            <span>Member vault ready</span>
           </p>
-          <h1 id="membershipHeroTitle">Memberships for the <em>Lottomind app</em></h1>
-          <p class="membership-temporal-subtitle">A membership observatory — walk every signal tier in one continuous hall.</p>
+          <h1 id="membershipHeroTitle">Choose Your <em>Membership</em></h1>
+          <p class="membership-temporal-subtitle">Unlock the LottoMind app, premium creative tools, arcade routes, member drops, and protected Vault access.</p>
           <p class="membership-collectible-offer">
-            The Little Man collectible is $19.95.<br />
-            It includes three months of membership — free.
+            The Little Man Guardian bundle is $29.95.<br />
+            Three months of app membership are included.
           </p>
+          <div class="membership-hud-status" aria-label="Current membership status">
+            <div><span>System</span><strong>Signal online</strong></div>
+            <div><span>Guardian bundle</span><strong>$29.95 one time</strong></div>
+            <div><span>Included access</span><strong>3 months</strong></div>
+            <div><span>Network</span><strong>Apps + arcade</strong></div>
+          </div>
           <div class="membership-hero-actions">
-            <a class="primary-action" href="#membership-plans">Compare Plans</a>
+            <a class="primary-action" href="#membership-plans">Choose a Plan</a>
             <a class="secondary-action" data-member-app-public="true" href="../lotto%20mind%20refined/?source=memberships">Launch App</a>
-            <a class="secondary-action" href="#stripe-pricing-table">Stripe Placeholder</a>
-            <button class="secondary-action membership-background-control" type="button" data-membership-bg-focus>Play Background</button>
-            <button class="secondary-action membership-commercial-hero-launch" type="button" data-membership-commercial-open data-commercial-index="0">Start Membership Film</button>
+            <button class="secondary-action membership-commercial-hero-launch" type="button" data-membership-commercial-open data-commercial-index="0">Watch Guardian Commercial</button>
           </div>
           <div class="membership-feature-ribbon" aria-label="Membership feature overview">
             <span>Premium tools</span>
@@ -123,20 +128,20 @@
               data-lm-video-unmanaged="true"
               aria-label="Little Man Guardian worn on a backpack in the LottoMind membership commercial"
             >
-              <source src="./assets/merch/lottomind-membership-hero-commercial-20260716.mp4" type="video/mp4" />
+              <source src="./assets/merch/lottomind-membership-single-commercial-20260716.mp4" type="video/mp4" />
             </video>
           </div>
           <div class="membership-signal-card-copy">
             <span class="plan-featured-tag">3 months included</span>
             <span>Luggage Charm &middot; Backpack Guardian</span>
             <strong>Little Man Guardian + App Membership</strong>
-            <b>$19.95<span> one time</span></b>
+            <b>$29.95<span> one time</span></b>
             <p>Buy the Little Man Luggage Charm and Backpack Guardian and receive three complimentary months of membership across the LottoMind apps.</p>
             <div class="membership-collectible-actions">
               <a class="membership-collectible-cta" href="./merch-store.html?product=guardian#keychains">View Guardian</a>
               <button class="membership-commercial-trigger" type="button" data-membership-commercial-open data-commercial-index="0">
                 <span class="membership-commercial-trigger__icon" aria-hidden="true"></span>
-                <span><b>Membership Films</b><small>Three 15s chapters</small></span>
+                <span><b>Guardian Commercial</b><small>Single film</small></span>
               </button>
             </div>
           </div>
@@ -196,43 +201,6 @@
         </div>
       </section>
 
-      <section class="membership-broadcast" id="membership-broadcast" aria-labelledby="membershipBroadcastTitle">
-        <header class="membership-broadcast__header">
-          <div>
-            <span>Membership film trilogy</span>
-            <h2 id="membershipBroadcastTitle">Meet the Guardian. <em>Unlock the network.</em></h2>
-          </div>
-          <p>Three short films introduce the Little Man Guardian, show how it clips on, and carry the LottoMind signal out into the world.</p>
-        </header>
-        <div class="membership-broadcast__grid" aria-label="LottoMind membership commercials">
-          <button class="membership-broadcast-card is-featured" type="button" data-membership-commercial-open data-commercial-index="0" aria-label="Play film 1, Meet the Guardian">
-            <span class="membership-broadcast-card__media">
-              <img src="./assets/merch/lottomind-guardian-commercial-reveal-poster-20260716.png" alt="Little Man Guardian collectible product reveal" width="1280" height="720" loading="lazy" decoding="async" />
-              <span class="membership-broadcast-card__play" aria-hidden="true"></span>
-            </span>
-            <span class="membership-broadcast-card__copy"><b>Film 01 / Product signal</b><strong>Meet the Guardian.</strong><small>The collectible, the attitude, and three months of LottoMind membership.</small></span>
-          </button>
-          <button class="membership-broadcast-card" type="button" data-membership-commercial-open data-commercial-index="1" aria-label="Play film 2, Clip on your mindset">
-            <span class="membership-broadcast-card__media">
-              <img src="./assets/merch/lottomind-guardian-commercial-clip-on-poster-20260716.png" alt="Little Man Guardian clipping onto a backpack" width="1280" height="720" loading="lazy" decoding="async" />
-              <span class="membership-broadcast-card__play" aria-hidden="true"></span>
-            </span>
-            <span class="membership-broadcast-card__copy"><b>Film 02 / Field setup</b><strong>Clip on your mindset.</strong><small>See the luggage charm and Backpack Guardian in motion.</small></span>
-          </button>
-          <button class="membership-broadcast-card" type="button" data-membership-commercial-open data-commercial-index="2" aria-label="Play film 3, Carry the signal">
-            <span class="membership-broadcast-card__media">
-              <img src="./assets/merch/lottomind-merch-commercial-poster-20260716.png" alt="Traveler carrying the Little Man Guardian through an airport" width="1280" height="720" loading="lazy" decoding="async" />
-              <span class="membership-broadcast-card__play" aria-hidden="true"></span>
-            </span>
-            <span class="membership-broadcast-card__copy"><b>Film 03 / Mobile signal</b><strong>Carry the signal.</strong><small>A Guardian for the bag, with the LottoMind apps ready wherever you land.</small></span>
-          </button>
-        </div>
-        <footer class="membership-broadcast__footer">
-          <span>3 films &middot; 45 seconds &middot; sound on</span>
-          <a href="#membership-plans">View membership plans</a>
-        </footer>
-      </section>
-
       <section class="membership-statement lm-observatory-section" id="ignition" aria-labelledby="ignitionTitle" data-lm-shape="1" data-lm-bg="#0a0710" data-lm-glow="#ff8a5b" data-lm-epoch="Create" data-lm-time="Music · Games · Journals">
         <div class="membership-statement__copy">
           <p class="membership-statement__kicker">LottoMind Ultra &middot; What this website does</p>
@@ -247,9 +215,9 @@
 
       <section class="membership-section lm-plans" id="membership-plans" aria-labelledby="plansTitle">
         <div class="membership-section-heading">
-          <span>T − 13.6 Gyr · Plan ladder</span>
-          <h2 id="plansTitle">Choose the <em>signal level.</em></h2>
-          <p>Ultra is the best-value recurring plan. Gold stays impulse-friendly, and Vault stays limited/founder focused.</p>
+          <span>Membership control deck</span>
+          <h2 id="plansTitle">Choose your <em>signal level.</em></h2>
+          <p>Start free, step into Gold, or choose Ultra for the full premium route. Vault remains a limited founder unlock.</p>
         </div>
         <div class="membership-plan-grid">
           <article class="membership-plan-card" data-lm-tier="free">
@@ -340,6 +308,27 @@
             </div>
           </div>
         </div>
+        <div class="membership-benefit-strip" aria-label="Membership benefits">
+          <article><img src="./assets/brand/lm-orb-mark.webp" alt="" /><span><strong>More creative tools</strong><small>Oracles, radars, journals, and studio routes</small></span></article>
+          <article><img src="./assets/brand/lm-brain-orb.webp" alt="" /><span><strong>Deeper Vault access</strong><small>Reports, history, downloads, and member drops</small></span></article>
+          <article><img src="./assets/brand/jazz-network-gold-coin.webp" alt="" /><span><strong>LottoCredits</strong><small>Shared entertainment-only creative tool balance</small></span></article>
+          <article><img src="./assets/cursor/lm-mascot-front.png" alt="" /><span><strong>Guardian membership</strong><small>Three months included with the $29.95 bundle</small></span></article>
+        </div>
+        <div class="membership-credits membership-credits--inline" id="lm-credits" aria-labelledby="creditsTitle">
+          <div class="membership-credits-inline__heading">
+            <div>
+              <span>Optional add-ons &middot; one-time purchase</span>
+              <h3 id="creditsTitle">Add <em>LottoCredits</em> to any signal level.</h3>
+              <p>Entertainment-only tool credits. They are not money, prizes, lottery tickets, or gambling credits.</p>
+            </div>
+            <a class="secondary-action" href="#lm-access-hero">Open Collector Wallet</a>
+          </div>
+          <div class="credit-pack-grid" aria-label="LottoCredits add-on packs">
+            <article><img src="./assets/brand/jazz-network-gold-coin.webp" alt="" loading="lazy" decoding="async" /><span>Starter Credits</span><strong>$4.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_starter_once">Choose Starter</button></article>
+            <article><img src="./assets/brand/lm-orb-mark.webp" alt="" loading="lazy" decoding="async" /><span>Studio Credits</span><strong>$9.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_studio_once">Choose Studio</button></article>
+            <article><img src="./assets/brand/lm-brain-orb.webp" alt="" loading="lazy" decoding="async" /><span>Vault Credits</span><strong>$19.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_vault_once">Choose Vault</button></article>
+          </div>
+        </div>
       </section>
 
       <section class="membership-section membership-what-you-get lm-observatory-section lm-worlds" id="worlds" aria-labelledby="worldsTitle" data-lm-shape="2" data-lm-bg="#070910" data-lm-glow="#c9a06a" data-lm-epoch="Worlds" data-lm-time="T − 4.6 Gyr">
@@ -392,11 +381,11 @@
       <section class="membership-section membership-water lm-observatory-section" id="water" aria-labelledby="waterTitle" data-lm-shape="3" data-lm-bg="#04080d" data-lm-glow="#4fb6e0" data-lm-epoch="Water" data-lm-time="T &minus; 3.8 Gyr">
         <div class="membership-water__copy">
           <div class="membership-section-heading">
-            <span>Featured film &middot; Guardian in transit</span>
-            <h2 id="waterTitle">Film 03 &mdash;<br /><em>Carry the Signal.</em></h2>
-            <p>See the Little Man Guardian travel beyond the studio. Clip it to a luggage or backpack route and carry three complimentary months of LottoMind app membership wherever the next idea begins.</p>
+            <span>Featured film &middot; Field setup</span>
+            <h2 id="waterTitle">Film 02 &mdash;<br /><em>Clip On Your Mindset.</em></h2>
+            <p>See how the Little Man Luggage Charm and Backpack Guardian clips securely onto your everyday carry, then unlocks three complimentary months of LottoMind app membership.</p>
           </div>
-          <dl class="membership-water__stats" aria-label="Guardian in transit film details">
+          <dl class="membership-water__stats" aria-label="Clip On Your Mindset film details">
             <div><dt>Film</dt><dd>15-second commercial</dd></div>
             <div><dt>Format</dt><dd>Sound-on membership story</dd></div>
             <div><dt>Included</dt><dd>3 months of app membership</dd></div>
@@ -410,130 +399,40 @@
               loop
               playsinline
               preload="metadata"
-              poster="./assets/merch/lottomind-merch-commercial-poster-20260716.png"
+              poster="./assets/merch/lottomind-guardian-commercial-clip-on-poster-20260716.png"
               data-membership-water-commercial
               data-lm-water-image
               data-lm-video-unmanaged="true"
-              aria-label="Little Man Guardian travel commercial"
+              aria-label="Little Man Guardian clip-on commercial"
             >
-              <source src="./assets/merch/lottomind-merch-commercial-20260716.mp4" type="video/mp4" />
+              <source src="./assets/merch/lottomind-guardian-commercial-clip-on-20260716.mp4" type="video/mp4" />
             </video>
-            <button class="membership-water-commercial-launch" type="button" data-membership-commercial-open data-commercial-index="2">Play with sound</button>
+            <button class="membership-water-commercial-launch" type="button" data-membership-water-sound aria-pressed="false">Play with sound</button>
           </div>
-          <figcaption>Membership Film 03 &mdash; Guardian in transit &middot; sound-on chapter</figcaption>
+          <figcaption>Membership Film 02 &mdash; Clip On Your Mindset &middot; full-frame commercial</figcaption>
         </figure>
-      </section>
-
-      <section class="membership-section membership-credits" id="lm-credits" aria-labelledby="creditsTitle">
-        <div class="membership-credits-intro">
-          <div class="membership-section-heading">
-            <span>T − 3.8 Gyr · Add-on packs</span>
-            <h2 id="creditsTitle"><em>LottoCredits</em> packs.</h2>
-            <p>LottoCredits are optional one-time purchases for entertainment-only tools. They are not money, prizes, lottery tickets, or gambling credits.</p>
-          </div>
-          <div class="membership-credit-medallion" aria-hidden="true">
-            <img src="./assets/brand/jazz-network-gold-coin.webp" alt="" loading="lazy" decoding="async" />
-          </div>
-          <div class="membership-wallet-state">
-            <span>Shared wallet</span>
-            <strong>Collector wallet access is available here</strong>
-            <a class="secondary-action" href="#lm-access-hero">Collector Access</a>
-          </div>
-        </div>
-        <div class="credit-pack-grid">
-          <article><img src="./assets/brand/jazz-network-gold-coin.webp" alt="" loading="lazy" decoding="async" /><span>Starter Credits</span><strong>$4.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_starter_once">Choose Starter</button></article>
-          <article><img src="./assets/brand/lm-orb-mark.webp" alt="" loading="lazy" decoding="async" /><span>Studio Credits</span><strong>$9.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_studio_once">Choose Studio</button></article>
-          <article><img src="./assets/brand/lm-brain-orb.webp" alt="" loading="lazy" decoding="async" /><span>Vault Credits</span><strong>$19.99</strong><button class="secondary-action" type="button" data-stripe-lookup-key="credits_vault_once">Choose Vault</button></article>
-        </div>
       </section>
 
       <section class="membership-section membership-visit lm-observatory-section" id="life" aria-labelledby="lifeTitle" data-lm-shape="4" data-lm-bg="#050a0a" data-lm-glow="#5bf0d8" data-lm-epoch="Life" data-lm-time="T − 0.54 Gyr">
         <div class="visit-lead">
-          <span class="visit-lead__kicker">Plan Your Crossing</span>
-          <h2 id="lifeTitle"><span>Thirteen billion years,</span><br /><em>one afternoon.</em></h2>
-          <p>The full walk takes about ninety minutes. Evening entries are limited to preserve the dark-adapted halls.</p>
+          <span class="visit-lead__kicker">LottoMind app access</span>
+          <h2 id="lifeTitle"><span>One membership,</span><br /><em>a growing tool network.</em></h2>
+          <p>Move between creative number journaling, saved signals, Dream Oracle, music tools, arcade routes, and new member features from one connected LottoMind flow.</p>
         </div>
-        <aside class="membership-ticket-card" aria-label="AEON Temporal Observatory timed entry details">
+        <aside class="membership-ticket-card" aria-label="LottoMind app membership feature details">
           <header>
-            <span>Timed admission</span>
-            <strong>AEON — Temporal Observatory</strong>
+            <span>Member access matrix</span>
+            <strong>LottoMind App + Network</strong>
           </header>
           <dl>
-            <div><dt>Address</dt><dd>Pier 40 · Harbour District</dd></div>
-            <div><dt>Hours</dt><dd>Wed — Sun · 10:00 — 22:00</dd></div>
-            <div><dt>Day entry</dt><dd>24 —</dd></div>
-            <div><dt>Evening (after 19:00)</dt><dd>18 —</dd></div>
-            <div><dt>Under 26</dt><dd>12 —</dd></div>
+            <div><dt>Create</dt><dd>Number journals + saved signals</dd></div>
+            <div><dt>Explore</dt><dd>Dream Oracle + Number Radar</dd></div>
+            <div><dt>Make</dt><dd>Music and Beat2Lotto+ studio tools</dd></div>
+            <div><dt>Play</dt><dd>Eight browser arcade routes</dd></div>
+            <div><dt>Unlock</dt><dd>Vault drops + beta access by plan</dd></div>
           </dl>
-          <a class="primary-action" href="#membership-plans">Reserve Timed Entry</a>
+          <a class="primary-action" href="#membership-plans">Compare Memberships</a>
         </aside>
-      </section>
-
-      <section class="membership-section membership-program lm-observatory-section" id="flight" aria-labelledby="flightTitle" data-lm-shape="5" data-lm-bg="#0a070c" data-lm-glow="#e08ab8" data-lm-epoch="Flight" data-lm-time="Member program">
-        <div class="membership-program__intro membership-section-heading">
-          <span>Season program &middot; Comet route</span>
-          <h2 id="flightTitle">Fly through <em>the live signal.</em></h2>
-          <p>Scroll the full route to fly the comet across the member program. Reverse direction and the signal retraces its path with you.</p>
-        </div>
-        <div class="membership-program__rows" aria-label="LottoMind member program">
-          <a class="membership-program__row" href="./live-events.html#twitch-live">
-            <time datetime="2026-07-15">Live now</time>
-            <strong>Featured Stream Events</strong>
-            <span>Concerts, comedy, festivals, and special broadcasts inside the live hub.</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-          </a>
-          <a class="membership-program__row" href="./features-app.html#arcade-library">
-            <time>Anytime</time>
-            <strong>LottoMind Arcade</strong>
-            <span>Enter the playable generator, number adventures, and complete game vault.</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-          </a>
-          <a class="membership-program__row" href="./beat2lotto-plus.html#beat2lotto">
-            <time>Fridays &middot; 22:00</time>
-            <strong>Beat2Lotto+ Night Session</strong>
-            <span>Build a beat-seeded signal and shape it in the music studio after dark.</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-          </a>
-          <a class="membership-program__row" href="../lotto%20mind%20refined/?route=journal" data-member-app-public="true">
-            <time>Sundays &middot; 11:00</time>
-            <strong>Creative Number Journaling</strong>
-            <span>Save sets, moods, notes, and patterns inside your LottoMind app flow.</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-          </a>
-          <a class="membership-program__row" href="./merch-store.html">
-            <time>Member drop</time>
-            <strong>Little Man Guardian Release</strong>
-            <span>Collector access, early artwork, and limited member merchandise signals.</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
-          </a>
-        </div>
-      </section>
-
-      <section class="membership-section membership-manifesto lm-observatory-section" id="signal" aria-labelledby="signalTitle" data-lm-shape="6" data-lm-bg="#0a0812" data-lm-glow="#a78bfa" data-lm-epoch="Signal" data-lm-time="T − 0.00 Gyr">
-        <div class="membership-manifesto__inner">
-          <span class="membership-manifesto__kicker">LottoMind Ultra Platform</span>
-          <h2 class="membership-manifesto__lines" id="signalTitle">
-            <span data-lm-manifesto-line>One site. Every LottoMind signal.</span>
-            <span data-lm-manifesto-line>Build creative number journals with <em>radars, oracles, and live tools.</em></span>
-            <span data-lm-manifesto-line>Make music, explore news, and play <em>the growing arcade.</em></span>
-            <span data-lm-manifesto-line>Membership unlocks more features, <em>vaults, drops, and app access.</em></span>
-          </h2>
-          <p class="membership-manifesto__credit">More creative tools are arriving across the <strong>LOTTOMIND NETWORK</strong></p>
-        </div>
-      </section>
-
-      <section class="membership-section stripe-placeholder-panel lm-observatory-section" id="stripe-pricing-table" aria-labelledby="stripeTitle" data-lm-shape="7" data-lm-bg="#030408" data-lm-glow="#5b9fe0" data-lm-epoch="Return" data-lm-time="Now">
-        <div class="membership-section-heading">
-          <span>T − 0.00 Gyr · Secure billing / Test checkout</span>
-          <h2 id="stripeTitle">Stripe <em>test checkout.</em></h2>
-          <p data-stripe-membership-status role="status">Checking Stripe test-mode configuration...</p>
-          <button class="secondary-action" type="button" data-stripe-portal>Manage test billing</button>
-        </div>
-        <!-- Replace the pricing-table-id and publishable-key below with your real Stripe Pricing Table values from the Stripe Dashboard. Never place a Stripe secret key in frontend code. -->
-        <stripe-pricing-table
-          pricing-table-id="prctbl_REPLACE_WITH_YOUR_TABLE_ID"
-          publishable-key="pk_test_REPLACE_WITH_YOUR_PUBLISHABLE_KEY">
-        </stripe-pricing-table>
       </section>
 
     </main>
@@ -542,8 +441,8 @@
       <div class="membership-commercial-modal__panel" role="dialog" aria-modal="true">
         <header class="membership-commercial-modal__header">
           <div>
-            <span data-membership-commercial-signal>Film 01 / Product signal</span>
-            <h2 id="membershipCommercialTitle" data-membership-commercial-title>Meet the Guardian.</h2>
+            <span data-membership-commercial-signal>Film 03 / Mobile signal</span>
+            <h2 id="membershipCommercialTitle" data-membership-commercial-title>Carry the Signal.</h2>
           </div>
           <button type="button" data-membership-commercial-close aria-label="Skip commercial and enter membership page">Skip &amp; Enter</button>
         </header>
@@ -552,27 +451,22 @@
             controls
             playsinline
             preload="metadata"
-            src="./assets/merch/lottomind-guardian-commercial-reveal-20260716.mp4"
-            poster="./assets/merch/lottomind-guardian-commercial-reveal-poster-20260716.png"
+            poster="./assets/merch/lottomind-merch-commercial-poster-20260716.png"
+            src="./assets/merch/lottomind-merch-commercial-20260716.mp4"
             data-membership-commercial-video
             data-lm-video-unmanaged="true"></video>
           <div class="membership-commercial-modal__scan" aria-hidden="true"></div>
           <div class="membership-commercial-modal__telemetry" aria-hidden="true">
-            <span data-membership-commercial-telemetry>LM-GUARDIAN / REVEAL</span>
+            <span data-membership-commercial-telemetry>LM-GUARDIAN / IN TRANSIT</span>
             <span>TRANSMISSION SECURE</span>
           </div>
         </div>
-        <nav class="membership-commercial-modal__chapters" aria-label="Membership film chapters">
-          <button class="is-active" type="button" data-membership-commercial-chapter data-commercial-index="0"><b>01</b><span>Meet the Guardian</span></button>
-          <button type="button" data-membership-commercial-chapter data-commercial-index="1"><b>02</b><span>Clip it on</span></button>
-          <button type="button" data-membership-commercial-chapter data-commercial-index="2"><b>03</b><span>Carry the signal</span></button>
-        </nav>
         <footer class="membership-commercial-modal__footer">
-          <p data-membership-commercial-copy>The $19.95 Little Man Luggage Charm and Backpack Guardian includes three complimentary months of LottoMind app membership.</p>
+          <p data-membership-commercial-copy>The Guardian goes wherever the next idea begins, with three months of LottoMind membership included.</p>
           <div>
             <button type="button" data-membership-commercial-replay>Replay</button>
             <button class="membership-commercial-enter" type="button" data-membership-commercial-enter>Enter Membership Page</button>
-            <a href="./merch-store.html?product=guardian#keychains">Shop Guardian &middot; $19.95</a>
+            <a href="./merch-store.html?product=guardian#keychains">Shop Guardian &middot; $29.95</a>
           </div>
         </footer>
       </div>
@@ -586,7 +480,7 @@
     </footer>
 
     <script src="./assets/js/lm-page-transition-audio.js?v=transition-audio-branded-5" defer></script>
-    <script src="./assets/js/lm-page-transition.js?v=transition-branded-colors-2" defer></script>
+    <script src="./assets/js/lm-page-transition.js?v=transition-exit-audit-4" defer></script>
     <script src="./site.js?v=memberships-first-1" defer></script>
     <script src="./assets/js/lottomind-account-service.js?v=collector-access-2"></script>
     <script src="./assets/js/beat2lotto-collector-access.js?v=collector-memberships-1" defer></script>
@@ -595,7 +489,7 @@
     <script src="./assets/vendor/gsap/ScrollTrigger.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/gsap/SplitText.min.js?v=3.13.0" defer></script>
     <script src="./assets/vendor/lenis/lenis.min.js?v=1.1.20" defer></script>
-  <script type="module" src="./assets/js/memberships-main.js?v=membership-films-2"></script>
+  <script type="module" src="./assets/js/memberships-main.js?v=membership-mascot-wave-5-handoff-2"></script>
     <script>
       (() => {
         const focusButton = document.querySelector("[data-membership-bg-focus]");

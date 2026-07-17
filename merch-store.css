@@ -214,6 +214,303 @@
   filter: saturate(1.18) contrast(1.05);
 }
 
+/* Guardian commercial premiere */
+.merch-commercial-capsule {
+  width: min(100%, 46rem);
+  border-color: rgba(255, 209, 102, 0.46);
+  background: #02060d;
+  box-shadow:
+    0 2.5rem 8rem rgba(0, 245, 255, 0.2),
+    0 0 0 1px rgba(41, 247, 255, 0.12),
+    inset 0 0 64px rgba(3, 5, 10, 0.58);
+}
+
+.merch-commercial-capsule::before {
+  background: radial-gradient(ellipse at center, transparent 64%, rgba(2, 5, 12, 0.35) 100%);
+  mix-blend-mode: normal;
+}
+
+.merch-commercial-capsule .merch-product-video {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  opacity: 1;
+  filter: none;
+  animation: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.merch-commercial-capsule:hover .merch-product-video,
+.merch-commercial-capsule:focus-within .merch-product-video,
+.merch-commercial-capsule.is-hover-grown .merch-product-video {
+  opacity: 1;
+  filter: none;
+  transform: scale(1.015);
+}
+
+.merch-commercial-actions {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 3.9rem;
+  left: 0.8rem;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  pointer-events: none;
+}
+
+.merch-commercial-actions button {
+  pointer-events: auto;
+}
+
+.merch-commercial-capsule .merch-sound-toggle,
+.merch-commercial-expand {
+  position: static;
+  min-height: 2.4rem;
+  padding: 0.66rem 0.88rem;
+  border: 1px solid rgba(41, 247, 255, 0.48);
+  border-radius: 999px;
+  color: #effbff;
+  background: rgba(2, 8, 18, 0.82);
+  box-shadow: 0 0 24px rgba(41, 247, 255, 0.14);
+  font: 900 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+}
+
+.merch-commercial-expand {
+  border-color: rgba(255, 209, 102, 0.68);
+  color: #071016;
+  background: linear-gradient(135deg, #ffe071, #7ff5ff);
+}
+
+.merch-commercial-capsule .merch-sound-toggle:hover,
+.merch-commercial-capsule .merch-sound-toggle:focus-visible,
+.merch-commercial-capsule .merch-sound-toggle.is-playing,
+.merch-commercial-expand:hover,
+.merch-commercial-expand:focus-visible {
+  color: #03070c;
+  border-color: #e9ff82;
+  background: linear-gradient(135deg, #e9ff82, #29f7ff);
+  box-shadow: 0 0 30px rgba(41, 247, 255, 0.35);
+}
+
+.merch-commercial-capsule > span {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.95rem 1rem 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+}
+
+.merch-commercial-capsule > span::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  content: "";
+  border-radius: 50%;
+  background: #ff3d8a;
+  box-shadow: 0 0 0 0.28rem rgba(255, 61, 138, 0.12), 0 0 1rem #ff3d8a;
+  animation: merch-commercial-live 1.35s ease-in-out infinite;
+}
+
+.merch-commercial-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: clamp(0.8rem, 3vw, 2.5rem);
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(41, 247, 255, 0.13), transparent 50%),
+    rgba(1, 3, 8, 0.94);
+  backdrop-filter: blur(22px);
+  opacity: 1;
+  transition: opacity 240ms ease;
+}
+
+.merch-commercial-modal.is-hidden {
+  display: none;
+}
+
+.merch-commercial-modal__panel {
+  width: min(76rem, 96vw);
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.5);
+  border-radius: 1.2rem;
+  background: linear-gradient(155deg, rgba(8, 21, 37, 0.98), rgba(2, 5, 12, 0.99));
+  box-shadow: 0 3rem 10rem rgba(0, 0, 0, 0.76), 0 0 4rem rgba(41, 247, 255, 0.15);
+}
+
+.merch-commercial-modal__header,
+.merch-commercial-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+}
+
+.merch-commercial-modal__header {
+  border-bottom: 1px solid rgba(41, 247, 255, 0.18);
+}
+
+.merch-commercial-modal__header small {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #7ff5ff;
+  font: 800 0.64rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.merch-commercial-modal__header h2 {
+  margin: 0;
+  color: #effbff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.merch-commercial-modal__close {
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 209, 102, 0.55);
+  border-radius: 50%;
+  color: #effbff;
+  background: rgba(2, 8, 18, 0.78);
+  font-weight: 900;
+}
+
+.merch-commercial-modal__stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+}
+
+.merch-commercial-modal__stage video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.merch-commercial-modal__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, transparent 0 48%, rgba(127, 245, 255, 0.1) 50%, transparent 52%);
+  background-size: 100% 220%;
+  mix-blend-mode: screen;
+  animation: merch-commercial-scan 4.5s linear infinite;
+}
+
+.merch-commercial-modal__footer {
+  border-top: 1px solid rgba(41, 247, 255, 0.18);
+}
+
+.merch-commercial-modal__footer p {
+  max-width: 44rem;
+  margin: 0;
+  color: rgba(239, 251, 255, 0.72);
+  line-height: 1.5;
+}
+
+.merch-commercial-modal__footer > div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.65rem;
+}
+
+.merch-commercial-modal__footer button,
+.merch-commercial-modal__footer a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.72rem 1rem;
+  border: 1px solid rgba(41, 247, 255, 0.45);
+  border-radius: 0.55rem;
+  color: #effbff;
+  background: rgba(2, 8, 18, 0.82);
+  font: 900 0.68rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.07em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.merch-commercial-modal__footer a {
+  border-color: rgba(255, 209, 102, 0.72);
+  color: #071016;
+  background: linear-gradient(135deg, #ffe071, #7ff5ff);
+}
+
+body.has-merch-commercial-modal {
+  overflow: hidden;
+}
+
+@keyframes merch-commercial-live {
+  50% { opacity: 0.45; transform: scale(0.78); }
+}
+
+@keyframes merch-commercial-scan {
+  to { background-position: 0 -220%; }
+}
+
+@media (max-width: 720px) {
+  .merch-commercial-actions {
+    bottom: 3.55rem;
+    justify-content: stretch;
+  }
+
+  .merch-commercial-actions button {
+    flex: 1 1 0;
+  }
+
+  .merch-commercial-modal {
+    place-items: start center;
+    padding: 0;
+  }
+
+  .merch-commercial-modal__panel {
+    width: 100%;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .merch-commercial-modal__header,
+  .merch-commercial-modal__footer {
+    align-items: stretch;
+  }
+
+  .merch-commercial-modal__footer {
+    flex-direction: column;
+  }
+
+  .merch-commercial-modal__footer > div {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .merch-commercial-capsule > span::before,
+  .merch-commercial-modal__scan {
+    animation: none;
+  }
+}
+
 html.lm-mobile-performance body.merch-store-page .merch-hero-video {
   display: block !important;
   opacity: 0.4;
@@ -2584,4 +2881,42 @@ body.has-merch-shadow-popup {
   .gallery-section .merch-section-copy:focus-within p {
     transform: none;
   }
+}
+
+/* Final commercial overrides: intentionally follow all legacy product-card rules. */
+.merch-hero-product.merch-commercial-capsule {
+  width: min(100%, 46rem);
+  border-color: rgba(255, 209, 102, 0.46);
+  background: #02060d;
+  box-shadow:
+    0 2.5rem 8rem rgba(0, 245, 255, 0.2),
+    0 0 0 1px rgba(41, 247, 255, 0.12),
+    inset 0 0 64px rgba(3, 5, 10, 0.58);
+}
+
+.merch-hero-product.merch-commercial-capsule::before {
+  background: radial-gradient(ellipse at center, transparent 64%, rgba(2, 5, 12, 0.35) 100%);
+  mix-blend-mode: normal;
+}
+
+.merch-hero-product.merch-commercial-capsule::after {
+  opacity: 0.16;
+}
+
+.merch-hero-product.merch-commercial-capsule > span {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.95rem 1rem 1rem;
+  color: #ffd166;
+  background: linear-gradient(90deg, rgba(2, 5, 12, 0.94), rgba(2, 5, 12, 0.72));
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+}
+
+/* Keep ambient hero audio separate from the commercial's own controls. */
+.merch-hero .merch-hero-video-toggle {
+  top: 1.35rem;
+  right: 1.35rem;
 }

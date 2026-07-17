@@ -54,8 +54,19 @@ function isSpeculative(item: LottoMindNewsItem): boolean {
   return ["UFO / UAP", "The Unexplained", "Paranormal", "Numerology", "Horoscopes"].includes(item.category) && !item.isOfficialSource;
 }
 
+function headlineArtTone(item: LottoMindNewsItem): "official" | "winner" | "jackpot" | "mystery" | "signal" {
+  if (isSpeculative(item)) return "mystery";
+  if (item.category === "Lottery Winners") return "winner";
+  if (["Jackpot Watch", "Powerball / Mega Millions"].includes(item.category)) return "jackpot";
+  if (item.isOfficialSource) return "official";
+  return "signal";
+}
+
 function ArticleCard({ item, saved, onSave }: { item: LottoMindNewsItem; saved: boolean; onSave: (id: string) => void }) {
   const [copied, setCopied] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const hasPublisherImage = Boolean(item.imageUrl && !imageFailed);
+  const artTone = headlineArtTone(item);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(item.articleUrl);
@@ -68,13 +79,31 @@ function ArticleCard({ item, saved, onSave }: { item: LottoMindNewsItem; saved: 
 
   return (
     <article className={`news-card ${isSpeculative(item) ? "news-card--speculative" : ""}`}>
-      {item.imageUrl ? (
-        <a className="news-card__media" href={item.articleUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open ${item.title} at ${item.source}`}>
-          <img src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" />
-        </a>
-      ) : (
-        <div className="news-card__signal" aria-hidden="true"><Signal size={24} /></div>
-      )}
+      <a
+        className={`news-card__media news-card__media--${artTone} ${hasPublisherImage ? "has-publisher-image" : "is-headline-art"}`}
+        href={item.articleUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open ${item.title} at ${item.source}`}
+      >
+        {hasPublisherImage ? (
+          <img
+            src={item.imageUrl}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setImageFailed(true)}
+          />
+        ) : null}
+        <span className="news-card__art-grid" aria-hidden="true" />
+        <span className="news-card__headline-art" aria-hidden="true">
+          <span className="news-card__headline-kicker">
+            <Signal size={13} /> {item.isOfficialSource ? "Official headline signal" : "Current headline signal"}
+          </span>
+          <strong>{item.title}</strong>
+          <span className="news-card__headline-source">{item.source} · {item.displayDate}</span>
+        </span>
+      </a>
       <div className="news-card__body">
         <div className="news-card__labels">
           <span className="category-label">{item.category}</span>

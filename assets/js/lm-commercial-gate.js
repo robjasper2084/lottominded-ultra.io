@@ -1,12 +1,12 @@
 (() => {
   "use strict";
 
-  const films = [
+  const filmLibrary = [
     {
       signal: "Film 01 / Product signal",
       title: "Meet the Guardian.",
       telemetry: "LM-GUARDIAN / REVEAL",
-      copy: "The $19.95 Little Man Luggage Charm and Backpack Guardian includes three complimentary months of LottoMind app membership.",
+      copy: "The $29.95 Little Man Luggage Charm and Backpack Guardian includes three complimentary months of LottoMind app membership.",
       src: "./assets/merch/lottomind-guardian-commercial-reveal-20260716.mp4",
       poster: "./assets/merch/lottomind-guardian-commercial-reveal-poster-20260716.png"
     },
@@ -31,7 +31,11 @@
   const body = document.body;
   if (!body || body.matches(".memberships-page")) return;
 
-  const routeName = body.matches(".beat2lotto-game-page") ? "Beat2Lotto+" : "Guide";
+  const isBeat2Lotto = body.matches(".beat2lotto-game-page");
+  const films = isBeat2Lotto
+    ? [{ ...filmLibrary[1], signal: "Beat2Lotto+ / Guardian signal" }]
+    : filmLibrary;
+  const routeName = isBeat2Lotto ? "Beat2Lotto+" : "Guide";
   const storageKey = `lm-commercial-gate-last:${location.pathname}`;
   let previous = -1;
   try {
@@ -63,16 +67,18 @@
         <span class="lm-commercial-gate__telemetry"><b></b><b>Transmission secure</b></span>
       </div>
       <nav class="lm-commercial-gate__chapters" aria-label="Commercial chapters">
-        <button type="button" data-film-index="0"><b>01</b><span>Meet the Guardian</span></button>
-        <button type="button" data-film-index="1"><b>02</b><span>Clip it on</span></button>
-        <button type="button" data-film-index="2"><b>03</b><span>Carry the signal</span></button>
+        ${films.map((film, index) => `
+          <button type="button" data-film-index="${index}">
+            <b>${String(index + 1).padStart(2, "0")}</b>
+            <span>${film.title.replace(/\.$/, "")}</span>
+          </button>`).join("")}
       </nav>
       <footer class="lm-commercial-gate__footer">
         <p></p>
         <div class="lm-commercial-gate__actions">
           <button type="button" class="lm-commercial-gate__replay">Replay</button>
           <button type="button" class="lm-commercial-gate__enter">Enter ${routeName}</button>
-          <a class="lm-commercial-gate__shop" href="./merch-store.html?product=guardian#keychains">Shop Guardian · $19.95</a>
+          <a class="lm-commercial-gate__shop" href="./merch-store.html?product=guardian#keychains">Shop Guardian · $29.95</a>
         </div>
       </footer>
     </div>`;
@@ -86,6 +92,7 @@
   const replayButton = modal.querySelector(".lm-commercial-gate__replay");
   const closeButtons = [modal.querySelector(".lm-commercial-gate__skip"), modal.querySelector(".lm-commercial-gate__enter")];
   const siblings = [...body.children].filter((node) => node !== modal && node.tagName !== "SCRIPT");
+  let closing = false;
 
   const renderFilm = (index, autoplay = true) => {
     activeIndex = ((index % films.length) + films.length) % films.length;
@@ -97,6 +104,9 @@
     video.poster = film.poster;
     video.src = film.src;
     video.muted = true;
+    // Every route gate is a one-pass commercial. When the film completes,
+    // the gate releases the page instead of looping or advancing a playlist.
+    video.loop = false;
     chapterButtons.forEach((button, buttonIndex) => {
       const active = buttonIndex === activeIndex;
       button.classList.toggle("is-active", active);
@@ -107,11 +117,32 @@
   };
 
   const closeGate = () => {
+    if (closing) return;
+    closing = true;
     video.pause();
-    modal.classList.remove("is-open");
-    body.classList.remove("has-lm-commercial-gate");
-    siblings.forEach((node) => node.removeAttribute("inert"));
-    window.setTimeout(() => modal.remove(), 380);
+
+    // Start the branded reveal while the commercial still covers the page.
+    // The gate then fades onto the already-running transition instead of
+    // exposing a blank frame between the two layers.
+    window.dispatchEvent(new CustomEvent("lottomind:commercial-dismissed", {
+      detail: {
+        label: routeName,
+        source: "route-commercial",
+        theme: isBeat2Lotto ? "beat2lotto" : "guide"
+      }
+    }));
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        modal.classList.add("is-handing-off");
+        modal.classList.remove("is-open");
+        window.setTimeout(() => {
+          modal.remove();
+          body.classList.remove("has-lm-commercial-gate");
+          siblings.forEach((node) => node.removeAttribute("inert"));
+        }, 150);
+      });
+    });
   };
 
   body.append(modal);
@@ -131,7 +162,7 @@
     video.play().catch(() => {});
   });
   closeButtons.forEach((button) => button.addEventListener("click", closeGate));
-  video.addEventListener("ended", () => renderFilm(activeIndex + 1));
+  video.addEventListener("ended", closeGate);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) video.pause();
   });

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "gothtechnology.keymap.v1";
+const STORAGE_KEY = "gothtechnology.keymap.v2";
 
 const DEFAULT_KEYMAP = Object.freeze({
   KeyA: "p1.left",
@@ -20,16 +20,16 @@ const DEFAULT_KEYMAP = Object.freeze({
   ArrowRight: "p2.right",
   ArrowUp: "p2.up",
   ArrowDown: "p2.down",
-  Numpad1: "p2.lightPunch",
-  Numpad4: "p2.heavyPunch",
-  Numpad2: "p2.lightKick",
-  Numpad5: "p2.heavyKick",
-  Numpad3: "p2.special",
-  Numpad6: "p2.super",
-  Numpad0: "p2.throw",
-  Numpad7: "p2.assist1",
-  Numpad8: "p2.assist2",
-  Numpad9: "p2.taunt",
+  Slash: "p2.lightPunch",
+  Period: "p2.heavyPunch",
+  Semicolon: "p2.lightKick",
+  Quote: "p2.heavyKick",
+  BracketRight: "p2.special",
+  Backslash: "p2.super",
+  Comma: "p2.throw",
+  Minus: "p2.assist1",
+  Equal: "p2.assist2",
+  BracketLeft: "p2.taunt",
   ShiftRight: "p2.dash",
   Enter: "ui.confirm",
   Space: "ui.confirm",
@@ -39,7 +39,11 @@ const DEFAULT_KEYMAP = Object.freeze({
   KeyT: "ui.training",
   KeyB: "ui.debug",
   KeyG: "ui.mute",
-  KeyR: "ui.reset"
+  KeyR: "ui.reset",
+  KeyV: "ui.dummy",
+  KeyF: "ui.record",
+  KeyE: "ui.playback",
+  KeyX: "ui.frameData"
 });
 
 const isEditableTarget = (target) => {
@@ -261,21 +265,27 @@ export class InputManager {
 
   actions(player) {
     const p = `p${player}`;
+    const modifier = this.isDown(`${p}.modifier`);
+    const lightPunch = this.consume(`${p}.lightPunch`);
+    const heavyPunch = this.consume(`${p}.heavyPunch`);
+    const lightKick = this.consume(`${p}.lightKick`);
+    const heavyKick = this.consume(`${p}.heavyKick`);
+    const special = this.consume(`${p}.special`);
     return {
       left: this.isDown(`${p}.left`),
       right: this.isDown(`${p}.right`),
       up: this.isDown(`${p}.up`),
       down: this.isDown(`${p}.down`),
-      lightPunch: this.consume(`${p}.lightPunch`),
-      heavyPunch: this.consume(`${p}.heavyPunch`),
-      lightKick: this.consume(`${p}.lightKick`),
-      heavyKick: this.consume(`${p}.heavyKick`),
-      special: this.consume(`${p}.special`),
-      super: this.consume(`${p}.super`),
-      throw: this.consume(`${p}.throw`),
-      assist1: this.consume(`${p}.assist1`),
-      assist2: this.consume(`${p}.assist2`),
-      taunt: this.consume(`${p}.taunt`),
+      lightPunch: !modifier && lightPunch,
+      heavyPunch: !modifier && heavyPunch,
+      lightKick: !modifier && lightKick,
+      heavyKick: !modifier && heavyKick,
+      special: !modifier && special,
+      super: this.consume(`${p}.super`) || (modifier && heavyPunch),
+      throw: this.consume(`${p}.throw`) || (modifier && lightPunch),
+      assist1: this.consume(`${p}.assist1`) || (modifier && lightKick),
+      assist2: this.consume(`${p}.assist2`) || (modifier && heavyKick),
+      taunt: this.consume(`${p}.taunt`) || (modifier && special),
       dash: this.consume(`${p}.dash`) || this.consume(`${p}.dashTap`)
     };
   }

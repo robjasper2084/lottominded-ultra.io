@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "cellWidth": 192,
+  "cellHeight": 192,
+  "columns": 6,
+  "rows": 4,
+  "frameCount": 24,
+  "anchor": "bottom-center",
+  "motions": {
+    "SUMMON": {
+      "row": 0,
+      "frames": 6,
+      "frameRate": 12,
+      "uniqueFrames": 6,
+      "sourceFigureCounts": [
+        3,
+        3
+      ]
+    },
+    "RUN": {
+      "row": 1,
+      "frames": 6,
+      "frameRate": 14,
+      "uniqueFrames": 6,
+      "sourceFigureCounts": [
+        3,
+        3
+      ]
+    },
+    "ATTACK": {
+      "row": 2,
+      "frames": 6,
+      "frameRate": 12,
+      "uniqueFrames": 6,
+      "sourceFigureCounts": [
+        3,
+        3
+      ]
+    },
+    "RECOVER": {
+      "row": 3,
+      "frames": 6,
+      "frameRate": 12,
+      "uniqueFrames": 6,
+      "sourceFigureCounts": [
+        3,
+        3
+      ]
+    }
+  }
+}

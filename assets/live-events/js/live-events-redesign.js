@@ -31,6 +31,8 @@
   const twitchLiveCard = document.querySelector("#twitch-live");
   const liveBallpassCanvas = document.querySelector("[data-live-ballpass-bg]");
   const previewIframes = Array.from(document.querySelectorAll(".event-card .video-thumb iframe"));
+  const heroSingerFilm = document.querySelector("[data-live-hero-film-video]");
+  const heroSingerSound = document.querySelector("[data-live-hero-film-sound]");
   const decorativeVideos = Array.from(document.querySelectorAll("video")).filter((video) => (
     !video.closest("#twitch-live") &&
     !video.closest("[data-lm-page-transition]") &&
@@ -100,6 +102,69 @@
       hype: "Signal recorded. That one is a clean creative seed."
     }
   ];
+
+  function setupHeroSingerFilm() {
+    if (!heroSingerFilm) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let isVisible = true;
+
+    const setSoundState = (active) => {
+      if (!heroSingerSound) return;
+      heroSingerSound.classList.toggle("is-active", active);
+      heroSingerSound.setAttribute("aria-pressed", String(active));
+      heroSingerSound.textContent = active ? "Sound off" : "Sound on";
+    };
+
+    const syncPlayback = () => {
+      if (document.hidden || reducedMotion.matches || !isVisible) {
+        heroSingerFilm.pause();
+        return;
+      }
+      heroSingerFilm.play().catch(() => {
+        heroSingerFilm.controls = true;
+      });
+    };
+
+    heroSingerSound?.addEventListener("click", async () => {
+      if (!heroSingerFilm.muted) {
+        heroSingerFilm.muted = true;
+        setSoundState(false);
+        syncPlayback();
+        return;
+      }
+
+      document.querySelectorAll("audio").forEach((audio) => audio.pause());
+      const wasPaused = heroSingerFilm.paused;
+      heroSingerFilm.muted = false;
+      heroSingerFilm.volume = 0.82;
+      try {
+        if (wasPaused) await heroSingerFilm.play();
+        setSoundState(true);
+      } catch {
+        heroSingerFilm.muted = true;
+        heroSingerFilm.controls = true;
+        setSoundState(false);
+      }
+    });
+
+    heroSingerFilm.addEventListener("volumechange", () => {
+      setSoundState(!heroSingerFilm.muted && heroSingerFilm.volume > 0);
+    });
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        isVisible = entries.some((entry) => entry.isIntersecting && entry.intersectionRatio > 0.08);
+        syncPlayback();
+      }, { threshold: [0, 0.08, 0.3] });
+      observer.observe(heroSingerFilm);
+    }
+
+    document.addEventListener("visibilitychange", syncPlayback);
+    reducedMotion.addEventListener?.("change", syncPlayback);
+    setSoundState(false);
+    syncPlayback();
+  }
   let botCursor = 0;
 
   function two(value) {
@@ -920,6 +985,7 @@
     });
   }
 
+  setupHeroSingerFilm();
   tickLiveTimer();
   window.setInterval(tickLiveTimer, 1000);
 })();

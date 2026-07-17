@@ -1,0 +1,21 @@
+{
+  "provider": "Higgsfield Nano Banana Pro",
+  "status": "promoted",
+  "generatedAt": "2026-07-14",
+  "pipeline": "higgsfield-v2",
+  "characters": {
+    "KALYX": {
+      "masterJobId": "1fd06f4d-cb3e-44a0-838c-e8f9989565ea",
+      "motionSheets": 39,
+      "runtimeFrames": 234
+    },
+    "MASTER_EZRA": {
+      "masterJobId": "c6063b17-b216-4e7d-8331-bf960eaf8e6b",
+      "motionSheets": 39,
+      "runtimeFrames": 234
+    }
+  },
+  "runtimeAtlasManifest": "assets/motion-atlases/motion-atlas-manifest.json",
+  "jobLedger": "assets/sprite-production/higgsfield-v2/jobs.json",
+  "legacyOverridesActive": false
+}

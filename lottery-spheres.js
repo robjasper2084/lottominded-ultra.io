@@ -798,8 +798,16 @@
   const closeButtons = popup.querySelectorAll("[data-jackpot-maze-close]");
   const closeButton = popup.querySelector(".spheres-jackpot-popup__close");
   const frame = popup.querySelector(".spheres-jackpot-popup__frame");
+  const autoOpenDelay = 60_000;
   let isOpen = popup.classList.contains("is-open");
+  let autoOpenTimer = 0;
   let returnFocus = null;
+
+  function cancelAutoOpen() {
+    if (!autoOpenTimer) return;
+    window.clearTimeout(autoOpenTimer);
+    autoOpenTimer = 0;
+  }
 
   function loadGame() {
     if (!frame || (frame.getAttribute("src") && frame.getAttribute("src") !== "about:blank")) return;
@@ -807,6 +815,7 @@
   }
 
   function openPopup(trigger = null) {
+    cancelAutoOpen();
     returnFocus = trigger instanceof HTMLElement ? trigger : document.activeElement;
     isOpen = true;
     popup.classList.add("is-open");
@@ -835,7 +844,21 @@
     button.addEventListener("click", () => openPopup(button));
   });
 
-  if (isOpen) openPopup();
+  function scheduleAutoOpen() {
+    cancelAutoOpen();
+    autoOpenTimer = window.setTimeout(() => {
+      autoOpenTimer = 0;
+      openPopup();
+    }, autoOpenDelay);
+  }
+
+  if (document.readyState === "complete") {
+    scheduleAutoOpen();
+  } else {
+    window.addEventListener("load", scheduleAutoOpen, { once: true });
+  }
+
+  window.addEventListener("pagehide", cancelAutoOpen, { once: true });
 })();
 
 (() => {

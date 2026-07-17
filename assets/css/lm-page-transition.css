@@ -1,7 +1,7 @@
 :root {
   --lm-transition-rgb: 41 247 255;
   --lm-transition-color: #29f7ff;
-  --lm-transition-duration: 520ms;
+  --lm-transition-duration: 875ms;
 }
 
 .lm-page-transition {

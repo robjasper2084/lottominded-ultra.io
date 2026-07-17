@@ -1,3 +1,4 @@
+import argparse
 import hashlib
 import json
 import math
@@ -6,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw
+
+from stabilize_motion_atlases import stabilize_manifest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +25,7 @@ SOURCE_ROWS = 2
 SOURCE_PANEL_GUTTER = 6
 FRAME_COUNT = SOURCE_COLUMNS * SOURCE_ROWS
 COMPONENT_SCALE = 4
+SOURCE_MAX_WIDTH = 1536
 
 CATEGORIES = {
     "locomotion": [
@@ -87,7 +91,7 @@ FRAME_DURATIONS = {
 }
 
 
-def chroma_key(image: Image.Image) -> Image.Image:
+def chroma_key(image: Image.Image, *, neutral_cleanup: bool = True) -> Image.Image:
     rgba = np.asarray(image.convert("RGBA"), dtype=np.uint8).copy()
     rgb = rgba[:, :, :3].astype(np.int16)
     red, green, blue = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
@@ -113,7 +117,7 @@ def chroma_key(image: Image.Image) -> Image.Image:
         box_area = (xs.max() - xs.min() + 1) * (ys.max() - ys.min() + 1)
         rectangularity = len(xs) / max(1, box_area)
         coverage = len(xs) / (keyed.width * keyed.height)
-        if rectangularity > 0.7 or coverage > 0.5:
+        if neutral_cleanup and (rectangularity > 0.7 or coverage > 0.5):
             keyed_rgba = np.asarray(keyed, dtype=np.uint8).copy()
             edge_rgb = np.concatenate(
                 (
@@ -187,7 +191,13 @@ def chroma_key(image: Image.Image) -> Image.Image:
     return keyed
 
 
-def validate_transparency(image: Image.Image, label: str) -> None:
+def validate_transparency(
+    image: Image.Image,
+    label: str,
+    *,
+    max_coverage: float = 0.55,
+    max_rectangularity: float = 0.78,
+) -> None:
     alpha = np.asarray(image.getchannel("A"))
     ys, xs = np.where(alpha > 24)
     if not len(xs):
@@ -195,7 +205,7 @@ def validate_transparency(image: Image.Image, label: str) -> None:
     box_area = (xs.max() - xs.min() + 1) * (ys.max() - ys.min() + 1)
     rectangularity = len(xs) / max(1, box_area)
     coverage = len(xs) / (image.width * image.height)
-    if rectangularity > 0.78 or coverage > 0.55:
+    if rectangularity > max_rectangularity or coverage > max_coverage:
         raise ValueError(
             f"{label} retained a panel background: coverage={coverage:.3f} rectangularity={rectangularity:.3f}"
         )
@@ -246,6 +256,30 @@ def connected_components(mask: np.ndarray) -> list[dict]:
 def remove_edge_grid_seams(image: Image.Image) -> Image.Image:
     rgba = np.asarray(image, dtype=np.uint8).copy()
     alpha = rgba[:, :, 3]
+    dark_foreground = (alpha > 24) & (rgba[:, :, :3].max(axis=2) < 24)
+
+    def clear_long_dark_runs(projection: np.ndarray, axis: str, span: int) -> None:
+        indices = np.where(projection > span * 0.52)[0]
+        if not len(indices):
+            return
+        run_start = previous = int(indices[0])
+        for raw_index in (*indices[1:], None):
+            index = None if raw_index is None else int(raw_index)
+            if index is not None and index == previous + 1:
+                previous = index
+                continue
+            if previous - run_start + 1 <= 18:
+                start = max(0, run_start - 3)
+                end = previous + 4
+                if axis == "vertical":
+                    alpha[:, start:end] = 0
+                else:
+                    alpha[start:end, :] = 0
+            if index is not None:
+                run_start = previous = index
+
+    clear_long_dark_runs(dark_foreground.sum(axis=0), "vertical", image.height)
+    clear_long_dark_runs(dark_foreground.sum(axis=1), "horizontal", image.width)
 
     reduced = Image.fromarray(alpha, "L").resize(
         (max(1, image.width // COMPONENT_SCALE), max(1, image.height // COMPONENT_SCALE)),
@@ -346,9 +380,48 @@ def detect_row_boundary(source: Image.Image) -> int:
     return min(scores)[1]
 
 
+def resize_source_for_runtime(source: Image.Image) -> Image.Image:
+    if source.width <= SOURCE_MAX_WIDTH:
+        return source
+    scale = SOURCE_MAX_WIDTH / source.width
+    return source.resize(
+        (SOURCE_MAX_WIDTH, max(1, round(source.height * scale))),
+        Image.Resampling.LANCZOS,
+    )
+
+
+def source_figure_counts(path: Path) -> list[int]:
+    with Image.open(path) as source:
+        source = resize_source_for_runtime(source.convert("RGB"))
+        row_boundary = detect_row_boundary(source)
+        y_edges = [0, row_boundary, source.height]
+        counts = []
+        for row in range(SOURCE_ROWS):
+            row_image = source.crop(
+                (0, y_edges[row] + SOURCE_PANEL_GUTTER, source.width, y_edges[row + 1] - SOURCE_PANEL_GUTTER)
+            )
+            reduced_row = row_image.resize(
+                (max(1, row_image.width // COMPONENT_SCALE), max(1, row_image.height // COMPONENT_SCALE)),
+                Image.Resampling.LANCZOS,
+            )
+            keyed = chroma_key(reduced_row)
+            mask = np.asarray(keyed.getchannel("A")) > 24
+            mask_width = mask.shape[1]
+            candidates = [
+                component
+                for component in connected_components(mask)
+                if component["area"] > 500
+                and component["width"] > 12
+                and component["height"] > 28
+                and component["width"] < mask_width * 0.55
+            ]
+            counts.append(len(candidates))
+        return counts
+
+
 def split_sheet(path: Path) -> list[Image.Image]:
     with Image.open(path) as source:
-        source = source.convert("RGB")
+        source = resize_source_for_runtime(source.convert("RGB"))
         row_boundary = detect_row_boundary(source)
         y_edges = [0, row_boundary, source.height]
         frames = []
@@ -365,12 +438,138 @@ def split_sheet(path: Path) -> list[Image.Image]:
         return frames
 
 
+def panel_divider_runs(projection: np.ndarray, span: int) -> list[tuple[int, int]]:
+    indices = np.where(projection > 0.80)[0]
+    if not len(indices):
+        return []
+
+    runs = []
+    start = previous = int(indices[0])
+    for raw_index in (*indices[1:], None):
+        index = None if raw_index is None else int(raw_index)
+        if index is not None and index == previous + 1:
+            previous = index
+            continue
+        width = previous - start + 1
+        if 1 <= width <= max(24, round(span * 0.025)) and start > 2 and previous < span - 3:
+            runs.append((start, previous + 1))
+        if index is not None:
+            start = previous = index
+    return runs
+
+
+def panel_intervals(span: int, divider_runs: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    intervals = []
+    start = 0
+    for divider_start, divider_end in divider_runs:
+        if divider_start - start > SOURCE_PANEL_GUTTER * 2:
+            intervals.append((start, divider_start))
+        start = divider_end
+    if span - start > SOURCE_PANEL_GUTTER * 2:
+        intervals.append((start, span))
+    return intervals
+
+
+def split_horizontal_strip(path: Path) -> list[Image.Image]:
+    with Image.open(path) as source:
+        source = resize_source_for_runtime(source.convert("RGB"))
+        rgb = np.asarray(source, dtype=np.uint8)
+        dark = rgb.max(axis=2) < 90
+        y_intervals = panel_intervals(
+            source.height,
+            panel_divider_runs(dark.mean(axis=1), source.height),
+        )
+        initial_x_intervals = panel_intervals(
+            source.width,
+            panel_divider_runs(dark.mean(axis=0), source.width),
+        )
+        if len(initial_x_intervals) < FRAME_COUNT and len(y_intervals) == 1:
+            red = rgb[:, :, 0].astype(np.int16)
+            green = rgb[:, :, 1].astype(np.int16)
+            blue = rgb[:, :, 2].astype(np.int16)
+            green_delta = np.minimum(green - red, green - blue)
+            foreground = ~((green > 40) & (green_delta > 8))
+            row_occupancy = foreground.mean(axis=1)
+            low = round(source.height * 0.30)
+            high = round(source.height * 0.70)
+            split = low + int(np.argmin(row_occupancy[low:high]))
+            if row_occupancy[split] < 0.12:
+                y_intervals = [(0, split), (split + 1, source.height)]
+
+        panel_specs = []
+        row_widths = []
+        for row, (top, bottom) in enumerate(y_intervals, start=1):
+            row_dark = dark[top:bottom]
+            x_intervals = panel_intervals(
+                source.width,
+                panel_divider_runs(row_dark.mean(axis=0), source.width),
+            )
+            row_widths.append(len(x_intervals))
+            panel_specs.extend((row, column, left, top, right, bottom) for column, (left, right) in enumerate(x_intervals, start=1))
+
+        if len(panel_specs) < FRAME_COUNT:
+            raise ValueError(
+                f"Generated sheet {path.name} exposed only "
+                f"{' + '.join(map(str, row_widths))} complete panels"
+            )
+
+        frames = []
+        for row, column, left, top, right, bottom in panel_specs:
+            panel = source.crop((left, top, right, bottom))
+            keyed = remove_edge_grid_seams(chroma_key(panel, neutral_cleanup=False))
+            validate_transparency(
+                keyed,
+                f"{path.stem}/source-panel-{row}-{column}",
+                max_coverage=0.72,
+                max_rectangularity=0.86,
+            )
+            frames.append(keyed)
+
+        if len(frames) > FRAME_COUNT:
+            indices = [round(index * (len(frames) - 1) / (FRAME_COUNT - 1)) for index in range(FRAME_COUNT)]
+            frames = [frames[index] for index in indices]
+        return frames
+
+
 def alpha_bbox(image: Image.Image) -> tuple[int, int, int, int]:
     alpha = np.asarray(image.getchannel("A"))
     ys, xs = np.where(alpha > 24)
     if not len(xs):
         raise ValueError("Frame contains no foreground after chroma removal")
     return int(xs.min()), int(ys.min()), int(xs.max() + 1), int(ys.max() + 1)
+
+
+def repair_amara_aerial_frames(
+    motion: str,
+    frames: list[Image.Image],
+    source_frames: dict[str, list[Image.Image]],
+) -> list[Image.Image]:
+    repaired = list(frames)
+    if motion == "JUMP_PEAK":
+        repaired[3] = source_frames["JUMP_RISE"][2]
+    elif motion == "AIR_ATTACK":
+        repaired = [
+            frames[0],
+            frames[1],
+            source_frames["JUMP_START"][5],
+            frames[3],
+            source_frames["JUMP_PEAK"][4],
+            source_frames["JUMP_FALL"][0],
+        ]
+    return repaired
+
+
+def validate_detached_fragments(image: Image.Image, label: str) -> None:
+    alpha = np.asarray(image.getchannel("A")) > 24
+    total = int(alpha.sum())
+    significant = [
+        component
+        for component in connected_components(alpha)
+        if component["area"] >= total * 0.035
+    ]
+    if len(significant) > 1:
+        ratios = sorted((component["area"] / total for component in significant), reverse=True)
+        raise ValueError(f"{label} contains a detached foreground fragment: component ratios={ratios}")
 
 
 def validate_internal_splits(image: Image.Image, label: str) -> None:
@@ -495,17 +694,47 @@ def process_character(character_id: str, character_data: dict) -> tuple[str, dic
     if missing:
         raise ValueError(f"{character_id} is missing jobs: {sorted(missing)}")
 
+    if character_id == "DETROIT_LENS":
+        invalid_counts = []
+        for motion in sorted(expected):
+            raw_path = raw_root / f"{motion.lower()}.png"
+            counts = source_figure_counts(raw_path)
+            if counts != [SOURCE_COLUMNS, SOURCE_COLUMNS]:
+                invalid_counts.append(f"{motion}={counts}")
+        if invalid_counts:
+            raise ValueError(
+                f"{character_id} source sheets must contain exactly 3 poses per row: "
+                + ", ".join(invalid_counts)
+            )
+
+    source_frames = {}
+    if character_id == "AMARA_VALENTINE":
+        source_frames = {
+            motion: split_horizontal_strip(raw_root / f"{motion.lower()}.png")
+            for motion in expected
+        }
+
     for motion in expected:
         raw_path = raw_root / f"{motion.lower()}.png"
-        keyed_frames = split_sheet(raw_path)
+        keyed_frames = list(source_frames[motion]) if source_frames else split_sheet(raw_path)
+        if character_id == "AMARA_VALENTINE":
+            keyed_frames = repair_amara_aerial_frames(motion, keyed_frames, source_frames)
         for index, frame in enumerate(keyed_frames, start=1):
-            validate_transparency(frame, f"{character_id}/{motion}/frame-{index}")
+            validate_transparency(
+                frame,
+                f"{character_id}/{motion}/frame-{index}",
+                max_coverage=0.72 if character_id == "AMARA_VALENTINE" else 0.55,
+                max_rectangularity=0.86 if character_id == "AMARA_VALENTINE" else 0.78,
+            )
         frames = normalize_frames(keyed_frames)
         for index, frame in enumerate(frames, start=1):
             validate_internal_splits(frame, f"{character_id}/{motion}/frame-{index}")
+            if character_id == "AMARA_VALENTINE" and motion in {"JUMP_PEAK", "AIR_ATTACK"}:
+                validate_detached_fragments(frame, f"{character_id}/{motion}/frame-{index}")
         if len({frame_hash(frame) for frame in frames}) < 5:
             raise ValueError(f"{character_id}/{motion} has fewer than five unique normalized frames")
         motion_frames[motion] = frames
+        print(f"Normalized {character_id} {len(motion_frames)}/{len(expected)} {motion}", flush=True)
 
     save_preview(slug, motion_frames)
     packed = {}
@@ -517,26 +746,43 @@ def process_character(character_id: str, character_data: dict) -> tuple[str, dic
 
     for motion, data in packed.items():
         data["higgsfieldJobId"] = character_data["motions"][motion]["jobId"]
+        if character_id == "AMARA_VALENTINE" and motion in {"JUMP_PEAK", "AIR_ATTACK"}:
+            data["repair"] = "amara-aerial-v1"
     return slug, {"atlasFiles": atlas_files, "motions": packed}
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--character", action="append")
+    args = parser.parse_args()
+
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     jobs = json.loads(JOBS_PATH.read_text(encoding="utf-8"))
-    manifest = {
-        "version": 2,
-        "provider": "Higgsfield Nano Banana Pro",
-        "cellSize": CELL_SIZE,
-        "columns": ATLAS_COLUMNS,
-        "framesPerMotion": FRAME_COUNT,
-        "characters": {},
-    }
+    if args.character and OUTPUT_MANIFEST.exists():
+        manifest = json.loads(OUTPUT_MANIFEST.read_text(encoding="utf-8"))
+    else:
+        manifest = {
+            "version": 3,
+            "provider": "Higgsfield Nano Banana Pro",
+            "cellSize": CELL_SIZE,
+            "columns": ATLAS_COLUMNS,
+            "framesPerMotion": FRAME_COUNT,
+            "characters": {},
+        }
 
-    for character_id, character_data in jobs["characters"].items():
+    manifest["version"] = 3
+    requested = list(dict.fromkeys(args.character or jobs["characters"].keys()))
+    unknown = set(requested) - set(jobs["characters"])
+    if unknown:
+        raise SystemExit(f"Unknown characters: {sorted(unknown)}")
+
+    for character_id in requested:
+        character_data = jobs["characters"][character_id]
         _, packed = process_character(character_id, character_data)
         manifest["characters"][character_id] = packed
 
     OUTPUT_MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    stabilize_manifest(ROOT, OUTPUT_MANIFEST)
     total = sum(path.stat().st_size for path in OUTPUT_ROOT.glob("*.webp"))
     print(f"Packed {sum(len(value['motions']) for value in manifest['characters'].values())} motions")
     print(f"Runtime atlas payload: {total / 1024 / 1024:.2f} MiB")

@@ -25,7 +25,7 @@
   var entitlementConfig = null;
   var pendingTransactions = new Map();
   var collectorPackReported = false;
-  var analyticsSurface = document.body.classList.contains("memberships-page") ? "memberships" : "beat2lotto";
+  var analyticsSurface = document.body.classList.contains("memberships-page") ? "memberships" : document.body.classList.contains("home-page") ? "home" : "beat2lotto";
 
   function formatDate(value) {
     if (!value) return "No expiration";
@@ -152,7 +152,7 @@
     var shouldOpen = typeof open === "boolean" ? open : panel.hidden;
     panel.hidden = !shouldOpen;
     trigger.setAttribute("aria-expanded", String(shouldOpen));
-    if (analyticsSurface === "memberships") document.body.classList.toggle("has-collector-panel", shouldOpen);
+    if (analyticsSurface === "memberships" || analyticsSurface === "home") document.body.classList.toggle("has-collector-panel", shouldOpen);
     if (shouldOpen) {
       account.analytics("collector_panel_viewed", { surface: analyticsSurface });
       setTimeout(function focusPanel() { closeButton.focus(); }, 0);
@@ -162,7 +162,7 @@
   }
 
   function syncPanelPortal() {
-    var shouldUseBody = analyticsSurface === "memberships" || mobilePanelMedia.matches;
+    var shouldUseBody = analyticsSurface === "memberships" || analyticsSurface === "home" || mobilePanelMedia.matches;
     if (shouldUseBody && panel.parentNode !== document.body) document.body.appendChild(panel);
     if (!shouldUseBody && panel.parentNode !== panelHome) panelHome.appendChild(panel);
   }

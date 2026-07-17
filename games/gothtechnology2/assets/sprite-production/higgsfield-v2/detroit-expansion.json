@@ -1,0 +1,40 @@
+{
+  "provider": "Higgsfield Nano Banana Pro",
+  "character": {
+    "id": "DETROIT_LENS",
+    "masterJobId": "8c3e4e29-296b-4ffa-b1d9-9104f945075c",
+    "references": [
+      "hf_20260416_221840_95b4a297-4169-4aef-b120-1911c7418878.png",
+      "hf_20260410_164700_5c4c6d6b-a7c0-4293-b6b2-ecbeccef6d8e.png"
+    ]
+  },
+  "assets": {
+    "boerboel": {
+      "provider": "OpenAI image generation",
+      "referenceCount": 4,
+      "motions": ["SUMMON", "RUN", "ATTACK", "RECOVER"],
+      "frames": 24,
+      "runtime": "assets/user-effects/detroit-boerboel-atlas.webp"
+    },
+    "detroitMidnightMile": {
+      "jobId": "e2de0756-734b-454c-b98b-e78b8e5be394",
+      "runtime": "assets/user-stage/detroit-midnight-mile.webp"
+    },
+    "motorCityAssembly": {
+      "jobId": "d2f8b67c-0f1b-46d7-8888-232f7c580366",
+      "runtime": "assets/user-stage/motor-city-assembly.webp"
+    },
+    "detroitRiverfront": {
+      "jobId": "872981e4-d3be-410f-88bd-27806854ec43",
+      "runtime": "assets/user-stage/detroit-riverfront.webp"
+    },
+    "easternMarketAfterDark": {
+      "jobId": "579ab089-8ea5-4a75-a616-c046ca9c0b76",
+      "runtime": "assets/user-stage/eastern-market-after-dark.webp"
+    },
+    "michiganCentralConcourse": {
+      "jobId": "02f3ff58-ecce-4cbd-b644-54125a8bb73a",
+      "runtime": "assets/user-stage/michigan-central-concourse.webp"
+    }
+  }
+}

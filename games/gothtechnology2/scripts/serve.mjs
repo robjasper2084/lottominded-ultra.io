@@ -16,7 +16,8 @@ const contentTypes = {
   ".mjs": "text/javascript; charset=utf-8",
   ".mp3": "audio/mpeg",
   ".mp4": "video/mp4",
-  ".png": "image/png"
+  ".png": "image/png",
+  ".webp": "image/webp"
 };
 
 export const createGameServer = () => createServer(async (request, response) => {

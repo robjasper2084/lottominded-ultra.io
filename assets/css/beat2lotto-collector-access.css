@@ -118,11 +118,24 @@
   z-index: 1001;
 }
 
-.memberships-page.has-collector-panel {
+.memberships-page.has-collector-panel,
+.home-page.has-collector-panel {
   overflow: hidden;
 }
 
-.memberships-page .collector-access__panel {
+.memberships-page.has-collector-panel .home-signal-marquee {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.home-page.has-collector-panel .lm-mascot-pointer,
+.home-page.has-collector-panel .lm-heart-pointer {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.memberships-page .collector-access__panel,
+.home-page .collector-access__panel {
   position: fixed;
   top: clamp(6.5rem, 12vh, 9rem);
   right: auto;
