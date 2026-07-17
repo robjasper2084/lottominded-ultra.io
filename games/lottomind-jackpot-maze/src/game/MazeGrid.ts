@@ -51,9 +51,13 @@ export function createMazeDefinition(level = 0): MazeDefinition {
   grid[9][10] = '.';
   grid[tunnelRow][0] = '.'; grid[tunnelRow][width - 1] = '.';
 
-  const playerSpawn = { x: 10, y: 19 };
-  const player2Spawn = [{ x: 11, y: 19 }, { x: 9, y: 19 }, { x: 10, y: 20 }, { x: 10, y: 18 }]
-    .find(point => grid[point.y]?.[point.x] !== '#') ?? { x: 10, y: 19 };
+  const exitCount = (point: GridPoint) => [[0, -1], [0, 1], [-1, 0], [1, 0]]
+    .filter(([dx, dy]) => grid[point.y + dy]?.[point.x + dx] !== undefined && grid[point.y + dy][point.x + dx] !== '#').length;
+  const spawnCandidates = [{ x: 10, y: 19 }, { x: 10, y: 18 }, { x: 10, y: 20 }, { x: 9, y: 19 }, { x: 11, y: 19 }, { x: 9, y: 20 }, { x: 11, y: 20 }];
+  const playerSpawn = spawnCandidates.find(point => grid[point.y]?.[point.x] !== '#' && exitCount(point) >= 2) ?? { x: 10, y: 19 };
+  const player2Spawn = spawnCandidates
+    .filter(point => point.x !== playerSpawn.x || point.y !== playerSpawn.y)
+    .find(point => grid[point.y]?.[point.x] !== '#' && exitCount(point) >= 2) ?? spawnCandidates.find(point => point.x !== playerSpawn.x || point.y !== playerSpawn.y) ?? { x: 11, y: 19 };
   const powerTiles = [{ x: 1, y: 1 }, { x: width - 2, y: 1 }, { x: 1, y: height - 2 }, { x: width - 2, y: height - 2 }];
   grid[playerSpawn.y][playerSpawn.x] = ' ';
   grid[player2Spawn.y][player2Spawn.x] = ' ';
@@ -112,7 +116,7 @@ export function shouldSnapLateTurn(
   queued: CardinalDirection,
   current: GridDirection,
   progress: number,
-  window = 0.34
+  window = 0.48
 ): boolean {
   if (current === 'none' || queued === current || queued === OPPOSITE[current]) return false;
   if (progress <= 0 || progress > window) return false;

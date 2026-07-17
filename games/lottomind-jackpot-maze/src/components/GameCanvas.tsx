@@ -5,6 +5,7 @@ import { DETROIT_LEVELS } from '../config/gameBalance';
 import { BONUS_TIERS, STREET_BONUSES } from '../config/streetBonuses';
 import { commercialForCompletedLevel, shouldShowCommercialAfterLevel } from '../config/levelCommercials';
 import { LOTTERY_RULES } from '../config/lotteryRules';
+import { EMPTY_MISSION_STATS, evaluateDetroitMissions } from '../config/detroitMissions';
 import { generateLotteryDraw } from '../services/secureRandom';
 import type { ControlAction, ControlBindings, ControlPreset, CosmeticId, GameCheckpoint, GameSnapshot, LotteryDraw, LotteryMode, PlayerCount, PlayStyle, RunVariant } from '../types/game';
 import type { GameSettings } from '../services/settings';
@@ -14,6 +15,42 @@ const IN_GAME_TRACK = 'untitled-14-gameplay-96.mp3';
 const COMMERCIAL_LOTTERY_MODES: LotteryMode[] = ['pick3', 'pick4', 'megaMillions', 'powerball'];
 const keyLabel = (code: string) => code.replace(/^Key/, '').replace(/^Arrow/, '').replace('Space', 'SPACE').replace('Enter', 'ENTER');
 const directionArrow = { N: '↑', NE: '↗', E: '→', SE: '↘', S: '↓', SW: '↙', W: '←', NW: '↖' } as const;
+
+function snapshotFromCheckpoint(checkpoint: GameCheckpoint, playerCount: PlayerCount, runVariant: RunVariant): GameSnapshot {
+  const totalSlots = checkpoint.draw.main.length + (checkpoint.draw.special === undefined ? 0 : 1);
+  const remainingHearts = checkpoint.remainingHeartKeys?.length ?? 0;
+  return {
+    ...initialSnapshot,
+    world: checkpoint.world,
+    score: checkpoint.score,
+    playerCount,
+    activePlayer: checkpoint.activePlayer,
+    playerScores: [...checkpoint.playerScores],
+    playerLives: [...checkpoint.playerLives],
+    playerShields: [...checkpoint.playerShields],
+    coins: checkpoint.pellets,
+    remainingHearts,
+    lives: checkpoint.lives,
+    revealed: [...checkpoint.revealed],
+    totalSlots,
+    powerUp: checkpoint.shielded ? 'Mind Coin Shield • READY' : 'Shield recharging',
+    hasMoved: true,
+    powerUpsUsed: checkpoint.powerUpsUsed,
+    villainEncounters: checkpoint.villainEncounters,
+    bossHealth: checkpoint.bossHealth ?? 0,
+    bossMaxHealth: 0,
+    bonusesCollected: checkpoint.bonusesCollected ?? 0,
+    bestCombo: checkpoint.bestCombo ?? 1,
+    heartsCollected: checkpoint.pellets,
+    levelHeartsTotal: checkpoint.pellets + remainingHearts,
+    eventsCompleted: checkpoint.eventsCompleted ?? 0,
+    missedBonuses: checkpoint.missedBonuses ?? 0,
+    runVariant,
+    timeAttackSeconds: Math.max(0, Math.ceil((checkpoint.levelTimeRemainingMs ?? 0) / 1000)),
+    missions: evaluateDetroitMissions(checkpoint.world, { ...EMPTY_MISSION_STATS, ...checkpoint.levelMissionStats }),
+    missionsCompleted: checkpoint.missionsCompleted ?? 0
+  };
+}
 
 export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic, muted, musicVolume, effectsVolume, reducedMotion, highContrast, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, hudScale, tutorialSeen, initialCheckpoint, onTutorialComplete, onSettingsChange, onCheckpoint, onComplete, onQuit }: {
   draw: LotteryDraw;
@@ -48,7 +85,9 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
   const commercialVideo = useRef<HTMLVideoElement | null>(null);
   const continueRunAfterCommercial = useRef<(() => void) | null>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
-  const [snapshot, setSnapshot] = useState(initialSnapshot);
+  const [snapshot, setSnapshot] = useState(() => initialCheckpoint ? snapshotFromCheckpoint(initialCheckpoint, playerCount, runVariant) : { ...initialSnapshot, playerCount, runVariant });
+  const [restoringRun, setRestoringRun] = useState(Boolean(initialCheckpoint));
+  const [liveSummary, setLiveSummary] = useState('');
   const [paused, setPaused] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(tutorialSeen ? -1 : 0);
   const [capture, setCapture] = useState<{ player: 0 | 1; action: ControlAction } | null>(null);
@@ -61,6 +100,8 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
   const pauseButton = useRef<HTMLButtonElement>(null);
   const pauseWasOpen = useRef(false);
   const level = DETROIT_LEVELS[snapshot.world] ?? DETROIT_LEVELS[0];
+  const lockedCount = snapshot.revealed.filter(value => value !== null).length;
+  const completedMissionCount = snapshot.missions.filter(mission => mission.complete).length;
   const isLevelIntro = Boolean(snapshot.warning?.includes('LEVEL') && snapshot.warning.includes('READY'));
   const levelCommercial = commercialLevel === null ? null : commercialForCompletedLevel(commercialLevel);
   const tutorialSteps = [
@@ -131,6 +172,33 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
   }, [paused]);
 
   useEffect(() => {
+    if (!paused) return;
+    const handlePauseKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (confirmExit) setConfirmExit(false);
+        else runtime.current?.setPaused(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !pauseDialog.current) return;
+      const focusable = [...pauseDialog.current.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), select:not(:disabled), summary, [tabindex]:not([tabindex="-1"])')];
+      if (!focusable.length) return;
+      const first = focusable[0]; const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    window.addEventListener('keydown', handlePauseKeys, true);
+    return () => window.removeEventListener('keydown', handlePauseKeys, true);
+  }, [confirmExit, paused]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setLiveSummary(`Level ${snapshot.world + 1}. Score ${snapshot.score}. ${snapshot.remainingHearts} hearts remain. ${lockedCount} of ${snapshot.totalSlots} numbers locked. ${completedMissionCount} Detroit missions complete.${snapshot.warning ? ` ${snapshot.warning}` : ''}`);
+    }, 500);
+    return () => window.clearTimeout(id);
+  }, [completedMissionCount, lockedCount, snapshot.remainingHearts, snapshot.score, snapshot.totalSlots, snapshot.warning, snapshot.world]);
+
+  useEffect(() => {
     const audio = new Audio(`${import.meta.env.BASE_URL}assets/audio/${IN_GAME_TRACK}`);
     soundtrack.current?.pause(); soundtrack.current = audio;
     audio.loop = true; audio.preload = 'metadata'; audio.volume = muted ? 0 : musicVolume;
@@ -154,12 +222,30 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
   }, [commercialLevel, musicVolume, muted]);
 
   useEffect(() => {
+    let nextCommercialLevel = snapshot.world;
+    while (nextCommercialLevel < 9 && !shouldShowCommercialAfterLevel(nextCommercialLevel)) nextCommercialLevel += 1;
+    if (nextCommercialLevel >= 9 && !shouldShowCommercialAfterLevel(nextCommercialLevel)) return;
+    const commercial = commercialForCompletedLevel(nextCommercialLevel);
+    const preload = () => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.src = `${import.meta.env.BASE_URL}${commercial.file}`;
+      video.load();
+    };
+    const requestIdle = window.requestIdleCallback?.bind(window);
+    const cancelIdle = window.cancelIdleCallback?.bind(window);
+    if (requestIdle) { const id = requestIdle(preload, { timeout: 2500 }); return () => cancelIdle?.(id); }
+    const id = window.setTimeout(preload, 1200);
+    return () => window.clearTimeout(id);
+  }, [snapshot.world]);
+
+  useEffect(() => {
     if (!host.current) return;
     window.scrollTo(0, 0);
     let cancelled = false;
     const currentHost = host.current;
     import('../game/GameRuntime').then(({ createGameRuntime }) => {
-      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, runVariant, cosmetic, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: setSnapshot, onPausedChange: setPaused, onLevelBreak: showLevelCommercial, onComplete });
+      if (!cancelled) runtime.current = createGameRuntime(currentHost, { draw, playerCount, playStyle, runVariant, cosmetic, muted, effectsVolume, reducedMotion, screenShake, gameSpeed, haptics, p1Controls, p2Controls, p1Bindings, p2Bindings, initialCheckpoint, onCheckpoint, onSnapshot: next => { setSnapshot(next); setRestoringRun(false); }, onPausedChange: setPaused, onLevelBreak: showLevelCommercial, onComplete });
     });
     return () => { cancelled = true; continueRunAfterCommercial.current = null; runtime.current?.destroy(); runtime.current = null; };
   }, [cosmetic, draw, gameSpeed, initialCheckpoint, onCheckpoint, onComplete, playerCount, playStyle, reducedMotion, runVariant, screenShake, showLevelCommercial]);
@@ -189,21 +275,22 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
 
   return (
     <main className={`game-shell ${highContrast ? 'high-contrast' : ''}`} style={{ '--hud-scale': hudScale } as CSSProperties}>
-      <div className={`arcade-scoreboard ${snapshot.playerCount === 2 ? 'two-player' : ''}`} aria-live="polite">
+      <div className={`arcade-scoreboard ${snapshot.playerCount === 2 ? 'two-player' : ''}`}>
         <div className={playStyle === 'coop' ? 'coop-player player-one' : snapshot.activePlayer === 0 ? 'active-player' : ''}><small>{playStyle === 'coop' ? 'P1' : '1UP'}</small><strong>{snapshot.playerScores[0].toString().padStart(2, '0')}</strong>{playStyle === 'coop' && <span className={`shield-status ${snapshot.playerShields[0] ? 'ready' : snapshot.downedPlayers[0] ? 'down' : ''}`}>{snapshot.downedPlayers[0] ? `REVIVE ${Math.round(snapshot.reviveProgress[0] / 1.4 * 100)}%` : snapshot.playerShields[0] ? 'SHIELD' : 'NO SHIELD'}</span>}</div>
         <div><small>HIGH SCORE</small><strong>{Math.max(10000, ...snapshot.playerScores)}</strong></div>
         {snapshot.playerCount === 2 && <div className={playStyle === 'coop' ? 'coop-player player-two' : snapshot.activePlayer === 1 ? 'active-player' : ''}><small>{playStyle === 'coop' ? 'P2' : '2UP'}</small><strong>{snapshot.playerScores[1].toString().padStart(2, '0')}</strong>{playStyle === 'coop' && <span className={`shield-status ${snapshot.playerShields[1] ? 'ready' : snapshot.downedPlayers[1] ? 'down' : ''}`}>{snapshot.downedPlayers[1] ? `REVIVE ${Math.round(snapshot.reviveProgress[1] / 1.4 * 100)}%` : snapshot.playerShields[1] ? 'SHIELD' : 'NO SHIELD'}</span>}</div>}
       </div>
-      <div className="live-mission-strip" aria-label={`Mission status: ${snapshot.remainingHearts} hearts left, ${snapshot.revealed.filter(value => value !== null).length} of ${snapshot.totalSlots} numbers locked`}>
+      <div className="live-mission-strip" aria-label={`Mission status: ${snapshot.remainingHearts} hearts left, ${lockedCount} of ${snapshot.totalSlots} numbers locked`}>
         <span><small>{playStyle === 'coop' ? 'TEAM MISSION' : 'ACTIVE MISSION'}</small><b>{snapshot.remainingHearts} HEARTS LEFT</b></span>
         {snapshot.runVariant === 'timeAttack' && <span className={`time-attack-live ${snapshot.timeAttackSeconds <= 20 ? 'urgent' : ''}`}><small>DISTRICT CLOCK</small><b>{Math.floor(snapshot.timeAttackSeconds / 60)}:{(snapshot.timeAttackSeconds % 60).toString().padStart(2, '0')}</b></span>}
         <span className={snapshot.bonusActive ? 'bonus-live' : ''}><small>{snapshot.bonusActive ? 'BONUS MOVING' : 'NEXT BONUS'}</small><b>{!snapshot.hasMoved ? 'MOVE TO START' : snapshot.bonusActive && snapshot.bonusDirection ? `${directionArrow[snapshot.bonusDirection]} ${snapshot.bonusDirection} • ${snapshot.bonusSeconds}s` : `0:${snapshot.bonusSeconds.toString().padStart(2, '0')}`}</b></span>
-        <span><small>NUMBERS LOCKED</small><b>{snapshot.revealed.filter(value => value !== null).length}/{snapshot.totalSlots}</b></span>
+        <span><small>NUMBERS LOCKED</small><b>{lockedCount}/{snapshot.totalSlots}</b></span>
         <span className={snapshot.eventName ? 'event-live' : 'event-timer'}><small>{snapshot.eventName ? 'DETROIT EVENT' : 'NEXT CITY EVENT'}</small><b>{!snapshot.hasMoved ? 'MOVE TO START' : snapshot.eventName ? `${snapshot.eventName} • ${snapshot.eventSeconds}s` : `0:${snapshot.eventSeconds.toString().padStart(2, '0')}`}</b></span>
         {playStyle === 'coop' && <span className="team-meter"><small>313 TEAM COMBO</small><b>{snapshot.teamCombo}x {snapshot.syncGateReady ? '• SYNC GATE OPEN' : ''}</b><i style={{ width: `${snapshot.teamCombo * 10}%` }} /></span>}
       </div>
-      <div className="screen-reader-stats">Level {snapshot.world + 1} of 10. {playStyle === 'coop' ? 'Two-player cooperative team.' : playStyle === 'alternating' ? `Player ${snapshot.activePlayer + 1} turn.` : 'Player one.'} {snapshot.coins} hearts collected. {snapshot.remainingHearts} remain. {snapshot.villainEncounters} villain contacts. {snapshot.lives} lives. {snapshot.powerUp}. {snapshot.bonusesCollected} street bonuses collected. {snapshot.missions.filter(mission => mission.complete).length} of {snapshot.missions.length} Detroit missions complete. {snapshot.bossMaxHealth ? `${snapshot.bossLabel} health ${snapshot.bossHealth} of ${snapshot.bossMaxHealth}.` : ''}</div>
+      <div className="screen-reader-stats" aria-live="polite" aria-atomic="true">{liveSummary}</div>
       <div className="playfield-wrap" onPointerDown={startSwipe} onPointerUp={finishSwipe} onPointerCancel={() => { swipeStart.current = null; }}>
+        {restoringRun && <div className="restore-run" role="status"><small>CHECKPOINT LINKED</small><strong>Restoring Detroit Run</strong><span>Rebuilding Level {snapshot.world + 1} • {snapshot.remainingHearts} hearts remain</span></div>}
         {isLevelIntro && <div className="level-intro" role="status">
           <small>LEVEL {snapshot.world + 1} / 10</small>
           <strong>{level.name.toUpperCase()}</strong>
@@ -211,8 +298,8 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
           <em>{level.tagline} • {level.mechanic}</em>
         </div>}
         {!isLevelIntro && snapshot.warning && <div className={`warning ${snapshot.warning.includes('MIND COIN') ? 'power-warning' : ''}`} role="status">{snapshot.warning}</div>}
-        {!isLevelIntro && snapshot.combo > 1 && <div className="combo-chip" aria-live="polite"><small>HEART STREAK</small><strong>×{snapshot.combo}</strong></div>}
-        {snapshot.portalCombo > 0 && <div className="portal-combo-chip" aria-live="polite"><small>PORTAL CHAIN</small><strong>×{snapshot.portalCombo}</strong><span>{snapshot.portalComboSeconds}s</span></div>}
+        {!isLevelIntro && !snapshot.warning && !snapshot.bonusEffect && snapshot.combo > 1 && <div className="combo-chip" aria-live="polite"><small>HEART STREAK</small><strong>×{snapshot.combo}</strong></div>}
+        {!isLevelIntro && !snapshot.warning && !snapshot.bonusEffect && snapshot.portalCombo > 0 && <div className="portal-combo-chip" aria-live="polite"><small>PORTAL CHAIN</small><strong>×{snapshot.portalCombo}</strong><span>{snapshot.portalComboSeconds}s</span></div>}
         {snapshot.bonusEffect && <div className={`street-bonus-chip ${snapshot.bonusEffect} tier-${snapshot.bonusTier ?? 'bronze'}`} aria-live="polite"><small>{snapshot.bonusTier ? `${BONUS_TIERS[snapshot.bonusTier].label} ` : ''}STREET BONUS</small><strong>{STREET_BONUSES[snapshot.bonusEffect].label}</strong><span>{STREET_BONUSES[snapshot.bonusEffect].effect}</span></div>}
         <aside className="detroit-mission-board" aria-label="Detroit district missions"><header><small>DETROIT MISSIONS</small><b>{snapshot.missions.filter(mission => mission.complete).length}/{snapshot.missions.length}</b></header>{snapshot.missions.map(mission => <span className={mission.complete ? 'complete' : ''} key={mission.id}><i>{mission.complete ? '✓' : '◇'}</i><em>{mission.label}</em><b>{mission.current}/{mission.target}</b></span>)}</aside>
         {playStyle === 'coop' && snapshot.teammateDirections && <div className="teammate-directions" aria-label={`Player one teammate is ${snapshot.teammateDirections[0]}. Player two teammate is ${snapshot.teammateDirections[1]}.`}><span>P1 TEAMMATE {directionArrow[snapshot.teammateDirections[0]]}</span><span>P2 TEAMMATE {directionArrow[snapshot.teammateDirections[1]]}</span></div>}
@@ -274,7 +361,7 @@ export function GameCanvas({ draw, playerCount, playStyle, runVariant, cosmetic,
               autoPlay
               controls
               playsInline
-              preload="auto"
+              preload="metadata"
               onEnded={finishLevelCommercial}
               onError={finishLevelCommercial}
             />

@@ -1,12 +1,12 @@
 import Phaser from 'phaser';
-import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, HEART_GRID_SPACING, HEART_SIZE, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS, VILLAIN_WAVES, villainCountForLevel } from '../config/gameBalance';
+import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, HEART_BASE_SCORE, HEART_SIZE, LEVEL_ONE_HEART_CAP, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS, VILLAIN_WAVES, heartGridSpacingForLevel, villainCountForLevel } from '../config/gameBalance';
 import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } from '../config/detroitEvents';
 import { EMPTY_MISSION_STATS, evaluateDetroitMissions } from '../config/detroitMissions';
 import { BONUS_TIERS, STREET_BONUSES, STREET_BONUS_ORDER, STREET_BONUS_SPAWN_INTERVAL_MS, STREET_BONUS_SPEED_TILES_PER_SECOND, bonusTierForSpawn } from '../config/streetBonuses';
 import { COSMETICS } from '../services/playerProgress';
 import type { BonusTier, CompassDirection, ControlBindings, ControlPreset, CosmeticId, GameCheckpoint, GameSnapshot, LevelMissionStats, LotteryDraw, PlayerCount, PlayStyle, RunVariant, StreetBonusKind } from '../types/game';
 import { chooseForgivingDirection, createMazeDefinition, MAZE_LEVEL_COUNT, OPPOSITE, projectTile, shortestDirection, shouldSnapLateTurn, stepTile, tileKey, validDirections, type CardinalDirection, type GridDirection, type GridPoint, type MazeDefinition } from './MazeGrid';
-import { createPortalNetwork } from './PortalNetwork';
+import { createPortalNetwork, tunnelPortalPair } from './PortalNetwork';
 
 type EnemyKind = 'tax' | 'reaper' | 'chaos' | 'envy' | 'police';
 type VillainMode = 'normal' | 'frightened' | 'returning';
@@ -176,6 +176,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private shielded = true;
     private warning = '';
     private warningUntil = 0;
+    private blockedFeedbackUntil = 0;
     private villainEncounters = 0;
     private powerUpsUsed = 0;
     private usedPortal = false;
@@ -222,6 +223,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private levelMissionStats: LevelMissionStats = { ...EMPTY_MISSION_STATS };
     private missionRewardsClaimed = new Set<string>();
     private missionsCompleted = 0;
+    private readonly portraitMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 760px) and (orientation: portrait)').matches;
+    private mobileCameraFocus?: Phaser.GameObjects.Zone;
 
     constructor() { super('lotto-grid-maze'); }
 
@@ -263,11 +266,11 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         this.missionsCompleted = checkpoint.missionsCompleted ?? 0;
       }
       this.playerShadows[0] = this.add.ellipse(0, 0, 30, 10, 0x000000, 0.58).setDepth(19);
-      this.player = this.add.sprite(0, 0, 'mascot', 0).setDisplaySize(52, 52).setDepth(20);
+      this.player = this.add.sprite(0, 0, 'mascot', 0).setDisplaySize(this.portraitMobile ? 58 : 52, this.portraitMobile ? 58 : 52).setDepth(20);
       this.forceFields[0] = this.add.circle(0, 0, 27, 0x43dcff, 0.06).setStrokeStyle(2, 0x9bf6ff, 0.95).setDepth(22).setVisible(false);
       if (options.playStyle === 'coop') {
         this.playerShadows[1] = this.add.ellipse(0, 0, 38, 10, 0x000000, 0.58).setDepth(19);
-        this.player2 = this.add.sprite(0, 0, 'player2Dog', 20).setDisplaySize(68, 54).setDepth(21);
+        this.player2 = this.add.sprite(0, 0, 'player2Dog', 20).setDisplaySize(this.portraitMobile ? 74 : 68, this.portraitMobile ? 59 : 54).setDepth(21);
         this.forceFields[1] = this.add.circle(0, 0, 27, 0xff5dcb, 0.05).setStrokeStyle(2, 0xffa1e7, 0.95).setDepth(23).setVisible(false);
       }
       this.playerLabels[0] = this.add.text(0, 0, '', {}).setVisible(false);
@@ -275,6 +278,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.cursors = this.input.keyboard!.createCursorKeys();
       this.keys = this.input.keyboard!.addKeys('W,A,S,D,I,J,K,L,SPACE,P,M') as Record<string, Phaser.Input.Keyboard.Key>;
       this.keys.M.on('down', () => { options.muted = !options.muted; });
+      if (this.portraitMobile) {
+        this.mobileCameraFocus = this.add.zone(this.pixelX(this.maze.playerSpawn.x), this.pixelY(this.maze.playerSpawn.y), 1, 1);
+        this.cameras.main.setRoundPixels(true).setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT).setZoom(options.playStyle === 'coop' ? 1.08 : 1.14).startFollow(this.mobileCameraFocus, true, 0.12, 0.12);
+      }
       this.createWorld();
     }
 
@@ -406,25 +413,30 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private createPortals(): void {
-      const makePortal = (point: GridPoint, color: number, orbitColor: number, direction: 'left' | 'right', pair: number) => {
-        const portal = this.add.container(this.pixelX(point.x), this.pixelY(point.y)).setDepth(9);
-        const mask = this.add.ellipse(0, 0, 25, 35, 0x010208, 0.96);
-        const halo = this.add.ellipse(0, 0, 35, 47, color, 0.1).setStrokeStyle(4, color, 0.24);
-        const outer = this.add.ellipse(0, 0, 29, 41, 0x000000, 0).setStrokeStyle(3, color, 1);
-        const middle = this.add.ellipse(0, 0, 22, 34, 0x000000, 0).setStrokeStyle(2, orbitColor, 0.95);
-        const core = this.add.ellipse(0, 0, 14, 27, 0x01020a, 1).setStrokeStyle(1, 0xffffff, 0.24);
-        const rimTop = this.add.ellipse(direction === 'left' ? 2 : -2, -1, 8, 23, color, 0.17);
+      const makePortal = (point: GridPoint, color: number, orbitColor: number, direction: 'left' | 'right', label: string, sidePortal = false) => {
+        const portal = this.add.container(this.pixelX(point.x), this.pixelY(point.y)).setDepth(12);
+        const size = sidePortal ? 1.12 : 1;
+        const backplate = this.add.ellipse(0, 0, 38 * size, 50 * size, 0x02030a, 0.98).setStrokeStyle(5, 0x02030a, 0.94);
+        const halo = this.add.ellipse(0, 0, 39 * size, 51 * size, color, 0.18).setStrokeStyle(4, color, 0.58);
+        const outer = this.add.ellipse(0, 0, 31 * size, 43 * size, 0x000000, 0).setStrokeStyle(3.5, color, 1);
+        const middle = this.add.ellipse(0, 0, 24 * size, 36 * size, 0x000000, 0).setStrokeStyle(2.5, orbitColor, 1);
+        const core = this.add.ellipse(0, 0, 15 * size, 28 * size, 0x01020a, 1).setStrokeStyle(1.5, 0xffffff, 0.62);
+        const rimTop = this.add.ellipse(direction === 'left' ? 2 : -2, -1, 8 * size, 23 * size, color, 0.25);
         const orbit = this.add.container(0, 0);
-        const sparkA = this.add.circle(0, -20, 2.2, 0xffffff, 1);
-        const sparkB = this.add.circle(0, 20, 1.9, orbitColor, 1);
-        const sparkC = this.add.circle(direction === 'left' ? -13 : 13, 0, 1.6, color, 0.95);
-        const pairLabel = this.add.text(0, 0, `${pair + 1}`, { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '7px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5);
+        const sparkA = this.add.circle(0, -22 * size, 2.4, 0xffffff, 1);
+        const sparkB = this.add.circle(0, 22 * size, 2.1, orbitColor, 1);
+        const sparkC = this.add.circle(direction === 'left' ? -15 * size : 15 * size, 0, 1.9, color, 1);
+        const pairLabel = this.add.text(0, 0, label, { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: sidePortal ? '9px' : '7px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5);
+        const directionMark = sidePortal
+          ? this.add.text(direction === 'left' ? 22 : -22, 0, direction === 'left' ? '<' : '>', { fontFamily: 'Arial Black, Arial, sans-serif', fontSize: '11px', color: '#ffffff', stroke: '#020207', strokeThickness: 2 }).setOrigin(0.5)
+          : null;
         orbit.add([sparkA, sparkB, sparkC]);
-        portal.add([halo, mask, rimTop, core, outer, middle, orbit, pairLabel]);
+        portal.add([backplate, halo, rimTop, core, outer, middle, orbit, pairLabel]);
+        if (directionMark) portal.add(directionMark);
         this.worldObjects.push(portal);
         if (!options.reducedMotion) {
-          this.tweens.add({ targets: halo, scaleX: 1.15, scaleY: 1.08, alpha: 0.25, duration: 620, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
-          this.tweens.add({ targets: middle, scaleX: 0.82, scaleY: 1.08, alpha: 0.55, duration: 430, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+          this.tweens.add({ targets: halo, scaleX: 1.12, scaleY: 1.07, alpha: 0.32, duration: 620, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+          this.tweens.add({ targets: middle, scaleX: 0.84, scaleY: 1.08, alpha: 0.68, duration: 430, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
           this.tweens.add({ targets: orbit, angle: direction === 'left' ? -360 : 360, duration: 1900, repeat: -1 });
         }
       };
@@ -432,9 +444,12 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       const cosmetic = COSMETICS.find(item => item.id === options.cosmetic) ?? COSMETICS[0];
       const portalLeft = cosmetic.portalBoost || palette.portalLeft;
       const portalRight = cosmetic.portalBoost || palette.portalRight;
+      const sidePair = tunnelPortalPair(this.maze);
+      makePortal(sidePair.entry, portalLeft, portalRight, 'left', 'S', true);
+      makePortal(sidePair.exit, portalRight, portalLeft, 'right', 'S', true);
       this.portalPoints.forEach((point, index) => {
         const first = index % 2 === 0;
-        makePortal(point, first ? portalLeft : portalRight, first ? portalRight : portalLeft, first ? 'left' : 'right', Math.floor(index / 2));
+        makePortal(point, first ? portalLeft : portalRight, first ? portalRight : portalLeft, first ? 'left' : 'right', `${Math.floor(index / 2) + 1}`);
       });
     }
 
@@ -494,7 +509,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       streets.forEach(street => {
         const x = ORIGIN_X + street.x * TILE;
         const y = ORIGIN_Y + street.y * TILE;
-        const labelSize = Math.max(street.size, 9);
+        const labelSize = Math.max(street.size, this.portraitMobile ? 12 : 9);
         const signLength = Phaser.Math.Clamp(street.name.length * (street.size * .72) + 22, 50, street.vertical ? 74 : 112);
         const sign = this.add.image(x, y, 'detroitStreetSign').setDisplaySize(signLength, 23).setDepth(5);
         if (street.vertical) sign.setAngle(90);
@@ -524,8 +539,12 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private createPellets(): void {
       const checkpoint = options.initialCheckpoint?.world === this.world ? options.initialCheckpoint : null;
       const palette = LEVEL_PALETTES[this.world] ?? LEVEL_PALETTES[0];
+      const heartSpacing = heartGridSpacingForLevel(this.world);
       const remaining = checkpoint?.remainingHeartKeys ? new Set(checkpoint.remainingHeartKeys) : null;
       const remainingPower = checkpoint?.remainingPowerKeys ? new Set(checkpoint.remainingPowerKeys) : null;
+      const powerHeartCount = this.maze.rows.reduce((sum, row) => sum + [...row].filter(token => token === 'o').length, 0);
+      const regularHeartCap = this.world === 0 ? Math.max(0, LEVEL_ONE_HEART_CAP - powerHeartCount) : Number.POSITIVE_INFINITY;
+      let regularHeartTotal = 0;
       let total = 0;
       for (let y = 0; y < this.maze.height; y += 1) for (let x = 0; x < this.maze.width; x += 1) {
         const token = this.maze.rows[y][x]; if (token !== '.' && token !== 'o') continue;
@@ -537,7 +556,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           if (!options.reducedMotion) this.tweens.add({ targets: orb, scaleX: orb.scaleX * 1.25, scaleY: orb.scaleY * 1.25, duration: 520, yoyo: true, repeat: -1 });
           this.pelletObjects.set(key, orb); if (!remainingPower || remainingPower.has(key)) this.powerPellets.add(key); this.worldObjects.push(orb);
         } else {
-          if (this.portalLinks.has(key) || (x + y * 2) % HEART_GRID_SPACING !== 0) continue;
+          const sidePortal = y === this.maze.tunnelRow && (x === 0 || x === this.maze.width - 1);
+          if (sidePortal || this.portalLinks.has(key) || (x + y * 2) % heartSpacing !== 0) continue;
+          if (regularHeartTotal >= regularHeartCap) continue;
+          regularHeartTotal += 1;
           total += 1;
           if (remaining && !remaining.has(key)) continue;
           const pellet = this.add.image(this.pixelX(x), this.pixelY(y), 'loveHeart').setDisplaySize(HEART_SIZE, HEART_SIZE).setDepth(7).setData('pellet', true);
@@ -597,6 +619,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (time < this.roundReadyUntil) {
         this.positionSprite(this.player, this.playerMover); this.animatePlayer(this.player, this.playerMover, time);
         if (this.player2) { this.positionSprite(this.player2, this.player2Mover); this.animatePlayer(this.player2, this.player2Mover, time); }
+        this.updateMobileCameraFocus();
         this.villains.forEach(villain => { this.positionSprite(villain.sprite, villain); this.animateVillain(villain, time); villain.sprite.setAlpha(0); villain.shadow.setAlpha(0); villain.label.setAlpha(0); });
         return;
       }
@@ -624,6 +647,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       };
       advancePlayer(this.player, this.playerMover, 0);
       if (this.player2) advancePlayer(this.player2, this.player2Mover, 1);
+      this.updateMobileCameraFocus();
       this.updateStreetBonuses(time, dt);
       this.updateHeroBonusFx(time);
       this.updateCoopRevive(dt);
@@ -645,6 +669,13 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.cityNear?.setAlpha(shouldDim ? 0.055 : 0.12);
       this.cityWash?.setAlpha(shouldDim ? 0.08 : 0.13);
       this.streetDecor.forEach(object => object.setAlpha(shouldDim ? 0.62 : 1));
+    }
+
+    private updateMobileCameraFocus(): void {
+      if (!this.mobileCameraFocus) return;
+      const targetX = this.player2 ? (this.player.x + this.player2.x) / 2 : this.player.x;
+      const targetY = this.player2 ? (this.player.y + this.player2.y) / 2 : this.player.y;
+      this.mobileCameraFocus.setPosition(targetX, targetY);
     }
 
     private handleTimeAttackExpired(time: number): void {
@@ -943,6 +974,19 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private queuePlayerDirection(direction: CardinalDirection, playerIndex: 0 | 1): void {
       const mover = playerIndex === 0 ? this.playerMover : this.player2Mover;
+      if (!mover.next && !stepTile(this.maze, mover.tile, direction)) {
+        const fallback = validDirections(this.maze, mover.tile)[0];
+        const sprite = playerIndex === 0 ? this.player : this.player2;
+        const canShowFeedback = this.time.now >= this.blockedFeedbackUntil;
+        if (sprite && canShowFeedback) {
+          const horizontal = direction === 'left' || direction === 'right';
+          this.tweens.add({ targets: sprite, x: sprite.x + (horizontal ? (direction === 'left' ? -3 : 3) : 0), y: sprite.y + (!horizontal ? (direction === 'up' ? -3 : 3) : 0), duration: 70, yoyo: true, ease: 'Sine.Out' });
+        }
+        if (canShowFeedback) {
+          this.blockedFeedbackUntil = this.time.now + 240;
+          if (fallback && this.time.now >= this.roundReadyUntil) this.setWarning(`ROAD CLOSED • TRY ${fallback.toUpperCase()}`, 520);
+        }
+      }
       if (!this.hasMoved) {
         this.hasMoved = true; this.hitUntil = this.time.now + 1200;
         this.nextBonusAt = this.time.now + STREET_BONUS_SPAWN_INTERVAL_MS;
@@ -953,7 +997,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         const old = mover.tile; mover.tile = mover.next; mover.next = old;
         mover.progress = 1 - mover.progress; mover.direction = direction;
       } else if (mover.next && shouldSnapLateTurn(this.maze, mover.tile, direction, mover.direction, mover.progress)) {
-        // Pull the hero back to the intersection by at most 34% of a tile. This
+        // Pull the hero back to the intersection by at most 48% of a tile. This
         // is visually tiny, but removes the frustrating missed-corner stop.
         mover.next = null; mover.progress = 0; mover.direction = 'none';
       }
@@ -1104,7 +1148,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       if (this.lastPelletAt && time - this.lastPelletAt > comboWindow) this.combo = 1;
       this.lastPelletAt = time;
       const isPower = this.powerPellets.delete(key);
-      let award = (isPower ? 50 : 10) * this.combo;
+      let award = (isPower ? 75 : HEART_BASE_SCORE) * this.combo;
       if (time < this.portalComboUntil) award *= 1 + this.portalComboChain;
       if (time < this.doubleScoreUntil) award *= 2;
       const teamPass = options.playStyle === 'coop' && this.lastCollector !== null && this.lastCollector !== playerIndex && time - this.lastTeamCollectAt < 1500;

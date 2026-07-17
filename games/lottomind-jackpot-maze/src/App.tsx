@@ -59,18 +59,11 @@ export function App() {
   const unlockMenuAudio = () => {
     if (screen === 'start' && !settings.muted && settings.musicVolume > 0) void menuAudio.current?.play().catch(() => undefined);
   };
-  const begin = () => {
+  const startRun = (variant: RunVariant) => {
     clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-    setRunVariant('classic'); setDraw(generateLotteryDraw(mode)); setScreen('game');
+    setRunVariant(variant); setDraw(variant === 'daily' ? generateDailyDraw(mode) : generateLotteryDraw(mode)); setScreen('game');
   };
-  const beginTimeAttack = () => {
-    clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-    setRunVariant('timeAttack'); setDraw(generateLotteryDraw(mode)); setScreen('game');
-  };
-  const beginDaily = () => {
-    clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-    setRunVariant('daily'); setDraw(generateDailyDraw(mode)); setScreen('game');
-  };
+  const begin = () => startRun('classic');
   const resume = () => {
     if (!checkpoint) return;
     setMode(checkpoint.draw.mode); setPlayStyle(checkpoint.playStyle); setRunVariant(checkpoint.runVariant ?? 'classic'); setResumeCheckpoint(checkpoint); setDraw(checkpoint.draw); setScreen('game');
@@ -169,14 +162,17 @@ export function App() {
           <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Mascot + dog • alternating turns</small></button>
           <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Mascot + dog together in the maze</small></button>
         </fieldset>
+        <fieldset className="run-mode-grid"><legend>Run mode</legend>
+          <button className={runVariant === 'classic' ? 'selected' : ''} onClick={() => setRunVariant('classic')} aria-pressed={runVariant === 'classic'}><strong>Classic</strong><small>Ten Detroit districts</small></button>
+          <button className={runVariant === 'timeAttack' ? 'selected' : ''} onClick={() => setRunVariant('timeAttack')} aria-pressed={runVariant === 'timeAttack'}><strong>Time Attack</strong><small>Beat the district clock</small></button>
+          <button className={runVariant === 'daily' ? 'selected' : ''} onClick={() => setRunVariant('daily')} aria-pressed={runVariant === 'daily'}><strong>Daily Detroit</strong><small>Best {(progress.dailyBest[dailyChallengeKey()] ?? 0).toLocaleString()}</small></button>
+        </fieldset>
         <div className="launch-row">
-          <button className="primary launch" onClick={begin}><span>Enter the Maze</span><small>Initialize Run • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>
-          <button className="time-attack-run" onClick={beginTimeAttack}><strong>Time Attack</strong><small>Beat each district clock • bank time bonuses</small></button>
-          <button className="daily-run" onClick={beginDaily}><strong>Daily Detroit Run</strong><small>Same secure challenge • Best {(progress.dailyBest[dailyChallengeKey()] ?? 0).toLocaleString()}</small></button>
+          <button className="primary launch" onClick={() => startRun(runVariant)}><span>Enter the Maze</span><small>{runVariantLabel(runVariant)} • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>
           {checkpoint && <button className="resume-run" onClick={resume}><strong>Resume Level {checkpoint.world + 1}</strong><small>{runVariantLabel(checkpoint.runVariant ?? 'classic')} • {checkpoint.playStyle === 'coop' ? 'Co-op' : checkpoint.playStyle === 'alternating' ? '2 Player' : 'Solo'} • {checkpoint.score.toLocaleString()} points</small></button>}
         </div>
-        <section className="cosmetic-locker" aria-labelledby="locker-title">
-          <header><span><small>PLAYER PROGRESS</small><strong id="locker-title">Detroit Hero Locker</strong></span><em>{progress.totalScore.toLocaleString()} lifetime • {progress.missionsCompleted} missions • {progress.completedRuns} runs</em></header>
+        <details className="cosmetic-locker">
+          <summary><span><small>PLAYER PROGRESS</small><strong>Detroit Hero Locker</strong></span><em>{progress.totalScore.toLocaleString()} lifetime • {progress.missionsCompleted} missions • {progress.completedRuns} runs</em></summary>
           <div className="cosmetic-grid">{COSMETICS.map(item => {
             const unlocked = progress.unlocked.includes(item.id);
             return <button key={item.id} disabled={!unlocked} className={progress.selected === item.id ? 'selected' : ''} onClick={() => { const next = selectCosmetic(item.id); setProgress(next); }} aria-pressed={progress.selected === item.id}>
@@ -184,7 +180,7 @@ export function App() {
               <span><strong>{item.label}</strong><small>{unlocked ? item.description : `LOCKED • ${item.description}`}</small></span>
             </button>;
           })}</div>
-        </section>
+        </details>
         <details className="settings-panel">
           <summary>Game options</summary>
           <div className="settings-row">
