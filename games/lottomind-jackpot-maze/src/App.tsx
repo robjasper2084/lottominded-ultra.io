@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { GameCanvas } from './components/GameCanvas';
 import { NumberSlots } from './components/NumberSlots';
 import { SocialShare } from './components/SocialShare';
@@ -8,7 +8,8 @@ import { loadSavedResults, makeResultId, saveResult } from './services/savedNumb
 import { loadSettings, saveSettings } from './services/settings';
 import type { GameSettings } from './services/settings';
 import { clearCheckpoint, loadCheckpoint, saveCheckpoint } from './services/checkpoint';
-import type { ControlBindings, ControlPreset, GameCheckpoint, LotteryDraw, LotteryMode, PlayStyle, SavedResult } from './types/game';
+import { COSMETICS, dailyChallengeKey, loadPlayerProgress, recordCompletedRun, runVariantLabel, selectCosmetic } from './services/playerProgress';
+import type { ControlBindings, ControlPreset, GameCheckpoint, LotteryDraw, LotteryMode, PlayStyle, RunVariant, SavedResult } from './types/game';
 
 const DISCLAIMER = 'For entertainment purposes only. LottoMind does not predict or guarantee lottery results. Play responsibly.';
 
@@ -43,7 +44,8 @@ export function App() {
   const [history, setHistory] = useState(loadSavedResults);
   const [checkpoint, setCheckpoint] = useState(loadCheckpoint);
   const [resumeCheckpoint, setResumeCheckpoint] = useState<GameCheckpoint | null>(null);
-  const [dailyRun, setDailyRun] = useState(false);
+  const [runVariant, setRunVariant] = useState<RunVariant>('classic');
+  const [progress, setProgress] = useState(loadPlayerProgress);
   const menuAudio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -57,30 +59,30 @@ export function App() {
   const unlockMenuAudio = () => {
     if (screen === 'start' && !settings.muted && settings.musicVolume > 0) void menuAudio.current?.play().catch(() => undefined);
   };
-  const begin = () => {
+  const startRun = (variant: RunVariant) => {
     clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-    setDailyRun(false); setDraw(generateLotteryDraw(mode)); setScreen('game');
+    setRunVariant(variant); setDraw(variant === 'daily' ? generateDailyDraw(mode) : generateLotteryDraw(mode)); setScreen('game');
   };
-  const beginDaily = () => {
-    clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-    setDailyRun(true); setDraw(generateDailyDraw(mode)); setScreen('game');
-  };
+  const begin = () => startRun('classic');
   const resume = () => {
     if (!checkpoint) return;
-    setMode(checkpoint.draw.mode); setPlayStyle(checkpoint.playStyle); setResumeCheckpoint(checkpoint); setDraw(checkpoint.draw); setScreen('game');
+    setMode(checkpoint.draw.mode); setPlayStyle(checkpoint.playStyle); setRunVariant(checkpoint.runVariant ?? 'classic'); setResumeCheckpoint(checkpoint); setDraw(checkpoint.draw); setScreen('game');
   };
   const checkpointRun = useCallback((next: GameCheckpoint) => { saveCheckpoint(next); setCheckpoint(next); }, []);
-  const complete = useCallback((run: { score: number; villainEncounters: number; powerUpsUsed: number; playerScores: [number, number]; heartsCollected: number; bonusesCollected: number; bestCombo: number; missedBonuses: number; eventsCompleted: number; levelGrades: Array<'S' | 'A' | 'B' | 'C'> }) => {
+  const complete = useCallback((run: { score: number; villainEncounters: number; powerUpsUsed: number; playerScores: [number, number]; heartsCollected: number; bonusesCollected: number; bestCombo: number; missedBonuses: number; eventsCompleted: number; levelGrades: Array<'S' | 'A' | 'B' | 'C'>; missionsCompleted: number; timeAttackBonus: number }) => {
     setDraw(current => {
       if (!current) return current;
       const grade: SavedResult['grade'] = run.score >= 40000 ? 'S' : run.score >= 28000 ? 'A' : run.score >= 17000 ? 'B' : 'C';
       const achievements = ['DETROIT GRID CLEARED', ...(run.villainEncounters <= 8 ? ['STREET SMART'] : []), ...(run.powerUpsUsed >= 8 ? ['MIND COIN MASTER'] : []), ...(playStyle === 'coop' ? ['313 TEAMWORK'] : [])];
-      const next: SavedResult = { ...current, id: makeResultId(), createdAt: new Date().toISOString(), level: 10, playerCount, playStyle, grade, achievements, daily: dailyRun, ...run };
+      const base: SavedResult = { ...current, id: makeResultId(), createdAt: new Date().toISOString(), level: 10, playerCount, playStyle, grade, achievements, daily: runVariant === 'daily', runVariant, ...run };
+      const recorded = recordCompletedRun(base);
+      const newCosmetics = recorded.newUnlocks.map(id => COSMETICS.find(item => item.id === id)?.label ?? id);
+      const next: SavedResult = { ...base, newCosmetics, achievements: [...achievements, ...newCosmetics.map(label => `UNLOCKED: ${label.toUpperCase()}`)] };
       clearCheckpoint(); setCheckpoint(null); setResumeCheckpoint(null);
-      setResult(next); setHistory(saveResult(next)); setScreen('results');
+      setProgress(recorded.progress); setResult(next); setHistory(saveResult(next)); setScreen('results');
       return current;
     });
-  }, [dailyRun, playStyle, playerCount]);
+  }, [playStyle, playerCount, runVariant]);
   const values = useMemo(() => result ? [...result.main, ...(result.special === undefined ? [] : [result.special])] : [], [result]);
   const updateSettings = useCallback((patch: Partial<GameSettings>) => {
     setSettings(current => { const next = { ...current, ...patch }; saveSettings(next); return next; });
@@ -90,12 +92,12 @@ export function App() {
     ? { p1Controls: preset, p1Bindings: presetBindings(preset, settings.p1Bindings.power) }
     : { p2Controls: preset, p2Bindings: presetBindings(preset, settings.p2Bindings.power) });
 
-  if (screen === 'game' && draw) return <GameCanvas draw={draw} playerCount={playerCount} playStyle={playStyle} muted={settings.muted} musicVolume={settings.musicVolume} effectsVolume={settings.effectsVolume} reducedMotion={settings.reducedMotion} highContrast={settings.highContrast} screenShake={settings.screenShake} gameSpeed={settings.gameSpeed} haptics={settings.haptics} p1Controls={settings.p1Controls} p2Controls={settings.p2Controls} p1Bindings={settings.p1Bindings} p2Bindings={settings.p2Bindings} hudScale={settings.hudScale} tutorialSeen={settings.tutorialSeen} initialCheckpoint={resumeCheckpoint} onTutorialComplete={() => updateSetting('tutorialSeen', true)} onSettingsChange={updateSettings} onCheckpoint={checkpointRun} onComplete={complete} onQuit={() => setScreen('start')} />;
+  if (screen === 'game' && draw) return <GameCanvas draw={draw} playerCount={playerCount} playStyle={playStyle} runVariant={runVariant} cosmetic={progress.selected} muted={settings.muted} musicVolume={settings.musicVolume} effectsVolume={settings.effectsVolume} reducedMotion={settings.reducedMotion} highContrast={settings.highContrast} screenShake={settings.screenShake} gameSpeed={settings.gameSpeed} haptics={settings.haptics} p1Controls={settings.p1Controls} p2Controls={settings.p2Controls} p1Bindings={settings.p1Bindings} p2Bindings={settings.p2Bindings} hudScale={settings.hudScale} tutorialSeen={settings.tutorialSeen} initialCheckpoint={resumeCheckpoint} onTutorialComplete={() => updateSetting('tutorialSeen', true)} onSettingsChange={updateSettings} onCheckpoint={checkpointRun} onComplete={complete} onQuit={() => setScreen('start')} />;
 
   if (screen === 'results' && result) return (
     <main className="results-screen panel-screen">
       <div className="results-card glass-panel">
-        <p className="eyebrow">VAULT OPEN • {LOTTERY_RULES[result.mode].label}</p>
+        <p className="eyebrow">VAULT OPEN • {LOTTERY_RULES[result.mode].label} • {runVariantLabel(result.runVariant ?? 'classic')}</p>
         <h1>Jackpot Maze Complete</h1>
         <div className={`result-grade grade-${result.grade}`} aria-label={`Run grade ${result.grade}`}><small>RUN GRADE</small><strong>{result.grade}</strong></div>
         <div className={`result-heroes ${result.playerCount === 2 ? 'two-heroes' : ''}`}>
@@ -111,10 +113,13 @@ export function App() {
           <span><small>BEST HEART STREAK</small><b>{result.bestCombo ? `${result.bestCombo}x` : '—'}</b></span>
           <span><small>DETROIT EVENTS</small><b>{result.eventsCompleted ?? '—'}</b></span>
           <span><small>MISSED BONUSES</small><b>{result.missedBonuses ?? '—'}</b></span>
+          <span><small>MISSIONS COMPLETE</small><b>{result.missionsCompleted ?? '—'}</b></span>
+          {result.runVariant === 'timeAttack' && <span><small>CLOCK BONUS</small><b>+{(result.timeAttackBonus ?? 0).toLocaleString()}</b></span>}
         </div>
         {result.levelGrades?.length ? <div className="level-grade-row" aria-label="Per-level grades">{result.levelGrades.map((grade, index) => <span key={index}><small>L{index + 1}</small><b>{grade}</b></span>)}</div> : null}
         {result.playStyle === 'coop' && result.playerScores && <div className="coop-recap"><span>P1 <b>{result.playerScores[0].toLocaleString()}</b></span><strong>313 TEAM TOTAL {result.score.toLocaleString()}</strong><span>P2 <b>{result.playerScores[1].toLocaleString()}</b></span></div>}
         {result.achievements && <div className="achievement-row" aria-label="Unlocked achievements">{result.achievements.map(item => <span key={item}>{item}</span>)}</div>}
+        {result.newCosmetics?.length ? <div className="cosmetic-unlock"><small>NEW HERO STYLE</small><strong>{result.newCosmetics.join(' • ')}</strong></div> : null}
         <p className="disclaimer">{DISCLAIMER}</p>
         <div className="button-row">
           <button className="primary" onClick={() => navigator.clipboard.writeText(values.join(' - '))}>Copy Numbers</button>
@@ -130,7 +135,7 @@ export function App() {
   if (screen === 'history') return (
     <main className="panel-screen"><section className="glass-panel history-panel"><p className="eyebrow">LOTTOMIND WALLET</p><h1>Saved Number History</h1>
       {history.length > 0 && <div className="local-leaderboard"><small>LOCAL TOP 5</small>{[...history].sort((a, b) => b.score - a.score).slice(0, 5).map((item, index) => <span key={item.id}><b>#{index + 1}</b> {item.score.toLocaleString()} <em>{item.grade ?? '—'}</em></span>)}</div>}
-      {history.length === 0 ? <p>No saved runs yet.</p> : history.map(item => <article key={item.id} className="history-item"><strong>{LOTTERY_RULES[item.mode].label} {item.grade ? `• GRADE ${item.grade}` : ''}</strong><span>{[...item.main, ...(item.special === undefined ? [] : [item.special])].join(' • ')}</span><small>{new Date(item.createdAt).toLocaleString()} — Score {item.score.toLocaleString()}</small></article>)}
+      {history.length === 0 ? <p>No saved runs yet.</p> : history.map(item => <article key={item.id} className="history-item"><strong>{LOTTERY_RULES[item.mode].label} • {runVariantLabel(item.runVariant ?? (item.daily ? 'daily' : 'classic'))} {item.grade ? `• GRADE ${item.grade}` : ''}</strong><span>{[...item.main, ...(item.special === undefined ? [] : [item.special])].join(' • ')}</span><small>{new Date(item.createdAt).toLocaleString()} — Score {item.score.toLocaleString()} • {item.missionsCompleted ?? 0} missions</small></article>)}
       <button onClick={() => setScreen('start')}>Back</button></section></main>
   );
 
@@ -157,11 +162,25 @@ export function App() {
           <button className={playStyle === 'alternating' ? 'selected' : ''} onClick={() => setPlayStyle('alternating')} aria-pressed={playStyle === 'alternating'}><strong>2 Player</strong><small>Mascot + dog • alternating turns</small></button>
           <button className={playStyle === 'coop' ? 'selected' : ''} onClick={() => setPlayStyle('coop')} aria-pressed={playStyle === 'coop'}><strong>2 Player Co-op</strong><small>Mascot + dog together in the maze</small></button>
         </fieldset>
+        <fieldset className="run-mode-grid"><legend>Run mode</legend>
+          <button className={runVariant === 'classic' ? 'selected' : ''} onClick={() => setRunVariant('classic')} aria-pressed={runVariant === 'classic'}><strong>Classic</strong><small>Ten Detroit districts</small></button>
+          <button className={runVariant === 'timeAttack' ? 'selected' : ''} onClick={() => setRunVariant('timeAttack')} aria-pressed={runVariant === 'timeAttack'}><strong>Time Attack</strong><small>Beat the district clock</small></button>
+          <button className={runVariant === 'daily' ? 'selected' : ''} onClick={() => setRunVariant('daily')} aria-pressed={runVariant === 'daily'}><strong>Daily Detroit</strong><small>Best {(progress.dailyBest[dailyChallengeKey()] ?? 0).toLocaleString()}</small></button>
+        </fieldset>
         <div className="launch-row">
-          <button className="primary launch" onClick={begin}><span>Enter the Maze</span><small>Initialize Run • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>
-          <button className="daily-run" onClick={beginDaily}><strong>Daily Detroit Run</strong><small>Same secure challenge for today</small></button>
-          {checkpoint && <button className="resume-run" onClick={resume}><strong>Resume Level {checkpoint.world + 1}</strong><small>{checkpoint.playStyle === 'coop' ? 'Co-op' : checkpoint.playStyle === 'alternating' ? '2 Player' : 'Solo'} • {checkpoint.score.toLocaleString()} points</small></button>}
+          <button className="primary launch" onClick={() => startRun(runVariant)}><span>Enter the Maze</span><small>{runVariantLabel(runVariant)} • {settings.gameSpeed === .8 ? 'Relaxed' : settings.gameSpeed === 1.2 ? 'Fast' : 'Standard'}</small></button>
+          {checkpoint && <button className="resume-run" onClick={resume}><strong>Resume Level {checkpoint.world + 1}</strong><small>{runVariantLabel(checkpoint.runVariant ?? 'classic')} • {checkpoint.playStyle === 'coop' ? 'Co-op' : checkpoint.playStyle === 'alternating' ? '2 Player' : 'Solo'} • {checkpoint.score.toLocaleString()} points</small></button>}
         </div>
+        <details className="cosmetic-locker">
+          <summary><span><small>PLAYER PROGRESS</small><strong>Detroit Hero Locker</strong></span><em>{progress.totalScore.toLocaleString()} lifetime • {progress.missionsCompleted} missions • {progress.completedRuns} runs</em></summary>
+          <div className="cosmetic-grid">{COSMETICS.map(item => {
+            const unlocked = progress.unlocked.includes(item.id);
+            return <button key={item.id} disabled={!unlocked} className={progress.selected === item.id ? 'selected' : ''} onClick={() => { const next = selectCosmetic(item.id); setProgress(next); }} aria-pressed={progress.selected === item.id}>
+              <i style={{ '--cosmetic-color': `#${item.heroTint.toString(16).padStart(6, '0')}` } as CSSProperties} />
+              <span><strong>{item.label}</strong><small>{unlocked ? item.description : `LOCKED • ${item.description}`}</small></span>
+            </button>;
+          })}</div>
+        </details>
         <details className="settings-panel">
           <summary>Game options</summary>
           <div className="settings-row">

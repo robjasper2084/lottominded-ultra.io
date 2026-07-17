@@ -1,10 +1,30 @@
 export type LotteryMode = 'pick3' | 'pick4' | 'megaMillions' | 'powerball';
 export type PlayerCount = 1 | 2;
 export type PlayStyle = 'solo' | 'alternating' | 'coop';
+export type RunVariant = 'classic' | 'timeAttack' | 'daily';
+export type BonusTier = 'bronze' | 'silver' | 'gold';
+export type CosmeticId = 'classic' | 'motorGold' | 'riverIce' | 'purple313' | 'jackpotChrome';
 export type ControlPreset = 'wasd' | 'arrows' | 'ijkl';
 export type ControlAction = 'up' | 'down' | 'left' | 'right' | 'power';
 export type StreetBonusKind = 'cash' | 'ticket' | 'scratch';
 export type CompassDirection = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
+
+export interface DetroitMissionProgress {
+  id: string;
+  label: string;
+  current: number;
+  target: number;
+  complete: boolean;
+  reward: number;
+}
+
+export interface LevelMissionStats {
+  hearts: number;
+  portals: number;
+  bonuses: number;
+  villains: number;
+  bestStreak: number;
+}
 
 export interface ControlBindings {
   up: string;
@@ -73,6 +93,14 @@ export interface GameSnapshot {
   eventSeconds: number;
   eventsCompleted: number;
   missedBonuses: number;
+  runVariant: RunVariant;
+  timeAttackSeconds: number;
+  portalCombo: number;
+  portalComboSeconds: number;
+  bonusTier?: BonusTier;
+  missions: DetroitMissionProgress[];
+  missionsCompleted: number;
+  bossLabel?: string;
 }
 
 export interface GameCheckpoint {
@@ -81,6 +109,7 @@ export interface GameCheckpoint {
   world: number;
   draw: LotteryDraw;
   playStyle: PlayStyle;
+  runVariant?: RunVariant;
   score: number;
   activePlayer: 0 | 1;
   playerScores: [number, number];
@@ -102,6 +131,10 @@ export interface GameCheckpoint {
   eventsCompleted?: number;
   missedBonuses?: number;
   levelGrades?: Array<'S' | 'A' | 'B' | 'C'>;
+  levelTimeRemainingMs?: number;
+  levelMissionStats?: LevelMissionStats;
+  missionRewardsClaimed?: string[];
+  missionsCompleted?: number;
 }
 
 export interface SavedResult extends LotteryDraw {
@@ -123,4 +156,8 @@ export interface SavedResult extends LotteryDraw {
   missedBonuses?: number;
   eventsCompleted?: number;
   levelGrades?: Array<'S' | 'A' | 'B' | 'C'>;
+  runVariant?: RunVariant;
+  missionsCompleted?: number;
+  timeAttackBonus?: number;
+  newCosmetics?: string[];
 }

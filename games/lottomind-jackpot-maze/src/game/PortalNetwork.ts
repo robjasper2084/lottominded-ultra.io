@@ -13,6 +13,13 @@ export interface PortalNetwork {
 
 export const PORTAL_COUNTS_BY_LEVEL = [2, 2, 4, 2, 4, 2, 4, 4, 2, 4] as const;
 
+export function tunnelPortalPair(maze: MazeDefinition): PortalPair {
+  return {
+    entry: { x: 0, y: maze.tunnelRow },
+    exit: { x: maze.width - 1, y: maze.tunnelRow }
+  };
+}
+
 export function portalCountForLevel(level: number): 2 | 4 {
   const index = ((Math.trunc(level) % PORTAL_COUNTS_BY_LEVEL.length) + PORTAL_COUNTS_BY_LEVEL.length) % PORTAL_COUNTS_BY_LEVEL.length;
   return PORTAL_COUNTS_BY_LEVEL[index];
@@ -44,7 +51,8 @@ function shuffled<T>(items: T[], seed: number): T[] {
 
 export function createPortalNetwork(maze: MazeDefinition, level: number, seed: number): PortalNetwork {
   const desiredCount = portalCountForLevel(level);
-  const protectedTiles = [maze.playerSpawn, maze.player2Spawn, maze.house, ...maze.villainSpawns, ...maze.powerTiles];
+  const tunnelPair = tunnelPortalPair(maze);
+  const protectedTiles = [maze.playerSpawn, maze.player2Spawn, maze.house, ...maze.villainSpawns, ...maze.powerTiles, tunnelPair.entry, tunnelPair.exit];
   const candidates: GridPoint[] = [];
 
   for (let y = 1; y < maze.height - 1; y += 1) {

@@ -41,10 +41,18 @@ export const VILLAIN_WAVES = [
   { tactic: 'chase', durationMs: Number.POSITIVE_INFINITY }
 ] as const;
 
-// Medium hearts appear every three walkable tiles. This keeps the route easy
-// to read while making collection feel steady instead of empty or cluttered.
+// Early districts use fewer, larger hearts so the first run stays readable and
+// brisk. Later maps tighten the rhythm as players learn the routes.
 export const HEART_GRID_SPACING = 3;
-export const HEART_SIZE = 18;
+export const HEART_SIZE = 20;
+export const HEART_BASE_SCORE = 20;
+export const LEVEL_ONE_HEART_CAP = 60;
+export const HEART_SPACING_BY_LEVEL = [5, 5, 4, 4, 4, 4, 3, 3, 3, 3] as const;
+
+export function heartGridSpacingForLevel(levelIndex: number): number {
+  const index = Math.max(0, Math.min(HEART_SPACING_BY_LEVEL.length - 1, Math.trunc(levelIndex)));
+  return HEART_SPACING_BY_LEVEL[index];
+}
 
 // The first two levels teach the four core personalities. Jackpot Patrol joins
 // on level three, after the player has learned movement and Mind Coins.
