@@ -449,6 +449,10 @@
 
   const dom = {
     titleScreen: document.getElementById("titleScreen"),
+    cutsceneScreen: document.getElementById("cutsceneScreen"),
+    introCutscene: document.getElementById("introCutscene"),
+    cutsceneProgress: document.getElementById("cutsceneProgress"),
+    cutsceneTime: document.getElementById("cutsceneTime"),
     purchaseScreen: document.getElementById("purchaseScreen"),
     pauseScreen: document.getElementById("pauseScreen"),
     settingsScreen: document.getElementById("settingsScreen"),
@@ -523,6 +527,9 @@
   let modeBeforeSettings = "title";
   let run = null;
   let pendingRunMode = "solo";
+  let pendingCutsceneRunMode = "solo";
+  let cutsceneSession = 0;
+  let cutsceneCompleting = false;
   let lastTime = performance.now();
   let accumulator = 0;
   let pulseTimer = 0;
@@ -974,6 +981,7 @@
   window.addEventListener("resize", syncViewportMode);
   window.addEventListener("orientationchange", syncViewportMode);
   bindInputs();
+  bindCutscene();
   installAccountBridge();
   if (DEBUG) installDebugPanel();
   setMode("title");
@@ -1208,7 +1216,6 @@
       if (["left", "right", "up", "down", "jump", "fire", "dash", "overdrive", "pause", "interact"].includes(action) || action.startsWith("p2-")) {
         event.preventDefault();
       }
-      if (action === "start" && mode === "title") startRun("solo");
     });
 
     window.addEventListener("keyup", (event) => {
@@ -1539,9 +1546,11 @@
   }
 
   function handleAction(action) {
-    if (action === "start" || action === "start-solo") startRun("solo");
-    if (action === "start-two-player") startRun("two-player");
-    if (action === "start-coop") startRun("coop");
+    if (action === "start" || action === "start-solo") beginCutscene("solo");
+    if (action === "start-two-player") beginCutscene("two-player");
+    if (action === "start-coop") beginCutscene("coop");
+    if (action === "skip-cutscene") completeCutscene();
+    if (action === "cancel-cutscene") cancelCutscene();
     if (action === "resume") resumeRun();
     if (action === "pause") {
       if (mode === "paused") resumeRun();
@@ -1591,8 +1600,10 @@
   function setMode(next) {
     mode = next;
     document.body.classList.toggle("is-title-mode", next === "title");
+    document.body.classList.toggle("is-cutscene-mode", next === "cutscene");
     document.body.classList.toggle("is-playing-mode", next === "playing");
     dom.titleScreen.classList.toggle("is-hidden", next !== "title");
+    dom.cutsceneScreen?.classList.toggle("is-hidden", next !== "cutscene");
     dom.purchaseScreen.classList.toggle("is-hidden", next !== "purchase");
     dom.pauseScreen.classList.toggle("is-hidden", next !== "paused");
     dom.settingsScreen.classList.toggle("is-hidden", next !== "settings");
@@ -1613,6 +1624,82 @@
 
   function closeSettings() {
     setMode(modeBeforeSettings || "title");
+  }
+
+  function bindCutscene() {
+    if (!dom.introCutscene) return;
+    dom.introCutscene.addEventListener("timeupdate", updateCutsceneProgress);
+    dom.introCutscene.addEventListener("loadedmetadata", updateCutsceneProgress);
+    dom.introCutscene.addEventListener("ended", completeCutscene);
+    dom.introCutscene.addEventListener("error", completeCutscene);
+  }
+
+  function normalizeRunMode(runMode) {
+    if (runMode === "coop") return "coop";
+    if (runMode === "two-player" || runMode === true) return "two-player";
+    return "solo";
+  }
+
+  function beginCutscene(runMode = pendingRunMode) {
+    const modeKey = normalizeRunMode(runMode);
+    pendingCutsceneRunMode = modeKey;
+    pendingRunMode = modeKey;
+    cutsceneCompleting = false;
+    const video = dom.introCutscene;
+    if (!video) {
+      startRun(modeKey);
+      return;
+    }
+
+    const session = ++cutsceneSession;
+    video.pause();
+    video.currentTime = 0;
+    video.muted = false;
+    video.volume = 1;
+    setMode("cutscene");
+    updateCutsceneProgress();
+
+    const playback = video.play();
+    if (playback?.catch) {
+      playback.catch(() => {
+        if (session !== cutsceneSession || mode !== "cutscene") return;
+        video.muted = true;
+        video.play().catch(() => completeCutscene());
+      });
+    }
+  }
+
+  function completeCutscene() {
+    if (mode !== "cutscene" || cutsceneCompleting) return;
+    cutsceneCompleting = true;
+    cutsceneSession += 1;
+    dom.introCutscene?.pause();
+    if (dom.introCutscene) dom.introCutscene.currentTime = 0;
+    const runMode = pendingCutsceneRunMode;
+    cutsceneCompleting = false;
+    startRun(runMode);
+  }
+
+  function cancelCutscene() {
+    if (mode !== "cutscene") return;
+    cutsceneSession += 1;
+    dom.introCutscene?.pause();
+    if (dom.introCutscene) dom.introCutscene.currentTime = 0;
+    updateCutsceneProgress();
+    setMode("title");
+  }
+
+  function updateCutsceneProgress() {
+    const video = dom.introCutscene;
+    if (!video) return;
+    const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+    const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    const percent = duration ? clamp(current / duration, 0, 1) * 100 : 0;
+    if (dom.cutsceneProgress) dom.cutsceneProgress.style.width = `${percent}%`;
+    if (dom.cutsceneTime) {
+      const seconds = Math.floor(current);
+      dom.cutsceneTime.textContent = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    }
   }
 
   function startRun(runMode = pendingRunMode) {
@@ -2749,8 +2836,14 @@
 
   function update(dt) {
     if (mode === "title") {
-      if (actionPressed("start") || actionPressed("fire")) startRun();
+      if (actionPressed("start") || actionPressed("fire")) beginCutscene();
       if (actionPressed("settings")) openSettings();
+      return;
+    }
+
+    if (mode === "cutscene") {
+      if (actionPressed("pause")) cancelCutscene();
+      else if (actionPressed("start") || actionPressed("fire") || actionPressed("interact")) completeCutscene();
       return;
     }
 

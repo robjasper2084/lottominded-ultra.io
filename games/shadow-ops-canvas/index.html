@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>ROBOT RAHBE</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="./style.css?v=title-cinematic-1" />
+    <style>
+      #loadingScreen,
+      .screen--loading {
+        display: none !important;
+      }
+    </style>
+    <link rel="stylesheet" href="./style.css?v=intro-cutscene-1" />
   </head>
   <body class="is-title-mode">
     <main class="game-shell" aria-label="ROBOT RAHBE browser game">
@@ -49,6 +55,30 @@
             <kbd class="control-key" title="Dash">K</kbd>
             <kbd class="control-key" title="Overdrive">L</kbd>
           </p>
+        </div>
+      </section>
+
+      <section id="cutsceneScreen" class="screen screen--cutscene is-hidden" aria-label="Robot Rahbe mission intro">
+        <div class="cutscene-stage">
+          <video id="introCutscene" preload="metadata" playsinline aria-label="Robot Rahbe mission transmission">
+            <source src="./assets/video/robot-rahbe-intro-cutscene.mp4?v=intro-cutscene-1" type="video/mp4" />
+          </video>
+          <div class="cutscene-shade" aria-hidden="true"></div>
+          <header class="cutscene-header">
+            <div>
+              <p class="small-label">Mission Transmission</p>
+              <strong>Vault Entry // Robot Rahbe</strong>
+            </div>
+            <div class="cutscene-actions">
+              <button data-action="cancel-cutscene">Back</button>
+              <button class="primary" data-action="skip-cutscene">Skip Intro</button>
+            </div>
+          </header>
+          <footer class="cutscene-footer">
+            <span id="cutsceneTime">00:00</span>
+            <div class="cutscene-progress" aria-hidden="true"><span id="cutsceneProgress"></span></div>
+            <span>Incoming mission feed</span>
+          </footer>
         </div>
       </section>
 
@@ -267,7 +297,7 @@
     <script src="../../assets/js/lm-game-rewards-sdk.js?v=rewards-sdk-1"></script>
     <script src="./src/mobile-touch.js?v=full-game-audit-1"></script>
     <script type="module" src="./src/startup3d.js?v=startup3d-opengw-1"></script>
-  <script src="./src/game.js?v=full-game-audit-1"></script>
+  <script src="./src/game.js?v=intro-cutscene-1"></script>
     <script src="./src/brand-title-v2.js?v=title-fit-1"></script>
   </body>
 </html>
