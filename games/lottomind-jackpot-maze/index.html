@@ -2,11 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#090611" />
     <meta name="description" content="LottoMind Jackpot Maze — an original neon maze-chase game." />
     <link rel="icon" href="./assets/ui/icon-192.png" />
     <title>LottoMind: Jackpot Maze</title>
+    <script>
+      (() => {
+        window.addEventListener("DOMContentLoaded", () => {
+          const vitePort = Number(window.location.port);
+          const viteDev = vitePort >= 5173 && vitePort <= 5199;
+          const vitePreview = (vitePort >= 4173 && vitePort <= 4199) || vitePort === 8190;
+          const alreadyBuilt = /\/dist\/?$/.test(window.location.pathname);
+          const moduleEntry = document.querySelector('script[type="module"][src]');
+          const entryPath = new URL(moduleEntry?.getAttribute("src") || "", window.location.href).pathname;
+          const sourceShell = /\/src\/main\.[jt]sx?$/i.test(entryPath);
+          if (vitePreview && window.location.pathname !== "/") window.location.replace(new URL("/", window.location.origin));
+          else if (sourceShell && !viteDev && !vitePreview && !alreadyBuilt) window.location.replace(new URL("./dist/", window.location.href));
+        });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

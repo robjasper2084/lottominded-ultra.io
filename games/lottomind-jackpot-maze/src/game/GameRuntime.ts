@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import Phaser from 'phaser/src/phaser-arcade-physics.js';
 import { BOSS_RECOVERY_MS, DETROIT_LEVELS, GAME_BALANCE, HEART_BASE_SCORE, HEART_SIZE, LEVEL_ONE_HEART_CAP, MIND_COIN_FRIGHTENED_MS, VILLAIN_RECOVERY_MS, VILLAIN_WAVES, heartGridSpacingForLevel, villainCountForLevel } from '../config/gameBalance';
 import { DETROIT_EVENT_DURATION_MS, DETROIT_EVENT_INTERVAL_MS, eventForLevel } from '../config/detroitEvents';
 import { EMPTY_MISSION_STATS, evaluateDetroitMissions } from '../config/detroitMissions';
@@ -210,6 +210,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private worldStartScore = 0;
     private lastStormCycle = -1;
     private completed = false;
+    private levelTransitioning = false;
     private roundReadyUntil = 0;
     private lastPelletAt = 0;
     private lastCollector: 0 | 1 | null = null;
@@ -244,8 +245,12 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private levelMissionStats: LevelMissionStats = { ...EMPTY_MISSION_STATS };
     private missionRewardsClaimed = new Set<string>();
     private missionsCompleted = 0;
-    private readonly portraitMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 760px) and (orientation: portrait)').matches;
+    private mobileCameraActive = false;
     private mobileCameraFocus?: Phaser.GameObjects.Zone;
+
+    private get portraitMobile(): boolean {
+      return typeof window !== 'undefined' && window.matchMedia('(max-width: 760px) and (orientation: portrait)').matches;
+    }
 
     constructor() { super('lotto-grid-maze'); }
 
@@ -299,14 +304,13 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.cursors = this.input.keyboard!.createCursorKeys();
       this.keys = this.input.keyboard!.addKeys('W,A,S,D,I,J,K,L,SPACE,P,M') as Record<string, Phaser.Input.Keyboard.Key>;
       this.keys.M.on('down', () => { options.muted = !options.muted; });
-      if (this.portraitMobile) {
-        this.mobileCameraFocus = this.add.zone(this.pixelX(this.maze.playerSpawn.x), this.pixelY(this.maze.playerSpawn.y), 1, 1);
-        this.cameras.main.setRoundPixels(true).setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT).setZoom(options.playStyle === 'coop' ? 1.08 : 1.14).startFollow(this.mobileCameraFocus, true, 0.12, 0.12);
-      }
+      this.scale.on(Phaser.Scale.Events.RESIZE, this.configureResponsiveCamera, this);
+      this.configureResponsiveCamera();
       this.createWorld();
     }
 
     private createWorld(): void {
+      this.levelTransitioning = false;
       this.activeBonus?.container.destroy(); this.activeBonus = undefined;
       this.worldObjects.forEach(object => object.destroy()); this.worldObjects = [];
       this.villains.forEach(villain => { villain.sprite.destroy(); villain.shadow.destroy(); villain.label.destroy(); }); this.villains = [];
@@ -364,6 +368,10 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.drawMaze(); this.createPellets(); this.createVillains(); this.resetMovers(this.time.now, 2300);
       this.setWarning(`${options.runVariant === 'timeAttack' ? 'TIME ATTACK • ' : options.runVariant === 'daily' ? 'DAILY DETROIT • ' : ''}${options.playStyle === 'coop' ? 'CO-OP • ' : options.playStyle === 'alternating' ? `PLAYER ${this.activePlayer + 1} • ` : ''}LEVEL ${this.world + 1} READY!`, 2300);
       this.emitSnapshot();
+      // A checkpoint can be captured after the last heart but before a level
+      // break finishes. Resume that state by advancing instead of leaving the
+      // player in an empty Warren Run (or any other cleared district).
+      if (this.pelletObjects.size === 0) this.time.delayedCall(60, () => this.finishHeartClearedWorld());
     }
 
     private drawRoadSurface(): void {
@@ -487,14 +495,14 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
 
     private applyPortalVisualState(visual: PortalVisual, active: boolean, animate = true): void {
       this.tweens.killTweensOf(visual.container);
-      visual.orbit.setVisible(active);
-      visual.label.setText(active ? visual.labelText : 'OFF').setColor(active ? '#ffffff' : '#8c9aa8').setFontSize(active ? 7 : 5);
-      visual.halo.setFillStyle(active ? visual.color : 0x26343f, active ? 0.18 : 0.06).setStrokeStyle(active ? 4 : 2, active ? visual.color : 0x53606c, active ? 0.58 : 0.32);
-      visual.core.setFillStyle(active ? 0x01020a : 0x07101a, 1).setStrokeStyle(1.5, active ? 0xffffff : 0x53606c, active ? 0.62 : 0.35);
-      visual.outer.setStrokeStyle(active ? 3.5 : 2, active ? visual.color : 0x53606c, active ? 1 : 0.45);
-      visual.middle.setStrokeStyle(active ? 2.5 : 2, active ? visual.orbitColor : 0x33414d, active ? 1 : 0.35);
-      const scale = active ? 1 : 0.82;
-      const alpha = active ? 1 : 0.58;
+      visual.orbit.setVisible(true).setAlpha(active ? 1 : 0.35);
+      visual.label.setText(active ? visual.labelText : 'IDLE').setColor(active ? '#ffffff' : '#c6e7ff').setFontSize(active ? 7 : 5.5);
+      visual.halo.setFillStyle(active ? visual.color : 0x114059, active ? 0.18 : 0.1).setStrokeStyle(active ? 4 : 2.4, active ? visual.color : 0x6eeaff, active ? 0.58 : 0.45);
+      visual.core.setFillStyle(active ? 0x01020a : 0x06111c, 1).setStrokeStyle(1.5, active ? 0xffffff : 0x7deaff, active ? 0.62 : 0.45);
+      visual.outer.setStrokeStyle(active ? 3.5 : 2.4, active ? visual.color : 0x79eaff, active ? 1 : 0.62);
+      visual.middle.setStrokeStyle(active ? 2.5 : 2.1, active ? visual.orbitColor : 0x8b67ff, active ? 1 : 0.48);
+      const scale = active ? 1 : 0.9;
+      const alpha = active ? 1 : 0.82;
       if (animate && !options.reducedMotion) {
         this.tweens.add({ targets: visual.container, scaleX: scale, scaleY: scale, alpha, duration: 240, ease: active ? 'Back.Out' : 'Sine.Out' });
       } else {
@@ -591,8 +599,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       streets.forEach(street => {
         const x = ORIGIN_X + street.x * TILE;
         const y = ORIGIN_Y + street.y * TILE;
-        const labelSize = Math.max(street.size, this.portraitMobile ? 12 : 9);
-        const signLength = Phaser.Math.Clamp(street.name.length * (street.size * .72) + 22, 50, street.vertical ? 74 : 112);
+        const labelSize = street.vertical ? Math.max(street.size, this.portraitMobile ? 8 : 7) : Math.max(street.size, this.portraitMobile ? 10 : 9);
+        const signLength = Phaser.Math.Clamp(street.name.length * (labelSize * .68) + 24, 50, street.vertical ? 78 : 108);
         const sign = this.add.image(x, y, 'detroitStreetSign').setDisplaySize(signLength, 23).setDepth(5);
         if (street.vertical) sign.setAngle(90);
         const plaque = this.add.text(
@@ -610,7 +618,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
           }
         ).setOrigin(0.5).setDepth(6).setResolution(4).setShadow(0, 1, '#00120b', 1, true, true);
         const maxLabelWidth = signLength - 16;
-        plaque.setScale(Math.min(1, maxLabelWidth / plaque.width), 1);
+        plaque.setScale(Math.min(1, maxLabelWidth / Math.max(1, plaque.width)), 1);
         if (street.vertical) plaque.setAngle(90);
         sign.setData('streetDecor', true); plaque.setData('streetDecor', true);
         this.streetDecor.push(sign, plaque);
@@ -755,10 +763,29 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private updateMobileCameraFocus(): void {
+      this.configureResponsiveCamera();
       if (!this.mobileCameraFocus) return;
       const targetX = this.player2 ? (this.player.x + this.player2.x) / 2 : this.player.x;
       const targetY = this.player2 ? (this.player.y + this.player2.y) / 2 : this.player.y;
       this.mobileCameraFocus.setPosition(targetX, targetY);
+    }
+
+    private configureResponsiveCamera(): void {
+      const portrait = this.portraitMobile;
+      const heroSize = portrait ? 58 : 52;
+      this.player?.setDisplaySize(heroSize, heroSize);
+      this.player2?.setDisplaySize(portrait ? 74 : 68, portrait ? 59 : 54);
+      if (portrait === this.mobileCameraActive) return;
+      this.mobileCameraActive = portrait;
+      const camera = this.cameras.main.setRoundPixels(true).setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      if (portrait) {
+        this.mobileCameraFocus = this.mobileCameraFocus ?? this.add.zone(this.player?.x || this.pixelX(this.maze.playerSpawn.x), this.player?.y || this.pixelY(this.maze.playerSpawn.y), 1, 1);
+        camera.setZoom(options.playStyle === 'coop' ? 1.06 : 1.12).startFollow(this.mobileCameraFocus, true, 0.12, 0.12);
+      } else {
+        camera.stopFollow().setZoom(1).setScroll(0, 0);
+        this.mobileCameraFocus?.destroy();
+        this.mobileCameraFocus = undefined;
+      }
     }
 
     private handleTimeAttackExpired(time: number): void {
@@ -1219,12 +1246,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     private scoringPlayer(playerIndex: 0 | 1): 0 | 1 { return options.playStyle === 'alternating' ? this.activePlayer : playerIndex; }
 
     private collectNearby(tile: GridPoint, time: number, playerIndex: 0 | 1): void {
-      const nearby = [tile, ...validDirections(this.maze, tile).map(direction => stepTile(this.maze, tile, direction)).filter((point): point is GridPoint => Boolean(point))];
-      const collectionWorld = this.world;
-      for (const point of nearby) {
-        this.collectAt(point, time, playerIndex);
-        if (this.completed || this.world !== collectionWorld) break;
-      }
+      this.collectAt(tile, time, playerIndex);
     }
 
     private collectAt(tile: GridPoint, time: number, playerIndex: 0 | 1): void {
@@ -1254,11 +1276,19 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       this.levelMissionStats.bestStreak = Math.max(this.levelMissionStats.bestStreak, this.combo);
       this.updateMissionProgress(owner);
       this.revealNumbers(owner); this.emitSnapshot();
+      if (this.pelletObjects.size === 0) this.bossHealth = 0;
       if (time - this.lastCheckpointAt > 500 || this.pelletObjects.size === 0) { this.lastCheckpointAt = time; this.saveProgressCheckpoint(); }
       if (this.pelletObjects.size === 0) {
-        if (this.bossHealth > 0) this.setWarning(`${this.bossLabel} REMAINS • ${this.bossHealth}/${this.bossMaxHealth} • USE MIND COINS`, 2200);
-        else this.completeWorld();
+        this.finishHeartClearedWorld();
       }
+    }
+
+    private finishHeartClearedWorld(): void {
+      if (this.pelletObjects.size > 0 || this.completed || this.levelTransitioning) return;
+      // Clearing the street is the Pac-Man-style win condition. Captains can
+      // still be defeated for points, but never hold a cleared map hostage.
+      this.bossHealth = 0;
+      this.completeWorld();
     }
 
     private spawnCollectFx(tile: GridPoint, award: number, power: boolean, combo: number, playerIndex: 0 | 1): void {
@@ -1320,6 +1350,8 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
     }
 
     private completeWorld(): void {
+      if (this.completed || this.levelTransitioning) return;
+      this.levelTransitioning = true;
       while (this.nextReveal < this.worldRevealStart + this.quotas[this.world]) { this.revealed[this.nextReveal] = values[this.nextReveal]; this.nextReveal += 1; }
       if (options.runVariant === 'timeAttack') {
         const clockBonus = Math.max(0, Math.ceil(this.levelTimeRemainingMs / 1000) * 50);
@@ -1344,6 +1376,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
         const continueRun = () => {
           if (advanced || this.completed) return;
           advanced = true;
+          this.levelTransitioning = false;
           this.scene.resume();
           this.world += 1;
           if (options.playStyle === 'alternating') this.selectPlayer(this.activePlayer === 0 ? 1 : 0);
@@ -1618,7 +1651,7 @@ export function createGameRuntime(parent: HTMLElement, options: RuntimeOptions):
       ] as [CompassDirection, CompassDirection] : undefined;
       options.onSnapshot({ world: this.world, score: this.score, playerCount: options.playerCount, activePlayer: this.activePlayer, playerScores: [...this.playerScores] as [number, number], playerLives: [...this.playerLives] as [number, number], playerShields: [...this.playerShields] as [boolean, boolean], downedPlayers: [...this.downedPlayers] as [boolean, boolean], reviveProgress: [...this.reviveProgress] as [number, number], coins: this.pellets, remainingHearts: this.pelletObjects.size, lives: this.lives, combo: this.combo, revealed: [...this.revealed], totalSlots: values.length,
         specialIndex: options.draw.special === undefined ? undefined : values.length - 1, warning: this.warning,
-        powerUp: this.bonusEffect ? `${STREET_BONUSES[this.bonusEffect].label} • ${STREET_BONUSES[this.bonusEffect].effect}` : this.shielded ? 'Mind Coin Shield • READY' : this.time.now < this.luckyRushUntil ? 'Mind Coin Rush • ACTIVE' : 'Shield recharging',
+        powerUp: this.bonusEffect ? `${STREET_BONUSES[this.bonusEffect].label} • ${STREET_BONUSES[this.bonusEffect].effect}` : this.time.now < this.luckyRushUntil ? 'Mind Coin Rush • ACTIVE' : this.shielded ? 'Mind Coin Shield • READY' : 'Shield recharging',
         hasMoved: this.hasMoved, usedPortal: this.usedPortal, powerUpsUsed: this.powerUpsUsed, villainEncounters: this.villainEncounters,
         revivesCompleted: this.revivesCompleted, bossHealth: this.bossHealth, bossMaxHealth: this.bossMaxHealth,
         mechanic: DETROIT_LEVELS[this.world]?.mechanic ?? '', bonusEffect: this.bonusEffect, bonusesCollected: this.bonusesCollected,
