@@ -15,6 +15,10 @@
   const SplitText = window.SplitText || null;
   if (gsap && ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
   if (gsap && SplitText) gsap.registerPlugin(SplitText);
+  if (window.LMPageTransitionAudio?.config) {
+    window.LMPageTransitionAudio.config.volume = 0.08;
+    window.LMPageTransitionAudio.config.playCloseBeforeNavigate = false;
+  }
   const sectionMap = [
     ["dust", "Dust", "T − 13.8 Gyr"],
     ["ignition", "Ignition", "T − 13.6 Gyr"],
@@ -51,7 +55,97 @@
   const commercialSignal = commercialModal?.querySelector("[data-membership-commercial-signal]");
   const commercialCopy = commercialModal?.querySelector("[data-membership-commercial-copy]");
   const commercialTelemetry = commercialModal?.querySelector("[data-membership-commercial-telemetry]");
+  const commercialSound = commercialModal?.querySelector("[data-membership-commercial-sound]");
+  const membershipSoundtrack = document.querySelector("#siteSoundtrack");
+  const membershipSoundPreferenceKey = "lottominded.ultra.membershipSound.v1";
+  let soundToggle = null;
+  let soundtrackPausedForCommercial = false;
+  let soundtrackShouldStartAfterCommercial = false;
+  try {
+    state.soundOptOut = localStorage.getItem(membershipSoundPreferenceKey) === "off";
+  } catch (_) {
+    state.soundOptOut = false;
+  }
+  if (membershipSoundtrack) {
+    membershipSoundtrack.loop = false;
+    membershipSoundtrack.removeAttribute("loop");
+    membershipSoundtrack.volume = window.LMAudioMix?.levels.background ?? 0.42;
+  }
+
+  const syncMembershipSoundState = () => {
+    if (!soundToggle) return;
+    soundToggle.setAttribute("aria-pressed", String(state.soundEnabled));
+    soundToggle.textContent = state.soundEnabled ? "MUSIC ON" : "MUSIC OFF";
+    soundToggle.setAttribute(
+      "aria-label",
+      `${state.soundEnabled ? "Pause" : "Play"} membership background music and transition sounds`,
+    );
+  };
+
+  const playMembershipSoundtrack = async ({ remember = false, restart = false, volume = window.LMAudioMix?.levels.background ?? 0.42, silent = false } = {}) => {
+    if (!membershipSoundtrack || state.soundOptOut) return false;
+    membershipSoundtrack.loop = false;
+    membershipSoundtrack.volume = volume;
+    if (restart) {
+      try { membershipSoundtrack.currentTime = 0; } catch (_) {}
+    }
+    try {
+      window.LMAudioMix?.claim?.(membershipSoundtrack);
+      await membershipSoundtrack.play();
+      state.soundEnabled = !silent;
+      if (remember) {
+        try { localStorage.setItem(membershipSoundPreferenceKey, "on"); } catch (_) {}
+      }
+      syncMembershipSoundState();
+      return true;
+    } catch (_) {
+      state.soundEnabled = false;
+      syncMembershipSoundState();
+      return false;
+    }
+  };
+
+  const pauseMembershipSoundtrack = ({ optOut = false } = {}) => {
+    membershipSoundtrack?.pause();
+    state.soundEnabled = false;
+    if (optOut) {
+      state.soundOptOut = true;
+      try { localStorage.setItem(membershipSoundPreferenceKey, "off"); } catch (_) {}
+    }
+    syncMembershipSoundState();
+  };
+
+  membershipSoundtrack?.addEventListener("play", () => {
+    state.soundEnabled = membershipSoundtrack.volume > 0;
+    syncMembershipSoundState();
+  });
+  membershipSoundtrack?.addEventListener("pause", () => {
+    state.soundEnabled = false;
+    syncMembershipSoundState();
+  });
+  membershipSoundtrack?.addEventListener("ended", () => {
+    state.soundEnabled = false;
+    syncMembershipSoundState();
+  });
   const commercialFilms = [
+    {
+      src: "./assets/merch/lottomind-membership-hero-commercial-20260716.mp4",
+      poster: "./assets/merch/lottomind-membership-hero-commercial-poster-20260716.png",
+      signal: "Film 01 / Membership signal",
+      title: "Enter the Signal.",
+      telemetry: "LM-MEMBERSHIP / ACCESS READY",
+      copy: "Step into the LottoMind app network with premium tools, arcade routes, member drops, and protected Vault access.",
+      volume: 0.78,
+    },
+    {
+      src: "./assets/merch/lottomind-membership-single-commercial-20260716.mp4",
+      poster: "./assets/merch/lottomind-membership-hero-commercial-poster-20260716.png",
+      signal: "Film 02 / Guardian bundle",
+      title: "Membership Travels With You.",
+      telemetry: "LM-GUARDIAN / MEMBER LINKED",
+      copy: "The Little Man Guardian bundle includes three complimentary months across the growing LottoMind app network.",
+      volume: 0.62,
+    },
     {
       src: "./assets/merch/lottomind-merch-commercial-20260716.mp4",
       poster: "./assets/merch/lottomind-merch-commercial-poster-20260716.png",
@@ -59,6 +153,7 @@
       title: "Carry the Signal.",
       telemetry: "LM-GUARDIAN / IN TRANSIT",
       copy: "The Guardian goes wherever the next idea begins, with three months of LottoMind membership included.",
+      volume: 0.64,
     },
   ];
   const commercialFocusables = () => commercialModal
@@ -67,7 +162,32 @@
   let commercialReturnFocus = null;
   let commercialFilmIndex = 0;
   let commercialIsClosing = false;
+  let commercialTransitionFallback = 0;
   let waterCommercialSoundEnabled = false;
+
+  const playCommercialWithFallback = async ({ restart = false } = {}) => {
+    if (!commercialVideo) return false;
+    if (restart) {
+      try { commercialVideo.currentTime = 0; } catch (_) {}
+    }
+    commercialVideo.muted = false;
+    commercialVideo.defaultMuted = false;
+    commercialVideo.removeAttribute("muted");
+    commercialVideo.volume = commercialFilms[commercialFilmIndex]?.volume ?? 0.64;
+    window.LMAudioMix?.claim?.(commercialVideo);
+    try {
+      await commercialVideo.play();
+      if (commercialSound) commercialSound.hidden = true;
+      return true;
+    } catch (_) {
+      commercialVideo.muted = true;
+      commercialVideo.defaultMuted = true;
+      commercialVideo.setAttribute("muted", "");
+      if (commercialSound) commercialSound.hidden = false;
+      await commercialVideo.play().catch(() => {});
+      return false;
+    }
+  };
 
   const setCommercialFilm = (index, { restart = true, play = false, muted = false } = {}) => {
     if (!commercialVideo) return;
@@ -92,11 +212,7 @@
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-current", active ? "true" : "false");
     });
-    if (play) {
-      commercialVideo.muted = muted;
-      commercialVideo.volume = 0.72;
-      commercialVideo.play().catch(() => {});
-    }
+    if (play) playCommercialWithFallback({ restart: false });
   };
 
   let heroCommercialInView = false;
@@ -144,24 +260,68 @@
     if (!waterCommercialVideo) return;
     waterCommercialSoundEnabled = !waterCommercialSoundEnabled;
     waterCommercialVideo.muted = !waterCommercialSoundEnabled;
-    waterCommercialVideo.volume = 0.72;
+    waterCommercialVideo.volume = window.LMAudioMix?.levels.preview ?? 0.48;
     waterCommercialSound.setAttribute("aria-pressed", String(waterCommercialSoundEnabled));
     waterCommercialSound.textContent = waterCommercialSoundEnabled ? "Sound on" : "Play with sound";
-    if (waterCommercialSoundEnabled) waterCommercialVideo.play().catch(() => {});
+    if (waterCommercialSoundEnabled) {
+      window.LMAudioMix?.claim?.(waterCommercialVideo);
+      waterCommercialVideo.play().catch(() => {});
+    }
   });
 
-  const closeCommercial = ({ restoreFocus = true } = {}) => {
+  let commercialShouldRestoreFocus = true;
+  const finishCommercialHandoff = () => {
+    window.clearTimeout(commercialTransitionFallback);
+    window.removeEventListener("lottomind:transition-complete", handleCommercialTransitionComplete);
+    commercialModal?.setAttribute("aria-hidden", "true");
+    if (commercialModal) commercialModal.hidden = true;
+    commercialModal?.classList.remove("is-entry");
+    body.classList.remove("has-membership-commercial");
+    delete body.dataset.membershipCommercialEntry;
+    root.inert = false;
+    document.querySelector("[data-site-header]")?.removeAttribute("inert");
+    state.lenis?.start();
+    syncHeroCommercialPlayback();
+    syncWaterCommercialPlayback();
+    if (soundtrackShouldStartAfterCommercial && membershipSoundtrack) {
+      if (!membershipSoundtrack.paused) {
+        try { membershipSoundtrack.currentTime = 0; } catch (_) {}
+        membershipSoundtrack.volume = window.LMAudioMix?.levels.background ?? 0.42;
+        state.soundEnabled = true;
+        syncMembershipSoundState();
+      } else {
+        playMembershipSoundtrack({ remember: true, restart: true, volume: window.LMAudioMix?.levels.background ?? 0.42 });
+      }
+    }
+    soundtrackShouldStartAfterCommercial = false;
+    if (commercialClose) commercialClose.textContent = "Close";
+    if (commercialShouldRestoreFocus) commercialReturnFocus?.focus?.({ preventScroll: true });
+    commercialIsClosing = false;
+  };
+
+  const handleCommercialTransitionComplete = (event) => {
+    if (event?.detail?.source !== "membership-commercial") return;
+    finishCommercialHandoff();
+  };
+
+  const closeCommercial = ({ restoreFocus = true, startMusic = false } = {}) => {
     if (!commercialModal || commercialModal.hidden || commercialIsClosing) return;
     commercialIsClosing = true;
+    commercialShouldRestoreFocus = restoreFocus;
     commercialVideo?.pause();
-
-    window.dispatchEvent(new CustomEvent("lottomind:commercial-dismissed", {
-      detail: {
-        label: "Memberships",
-        source: "membership-commercial",
-        theme: "memberships"
+    soundtrackShouldStartAfterCommercial = Boolean(
+      (startMusic && !state.soundOptOut) || soundtrackPausedForCommercial,
+    );
+    if (soundtrackShouldStartAfterCommercial && membershipSoundtrack) {
+      if (startMusic) {
+        try { localStorage.setItem(membershipSoundPreferenceKey, "on"); } catch (_) {}
       }
-    }));
+      membershipSoundtrack.volume = 0;
+      try { membershipSoundtrack.currentTime = 0; } catch (_) {}
+      playMembershipSoundtrack({ remember: startMusic, restart: true, volume: 0, silent: true });
+    }
+    soundtrackPausedForCommercial = false;
+    window.addEventListener("lottomind:transition-complete", handleCommercialTransitionComplete);
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -169,17 +329,14 @@
         window.setTimeout(() => {
           commercialModal.setAttribute("aria-hidden", "true");
           commercialModal.hidden = true;
-          commercialModal.classList.remove("is-entry");
-          body.classList.remove("has-membership-commercial");
-          delete body.dataset.membershipCommercialEntry;
-          root.inert = false;
-          document.querySelector("[data-site-header]")?.removeAttribute("inert");
-          state.lenis?.start();
-          syncHeroCommercialPlayback();
-          syncWaterCommercialPlayback();
-          if (commercialClose) commercialClose.textContent = "Close";
-          if (restoreFocus) commercialReturnFocus?.focus?.({ preventScroll: true });
-          commercialIsClosing = false;
+          window.dispatchEvent(new CustomEvent("lottomind:commercial-dismissed", {
+            detail: {
+              label: "Memberships",
+              source: "membership-commercial",
+              theme: "memberships"
+            }
+          }));
+          commercialTransitionFallback = window.setTimeout(finishCommercialHandoff, 1500);
         }, 140);
       });
     });
@@ -198,6 +355,8 @@
     body.classList.add("has-membership-commercial");
     if (entry) body.dataset.membershipCommercialEntry = "true";
     else delete body.dataset.membershipCommercialEntry;
+    soundtrackPausedForCommercial = Boolean(membershipSoundtrack && !membershipSoundtrack.paused);
+    membershipSoundtrack?.pause();
     heroCommercialVideo?.pause();
     waterCommercialVideo?.pause();
     root.inert = true;
@@ -205,33 +364,34 @@
     state.lenis?.stop();
     requestAnimationFrame(() => commercialModal.classList.add("is-open"));
     if (commercialClose) commercialClose.textContent = entry ? "Skip & Enter" : "Close";
-    setCommercialFilm(commercialFilmIndex, { restart: true, play: true, muted: entry });
+    setCommercialFilm(commercialFilmIndex, { restart: true, play: true });
     commercialClose?.focus({ preventScroll: true });
   };
 
   commercialOpeners.forEach((button) => button.addEventListener("click", () => openCommercial(button)));
-  commercialClose?.addEventListener("click", () => closeCommercial());
-  commercialEnter?.addEventListener("click", () => closeCommercial());
+  commercialClose?.addEventListener("click", () => closeCommercial({ startMusic: true }));
+  commercialEnter?.addEventListener("click", () => closeCommercial({ startMusic: true }));
   commercialReplay?.addEventListener("click", () => {
-    if (!commercialVideo) return;
-    commercialVideo.currentTime = 0;
-    commercialVideo.play().catch(() => {});
+    playCommercialWithFallback({ restart: true });
   });
+  commercialSound?.addEventListener("click", () => playCommercialWithFallback({ restart: true }));
+  commercialVideo?.addEventListener("pointerdown", () => {
+    if (commercialVideo.muted) playCommercialWithFallback({ restart: true });
+  }, { passive: true });
   commercialChapters.forEach((button) => button.addEventListener("click", () => {
     setCommercialFilm(button.dataset.commercialIndex, { restart: true, play: true });
   }));
   commercialVideo?.addEventListener("ended", () => {
-    closeCommercial();
+    closeCommercial({ startMusic: true });
   });
-  openCommercial(null, { entry: true, index: 0 });
   commercialModal?.addEventListener("click", (event) => {
-    if (event.target === commercialModal) closeCommercial();
+    if (event.target === commercialModal) closeCommercial({ startMusic: true });
   });
   document.addEventListener("keydown", (event) => {
     if (!commercialModal || commercialModal.hidden) return;
     if (event.key === "Escape") {
       event.preventDefault();
-      closeCommercial();
+      closeCommercial({ startMusic: true });
       return;
     }
     if (event.key !== "Tab") return;
@@ -313,12 +473,12 @@
   hudRight.textContent = "0.50 · 0.50 · ARRAY STABLE";
   root.append(hudLeft, hudRight);
 
-  const soundToggle = document.createElement("button");
+  soundToggle = document.createElement("button");
   soundToggle.type = "button";
   soundToggle.className = "lm-sound-toggle";
   soundToggle.setAttribute("aria-pressed", "false");
-  soundToggle.setAttribute("aria-label", "Enable membership transition sound effects");
-  soundToggle.textContent = "SND OFF";
+  soundToggle.setAttribute("aria-label", "Play membership background music and transition sounds");
+  soundToggle.textContent = "MUSIC OFF";
   root.append(soundToggle);
 
   const cursorDot = document.createElement("span");
@@ -337,44 +497,68 @@
     if (!state.hintRetired) root.append(cursorHint);
   }
 
-  const playEpochTone = (index) => {
+  const eraChimeFrequencies = [196, 220, 246.94, 293.66, 329.63, 392, 440, 493.88];
+  let lastEraChimeAt = 0;
+  const playEraChime = (index) => {
     if (!state.soundEnabled) return;
+    const timestamp = performance.now();
+    if (timestamp - lastEraChimeAt < 240) return;
+    lastEraChimeAt = timestamp;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
     state.audioContext ||= new AudioContext();
     const context = state.audioContext;
     if (context.state === "suspended") context.resume().catch(() => {});
-    const now = context.currentTime;
-    const fundamental = 116 + index * 24;
-    const gain = context.createGain();
+    const now = context.currentTime + 0.01;
+    const duration = 0.9;
+    const frequency = eraChimeFrequencies[index % eraChimeFrequencies.length];
+    const output = context.createGain();
+    const shimmerGain = context.createGain();
     const filter = context.createBiquadFilter();
-    const tone = context.createOscillator();
-    const overtone = context.createOscillator();
+    const bell = context.createOscillator();
+    const shimmer = context.createOscillator();
+    const panner = context.createStereoPanner?.() || null;
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(920 + index * 110, now);
-    tone.type = "sine";
-    overtone.type = "triangle";
-    tone.frequency.setValueAtTime(fundamental, now);
-    overtone.frequency.setValueAtTime(fundamental * 2.01, now);
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.045, now + 0.025);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.48);
-    tone.connect(filter);
-    overtone.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
-    tone.start(now);
-    overtone.start(now);
-    tone.stop(now + 0.5);
-    overtone.stop(now + 0.5);
+    filter.frequency.setValueAtTime(1800, now);
+    filter.Q.setValueAtTime(0.7, now);
+    bell.type = "sine";
+    shimmer.type = "sine";
+    bell.frequency.setValueAtTime(frequency, now);
+    shimmer.frequency.setValueAtTime(frequency * 2.005, now);
+    shimmerGain.gain.setValueAtTime(0.2, now);
+    output.gain.setValueAtTime(0.0001, now);
+    output.gain.exponentialRampToValueAtTime(0.014, now + 0.04);
+    output.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    bell.connect(filter);
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(filter);
+    filter.connect(output);
+    if (panner) {
+      panner.pan.setValueAtTime(((index % 3) - 1) * 0.12, now);
+      output.connect(panner);
+      panner.connect(context.destination);
+    } else {
+      output.connect(context.destination);
+    }
+    const cleanup = () => {
+      [bell, shimmer, shimmerGain, filter, output, panner].filter(Boolean).forEach((node) => {
+        try { node.disconnect(); } catch (_) {}
+      });
+    };
+    bell.addEventListener("ended", cleanup, { once: true });
+    bell.start(now);
+    shimmer.start(now + 0.025);
+    bell.stop(now + duration + 0.05);
+    shimmer.stop(now + duration + 0.05);
   };
 
-  soundToggle.addEventListener("click", () => {
-    state.soundEnabled = !state.soundEnabled;
-    soundToggle.setAttribute("aria-pressed", String(state.soundEnabled));
-    soundToggle.textContent = state.soundEnabled ? "SND ON" : "SND OFF";
-    soundToggle.setAttribute("aria-label", `${state.soundEnabled ? "Disable" : "Enable"} membership transition sound effects`);
-    if (state.soundEnabled) playEpochTone(state.activeIndex);
+  soundToggle.addEventListener("click", async () => {
+    if (state.soundEnabled && membershipSoundtrack && !membershipSoundtrack.paused) {
+      pauseMembershipSoundtrack({ optOut: true });
+      return;
+    }
+    state.soundOptOut = false;
+    await playMembershipSoundtrack({ remember: true });
   });
 
   const updateTelemetry = () => {
@@ -431,7 +615,7 @@
       detail: { index, label: item.label, time: item.time, glow, background },
     }));
     if (item.id !== "ignition") state.visual?.arrivalPulse?.();
-    if (previousIndex !== index) playEpochTone(index);
+    if (previousIndex !== index) playEraChime(index);
   };
 
   if (gsap && ScrollTrigger && !reducedMotion.matches) {
@@ -852,6 +1036,7 @@
   state.lenis?.start();
   revealHero();
   ScrollTrigger?.refresh();
+  requestAnimationFrame(() => openCommercial(null, { entry: true, index: 0 }));
   };
 
   const windowReady = document.readyState === "complete"

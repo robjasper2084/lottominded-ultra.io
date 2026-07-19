@@ -29,8 +29,8 @@
   const shadowFullscreenButton = document.querySelector("[data-sphere-shadow-fullscreen]");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const sphereAudioGateEnabled = false;
-  const sphereSoundtrackFullVolume = 0.58;
-  const sphereSoundtrackDuckedVolume = 0.22;
+  const sphereSoundtrackFullVolume = 0.38;
+  const sphereSoundtrackDuckedVolume = 0.16;
   const sphereShadowAutoOpenEnabled = false;
   const sphereShadowAutoDelay = 1200;
   const sphereShadowAutoKey = "lottomind.spheres.shadowAutoShown.v1";

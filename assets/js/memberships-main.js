@@ -33,6 +33,26 @@ const STYLE = [
   { color: "#3d7fd6", cameraZ: 16.0, x: 0 },
 ];
 const LIVELINESS = [0.3, 0.95, 0.42, 0.82, 0.64, 1.0, 0.72, 0.3];
+const FLOW_AXES = [
+  [1.0, 0.12, 0.04],
+  [0.94, -0.08, 0.22],
+  [1.0, 0.02, -0.08],
+  [0.86, 0.16, 0.05],
+  [0.92, 0.38, 0.02],
+  [0.88, -0.1, 0.28],
+  [0.72, 0.08, 0.56],
+];
+
+const FORM_NAMES = [
+  "signal-core",
+  "signal-bloom",
+  "lottery-intelligence",
+  "detroit-sound-wave",
+  "lottoman-mascot",
+  "comet-signal",
+  "broadcast-signal",
+  "lottoman-mascot",
+];
 const HERO_RING_COLORS = ["#ff4b4b", "#7fd4ff", "#b9f0e4"];
 const HERO_CORE_COLOR = "#ff8a5b";
 const HERO_RING_RADII = [6.4, 5.3, 4.2];
@@ -89,21 +109,32 @@ async function loadMascotParticleSource() {
   context.drawImage(image, 0, 0);
   const pixels = context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height).data;
   const samples = [];
+  const edgeSamples = [];
+  const alphaAt = (x, y) => {
+    if (x < 0 || y < 0 || x >= sampleCanvas.width || y >= sampleCanvas.height) return 0;
+    return pixels[(y * sampleCanvas.width + x) * 4 + 3];
+  };
   for (let y = 0; y < sampleCanvas.height; y += 1) {
     for (let x = 0; x < sampleCanvas.width; x += 1) {
       const offset = (y * sampleCanvas.width + x) * 4;
       if (pixels[offset + 3] < 36) continue;
-      samples.push([
+      const sample = [
         x / sampleCanvas.width,
         y / sampleCanvas.height,
         pixels[offset] / 255,
         pixels[offset + 1] / 255,
         pixels[offset + 2] / 255,
-      ]);
+      ];
+      samples.push(sample);
+      const edge = alphaAt(x - 1, y) < 36
+        || alphaAt(x + 1, y) < 36
+        || alphaAt(x, y - 1) < 36
+        || alphaAt(x, y + 1) < 36;
+      if (edge) edgeSamples.push(sample);
     }
   }
   if (samples.length < 100) throw new Error("Mascot particle mask is empty");
-  return samples;
+  return { samples, edgeSamples };
 }
 
 const mascotParticleSource = await loadMascotParticleSource().catch((error) => {
@@ -163,39 +194,90 @@ function generateGyroscope(count, seed = 11, roles = createGyroscopeRoles(count)
   return target;
 }
 
-function generateStar(count, seed = 23) {
+function generateSignalBloom(count, seed = 23) {
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
-  for (let index = 0; index < count; index += 1) {
-    const direction = unitDirection(random);
-    const radius = random() < 0.85
-      ? 3.4 * Math.cbrt(random())
-      : 3.4 + Math.pow(random(), 2.4) * 5.6;
-    setPoint(target, index, direction[0] * radius, direction[1] * radius, direction[2] * radius);
-  }
-  return target;
-}
-
-function generateRingedPlanet(count, seed = 37) {
-  const random = mulberry32(seed);
-  const target = new Float32Array(count * 3);
+  const coreEnd = Math.floor(count * 0.22);
+  const petalEnd = Math.floor(count * 0.92);
   for (let index = 0; index < count; index += 1) {
     let x;
     let y;
     let z;
-    if (random() < 0.76) {
+    if (index < coreEnd) {
       const direction = unitDirection(random);
-      const radius = 3.1 + (random() - 0.5) * 0.08;
-      [x, y, z] = direction.map((value) => value * radius);
-    } else {
-      const angle = random() * Math.PI * 2;
-      const radius = 4.4 + random() * 2.1;
+      const radius = 1.75 * Math.cbrt(random());
+      x = direction[0] * radius;
+      y = direction[1] * radius;
+      z = direction[2] * radius;
+    } else if (index < petalEnd) {
+      const lane = index % 8;
+      const t = Math.pow(random(), 0.72);
+      const angle = lane / 8 * Math.PI * 2
+        + t * 2.45
+        + Math.sin(t * Math.PI) * 0.42
+        + gaussian(random) * 0.028;
+      const radius = 1.15 + t * 5.85 + gaussian(random) * 0.09;
       x = Math.cos(angle) * radius;
-      y = (random() - 0.5) * 0.08;
-      z = Math.sin(angle) * radius;
+      y = Math.sin(angle) * radius * 0.72;
+      z = Math.sin(t * Math.PI * 3 + lane * 0.82) * 0.52 + gaussian(random) * 0.14;
+    } else {
+      const direction = unitDirection(random);
+      const radius = 7.4 + random() * 4.6;
+      x = direction[0] * radius;
+      y = direction[1] * radius;
+      z = direction[2] * radius;
     }
-    [x, y, z] = rotateX(x, y, z, -0.4);
-    [x, y, z] = rotateZ(x, y, z, 0.16);
+    [x, y, z] = rotateZ(...rotateX(x, y, z, -0.13), 0.08);
+    setPoint(target, index, x, y, z);
+  }
+  return target;
+}
+
+function generateLottoIntelligenceGlobe(count, seed = 37) {
+  const random = mulberry32(seed);
+  const target = new Float32Array(count * 3);
+  const shellEnd = Math.floor(count * 0.54);
+  const circuitEnd = Math.floor(count * 0.72);
+  const orbitEnd = Math.floor(count * 0.92);
+  for (let index = 0; index < count; index += 1) {
+    let x;
+    let y;
+    let z;
+    if (index < shellEnd) {
+      const direction = unitDirection(random);
+      const radius = 3.45 + (random() - 0.5) * 0.1;
+      [x, y, z] = direction.map((value) => value * radius);
+    } else if (index < circuitEnd) {
+      const lane = index % 9;
+      const t = random() * Math.PI * 2;
+      if (lane % 3 === 0) {
+        const latitude = ((lane / 3) - 1) * 0.72;
+        const radius = Math.sqrt(Math.max(0.1, 3.45 * 3.45 - latitude * latitude));
+        x = Math.cos(t) * radius;
+        y = latitude + gaussian(random) * 0.045;
+        z = Math.sin(t) * radius;
+      } else {
+        const meridian = lane / 9 * Math.PI * 2;
+        x = Math.sin(t) * Math.cos(meridian) * 3.45;
+        y = Math.cos(t) * 3.45;
+        z = Math.sin(t) * Math.sin(meridian) * 3.45;
+      }
+    } else if (index < orbitEnd) {
+      const angle = random() * Math.PI * 2;
+      const ring = index % 3;
+      const radius = 4.55 + ring * 0.72 + gaussian(random) * 0.07;
+      x = Math.cos(angle) * radius;
+      y = gaussian(random) * 0.07;
+      z = Math.sin(angle) * radius;
+      [x, y, z] = rotateZ(...rotateX(x, y, z, -0.38 + ring * 0.24), 0.14 - ring * 0.12);
+    } else {
+      const direction = unitDirection(random);
+      const radius = 7.8 + random() * 4.2;
+      x = direction[0] * radius;
+      y = direction[1] * radius;
+      z = direction[2] * radius;
+    }
+    [x, y, z] = rotateZ(...rotateX(x, y, z, -0.18), 0.12);
     setPoint(target, index, x, y, z);
   }
   return target;
@@ -205,16 +287,17 @@ function generateDetroitSoundWave(count, seed = 51) {
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
   for (let index = 0; index < count; index += 1) {
-    const x = (random() * 2 - 1) * 7.4;
-    const band = index % 5;
-    const bandOffset = (band - 2) * 0.34;
-    const envelope = 0.34 + Math.pow(Math.max(0, 1 - Math.abs(x) / 7.4), 1.4) * 1.15;
-    const carrier = Math.sin(x * 1.14 + band * 0.42) * 1.05
-      + Math.sin(x * 2.78 - band * 0.63) * 0.38
-      + Math.sin(x * 0.36 + 1.2) * 0.58;
-    const transient = Math.sin(x * 5.7) * 0.18 * Math.pow(envelope, 1.35);
-    const y = (carrier + transient) * envelope + bandOffset + gaussian(random) * 0.11;
-    const z = gaussian(random) * 0.38 + bandOffset * 0.22;
+    const x = (random() * 2 - 1) * 7.8;
+    const lane = index % 8;
+    const side = lane < 4 ? -1 : 1;
+    const ribbon = lane % 4;
+    const envelope = 0.42 + Math.pow(Math.max(0, 1 - Math.abs(x) / 7.8), 1.35) * 1.36;
+    const carrier = Math.sin(x * 0.82 + ribbon * 0.36) * 0.8
+      + Math.sin(x * 2.18 - ribbon * 0.48) * 0.34
+      + Math.sin(x * 4.9 + 0.6) * 0.11;
+    const y = side * (Math.abs(carrier) * envelope + ribbon * 0.29)
+      + gaussian(random) * 0.085;
+    const z = gaussian(random) * 0.23 + (ribbon - 1.5) * 0.075;
     setPoint(target, index, x, y, z);
   }
   return target;
@@ -335,6 +418,9 @@ function generateMascotParticles(count, seed = 113, source = mascotParticleSourc
   const random = mulberry32(seed);
   const target = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
+  const edges = new Float32Array(count);
+  const sourceSamples = Array.isArray(source) ? source : source?.samples;
+  const sourceEdges = Array.isArray(source) ? null : source?.edgeSamples;
   for (let index = 0; index < count; index += 1) {
     let x;
     let y;
@@ -342,14 +428,17 @@ function generateMascotParticles(count, seed = 113, source = mascotParticleSourc
     let red = 0.46;
     let green = 0.34;
     let blue = 0.68;
-    if (source?.length) {
-      const sample = source[Math.floor(random() * source.length)];
+    if (sourceSamples?.length) {
+      const useEdge = sourceEdges?.length && random() < 0.58;
+      const pool = useEdge ? sourceEdges : sourceSamples;
+      const sample = pool[Math.floor(random() * pool.length)];
       x = (sample[0] - 0.5) * 13.2 + gaussian(random) * 0.025;
       y = (0.5 - sample[1]) * 11.0 + gaussian(random) * 0.025;
-      z = gaussian(random) * 0.24;
+      z = gaussian(random) * (useEdge ? 0.12 : 0.22);
       red = sample[2];
       green = sample[3];
       blue = sample[4];
+      edges[index] = useEdge ? 1 : 0;
     } else {
       const head = index < count * 0.38;
       const angle = random() * Math.PI * 2;
@@ -364,13 +453,13 @@ function generateMascotParticles(count, seed = 113, source = mascotParticleSourc
     colors[colorOffset + 1] = green;
     colors[colorOffset + 2] = blue;
   }
-  return { target, colors };
+  return { target, colors, edges };
 }
 
 const generators = [
   generateGyroscope,
-  generateStar,
-  generateRingedPlanet,
+  generateSignalBloom,
+  generateLottoIntelligenceGlobe,
   generateDetroitSoundWave,
   generateDnaHelix,
   generateComet,
@@ -486,6 +575,7 @@ function initializeEntity(runtime) {
     geometry.setAttribute("aScale", new THREE.BufferAttribute(scales, 1));
     geometry.setAttribute("aRing", new THREE.BufferAttribute(heroRoles, 1));
     geometry.setAttribute("aMascotColor", new THREE.BufferAttribute(mascotParticleData.colors, 3));
+    geometry.setAttribute("aMascotEdge", new THREE.BufferAttribute(mascotParticleData.edges, 1));
 
     const uniforms = {
       uMorph: { value: 0 },
@@ -500,6 +590,8 @@ function initializeEntity(runtime) {
       uComet: { value: 0 },
       uSignal: { value: 0 },
       uMascot: { value: 0 },
+      uSegment: { value: 0 },
+      uFlowAxis: { value: new THREE.Vector3(...FLOW_AXES[0]).normalize() },
       uDrift: { value: 1 },
       uLiveliness: { value: LIVELINESS[0] },
       uScrollTurbulence: { value: 0 },
@@ -524,6 +616,7 @@ function initializeEntity(runtime) {
         attribute float aScale;
         attribute float aRing;
         attribute vec3 aMascotColor;
+        attribute float aMascotEdge;
         uniform float uMorph;
         uniform float uTime;
         uniform float uTime2;
@@ -536,6 +629,8 @@ function initializeEntity(runtime) {
         uniform float uComet;
         uniform float uSignal;
         uniform float uMascot;
+        uniform float uSegment;
+        uniform vec3 uFlowAxis;
         uniform float uDrift;
         uniform float uLiveliness;
         uniform float uScrollTurbulence;
@@ -552,6 +647,9 @@ function initializeEntity(runtime) {
         varying float vSignalBrightness;
         varying vec3 vMascotColor;
         varying float vMascot;
+        varying float vMascotEdge;
+        varying float vTransition;
+        varying float vBrandBand;
 
         vec4 permute(vec4 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
         vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
@@ -630,6 +728,16 @@ function initializeEntity(runtime) {
           }
           vec3 heroSource = mix(aPosA, rotatedHero, uHero);
           vec3 base = mix(heroSource, aPosB, tt);
+          float transition = sin(uMorph * 3.14159265);
+          vec3 flowAxis = normalize(uFlowAxis);
+          vec3 flowReference = abs(flowAxis.z) < 0.9 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+          vec3 ribbonSide = normalize(cross(flowAxis, flowReference));
+          vec3 ribbonUp = normalize(cross(ribbonSide, flowAxis));
+          float ribbonPhase = aSeed * 6.2831853 + uTime2 * 0.48 + tt * 9.42478 + uSegment * 0.72;
+          float ribbonAmplitude = (0.12 + aSeed * 0.62) * transition;
+          base += ribbonSide * sin(ribbonPhase * 2.0) * ribbonAmplitude;
+          base += ribbonUp * cos(ribbonPhase * 1.35) * ribbonAmplitude * 0.72;
+          base += flowAxis * (aSeed - 0.5) * transition * 1.35;
           float lifeShimmer = sin(uTime2 * 1.18 + aSeed * 31.0);
           base.x += lifeShimmer * 0.035 * uLife;
           base.y += cos(uTime2 * 0.84 + aSeed * 23.0) * 0.045 * uLife;
@@ -668,9 +776,10 @@ function initializeEntity(runtime) {
             snoise(noisePoint + vec3(19.13, 7.17, 3.91)),
             snoise(noisePoint + vec3(41.73, 29.41, 13.37))
           );
-          float storm = 0.05 * uLiveliness * (1.0 + uDrift * 1.6)
-            + sin(uMorph * 3.14159265) * 1.05 * (0.8 + aSeed)
+          float storm = 0.045 * uLiveliness * (1.0 + uDrift * 1.45)
+            + transition * 0.36 * (0.72 + aSeed)
             + uScrollTurbulence;
+          storm = mix(storm, 0.012, uMascot * (1.0 - transition));
           vec3 position = base + flow * storm;
           float coronaMask = smoothstep(3.4, 4.2, length(base));
           float coronaNoise = snoise(base * 0.5 + vec3(uTime2 * 0.35)) * 0.5 + 0.5;
@@ -692,7 +801,9 @@ function initializeEntity(runtime) {
             * mouseFalloff * uMouseForce * (0.6 + aSeed * 0.8);
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          gl_PointSize = max(1.4, aScale * uPixelRatio * (58.0 / max(1.0, -mvPosition.z)));
+          float mascotRest = uMascot * (1.0 - transition);
+          float mascotEdgeScale = mix(1.0, mix(0.72, 0.92, aMascotEdge), mascotRest);
+          gl_PointSize = max(1.4, aScale * mascotEdgeScale * uPixelRatio * (58.0 / max(1.0, -mvPosition.z)));
           vSeed = aSeed;
           vTravel = tt;
           vRing = aRing;
@@ -700,11 +811,15 @@ function initializeEntity(runtime) {
           vHeroRadius = length(heroSource);
           vMascotColor = aMascotColor;
           vMascot = uMascot;
+          vMascotEdge = aMascotEdge;
+          vTransition = transition;
+          vBrandBand = fract(aSeed * 9.0 + uSegment * 0.17);
         }
       `,
       fragmentShader: `
         uniform float uTime;
         uniform float uHeat;
+        uniform float uSegment;
         uniform vec3 uColorFrom;
         uniform vec3 uColorTo;
         varying float vSeed;
@@ -715,6 +830,9 @@ function initializeEntity(runtime) {
         varying float vSignalBrightness;
         varying vec3 vMascotColor;
         varying float vMascot;
+        varying float vMascotEdge;
+        varying float vTransition;
+        varying float vBrandBand;
         void main() {
           vec2 center = gl_PointCoord - 0.5;
           float distanceFromCenter = length(center);
@@ -724,6 +842,22 @@ function initializeEntity(runtime) {
           float twinkle = (0.68 + 0.32 * sin(uTime * (1.6 + vSeed * 4.2) + vSeed * 73.0))
             * (1.0 + uHeat * 0.35);
           vec3 color = mix(uColorFrom, uColorTo, vTravel);
+          vec3 brandCyan = vec3(0.1765, 0.8902, 0.9686);
+          vec3 brandMint = vec3(0.3608, 0.9412, 0.8471);
+          vec3 brandGold = vec3(1.0, 0.7608, 0.2549);
+          vec3 brandViolet = vec3(0.6588, 0.5451, 0.9804);
+          float stage = uSegment + vTravel;
+          vec3 stageAccent = brandCyan;
+          if (stage < 1.5) {
+            stageAccent = mix(brandGold, brandViolet, smoothstep(0.48, 0.88, vBrandBand));
+          } else if (stage < 2.5) {
+            stageAccent = mix(brandGold, brandCyan, smoothstep(0.36, 0.76, vBrandBand));
+          } else if (stage < 3.5) {
+            stageAccent = vBrandBand < 0.34 ? brandGold : (vBrandBand > 0.76 ? brandViolet : brandCyan);
+          } else {
+            stageAccent = mix(brandCyan, brandMint, vBrandBand);
+          }
+          color = mix(color, stageAccent, 0.18 + vTransition * 0.34);
           vec3 heroColor = vec3(0.4980, 0.8314, 1.0);
           if (vRing < 0.5) {
             heroColor = vec3(1.0, 0.2941, 0.2941);
@@ -740,12 +874,13 @@ function initializeEntity(runtime) {
           color = mix(color, heroColor, vHero);
           vec3 mascotColor = max(vMascotColor, vec3(0.16, 0.12, 0.22));
           mascotColor = mascotColor * 1.18 + vec3(0.035, 0.055, 0.08);
+          mascotColor = mix(mascotColor, mix(brandCyan, brandGold, vBrandBand), vMascotEdge * 0.42);
           color = mix(color, mascotColor, vMascot);
           color = mix(color, vec3(1.0, 0.32, 0.12), uHeat * 0.6);
-          if (vSeed > 0.985) color = vec3(1.0);
-          if (vSeed > 0.9982) color = vec3(1.0, 0.2392, 0.5412);
+          if (vSeed > 0.985) color = mix(color, vec3(1.0), 1.0 - vMascot * 0.72);
+          if (vSeed > 0.9982) color = mix(color, vec3(1.0, 0.2392, 0.5412), 1.0 - vMascot * 0.58);
           vec3 pointCore = mix(vec3(1.05), vec3(0.55, 0.10, 0.025), uHeat);
-          color += hotCore * pointCore;
+          color += hotCore * pointCore * mix(1.0, 0.22, vMascot);
           color *= vSignalBrightness;
           gl_FragColor = vec4(color, disc * (0.58 + twinkle * 0.42));
         }
@@ -865,6 +1000,8 @@ function initializeEntity(runtime) {
       geometry.setAttribute("aPosB", new THREE.BufferAttribute(shapes[nextSegment + 1], 3));
       uniforms.uColorFrom.value.set(STYLE[nextSegment].color);
       uniforms.uColorTo.value.set(STYLE[nextSegment + 1].color);
+      uniforms.uSegment.value = nextSegment;
+      uniforms.uFlowAxis.value.set(...FLOW_AXES[nextSegment]).normalize();
       backgroundFrom.set(BACKGROUNDS[nextSegment]);
       backgroundTo.set(BACKGROUNDS[nextSegment + 1]);
     };
@@ -875,7 +1012,7 @@ function initializeEntity(runtime) {
       bindSegment(segment);
       uniforms.uMorph.value = entityState.shapeFloat >= 7 ? 1 : entityState.shapeFloat - segment;
       canvas.dataset.lmShape = entityState.shapeFloat.toFixed(3);
-      canvas.dataset.lmForm = entityState.shapeFloat >= 3.96 ? "lottoman-mascot" : "morphing-array";
+      canvas.dataset.lmForm = FORM_NAMES[Math.min(7, Math.max(0, Math.round(entityState.shapeFloat)))];
     };
 
     const recomputeShapeFloat = () => {
@@ -897,21 +1034,28 @@ function initializeEntity(runtime) {
       transitionFrom[shape] = previousShape;
       previousShape = shape;
       const proxy = { progress: 0 };
+      const syncShapeProgress = () => {
+        progressTable[shape] = proxy.progress;
+        recomputeShapeFloat();
+      };
       const animation = gsap.to(proxy, {
         progress: 1,
         paused: true,
         ease: "none",
-        onUpdate: () => {
-          progressTable[shape] = proxy.progress;
-          recomputeShapeFloat();
-        },
+        onUpdate: syncShapeProgress,
       });
+      const isFinalShapeSection = section === sections[sections.length - 1];
       ScrollTrigger.create({
         trigger: section,
         start: "top 94%",
-        end: "top 34%",
+        end: isFinalShapeSection ? "top 70%" : "top 34%",
         scrub: 1.2,
         animation,
+        onRefresh(self) {
+          proxy.progress = self.progress;
+          syncShapeProgress();
+        },
+        onScrubComplete: syncShapeProgress,
         invalidateOnRefresh: false,
       });
     });
@@ -1157,10 +1301,16 @@ function initializeEntity(runtime) {
       scene.background.copy(backgroundFrom).lerp(backgroundTo, fraction);
       if (composer && afterimagePass) {
         const storm = Math.sin(fraction * Math.PI);
+        const mascotRest = entityState.mascotWeight * (1 - storm);
         afterimagePass.uniforms.damp.value = Math.min(
           0.92,
           0.35 + storm * 0.45 + burst * 0.5 + renderTurbulence * 0.4,
         );
+        if (bloomPass) {
+          bloomPass.strength = THREE.MathUtils.lerp(0.85, 0.42, mascotRest);
+          bloomPass.radius = THREE.MathUtils.lerp(0.55, 0.32, mascotRest);
+          bloomPass.threshold = THREE.MathUtils.lerp(0.12, 0.28, mascotRest);
+        }
         composer.render(dt);
       } else {
         renderer.render(scene, camera);
@@ -1180,6 +1330,8 @@ function initializeEntity(runtime) {
       setFlight(progress) { entityState.flight = THREE.MathUtils.clamp(Number(progress) || 0, 0, 1); },
       get currentShape() { return entityState.shapeFloat; },
       get shapeFloat() { return entityState.shapeFloat; },
+      get formName() { return FORM_NAMES[Math.round(entityState.shapeFloat)] || FORM_NAMES[0]; },
+      get mascotWeight() { return entityState.mascotWeight; },
       get morph() { return uniforms.uMorph.value; },
       get segment() { return entityState.segment; },
       get pointCount() { return pointCount; },
@@ -1424,5 +1576,5 @@ const connectRuntime = (runtime) => {
 };
 window.addEventListener("lm:membership-runtime-ready", (event) => connectRuntime(event.detail), { once: true });
 
-await import("./memberships-cinematic.js?v=membership-commercial-handoff-3");
+await import("./memberships-cinematic.js?v=membership-audio-mix-5");
 if (window.__lmMembershipRuntime) connectRuntime(window.__lmMembershipRuntime);

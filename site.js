@@ -1,6 +1,32 @@
 const SITE_SCRIPT_URL = document.currentScript?.src || new URL("./site.js", document.baseURI).href;
 const SITE_ROOT_URL = new URL("./", SITE_SCRIPT_URL);
 const siteUrl = (relativePath) => new URL(relativePath.replace(/^\.\//, ""), SITE_ROOT_URL).toString();
+const SITE_AUDIO_LEVELS = Object.freeze({
+  background: 0.42,
+  live: 0.56,
+  commercial: 0.64,
+  inline: 0.56,
+  preview: 0.48,
+  ui: 0.022,
+});
+window.LMAudioMix = {
+  ...(window.LMAudioMix || {}),
+  levels: SITE_AUDIO_LEVELS,
+  claim(activeMedia) {
+    const paused = [];
+    document.querySelectorAll("audio, video").forEach((media) => {
+      if (media === activeMedia || media.matches("[data-lm-transition-video]")) return;
+      const isAudible = media.tagName === "AUDIO" || !media.muted;
+      if (!isAudible || media.paused) return;
+      media.pause();
+      paused.push(media);
+    });
+    window.dispatchEvent(new CustomEvent("lottomind:audio-owner", {
+      detail: { media: activeMedia || null, paused },
+    }));
+    return paused;
+  },
+};
 
 (() => {
   const main = document.querySelector("main");
@@ -275,6 +301,9 @@ const startupVideoCloseButtons = document.querySelectorAll("[data-startup-video-
 const startupMusicStart = document.querySelector("[data-startup-music-start]");
 const startupVideoPlayer = startupVideoModal?.querySelector("video");
 let startupOpenTimer = 0;
+let startupTransitionFallback = 0;
+let startupVideoClosing = false;
+let startupShouldPlayMusic = false;
 const domainStrip = document.querySelector(".domain-strip");
 const gamePip = document.querySelector("[data-game-pip]");
 const gamePipClose = document.querySelector("[data-game-pip-close]");
@@ -309,6 +338,14 @@ let gamePipResumeFromPage = false;
 let gamePipResumeFromHover = false;
 let gamePipDragState = null;
 let activePasswordGatePanel = null;
+
+function isStartupVideoOpen() {
+  return Boolean(
+    startupVideoModal
+    && !startupVideoModal.classList.contains("is-hidden")
+    && startupVideoModal.getAttribute("aria-hidden") !== "true"
+  );
+}
 
 function getSharedSignalHref() {
   const isNestedPage = /\/(?:news|news-hub)(?:\/|$)/i.test(window.location.pathname);
@@ -357,7 +394,7 @@ if (!setupSharedSignalMarquee()) {
     if (!setupSharedSignalMarquee()) return;
     sharedSignalObserver.disconnect();
   });
-  sharedSignalObserver.observe(document.body, { childList: true, subtree: true });
+  sharedSignalObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
   window.setTimeout(() => sharedSignalObserver.disconnect(), 5000);
 }
 
@@ -1360,9 +1397,10 @@ function setupSharedLivePlayers() {
     const togglePlayback = async () => {
       if (audio.paused || audio.ended) {
         try {
+          window.LMAudioMix.claim(audio);
           setupAnalyser();
           await context?.resume?.();
-          audio.volume = 0.72;
+          audio.volume = SITE_AUDIO_LEVELS.live;
           await audio.play();
           startWave();
         } catch {
@@ -2972,20 +3010,11 @@ function setupInlineSoundVideos() {
     setSoundButtonState(false);
 
     const playWithSound = async () => {
-      document.querySelectorAll("audio, video").forEach((media) => {
-        if (media === video) return;
-        const isSiteAudio =
-          media.id === "siteSoundtrack" ||
-          media.closest("[data-startup-video]") ||
-          media.classList.contains("startup-video-player");
-        if (media.tagName === "AUDIO" || isSiteAudio || !media.muted) {
-          media.pause();
-        }
-      });
+      window.LMAudioMix.claim(video);
 
       try {
         video.muted = false;
-        video.volume = Number(video.dataset.inlineSoundVolume || 0.82);
+        video.volume = Number(video.dataset.inlineSoundVolume || SITE_AUDIO_LEVELS.inline);
         await video.play();
         video.classList.add("is-sound-active");
         setSoundButtonState(true);
@@ -2996,18 +3025,25 @@ function setupInlineSoundVideos() {
       }
     };
 
-    video.addEventListener("click", playWithSound);
-    if (soundSurface !== video) {
+    if (soundSurface === video) {
+      video.addEventListener("click", playWithSound);
+    } else {
       soundSurface.addEventListener("click", playWithSound);
     }
     soundButton?.addEventListener("click", (event) => {
       event.stopPropagation();
       playWithSound();
     });
-    video.addEventListener("focus", playWithSound);
     if (video.dataset.inlineSoundHover === "true") {
       video.addEventListener("pointerenter", playWithSound, { passive: true });
     }
+    const clearSoundState = () => {
+      video.classList.remove("is-sound-active");
+      setSoundButtonState(false);
+    };
+    video.addEventListener("pause", clearSoundState);
+    video.addEventListener("ended", clearSoundState);
+    video.addEventListener("volumechange", () => setSoundButtonState(!video.muted && video.volume > 0));
   });
 }
 
@@ -3052,7 +3088,7 @@ function prepareStartupVideoAudio(options = {}) {
   startupVideoPlayer.muted = false;
   startupVideoPlayer.defaultMuted = false;
   startupVideoPlayer.removeAttribute("muted");
-  startupVideoPlayer.volume = Number(startupVideoPlayer.dataset.startupVideoVolume || 0.82);
+  startupVideoPlayer.volume = Number(startupVideoPlayer.dataset.startupVideoVolume || SITE_AUDIO_LEVELS.commercial);
   startupVideoPlayer.autoplay = false;
   startupVideoPlayer.removeAttribute("autoplay");
   if (options.reset) {
@@ -3073,16 +3109,63 @@ function stopStartupSoundtrack(options = {}) {
   setSoundtrackButtonState(false);
 }
 
-async function closeStartupVideo(options = {}) {
+async function playStartupVideoWithSound(options = {}) {
+  if (!startupVideoPlayer || !isStartupVideoOpen()) return false;
+  stopStartupSoundtrack({ reset: true });
+  window.LMAudioMix.claim(startupVideoPlayer);
+  prepareStartupVideoAudio(options);
+  try {
+    await startupVideoPlayer.play();
+    startupVideoModal?.classList.remove("is-awaiting-video-play");
+    return true;
+  } catch {
+    // Browsers block unmuted autoplay without a gesture. Keep the film moving
+    // muted so `ended` can still release the page, then let the first pointer
+    // gesture restore its commercial audio channel.
+    startupVideoPlayer.muted = true;
+    startupVideoPlayer.defaultMuted = true;
+    startupVideoPlayer.setAttribute("muted", "");
+    startupVideoModal?.classList.add("is-awaiting-video-play");
+    await startupVideoPlayer.play().catch(() => {});
+    return false;
+  }
+}
+
+async function finishStartupVideoHandoff() {
+  window.clearTimeout(startupTransitionFallback);
+  window.removeEventListener("lottomind:transition-complete", handleStartupTransitionComplete);
+  document.body.classList.remove("has-startup-modal");
+  syncHeroMotionPreference();
+  startupVideoClosing = false;
+  if (startupShouldPlayMusic) {
+    await playSiteSoundtrack({ fromPage: true, restart: true, volume: SITE_AUDIO_LEVELS.background });
+  }
+}
+
+function handleStartupTransitionComplete(event) {
+  if (event?.detail?.source !== "home-commercial") return;
+  finishStartupVideoHandoff();
+}
+
+function closeStartupVideo(options = {}) {
+  if (startupVideoClosing) return;
+  startupVideoClosing = true;
+  startupShouldPlayMusic = options.playMusic === true;
   clearStartupOpenTimer();
   if (options.remember !== false) rememberStartupVideoSeen();
   startupVideoModal?.classList.add("is-hidden");
+  startupVideoModal?.classList.remove("is-awaiting-video-play");
   startupVideoModal?.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("has-startup-modal");
   startupVideoPlayer?.pause();
-  syncHeroMotionPreference();
-  if (options.playMusic !== true) return;
-  await playSiteSoundtrack({ fromPage: true, restart: true, volume: 0.5 });
+  window.addEventListener("lottomind:transition-complete", handleStartupTransitionComplete);
+  window.dispatchEvent(new CustomEvent("lottomind:commercial-dismissed", {
+    detail: {
+      label: "Home",
+      source: "home-commercial",
+      theme: "home"
+    }
+  }));
+  startupTransitionFallback = window.setTimeout(finishStartupVideoHandoff, 1500);
 }
 
 function showStartupVideo() {
@@ -3100,7 +3183,7 @@ function showStartupVideo() {
   stopStartupSoundtrack({ reset: true });
   syncHeroMotionPreference();
   rememberStartupVideoSeen();
-  prepareStartupVideoAudio();
+  playStartupVideoWithSound({ reset: true });
 }
 
 function scheduleStartupVideoOpen() {
@@ -3726,11 +3809,15 @@ startupVideoCloseButtons.forEach((button) => {
 });
 startupMusicStart?.addEventListener("click", () => closeStartupVideo({ playMusic: true }));
 startupVideoPlayer?.addEventListener("pointerdown", () => {
-  restoreDeferredVideoSources(startupVideoPlayer);
-  stopStartupSoundtrack({ reset: true });
-  prepareStartupVideoAudio();
-  startupVideoPlayer.play?.().catch(() => {});
+  playStartupVideoWithSound();
 }, { passive: true });
+startupVideoPlayer?.addEventListener("play", () => {
+  // The commercial owns the home-page audio channel for its entire run.
+  if (isStartupVideoOpen()) stopStartupSoundtrack({ reset: true });
+});
+startupVideoPlayer?.addEventListener("ended", () => {
+  closeStartupVideo({ playMusic: true });
+});
 startupVideoModal?.addEventListener("click", (event) => {
   if (event.target === startupVideoModal) closeStartupVideo({ playMusic: true });
 });
@@ -3768,8 +3855,13 @@ function setSoundtrackButtonState(isPlaying, blocked = false) {
 
 async function playSiteSoundtrack(options = {}) {
   if (!siteSoundtrack) return;
+  if (isStartupVideoOpen()) {
+    stopStartupSoundtrack({ reset: true });
+    return;
+  }
   try {
-    siteSoundtrack.volume = options.volume ?? 0.42;
+    window.LMAudioMix.claim(siteSoundtrack);
+    siteSoundtrack.volume = options.volume ?? SITE_AUDIO_LEVELS.background;
     if (options.restart) siteSoundtrack.currentTime = 0;
     await siteSoundtrack.play();
     if (options.fromPage) soundtrackStartedFromPage = true;
@@ -3779,6 +3871,12 @@ async function playSiteSoundtrack(options = {}) {
     setSoundtrackButtonState(false, true);
   }
 }
+
+siteSoundtrack?.addEventListener("play", () => {
+  // Protect against any direct audio.play() call outside playSiteSoundtrack().
+  if (isStartupVideoOpen()) stopStartupSoundtrack({ reset: true });
+});
+siteSoundtrack?.addEventListener("pause", () => setSoundtrackButtonState(false));
 
 soundtrackButtons.forEach((button) => {
   button.addEventListener("keydown", (event) => {

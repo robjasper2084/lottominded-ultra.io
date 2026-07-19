@@ -2,31 +2,31 @@
   "use strict";
 
   /*
-    LottoMind portal transition audio.
-    - Put real audio files in assets/audio/.
-    - Rename files by editing AUDIO_CONFIG.files below.
+    LottoMind page transition audio.
+    - Empty file names use the generated soft signal chord.
+    - To use recorded cues, put files in assets/audio/ and set their names below.
     - Disable sounds by setting AUDIO_CONFIG.enabled to false.
     - Adjust loudness with AUDIO_CONFIG.volume.
-    - To try an arrival shutdown sound, set playCloseOnArrival to true.
+    - Keep one cue per transition unless a distinct arrival sound is intentional.
   */
   const AUDIO_CONFIG = {
     enabled: true,
-    volume: 0.16,
-    playCloseBeforeNavigate: true,
+    volume: 0.1,
+    playCloseBeforeNavigate: false,
     closeDelay: 150,
     playCloseOnArrival: false,
     files: {
-      open: "lm-portal-open.mp3",
-      close: "lm-portal-close.mp3",
+      open: "",
+      close: "",
     },
   };
 
   const reducedMotionQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
   const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
   const SOUND_TIMING = {
-    open: 500,
-    close: 380,
-    fadeOut: 36,
+    open: 760,
+    close: 620,
+    fadeOut: 80,
   };
   const scriptUrl =
     document.currentScript?.src || new URL("./assets/js/lm-page-transition.js", document.baseURI).href;
@@ -96,47 +96,50 @@
     const context = getAudioContext();
     if (!context) return;
 
-    const now = context.currentTime + 0.008;
+    const now = context.currentTime + 0.01;
     const isClose = kind === "close";
-    const duration = isClose ? 0.28 : 0.34;
-    const carrier = context.createOscillator();
-    const body = context.createOscillator();
+    const duration = isClose ? 0.52 : 0.68;
+    const pitches = isClose
+      ? [329.63, 277.18, 220]
+      : [220, 277.18, 329.63];
+    const levels = [0.58, 0.34, 0.2];
+    const detunes = [-2, 1, 3];
     const filter = context.createBiquadFilter();
-    const gain = context.createGain();
-
-    carrier.type = "sine";
-    body.type = "sine";
+    const master = context.createGain();
+    const delay = context.createDelay(0.4);
+    const echo = context.createGain();
     filter.type = "lowpass";
-    filter.Q.setValueAtTime(1.35, now);
+    filter.frequency.setValueAtTime(2400, now);
+    filter.Q.setValueAtTime(0.55, now);
+    delay.delayTime.setValueAtTime(0.13, now);
+    echo.gain.setValueAtTime(0.11, now);
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.18, now + 0.05);
+    master.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.06, now + duration * 0.58);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    if (isClose) {
-      carrier.frequency.setValueAtTime(520, now);
-      carrier.frequency.exponentialRampToValueAtTime(190, now + duration);
-      body.frequency.setValueAtTime(130, now);
-      body.frequency.exponentialRampToValueAtTime(74, now + duration);
-      filter.frequency.setValueAtTime(1600, now);
-      filter.frequency.exponentialRampToValueAtTime(540, now + duration);
-    } else {
-      carrier.frequency.setValueAtTime(180, now);
-      carrier.frequency.exponentialRampToValueAtTime(620, now + duration * 0.82);
-      body.frequency.setValueAtTime(82, now);
-      body.frequency.exponentialRampToValueAtTime(146, now + duration);
-      filter.frequency.setValueAtTime(680, now);
-      filter.frequency.exponentialRampToValueAtTime(1900, now + duration);
-    }
+    filter.connect(master);
+    master.connect(context.destination);
+    master.connect(delay);
+    delay.connect(echo);
+    echo.connect(context.destination);
 
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * (isClose ? 0.2 : 0.24), now + 0.028);
-    gain.gain.exponentialRampToValueAtTime(AUDIO_CONFIG.volume * 0.08, now + duration * 0.58);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-    carrier.connect(filter);
-    body.connect(filter);
-    filter.connect(gain);
-    gain.connect(context.destination);
+    const oscillators = pitches.map((pitch, index) => {
+      const oscillator = context.createOscillator();
+      const voice = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(pitch, now);
+      oscillator.detune.setValueAtTime(detunes[index], now);
+      voice.gain.setValueAtTime(levels[index], now);
+      oscillator.connect(voice);
+      voice.connect(filter);
+      oscillator.start(now + index * 0.055);
+      oscillator.stop(now + duration + 0.12);
+      return { oscillator, voice };
+    });
 
     const cleanup = () => {
-      [carrier, body, filter, gain].forEach((node) => {
+      [...oscillators.flatMap(({ oscillator, voice }) => [oscillator, voice]), filter, master, delay, echo].forEach((node) => {
         try {
           node.disconnect();
         } catch {
@@ -145,11 +148,7 @@
       });
     };
 
-    carrier.addEventListener("ended", cleanup, { once: true });
-    carrier.start(now);
-    body.start(now);
-    carrier.stop(now + duration + 0.05);
-    body.stop(now + duration + 0.05);
+    oscillators.at(-1)?.oscillator.addEventListener("ended", cleanup, { once: true });
   }
 
   function playSound(kind) {

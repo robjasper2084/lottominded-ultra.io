@@ -32,6 +32,7 @@
   const liveBallpassCanvas = document.querySelector("[data-live-ballpass-bg]");
   const previewIframes = Array.from(document.querySelectorAll(".event-card .video-thumb iframe"));
   const heroSingerFilm = document.querySelector("[data-live-hero-film-video]");
+  const heroSingerAudio = document.querySelector("[data-live-hero-film-audio]");
   const heroSingerSound = document.querySelector("[data-live-hero-film-sound]");
   const decorativeVideos = Array.from(document.querySelectorAll("video")).filter((video) => (
     !video.closest("#twitch-live") &&
@@ -43,6 +44,7 @@
   let liveAudioData = null;
   let liveAudioSource = null;
   let liveWaveFrame = null;
+  let heroSingerSoundEnabled = false;
   let shadowOpsShouldResumeLiveAudio = false;
   let shadowOpsLiveAudioVolume = 0.56;
   const chatBots = [
@@ -119,38 +121,66 @@
     const syncPlayback = () => {
       if (document.hidden || reducedMotion.matches || !isVisible) {
         heroSingerFilm.pause();
+        heroSingerAudio?.pause();
         return;
       }
       heroSingerFilm.play().catch(() => {
         heroSingerFilm.controls = true;
       });
+      if (heroSingerSoundEnabled && heroSingerAudio?.paused) {
+        heroSingerAudio.play().catch(() => setSoundState(false));
+      }
+    };
+
+    const stopBackgroundAudio = () => {
+      document.querySelectorAll("audio").forEach((audio) => {
+        if (audio !== heroSingerAudio) audio.pause();
+      });
+      resetLiveWave();
+      updateLivePlayer();
+      livePlayer?.setAttribute("data-hero-audio", "active");
+    };
+
+    const stopHeroAudio = () => {
+      heroSingerSoundEnabled = false;
+      heroSingerAudio?.pause();
+      livePlayer?.removeAttribute("data-hero-audio");
+      setSoundState(false);
     };
 
     heroSingerSound?.addEventListener("click", async () => {
-      if (!heroSingerFilm.muted) {
-        heroSingerFilm.muted = true;
-        setSoundState(false);
+      if (heroSingerSoundEnabled) {
+        stopHeroAudio();
         syncPlayback();
         return;
       }
 
-      document.querySelectorAll("audio").forEach((audio) => audio.pause());
-      const wasPaused = heroSingerFilm.paused;
-      heroSingerFilm.muted = false;
-      heroSingerFilm.volume = 0.82;
+      if (!heroSingerAudio) return;
+      stopBackgroundAudio();
+      heroSingerSoundEnabled = true;
+      heroSingerAudio.volume = 0.52;
+      window.LMAudioMix?.claim?.(heroSingerAudio);
+      if (heroSingerAudio.ended) heroSingerAudio.currentTime = 0;
       try {
-        if (wasPaused) await heroSingerFilm.play();
+        await Promise.all([
+          heroSingerFilm.play(),
+          heroSingerAudio.play()
+        ]);
         setSoundState(true);
       } catch {
-        heroSingerFilm.muted = true;
-        heroSingerFilm.controls = true;
-        setSoundState(false);
+        stopHeroAudio();
       }
     });
 
-    heroSingerFilm.addEventListener("volumechange", () => {
-      setSoundState(!heroSingerFilm.muted && heroSingerFilm.volume > 0);
+    heroSingerAudio?.addEventListener("play", () => {
+      heroSingerSoundEnabled = true;
+      setSoundState(true);
     });
+    heroSingerAudio?.addEventListener("pause", () => {
+      if (!document.hidden && isVisible && heroSingerSoundEnabled) return;
+      setSoundState(false);
+    });
+    heroSingerAudio?.addEventListener("ended", stopHeroAudio);
 
     if ("IntersectionObserver" in window) {
       const observer = new IntersectionObserver((entries) => {
@@ -188,10 +218,10 @@
     const gain = ctx.createGain();
     const freq = [261.63, 293.66, 329.63, 392, 440, 523.25][seed % 6];
 
-    osc.type = "triangle";
+    osc.type = "sine";
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.012);
+    gain.gain.linearRampToValueAtTime(window.LMAudioMix?.levels.ui ?? 0.022, ctx.currentTime + 0.012);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
 
     osc.connect(gain);
@@ -335,7 +365,16 @@
   async function startLivePlayer(options = {}) {
     if (!livePlayerAudio) return false;
     try {
-      livePlayerAudio.volume = options.volume ?? 0.72;
+      if (heroSingerAudio && !heroSingerAudio.paused) {
+        heroSingerSoundEnabled = false;
+        heroSingerAudio.pause();
+        livePlayer?.removeAttribute("data-hero-audio");
+        heroSingerSound?.classList.remove("is-active");
+        heroSingerSound?.setAttribute("aria-pressed", "false");
+        if (heroSingerSound) heroSingerSound.textContent = "Sound on";
+      }
+      livePlayerAudio.volume = options.volume ?? window.LMAudioMix?.levels.live ?? 0.56;
+      window.LMAudioMix?.claim?.(livePlayerAudio);
       if (options.restart) livePlayerAudio.currentTime = 0;
       const playPromise = livePlayerAudio.play();
       const playStarted = await Promise.race([
@@ -366,7 +405,7 @@
   async function toggleLivePlayer() {
     if (!livePlayerAudio) return;
     if (livePlayerAudio.paused || livePlayerAudio.ended) {
-      await startLivePlayer({ restart: livePlayerAudio.ended, volume: 0.72 });
+      await startLivePlayer({ restart: livePlayerAudio.ended, volume: window.LMAudioMix?.levels.live ?? 0.56 });
     } else {
       livePlayerAudio.pause();
       resetLiveWave();
@@ -431,14 +470,8 @@
 
   function scheduleStreamOpenAudio() {
     if (!livePlayerAudio?.hasAttribute("data-stream-open-audio")) return;
-    if (livePlayerAudio.dataset.streamOpenReady === "true") return;
-    livePlayerAudio.dataset.streamOpenReady = "true";
-    const run = () => window.setTimeout(() => startStreamOpenAudio({ volume: 0.56 }), 420);
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", run, { once: true });
-    } else {
-      run();
-    }
+    livePlayerAudio.dataset.streamOpenReady = "manual";
+    livePlayer?.setAttribute("data-stream-open-state", "ready");
   }
 
   function openShadowOpsModal() {

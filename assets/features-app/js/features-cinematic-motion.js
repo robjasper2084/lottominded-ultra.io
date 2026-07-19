@@ -28,6 +28,10 @@
   const playerPrev = player?.querySelector("[data-feature-player-prev]");
   const playerNext = player?.querySelector("[data-feature-player-next]");
   const playerTime = player?.querySelector("[data-feature-player-time]");
+  const playerSeek = player?.querySelector("[data-feature-player-seek]");
+  const playerVolume = player?.querySelector("[data-feature-player-volume]");
+  const playerVolumeLabel = player?.querySelector("[data-feature-player-volume-label]");
+  const playerMute = player?.querySelector("[data-feature-player-mute]");
   const maxEntryLoops = 2;
   let completedEntryLoops = 0;
   let audioCtx = null;
@@ -46,16 +50,32 @@
   let delayWet = null;
   let reverbNode = null;
   let reverbWet = null;
+  let limiter = null;
   let eqData = null;
   let eqFrame = 0;
   let idlePhase = 0;
   let visualImpulse = 0;
   let lastBeatPaintAt = 0;
   let lastEqSnapshot = { average: 0, bass: 0, mid: 0, high: 0 };
-  const featureEntryVolume = 0.18;
-  const featureManualVolume = 0.58;
+  const featureVolumeStorageKey = "lottomind.features.volume.v1";
+  const clampVolume = (value) => Math.min(1, Math.max(0, Number(value) || 0));
+  const readStoredFeatureVolume = () => {
+    try {
+      const stored = Number(window.localStorage.getItem(featureVolumeStorageKey));
+      return Number.isFinite(stored) && stored >= 0 && stored <= 1 ? stored : 0.24;
+    } catch {
+      return 0.24;
+    }
+  };
+  let featureUserVolume = readStoredFeatureVolume();
+  let featureVolumeBeforeMute = featureUserVolume > 0.01 ? featureUserVolume : 0.24;
   const mediaSources = new WeakSet();
   const fxState = { drive: 0.16, reverb: 0.22, delay: 0.18, master: 0.72 };
+
+  if (featureTrack) {
+    featureTrack.volume = featureUserVolume;
+    featureTrack.muted = featureUserVolume <= 0.001;
+  }
 
   function setEqStatus(text) {
     eqStatuses.forEach((status) => {
@@ -168,6 +188,56 @@
     if (playerTime) {
       playerTime.textContent = `${formatMediaTime(featureTrack.currentTime)} / ${formatMediaTime(duration)}`;
     }
+    if (playerSeek) {
+      playerSeek.disabled = !duration;
+      playerSeek.value = String(Math.round(progress * 1000));
+      playerSeek.style.setProperty("--seek-progress", progress.toFixed(3));
+      playerSeek.setAttribute("aria-valuetext", `${formatMediaTime(featureTrack.currentTime)} of ${formatMediaTime(duration)}`);
+    }
+    if (playerVolume) {
+      playerVolume.value = String(Math.round(featureTrack.volume * 100));
+      playerVolume.style.setProperty("--volume-progress", featureTrack.volume.toFixed(3));
+    }
+    if (playerVolumeLabel) {
+      const prefix = featureTrack.muted || featureTrack.volume <= 0.001 ? "Muted" : "Volume";
+      playerVolumeLabel.textContent = `${prefix} ${Math.round(featureTrack.volume * 100)}%`;
+    }
+    if (playerMute) {
+      const isMuted = featureTrack.muted || featureTrack.volume <= 0.001;
+      playerMute.textContent = isMuted ? "MUTE" : "VOL";
+      playerMute.setAttribute("aria-pressed", String(isMuted));
+      playerMute.setAttribute("aria-label", isMuted ? "Unmute Digital Static" : "Mute Digital Static");
+    }
+  }
+
+  function setFeatureVolume(value, { persist = true } = {}) {
+    if (!featureTrack) return 0;
+    featureUserVolume = clampVolume(value);
+    if (featureUserVolume > 0.01) featureVolumeBeforeMute = featureUserVolume;
+    featureTrack.volume = featureUserVolume;
+    featureTrack.muted = featureUserVolume <= 0.001;
+    document.body.dataset.featureTrackVolume = featureUserVolume.toFixed(2);
+    if (persist) {
+      try {
+        window.localStorage.setItem(featureVolumeStorageKey, featureUserVolume.toFixed(2));
+      } catch {
+        // Private browsing can block persistent storage; playback still works.
+      }
+    }
+    syncPlayerUi();
+    return featureUserVolume;
+  }
+
+  function toggleFeatureMute() {
+    if (!featureTrack) return false;
+    if (featureTrack.muted || featureTrack.volume <= 0.001) {
+      setFeatureVolume(featureVolumeBeforeMute || 0.24);
+    } else {
+      featureVolumeBeforeMute = featureTrack.volume;
+      featureTrack.muted = true;
+      syncPlayerUi();
+    }
+    return featureTrack.muted;
   }
 
   function setBeatVars(energy = 0, bass = 0) {
@@ -212,6 +282,7 @@
       reverbNode = audioCtx.createConvolver();
       reverbWet = audioCtx.createGain();
       master = audioCtx.createGain();
+      limiter = audioCtx.createDynamicsCompressor();
 
       toneFilter.type = "lowpass";
       bassFilter.type = "lowshelf";
@@ -226,6 +297,11 @@
       delayFeedback.gain.value = 0;
       reverbWet.gain.value = 0;
       reverbNode.buffer = buildImpulseResponse(audioCtx);
+      limiter.threshold.value = -12;
+      limiter.knee.value = 8;
+      limiter.ratio.value = 8;
+      limiter.attack.value = 0.004;
+      limiter.release.value = 0.24;
 
       effectInput.connect(driveInput);
       driveInput.connect(driveNode);
@@ -243,7 +319,8 @@
       highFilter.connect(reverbNode);
       reverbNode.connect(reverbWet);
       reverbWet.connect(master);
-      master.connect(analyser);
+      master.connect(limiter);
+      limiter.connect(analyser);
       applyFxState();
     }
 
@@ -301,9 +378,10 @@
     }
     try {
       featureTrack.loop = false;
-      const targetVolume = entry ? featureEntryVolume : featureManualVolume;
+      const targetVolume = entry ? Math.min(featureUserVolume, 0.16) : featureUserVolume;
       featureTrack.volume = targetVolume;
       document.body.dataset.featureTrackVolume = targetVolume.toFixed(2);
+      window.LMAudioMix?.claim?.(featureTrack);
       await featureTrack.play();
       setEqStatus(entry ? "Digital Static" : "Playing");
       startEqRender();
@@ -432,10 +510,10 @@
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
 
-    osc.type = "triangle";
+    osc.type = "sine";
     osc.frequency.setValueAtTime(notes[seed % notes.length], now);
     gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.linearRampToValueAtTime(0.055, now + 0.012);
+    gain.gain.linearRampToValueAtTime(window.LMAudioMix?.levels.ui ?? 0.022, now + 0.012);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
     osc.connect(gain);
     gain.connect(output);
@@ -445,9 +523,11 @@
     startEqRender();
   }
 
-  document.querySelectorAll("button:not(.piano-key):not([data-feature-player-control]), .rail-cards a, .feature-cta").forEach((el, index) => {
-    el.addEventListener("pointerdown", () => playTone(index), { passive: true });
-  });
+  if (document.body.classList.contains("features-cinematic-page")) {
+    document.querySelectorAll("button:not(.piano-key):not([data-feature-player-control]), .rail-cards a, .feature-cta").forEach((el, index) => {
+      el.addEventListener("pointerdown", () => playTone(index), { passive: true });
+    });
+  }
 
   knobButtons.forEach((button) => {
     button.addEventListener("click", () => nudgeFxControl(button.dataset.fxControl));
@@ -466,6 +546,8 @@
         featureTrackConnected: featureTrack ? mediaSources.has(featureTrack) : false,
         featureTrackPaused: featureTrack ? featureTrack.paused : true,
         featureTrackVolume: featureTrack ? featureTrack.volume : 0,
+        featureTrackMuted: featureTrack ? featureTrack.muted : false,
+        preferredVolume: featureUserVolume,
         effects: { ...fxState },
         eq: { ...lastEqSnapshot }
       };
@@ -477,6 +559,13 @@
       visualImpulse = Math.max(visualImpulse, 0.78);
       startEqRender();
       return true;
+    },
+    setVolume(value) {
+      setFeatureVolume(value);
+      return featureUserVolume;
+    },
+    toggleMute() {
+      return toggleFeatureMute();
     }
   };
 
@@ -538,6 +627,27 @@
       syncPlayerUi();
     });
 
+    playerSeek?.addEventListener("input", () => {
+      const duration = Number.isFinite(featureTrack.duration) ? featureTrack.duration : 0;
+      if (!duration) return;
+      try {
+        featureTrack.currentTime = duration * (Number(playerSeek.value) / 1000);
+      } catch {
+        // Media can reject seeks until metadata is available.
+      }
+      syncPlayerUi();
+    });
+
+    playerVolume?.addEventListener("input", () => {
+      setFeatureVolume(Number(playerVolume.value) / 100);
+      setEqStatus(`Volume ${Math.round(featureUserVolume * 100)}%`);
+    });
+
+    playerMute?.addEventListener("click", () => {
+      const muted = toggleFeatureMute();
+      setEqStatus(muted ? "Muted" : `Volume ${Math.round(featureTrack.volume * 100)}%`);
+    });
+
     featureTrack.addEventListener("ended", () => {
       completedEntryLoops += 1;
       resetBeatVars();
@@ -577,8 +687,11 @@
     featureTrack.addEventListener("durationchange", syncPlayerUi);
     featureTrack.addEventListener("timeupdate", syncPlayerUi);
     featureTrack.addEventListener("seeking", syncPlayerUi);
+    featureTrack.addEventListener("volumechange", syncPlayerUi);
+    setFeatureVolume(featureUserVolume, { persist: false });
     syncPlayerUi();
-    window.setTimeout(() => startFeatureTrack({ restart: true, entry: true }), 320);
+    // Keep playback user-initiated. A deferred autoplay attempt can remain pending
+    // until the first click, then restart the track underneath the player controls.
   }
   const pianos = Array.from(document.querySelectorAll("[data-playable-piano]"));
   if (!pianos.length) return;
