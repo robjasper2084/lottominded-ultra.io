@@ -96,14 +96,17 @@ button[hidden],
   overflow: hidden;
   background: #05070d;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   transform: scale(1.015);
-  transition: opacity 360ms ease, transform 520ms ease;
+  transition: opacity 220ms ease, transform 360ms ease, visibility 0s linear 220ms;
 }
 
 #shell[data-mode="menu"] #startupScene {
   opacity: 1;
+  visibility: visible;
   transform: scale(1);
+  transition-delay: 0s;
 }
 
 #startupScene::before,
@@ -3826,4 +3829,37 @@ button[hidden],
   .signal-chain[data-urgent="true"],
   .upgrade-visual i { animation: none; }
   .game-toast { transition: none; }
+}
+
+/* Keep low-end Android compositing predictable during sustained play. */
+#shell[data-performance="constrained"] .hud-chip,
+#shell[data-performance="constrained"] .signal-chain,
+#shell[data-performance="constrained"] #statusStrip,
+#shell[data-performance="constrained"] .forge-hud,
+#shell[data-performance="constrained"] .tutorial-panel,
+#shell[data-performance="constrained"] .game-toast,
+#shell[data-performance="constrained"] .touch-zone,
+#shell[data-performance="constrained"] .touch-control-panel button {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.24);
+}
+
+#shell[data-performance="constrained"] #startupScene::before {
+  mix-blend-mode: normal;
+  opacity: 0.12;
+}
+
+#shell[data-performance="constrained"] #marqueeMotion,
+#shell[data-performance="constrained"] #marquee {
+  filter: none !important;
+}
+
+#shell[data-performance="constrained"][data-input="touch"] .touch-zone {
+  filter: none;
+  box-shadow: 0 0 12px rgba(41, 247, 255, 0.06);
+}
+
+#shell[data-performance="constrained"] .score-pop {
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.82);
 }

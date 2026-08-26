@@ -11,7 +11,7 @@ if (wrapper && canvas) {
   } else {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const coarseMotion = window.matchMedia("(pointer: coarse), (max-width: 820px)");
-  const targetFrameMs = () => coarseMotion.matches ? 1000 / 24 : 1000 / 45;
+  const targetFrameMs = () => coarseMotion.matches ? 1000 / 20 : 1000 / 45;
   const state = {
     w: 1,
     h: 1,
@@ -34,7 +34,7 @@ if (wrapper && canvas) {
     return seed / 4294967296;
   };
 
-  const particles = Array.from({ length: coarseMotion.matches ? 28 : 72 }, (_, i) => ({
+  const particles = Array.from({ length: coarseMotion.matches ? 18 : 72 }, (_, i) => ({
     x: rand(),
     y: rand(),
     z: 0.28 + rand() * 1.6,

@@ -26,8 +26,11 @@ const STEP = 1 / 60;
 const DPR_CAP = 1.5;
 const MAX_FRAME_STEPS = 5;
 const MAX_LIGHTS = 8;
-const PARTICLE_LIMIT = 240;
-const RING_PARTICLE_LIMIT = 268;
+const LOW_POWER_MEDIA = window.matchMedia("(pointer: coarse), (max-width: 820px)");
+const PERFORMANCE_PROFILE = detectPerformanceProfile();
+const ACTIVE_LIGHT_LIMIT = PERFORMANCE_PROFILE.constrained ? 4 : MAX_LIGHTS;
+const PARTICLE_LIMIT = PERFORMANCE_PROFILE.constrained ? 144 : 240;
+const RING_PARTICLE_LIMIT = PERFORMANCE_PROFILE.constrained ? 168 : 268;
 const TAU = Math.PI * 2;
 const PLAYER_MAX_SPEED = 318;
 const PLAYER_ACCEL_RATE = 12.5;
@@ -41,10 +44,27 @@ const WELL_CORE_RADIUS = 19;
 const WELL_PLAYER_DANGER_RADIUS = 58;
 
 const GRAPHICS_PRESETS = {
-  mobile: { label: "Mobile", dprCap: 1, minScale: 0.62, targetFps: 50, post: 0 },
-  high: { label: "High WebGL2", dprCap: 1.5, minScale: 0.7, targetFps: 55, post: 1 },
-  ultra: { label: "Ultra WebGPU", dprCap: 1.8, minScale: 0.68, targetFps: 58, post: 2 }
+  mobile: { label: "Mobile", dprCap: 0.9, minScale: 0.68, targetFps: 45, frameCap: 45, post: 0, segmentScale: 0.58 },
+  high: { label: "High WebGL2", dprCap: 1.5, minScale: 0.7, targetFps: 55, frameCap: 0, post: 1, segmentScale: 1 },
+  ultra: { label: "Ultra WebGPU", dprCap: 1.8, minScale: 0.68, targetFps: 58, frameCap: 0, post: 2, segmentScale: 1 }
 };
+
+function detectPerformanceProfile() {
+  const memory = Number(navigator.deviceMemory) || 0;
+  const cores = Number(navigator.hardwareConcurrency) || 0;
+  const narrowPhone = Math.min(window.innerWidth || 0, window.innerHeight || 0) <= 540;
+  const constrained = QUERY_PARAMS.has("mobilePerf") || LOW_POWER_MEDIA.matches && (
+    narrowPhone ||
+    (memory > 0 && memory <= 4) ||
+    (cores > 0 && cores <= 8)
+  );
+  return {
+    constrained,
+    memory,
+    cores,
+    label: constrained ? "constrained-mobile" : "standard"
+  };
+}
 
 const MATERIALS = {
   player: { metallic: 0.92, roughness: 0.24, emissive: 0.24 },
@@ -205,7 +225,6 @@ const COLOR_VEC_CACHE = new Map();
 const AUDIO_BASE_PATH = "../assets/audio/";
 const AUDIO_WAV_BASE_PATH = `${AUDIO_BASE_PATH}wav/`;
 const HUD_UPDATE_INTERVAL = 100;
-const LOW_POWER_MEDIA = window.matchMedia("(pointer: coarse), (max-width: 820px)");
 
 function audioAssetPaths(file) {
   const fileName = String(file || "");
@@ -286,14 +305,22 @@ class StaticWarsRenderer {
     this.canvas = targetCanvas;
     this.gl = targetCanvas.getContext("webgl2", {
       alpha: false,
-      antialias: true,
+      antialias: !PERFORMANCE_PROFILE.constrained,
+      depth: false,
+      desynchronized: true,
       powerPreference: "high-performance",
-      premultipliedAlpha: true
+      premultipliedAlpha: true,
+      preserveDrawingBuffer: false,
+      stencil: false
     }) || targetCanvas.getContext("webgl", {
       alpha: false,
-      antialias: true,
+      antialias: !PERFORMANCE_PROFILE.constrained,
+      depth: false,
+      desynchronized: true,
       powerPreference: "high-performance",
-      premultipliedAlpha: true
+      premultipliedAlpha: true,
+      preserveDrawingBuffer: false,
+      stencil: false
     });
     if (!this.gl) throw new Error("WebGL/OpenGL renderer unavailable");
 
@@ -318,9 +345,16 @@ class StaticWarsRenderer {
     this.currentLit = null;
     this.lights = [];
     this.graphicsPreset = "mobile";
+    this.normalMapsEnabled = false;
+    this.segmentScale = GRAPHICS_PRESETS.mobile.segmentScale;
     this.postEnabled = false;
     this.postTargetsReady = false;
     this.blendMode = "";
+    this.solidUpload = new Float32Array(0);
+    this.textureUpload = new Float32Array(0);
+    this.litUpload = new Float32Array(0);
+    this.packedLights = new Float32Array(MAX_LIGHTS * 4);
+    this.packedLightColors = new Float32Array(MAX_LIGHTS * 3);
     this.solidProgram = this.createProgram(SOLID_VERTEX_SHADER, SOLID_FRAGMENT_SHADER);
     this.textureProgram = this.createProgram(TEXTURE_VERTEX_SHADER, TEXTURE_FRAGMENT_SHADER);
     this.litProgram = this.createProgram(LIT_VERTEX_SHADER, LIT_FRAGMENT_SHADER);
@@ -414,6 +448,8 @@ class StaticWarsRenderer {
 
   setGraphicsPreset(preset) {
     this.graphicsPreset = GRAPHICS_PRESETS[preset] ? preset : "mobile";
+    this.normalMapsEnabled = this.graphicsPreset !== "mobile";
+    this.segmentScale = GRAPHICS_PRESETS[this.graphicsPreset].segmentScale ?? 1;
     this.postEnabled = this.isWebGL2 && this.graphicsPreset !== "mobile";
     if (this.postEnabled) this.createPostTargets();
   }
@@ -494,7 +530,7 @@ class StaticWarsRenderer {
   }
 
   setLights(lights) {
-    this.lights = lights.slice(0, MAX_LIGHTS);
+    this.lights = this.normalMapsEnabled ? lights.slice(0, ACTIVE_LIGHT_LIMIT) : [];
   }
 
   setWorldClip(enabled) {
@@ -618,6 +654,7 @@ class StaticWarsRenderer {
   }
 
   drawWorldCircle(x, y, radius, color, alpha = 1, segments = 32) {
+    segments = Math.max(8, Math.round(segments * this.segmentScale));
     const points = [];
     for (let i = 0; i < segments; i += 1) {
       const a = (i / segments) * TAU;
@@ -627,6 +664,7 @@ class StaticWarsRenderer {
   }
 
   drawWorldRing(x, y, radius, width, color, alpha = 1, segments = 64) {
+    segments = Math.max(8, Math.round(segments * this.segmentScale));
     let prev = { x: x + radius, y };
     for (let i = 1; i <= segments; i += 1) {
       const a = (i / segments) * TAU;
@@ -637,6 +675,7 @@ class StaticWarsRenderer {
   }
 
   drawWorldArc(x, y, radius, start, end, width, color, alpha = 1, segments = 36) {
+    segments = Math.max(6, Math.round(segments * this.segmentScale));
     let prev = { x: x + Math.cos(start) * radius, y: y + Math.sin(start) * radius };
     for (let i = 1; i <= segments; i += 1) {
       const t = i / segments;
@@ -675,7 +714,10 @@ class StaticWarsRenderer {
   }
 
   drawLitWorldImage(pair, x, y, w, h, angle = 0, alpha = 1, options = {}) {
-    if (!pair || !imageReady(pair.diffuse) || !imageReady(pair.normal)) return false;
+    if (!pair || !imageReady(pair.diffuse)) return false;
+    if (!this.normalMapsEnabled || !imageReady(pair.normal)) {
+      return this.drawWorldImage(pair.diffuse, x, y, w, h, angle, alpha, { color: options.color ?? COLORS.white });
+    }
     const hw = w * 0.5;
     const hh = h * 0.5;
     const cos = Math.cos(angle);
@@ -790,12 +832,26 @@ class StaticWarsRenderer {
     this.flushLit();
   }
 
+  uploadDynamicBuffer(buffer, data, cacheKey) {
+    const gl = this.gl;
+    let upload = this[cacheKey];
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    if (!upload || upload.length < data.length) {
+      let capacity = 256;
+      while (capacity < data.length) capacity *= 2;
+      upload = new Float32Array(capacity);
+      this[cacheKey] = upload;
+      gl.bufferData(gl.ARRAY_BUFFER, upload.byteLength, gl.DYNAMIC_DRAW);
+    }
+    upload.set(data, 0);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, upload.subarray(0, data.length));
+  }
+
   flushSolid() {
     if (!this.solidData.length || this.isContextLost()) return;
     const gl = this.gl;
     gl.useProgram(this.solidProgram);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.solidBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.solidData), gl.DYNAMIC_DRAW);
+    this.uploadDynamicBuffer(this.solidBuffer, this.solidData, "solidUpload");
     const stride = 6 * 4;
     gl.enableVertexAttribArray(this.solidLayout.position);
     gl.vertexAttribPointer(this.solidLayout.position, 2, gl.FLOAT, false, stride, 0);
@@ -812,8 +868,7 @@ class StaticWarsRenderer {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.currentTexture);
     gl.uniform1i(this.textureLayout.sampler, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.textureBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.textureData), gl.DYNAMIC_DRAW);
+    this.uploadDynamicBuffer(this.textureBuffer, this.textureData, "textureUpload");
     const stride = 8 * 4;
     gl.enableVertexAttribArray(this.textureLayout.position);
     gl.vertexAttribPointer(this.textureLayout.position, 2, gl.FLOAT, false, stride, 0);
@@ -842,8 +897,10 @@ class StaticWarsRenderer {
     gl.uniform1f(this.litLayout.roughness, this.currentLit.roughness);
     gl.uniform1f(this.litLayout.emissive, this.currentLit.emissive);
 
-    const packedLights = new Float32Array(MAX_LIGHTS * 4);
-    const packedColors = new Float32Array(MAX_LIGHTS * 3);
+    const packedLights = this.packedLights;
+    const packedColors = this.packedLightColors;
+    packedLights.fill(0);
+    packedColors.fill(0);
     for (let i = 0; i < MAX_LIGHTS; i += 1) {
       const light = this.lights[i];
       if (!light) continue;
@@ -859,8 +916,7 @@ class StaticWarsRenderer {
     gl.uniform4fv(this.litLayout.lights, packedLights);
     gl.uniform3fv(this.litLayout.lightColors, packedColors);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.litBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.litData), gl.DYNAMIC_DRAW);
+    this.uploadDynamicBuffer(this.litBuffer, this.litData, "litUpload");
     const stride = 10 * 4;
     gl.enableVertexAttribArray(this.litLayout.position);
     gl.vertexAttribPointer(this.litLayout.position, 2, gl.FLOAT, false, stride, 0);
@@ -1207,7 +1263,7 @@ let shareStatusTimer = 0;
 let effectiveGraphicsPreset = "mobile";
 let renderScale = 1;
 let qualityFrames = 0;
-let qualityElapsed = 0;
+let qualitySampleStartedAt = 0;
 let lastQualityResize = 0;
 let toastTimer = 0;
 
@@ -1815,6 +1871,7 @@ const touchLayout = loadTouchLayout();
 let state = createState();
 applySettings();
 let lastFrame = performance.now();
+let renderAccumulator = 1;
 let accumulator = 0;
 let fpsFrames = 0;
 let fpsAt = lastFrame;
@@ -2117,7 +2174,7 @@ function createState() {
     scoreSaved: false,
     mode,
     difficulty,
-    settings: { ...gameSettings },
+    settings: runtimeSettings(),
     timeLeft: GAME_MODES[mode].timeLimit ?? 0,
     bossesDefeated: 0,
     bombsUsed: 0,
@@ -2348,7 +2405,7 @@ function frame(now) {
   const delta = Math.min(0.08, (now - lastFrame) / 1000);
   lastFrame = now;
   pollGamepadMenuActions();
-  updateDynamicResolution(delta, now);
+  let rendered = false;
 
   if (state.status === "running" && !pausedByBlur) {
     accumulator += delta;
@@ -2360,19 +2417,31 @@ function frame(now) {
       steps += 1;
     }
     if (steps === MAX_FRAME_STEPS) accumulator = 0;
-    render(accumulator / STEP);
-    if (now - lastHudUpdate >= HUD_UPDATE_INTERVAL) {
-      updateHud();
-      lastHudUpdate = now;
+    const frameCap = GRAPHICS_PRESETS[effectiveGraphicsPreset]?.frameCap || 0;
+    const renderInterval = frameCap > 0 ? 1 / frameCap : 0;
+    renderAccumulator = renderInterval > 0 ? Math.min(renderInterval * 2, renderAccumulator + delta) : 1;
+    if (renderInterval === 0 || renderAccumulator >= renderInterval) {
+      if (renderInterval > 0) renderAccumulator %= renderInterval;
+      render(accumulator / STEP);
+      rendered = true;
+      updateDynamicResolution(now);
+      if (now - lastHudUpdate >= HUD_UPDATE_INTERVAL) {
+        updateHud();
+        lastHudUpdate = now;
+      }
     }
   } else if (staticFrameDirty) {
     accumulator = 0;
+    renderAccumulator = 1;
+    qualityFrames = 0;
+    qualitySampleStartedAt = 0;
     render(0);
+    rendered = true;
     updateHud();
     lastHudUpdate = now;
     staticFrameDirty = false;
   }
-  updateDev(now);
+  updateDev(now, rendered);
 }
 
 function update(dt, commands) {
@@ -3209,18 +3278,27 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
   }
 }
 
-function updateDynamicResolution(delta, now) {
-  if (state.status !== "running" || !gameSettings.dynamicResolution) return;
+function updateDynamicResolution(now) {
+  if (state.status !== "running" || !gameSettings.dynamicResolution) {
+    qualityFrames = 0;
+    qualitySampleStartedAt = 0;
+    return;
+  }
+  if (!qualitySampleStartedAt) {
+    qualitySampleStartedAt = now;
+    qualityFrames = 1;
+    return;
+  }
   qualityFrames += 1;
-  qualityElapsed += delta;
-  if (qualityElapsed < 1.4 || now - lastQualityResize < 1400) return;
+  const qualityElapsed = (now - qualitySampleStartedAt) / 1000;
+  if (qualityElapsed < 1.6 || now - lastQualityResize < 1600) return;
   const measuredFps = qualityFrames / Math.max(qualityElapsed, 0.001);
   const config = GRAPHICS_PRESETS[effectiveGraphicsPreset];
   let next = renderScale;
   if (measuredFps < config.targetFps - 7) next = Math.max(config.minScale, renderScale - 0.08);
   else if (measuredFps > config.targetFps + 3) next = Math.min(1, renderScale + 0.04);
   qualityFrames = 0;
-  qualityElapsed = 0;
+  qualitySampleStartedAt = now;
   if (Math.abs(next - renderScale) < 0.025) return;
   renderScale = Math.round(next * 100) / 100;
   lastQualityResize = now;
@@ -3362,13 +3440,24 @@ function readSettingsUi() {
 
 function applySettings() {
   shell.dataset.colorMode = gameSettings.colorMode;
-  shell.dataset.effects = Number(gameSettings.effects) < 0.55 ? "low" : "full";
+  shell.dataset.performance = PERFORMANCE_PROFILE.label;
+  shell.dataset.effects = PERFORMANCE_PROFILE.constrained || Number(gameSettings.effects) < 0.55 ? "low" : "full";
   applyGraphicsPreset();
   bus.applyCategoryLevels();
-  if (typeof state !== "undefined" && state?.settings) state.settings = { ...gameSettings };
+  if (typeof state !== "undefined" && state?.settings) state.settings = runtimeSettings();
+}
+
+function runtimeSettings() {
+  if (!PERFORMANCE_PROFILE.constrained) return { ...gameSettings };
+  return {
+    ...gameSettings,
+    effects: Math.min(Number(gameSettings.effects) || 0.25, 0.5),
+    shake: Math.min(Number(gameSettings.shake) || 0, 0.55)
+  };
 }
 
 function resolveGraphicsPreset(requested) {
+  if (PERFORMANCE_PROFILE.constrained) return "mobile";
   if (requested === "mobile") return "mobile";
   if (requested === "ultra") return renderer.isWebGL2 && UltraWebGpuLayer.supported() ? "ultra" : "high";
   if (requested === "high") return renderer.isWebGL2 ? "high" : "mobile";
@@ -3382,6 +3471,7 @@ function applyGraphicsPreset() {
   effectiveGraphicsPreset = next;
   renderer.setGraphicsPreset(next);
   shell.dataset.graphics = next;
+  shell.dataset.frameCap = String(GRAPHICS_PRESETS[next].frameCap || 0);
   if (!gameSettings.dynamicResolution) renderScale = 1;
   if (next === "ultra") {
     ultraFx.enable().then((ready) => {
@@ -3393,7 +3483,11 @@ function applyGraphicsPreset() {
       resize();
     });
   }
-  const fallback = requested !== "auto" && requested !== next ? `${GRAPHICS_PRESETS[next].label} fallback` : GRAPHICS_PRESETS[next].label;
+  const fallback = PERFORMANCE_PROFILE.constrained
+    ? "Mobile optimized"
+    : requested !== "auto" && requested !== next
+      ? `${GRAPHICS_PRESETS[next].label} fallback`
+      : GRAPHICS_PRESETS[next].label;
   updateGraphicsStatus(`${fallback} - ${Math.round(renderScale * 100)}% render scale`);
 }
 
@@ -4179,6 +4273,7 @@ function addParticle(x, y, vx, vy, color, life, size, drag) {
 }
 
 function buildLights() {
+  if (!renderer.normalMapsEnabled) return [];
   const lights = [];
   for (const player of state.players) {
     if (!player.active) continue;
@@ -4195,7 +4290,7 @@ function buildLights() {
     });
   }
   const bulletStride = Math.max(1, Math.ceil(state.bullets.length / 4));
-  for (let i = 0; i < state.bullets.length && lights.length < MAX_LIGHTS - 1; i += bulletStride) {
+  for (let i = 0; i < state.bullets.length && lights.length < ACTIVE_LIGHT_LIMIT - 1; i += bulletStride) {
     const bullet = state.bullets[i];
     const tier = Math.max(0, Math.min(WEAPON_STAGES.length - 1, bullet.weaponTier || 0));
     const flicker = 0.88 + Math.sin((bullet.age ?? 0) * 42 + bullet.x * 0.03) * 0.12;
@@ -4213,11 +4308,11 @@ function buildLights() {
     lights.unshift({ x: p.x, y: p.y, radius: 540, intensity: 1.2 * state.bombWave, color: p.color ?? COLORS.magenta });
   }
   for (const pulse of state.forge?.worldPulses ?? []) {
-    if (lights.length >= MAX_LIGHTS) break;
+    if (lights.length >= ACTIVE_LIGHT_LIMIT) break;
     const t = clamp(pulse.life / pulse.maxLife, 0, 1);
     lights.push({ x: pulse.x, y: pulse.y, radius: 210, intensity: 0.55 * t, color: pulse.color });
   }
-  return lights.slice(0, MAX_LIGHTS);
+  return lights.slice(0, ACTIVE_LIGHT_LIMIT);
 }
 
 function spawnScorePop(x, y, text, color) {
@@ -5211,8 +5306,8 @@ function hideOverlay() {
   shell.dataset.mode = "running";
 }
 
-function updateDev(now) {
-  fpsFrames += 1;
+function updateDev(now, rendered = false) {
+  if (rendered) fpsFrames += 1;
   if (now - fpsAt >= 500) {
     fps = Math.round((fpsFrames * 1000) / (now - fpsAt));
     fpsFrames = 0;
@@ -5336,7 +5431,8 @@ function ensureStartupAssetsReady() {
 function loadingProgressValue() {
   const visuals = [GL_IMAGES.atlas, ...Object.keys(GAMEPLAY_IMAGE_PATHS).map((key) => GL_IMAGES[key])];
   for (const name of SPRITE_PAIR_NAMES) {
-    visuals.push(GL_IMAGES.sprites[name]?.diffuse, GL_IMAGES.sprites[name]?.normal);
+    visuals.push(GL_IMAGES.sprites[name]?.diffuse);
+    if (renderer.normalMapsEnabled) visuals.push(GL_IMAGES.sprites[name]?.normal);
   }
   const visualReady = visuals.filter(imageReady).length;
   const visualProgress = visuals.length ? visualReady / visuals.length : 1;
@@ -5363,10 +5459,7 @@ function ensureRunAudioReady() {
 
 function visualAssetsReady() {
   const gameplayReady = Object.keys(GAMEPLAY_IMAGE_PATHS).every((key) => imageReady(GL_IMAGES[key]));
-  const spritesReady = SPRITE_PAIR_NAMES.every((name) => {
-    const pair = GL_IMAGES.sprites[name];
-    return imageReady(pair?.diffuse) && imageReady(pair?.normal);
-  });
+  const spritesReady = SPRITE_PAIR_NAMES.every((name) => spritePairReady(GL_IMAGES.sprites[name]));
   return imageReady(GL_IMAGES.atlas) && gameplayReady && spritesReady;
 }
 
@@ -5382,7 +5475,7 @@ function prewarmVisualTextures() {
     const pair = GL_IMAGES.sprites[name];
     if (!pair) continue;
     renderer.textureFor(pair.diffuse, false);
-    renderer.textureFor(pair.normal, false);
+    if (renderer.normalMapsEnabled && imageReady(pair.normal)) renderer.textureFor(pair.normal, false);
   }
 }
 
@@ -5392,7 +5485,7 @@ function loadMissingVisualAssetsNow() {
   }
   for (const name of SPRITE_PAIR_NAMES) {
     const pair = GL_IMAGES.sprites[name];
-    if (!pair?.diffuse || !pair?.normal) {
+    if (!spritePairReady(pair)) {
       GL_IMAGES.sprites[name] = loadSpritePair(name);
     }
   }
@@ -5424,7 +5517,7 @@ function queueSpritePairLoad(options = {}) {
     const name = pending.shift();
     if (!name) return;
     const pair = GL_IMAGES.sprites[name];
-    if (!pair?.diffuse || !pair?.normal) {
+    if (!spritePairReady(pair)) {
       GL_IMAGES.sprites[name] = loadSpritePair(name);
     }
     if (pending.length) runWhenIdle(pump, stepDelay);
@@ -5433,10 +5526,13 @@ function queueSpritePairLoad(options = {}) {
 }
 
 function loadSpritePair(name) {
-  return {
-    diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`),
-    normal: loadImage(`${ASSETS.spriteBase}${name}.normal.png`)
-  };
+  const pair = { diffuse: loadImage(`${ASSETS.spriteBase}${name}.png`), normal: null };
+  if (renderer.normalMapsEnabled) pair.normal = loadImage(`${ASSETS.spriteBase}${name}.normal.png`);
+  return pair;
+}
+
+function spritePairReady(pair) {
+  return imageReady(pair?.diffuse) && (!renderer.normalMapsEnabled || imageReady(pair?.normal));
 }
 
 function imageReady(image) {
