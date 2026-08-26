@@ -28,10 +28,29 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare public site artifact
+        shell: bash
+        run: |
+          mkdir -p _site
+          rsync -a --delete --exclude-from=.github/pages-excludes.txt ./ _site/
+
+          test -f _site/index.html
+          test -f _site/games/opengw-levels/index.html
+          test -f _site/games/shadow-ops-canvas/index.html
+          test -f _site/games/gothtechnology2/index.html
+
+          artifact_bytes=$(du -sb _site | cut -f1)
+          artifact_limit=950000000
+          echo "Prepared Pages artifact: ${artifact_bytes} bytes"
+          if (( artifact_bytes > artifact_limit )); then
+            echo "Pages artifact exceeds the ${artifact_limit}-byte safety limit."
+            exit 1
+          fi
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy
         id: deployment
