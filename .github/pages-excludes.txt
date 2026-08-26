@@ -1,0 +1,15 @@
+# Repository and workflow metadata are not public-site files.
+/.git/
+/.github/
+/_site/
+
+# Development-only browser-game material. Runtime assets remain deployed.
+/games/gothtechnology2/assets/generated-sprites/
+/games/gothtechnology2/assets/user-sheets/
+/games/gothtechnology2/scripts/
+/games/gothtechnology2/tests/
+/games/shadow-ops-canvas/audit/
+/games/shadow-ops-canvas/docs/
+/games/shadow-ops-canvas/tools/
+/games/shadow-ops-canvas/assets/mission/*_source*
+/games/shadow-ops-canvas/assets/mission/*_alpha*
