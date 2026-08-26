@@ -22,16 +22,20 @@ async function initStartupScene() {
   const gl =
     canvas.getContext("webgl", {
       alpha: false,
-      antialias: true,
+      antialias: !lowPowerStartup.matches,
       depth: false,
+      desynchronized: true,
+      powerPreference: lowPowerStartup.matches ? "low-power" : "high-performance",
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
       stencil: false
     }) ||
     canvas.getContext("experimental-webgl", {
       alpha: false,
-      antialias: true,
+      antialias: !lowPowerStartup.matches,
       depth: false,
+      desynchronized: true,
+      powerPreference: lowPowerStartup.matches ? "low-power" : "high-performance",
       premultipliedAlpha: false,
       preserveDrawingBuffer: false,
       stencil: false
@@ -86,7 +90,9 @@ async function initStartupScene() {
     gridProgram,
     interaction,
     lastTime: 0,
+    lastRenderAt: 0,
     quad,
+    rafId: 0,
     floor,
     reducedMotion,
     texturedProgram,
@@ -105,34 +111,68 @@ async function initStartupScene() {
   if ("ResizeObserver" in window) {
     new ResizeObserver(() => resize(gl)).observe(canvas);
   }
+  new MutationObserver(() => syncLoop(state)).observe(shell, { attributes: true, attributeFilter: ["data-mode"] });
+  document.addEventListener("visibilitychange", () => syncLoop(state));
+  state.reducedMotion.addEventListener("change", () => syncLoop(state));
+  lowPowerStartup.addEventListener("change", () => {
+    resize(gl);
+    syncLoop(state);
+  });
 
   debug.ready = true;
   canvas.dataset.ready = "true";
   canvas.dataset.interactive = "true";
   sceneEl.dataset.renderer = debug.renderer;
   sceneEl.classList.add("is-webgl-ready");
-  requestAnimationFrame((time) => render(state, time));
+  syncLoop(state);
 }
 
 function render(state, timeMs) {
+  state.rafId = 0;
   const { gl } = state;
-  const isMenu = shell.dataset.mode === "menu";
+  if (!shouldAnimate(state)) return;
+  const frameInterval = lowPowerStartup.matches ? 1000 / 24 : 0;
+  if (frameInterval && timeMs - state.lastRenderAt < frameInterval) {
+    state.rafId = requestAnimationFrame((time) => render(state, time));
+    return;
+  }
+  state.lastRenderAt = timeMs;
   const time = timeMs * 0.001;
   const dt = Math.min(0.05, Math.max(0.001, time - (state.lastTime || time)));
   state.lastTime = time;
-  debug.active = isMenu;
+  debug.active = true;
   debug.frame += 1;
   if (debug.frame % 60 === 0) {
-    canvas.dataset.active = String(isMenu);
+    canvas.dataset.active = "true";
     canvas.dataset.frame = String(debug.frame);
   }
 
-  if (isMenu) {
-    updateInteraction(state.interaction, dt);
-    renderScene(state, state.reducedMotion.matches ? 0 : time);
-  }
+  updateInteraction(state.interaction, dt);
+  renderScene(state, time);
+  state.rafId = requestAnimationFrame((nextTime) => render(state, nextTime));
+}
 
-  requestAnimationFrame((time) => render(state, time));
+function shouldAnimate(state) {
+  return !document.hidden && shell.dataset.mode === "menu" && !state.reducedMotion.matches;
+}
+
+function syncLoop(state) {
+  if (state.rafId) {
+    cancelAnimationFrame(state.rafId);
+    state.rafId = 0;
+  }
+  const menuVisible = !document.hidden && shell.dataset.mode === "menu";
+  debug.active = menuVisible;
+  canvas.dataset.active = String(menuVisible);
+  if (!menuVisible) return;
+  resize(state.gl);
+  state.lastTime = 0;
+  state.lastRenderAt = 0;
+  if (state.reducedMotion.matches) {
+    renderScene(state, 0);
+    return;
+  }
+  state.rafId = requestAnimationFrame((time) => render(state, time));
 }
 
 function renderScene(state, time) {
@@ -368,7 +408,7 @@ function screenToGrid(x, y) {
 }
 
 function resize(gl) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+  const dpr = Math.min(window.devicePixelRatio || 1, lowPowerStartup.matches ? 0.8 : 1.6);
   const width = Math.max(1, Math.floor((canvas.clientWidth || window.innerWidth) * dpr));
   const height = Math.max(1, Math.floor((canvas.clientHeight || window.innerHeight) * dpr));
   if (canvas.width !== width || canvas.height !== height) {
