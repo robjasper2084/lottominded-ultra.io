@@ -4,15 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#05070d" />
+    <meta name="static-wave-leaderboard-endpoint" content="" />
     <title>2084 Static Wave - LottoMind</title>
-    <link rel="icon" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" />
-    <link rel="preload" href="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" as="image" />
-    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" as="image" />
-    <link rel="stylesheet" href="./styles.css?v=startup-music-banner-wide-20" />
+    <link rel="icon" href="./assets/2084/branding/2084-static-wars.ico?v=audit-fixes-1" />
+    <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" as="image" type="image/webp" />
+    <link rel="stylesheet" href="./styles.css?v=polish-pass-2" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
       <canvas id="game" width="1280" height="720"></canvas>
+      <canvas id="ultraFxCanvas" width="1280" height="720" aria-hidden="true"></canvas>
 
       <div id="startupScene" aria-hidden="true">
         <canvas id="startup3dCanvas" width="1280" height="720"></canvas>
@@ -59,6 +60,14 @@
         <span id="statusText"></span>
         <span id="bestText"></span>
       </div>
+      <div id="bossMeter" class="boss-meter" hidden aria-live="polite">
+        <span id="bossName">CROWN SIGNAL</span>
+        <div><i id="bossMeterFill"></i></div>
+      </div>
+      <div id="signalChain" class="signal-chain" aria-label="Signal Chain" data-active="false">
+        <div><span>Signal Chain</span><strong id="chainValue">x1</strong></div>
+        <i><b id="chainFill"></b></i>
+      </div>
 
       <div id="forgeHud" class="forge-panel forge-hud" aria-live="polite">
         <button id="forgeHudClose" class="forge-close" type="button" aria-label=""></button>
@@ -70,12 +79,9 @@
 
       <section id="overlay" data-state="menu" aria-labelledby="menuTitle">
         <h1 id="menuTitle" class="sr-only">2084 Static Wave gameplay portal</h1>
-        <div id="startupBrand" aria-hidden="true">
-          <img id="startupMark" src="./assets/2084/branding/app-icon.png?v=chatgpt-wav-icon-1" alt="" />
-        </div>
         <div id="marqueeMotion" aria-hidden="true">
           <canvas id="marqueeFx" width="1280" height="720"></canvas>
-          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.png?v=fullscreen-button-1" alt="" />
+          <img id="marquee" src="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" alt="" />
           <span class="marquee-status">Signal Ready</span>
         </div>
         <div id="startupForge" class="forge-panel startup-forge" aria-live="polite">
@@ -86,31 +92,159 @@
         <h1 id="overlayTitle"></h1>
         <p id="overlayCopy"></p>
         <div id="overlayStats" hidden></div>
+        <section id="rewardPanel" class="reward-panel" hidden aria-live="polite">
+          <strong id="rewardGrade"></strong>
+          <div><span id="rewardMedal"></span><span id="rewardXp"></span></div>
+          <p id="rewardUnlocks"></p>
+        </section>
+        <div id="shareResultPanel" class="share-result-panel" hidden>
+          <button id="shareResultToggle" class="share-result-toggle" type="button" aria-expanded="false"></button>
+          <div id="shareResultOptions" class="share-result-options" hidden>
+            <button id="shareFacebookAction" type="button"></button>
+            <button id="shareInstagramAction" type="button"></button>
+            <button id="shareXAction" type="button"></button>
+          </div>
+          <p id="shareResultStatus" class="share-result-status" aria-live="polite"></p>
+        </div>
+        <section id="scoreboardPanel" class="scoreboard-panel" role="dialog" aria-modal="true" aria-labelledby="scoreboardTitle" hidden>
+          <div class="scoreboard-header">
+            <div>
+              <span id="scoreboardTitle"></span>
+              <small id="scoreboardNote"></small>
+            </div>
+            <button id="scoreboardCloseAction" class="scoreboard-close" type="button" aria-label="Close Top 5 scores">X</button>
+          </div>
+          <div class="scoreboard-tabs" role="tablist" aria-label="Scoreboard source">
+            <button id="localScoresAction" type="button" role="tab" aria-selected="true">Local</button>
+            <button id="communityScoresAction" type="button" role="tab" aria-selected="false">Community</button>
+          </div>
+          <ol id="scoreboardList" class="scoreboard-list"></ol>
+        </section>
         <div id="playerChooser" class="player-chooser" aria-label="Player count"></div>
+        <details id="preflightPanel" class="preflight-panel" aria-label="Mission setup">
+          <summary>
+            <span>Run Setup</span>
+            <strong id="preflightSummary">Campaign / Normal</strong>
+          </summary>
+          <div class="preflight-grid">
+            <div class="preflight-group">
+              <span>Mode</span>
+              <div id="modeChooser" class="segmented-control"></div>
+            </div>
+            <div class="preflight-group">
+              <span>Difficulty</span>
+              <div id="difficultyChooser" class="segmented-control"></div>
+            </div>
+            <div class="pilot-briefing">
+              <strong id="pilotBriefingTitle"></strong>
+              <span id="pilotBriefingText"></span>
+            </div>
+            <div id="profileSummary" class="profile-summary"></div>
+          </div>
+        </details>
         <p id="controlsHint" class="controls-hint"></p>
+        <div id="loadingProgress" class="loading-progress" hidden aria-live="polite">
+          <span id="loadingProgressLabel">Arming signal 0%</span>
+          <div><i id="loadingProgressFill"></i></div>
+        </div>
         <div class="overlay-actions">
           <button id="primaryAction" type="button"></button>
           <button id="homeAction" type="button" hidden></button>
           <button id="soundAction" type="button"></button>
+          <button id="settingsAction" type="button">Settings</button>
+          <button id="scoresAction" type="button" aria-controls="scoreboardPanel" aria-expanded="false">Top 5</button>
           <button id="fullscreenAction" type="button" aria-pressed="false">Full Screen</button>
+        </div>
+      </section>
+
+      <section id="settingsPanel" class="settings-panel" hidden aria-labelledby="settingsTitle">
+        <div class="settings-header">
+          <h2 id="settingsTitle">Signal Settings</h2>
+          <button id="settingsCloseAction" class="icon-action" type="button" aria-label="Close settings">X</button>
+        </div>
+        <label>Music <input id="musicVolumeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Sound effects <input id="sfxVolumeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Effects intensity <input id="effectsInput" type="range" min="0.25" max="1" step="0.05" /></label>
+        <label>Camera shake <input id="shakeInput" type="range" min="0" max="1" step="0.05" /></label>
+        <label>Color mode
+          <select id="colorModeInput">
+            <option value="standard">Standard</option>
+            <option value="contrast">High contrast</option>
+            <option value="deuteranopia">Green-safe</option>
+          </select>
+        </label>
+        <label>Controls
+          <select id="controlPresetInput">
+            <option value="classic">WASD + IJKL</option>
+            <option value="arrows">Arrows + IJKL</option>
+            <option value="lefty">IJKL + WASD</option>
+          </select>
+        </label>
+        <label>Graphics preset
+          <select id="graphicsPresetInput">
+            <option value="auto">Auto (recommended)</option>
+            <option value="mobile">Mobile</option>
+            <option value="high">High WebGL2</option>
+            <option value="ultra">Ultra WebGPU</option>
+          </select>
+          <small id="graphicsStatus" class="graphics-status" aria-live="polite"></small>
+        </label>
+        <label class="toggle-setting"><input id="dynamicResolutionInput" type="checkbox" /> Dynamic resolution</label>
+        <label class="toggle-setting"><input id="hapticsInput" type="checkbox" /> Haptics</label>
+        <label class="toggle-setting"><input id="tutorialInput" type="checkbox" /> Tutorial prompts</label>
+        <div class="settings-actions">
+          <button id="tutorialResetAction" type="button">Replay Tutorial</button>
+          <button id="tutorialSkipAction" type="button" hidden>Skip Current Tutorial</button>
+          <button id="settingsDoneAction" type="button">Done</button>
+        </div>
+      </section>
+
+      <section id="tutorialPanel" class="tutorial-panel" hidden aria-live="polite">
+        <small id="tutorialStep"></small>
+        <strong id="tutorialMessage"></strong>
+      </section>
+
+      <section id="upgradeDraft" class="upgrade-draft" hidden aria-labelledby="upgradeDraftTitle">
+        <div class="upgrade-draft-panel">
+          <header>
+            <span id="upgradeDraftEyebrow">Sector Clear</span>
+            <h2 id="upgradeDraftTitle">Choose Your Signal</h2>
+            <p id="upgradeDraftCopy">Select one upgrade for the next sector.</p>
+          </header>
+          <div id="upgradeChoices" class="upgrade-choices"></div>
+          <footer>
+            <span id="upgradeCoreCount">0 carrier cores</span>
+            <small>1-3 or move + confirm</small>
+          </footer>
         </div>
       </section>
 
       <button id="pauseAction" class="icon-action top-action" type="button" aria-label=""></button>
       <button id="bombAction" class="bomb-action" type="button" aria-label=""><span>B</span></button>
 
-      <div id="touchMarks" aria-hidden="true">
-        <div class="touch-zone left-zone"><span></span></div>
-        <div class="touch-zone right-zone"><span></span></div>
+      <div id="touchMarks" aria-label="Touch controls">
+        <div class="touch-control-panel" aria-label="Touch control placement">
+          <button id="touchEditAction" type="button">Move Controls</button>
+          <button id="touchResetAction" type="button">Reset</button>
+        </div>
+        <div class="touch-zone left-zone" data-role="move" role="button" aria-label="Move ship control">
+          <span></span>
+          <em>Move</em>
+        </div>
+        <div class="touch-zone right-zone" data-role="aim" role="button" aria-label="Aim and fire control">
+          <span></span>
+          <em>Fire</em>
+        </div>
       </div>
 
       <div id="fxLayer" aria-hidden="true"></div>
+      <div id="gameToast" class="game-toast" hidden role="status" aria-live="polite"></div>
       <div id="bannerText" hidden></div>
       <div id="dev"></div>
     </main>
     <script type="module" src="./src/startup3d.js?v=fullscreen-button-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=fullscreen-button-1"></script>
-    <script type="module" src="./src/game.js?v=fullscreen-button-1"></script>
+    <script type="module" src="./src/game.js?v=polish-pass-2"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");
