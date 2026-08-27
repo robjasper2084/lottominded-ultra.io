@@ -8,7 +8,7 @@
     <title>2084 Static Wave - LottoMind</title>
     <link rel="icon" href="./assets/2084/branding/2084-static-wars.ico?v=audit-fixes-1" />
     <link rel="preload" href="./assets/2084/branding/marquee-gameplay-keyart.webp?v=audit-fixes-1" as="image" type="image/webp" />
-    <link rel="stylesheet" href="./styles.css?v=samsung-a16-1" />
+    <link rel="stylesheet" href="./styles.css?v=replay-hooks-1" />
   </head>
   <body>
     <main id="shell" data-mode="menu" aria-label="2084 Static Wave game">
@@ -67,6 +67,18 @@
       <div id="signalChain" class="signal-chain" aria-label="Signal Chain" data-active="false">
         <div><span>Signal Chain</span><strong id="chainValue">x1</strong></div>
         <i><b id="chainFill"></b></i>
+      </div>
+      <div id="replayHud" class="replay-hud" aria-live="polite">
+        <div id="missionHud" class="replay-module mission-module">
+          <span>Sector Mission</span>
+          <strong id="missionLabel">Signal Scan</strong>
+          <b id="missionProgress">0 / 1</b>
+        </div>
+        <div id="orbComboHud" class="replay-module orb-combo-module" hidden>
+          <span>Orb Sync</span>
+          <strong id="orbComboLabel">Awaiting Orb</strong>
+          <b id="orbComboTime"></b>
+        </div>
       </div>
 
       <div id="forgeHud" class="forge-panel forge-hud" aria-live="polite">
@@ -213,7 +225,7 @@
           </header>
           <div id="upgradeChoices" class="upgrade-choices"></div>
           <footer>
-            <span id="upgradeCoreCount">0 carrier cores</span>
+            <span id="upgradeCoreCount">Weapon orbs upgrade on contact</span>
             <small>1-3 or move + confirm</small>
           </footer>
         </div>
@@ -244,7 +256,7 @@
     </main>
     <script type="module" src="./src/startup3d.js?v=samsung-a16-1"></script>
     <script type="module" src="./src/marqueeMotion.js?v=samsung-a16-1"></script>
-    <script type="module" src="./src/game.js?v=samsung-a16-1"></script>
+    <script type="module" src="./src/game.js?v=replay-hooks-1"></script>
     <script>
       (() => {
         const fullscreenButton = document.getElementById("fullscreenAction");

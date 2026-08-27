@@ -400,6 +400,83 @@ button[hidden],
   transition: width 90ms linear;
 }
 
+.replay-hud {
+  position: fixed;
+  z-index: 17;
+  top: max(116px, calc(var(--safe-top) + 108px));
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  max-width: calc(100vw - 24px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.replay-hud[data-boss="true"] {
+  top: max(174px, calc(var(--safe-top) + 166px));
+}
+
+#shell:not([data-mode="running"]) .replay-hud,
+.replay-hud[hidden],
+.replay-module[hidden] {
+  display: none;
+}
+
+.replay-module {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 2px 9px;
+  min-width: 188px;
+  max-width: 248px;
+  min-height: 42px;
+  padding: 6px 9px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(41, 247, 255, 0.24);
+  border-radius: 4px;
+  background: rgba(3, 8, 17, 0.8);
+  box-shadow: inset 0 0 13px rgba(41, 247, 255, 0.06), 0 6px 15px rgba(0, 0, 0, 0.22);
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+
+.replay-module > span {
+  grid-column: 1 / -1;
+  color: rgba(180, 233, 244, 0.72);
+  font: 900 7px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-transform: uppercase;
+}
+
+.replay-module > strong {
+  overflow: hidden;
+  color: #eafcff;
+  font: 950 9px/1.1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.replay-module > b {
+  color: var(--warm-gold);
+  font: 950 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+  white-space: nowrap;
+}
+
+.mission-module[data-complete="true"] {
+  border-color: rgba(255, 223, 117, 0.58);
+  background: rgba(28, 24, 9, 0.82);
+}
+
+.orb-combo-module {
+  border-color: rgba(255, 60, 174, 0.42);
+  box-shadow: inset 0 0 15px rgba(255, 60, 174, 0.08), 0 6px 15px rgba(0, 0, 0, 0.22);
+}
+
+.orb-combo-module[data-buffed="true"] {
+  border-color: rgba(255, 223, 117, 0.7);
+  background: linear-gradient(90deg, rgba(92, 20, 112, 0.76), rgba(9, 25, 37, 0.84));
+}
+
 .forge-panel {
   position: relative;
   display: grid;
@@ -3638,6 +3715,26 @@ button[hidden],
     padding: 5px 8px 7px;
   }
 
+  .replay-hud {
+    top: max(121px, calc(var(--safe-top) + 115px));
+    width: min(94vw, 430px);
+    gap: 4px;
+  }
+
+  .replay-hud[data-boss="true"] {
+    top: max(158px, calc(var(--safe-top) + 152px));
+  }
+
+  .replay-module {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 38px;
+    padding: 5px 7px 6px;
+  }
+
+  .replay-module > strong { font-size: 8px; }
+  .replay-module > b { font-size: 8px; }
+
   #statusStrip {
     top: max(94px, calc(var(--safe-top) + 88px));
     bottom: auto;
@@ -3762,6 +3859,26 @@ button[hidden],
     top: max(94px, calc(var(--arena-top, 0px) + 82px));
     width: min(330px, 52vw);
   }
+
+  .replay-hud {
+    top: max(108px, calc(var(--safe-top) + 100px));
+    gap: 4px;
+  }
+
+
+  .replay-hud[data-boss="true"] {
+    top: max(156px, calc(var(--safe-top) + 148px));
+  }
+
+  .replay-module {
+    min-width: 144px;
+    min-height: 34px;
+    padding: 4px 7px 5px;
+  }
+
+  .replay-module > span { font-size: 6.5px; }
+  .replay-module > strong,
+  .replay-module > b { font-size: 7.5px; }
 
   .touch-zone { --control-size: 92px; }
   .touch-zone span { inset: 27px; }

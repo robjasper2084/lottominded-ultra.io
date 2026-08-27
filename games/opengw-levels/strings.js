@@ -62,7 +62,7 @@ export const STR = {
   forgeRunNote: "updates on shards, wells, and clears",
   forgePickupNote: "shard tuned",
   forgePowerupNote: "weapon signal evolved",
-  forgeCarrierNote: "elite carrier core secured",
+  forgeCarrierNote: "weapon orb armed",
   forgeDraftNote: "sector upgrade selected",
   forgeWellNote: "well cracked",
   forgeClearNote: "sector sealed",
