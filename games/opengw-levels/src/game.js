@@ -1,4 +1,4 @@
-import { STR } from "../strings.js?v=polish-pass-2";
+import { STR } from "../strings.js?v=replay-hooks-1";
 import { createForgeReadout } from "./numberForge.js?v=number-forge-1";
 import { UltraWebGpuLayer } from "./ultraWebGpu.js?v=graphics-evolution-1";
 import { readStandardGamepad } from "./inputControls.js?v=controller-responsive-1";
@@ -14,11 +14,13 @@ import {
   loadMode,
   loadProfile,
   loadSettings,
+  nextUnlockForRank,
   saveDifficulty,
   saveMode,
   saveProfile,
-  saveSettings
-} from "./metaSystems.js?v=evolution-pass-2";
+  saveSettings,
+  unlocksForRank
+} from "./metaSystems.js?v=replay-hooks-1";
 
 const QUERY_PARAMS = new URLSearchParams(location.search);
 const WORLD = { w: 1280, h: 720 };
@@ -101,6 +103,26 @@ const WEAPON_STAGES = [
   { name: "Nova Cannon", shortName: "Nova", angles: [-0.045, 0, 0.045], speed: 840, radius: 5, life: 1.22, damage: 0.85, cooldown: 0.092 }
 ];
 const WEAPON_PATHS = ["signal", "pulse", "fork", "nova"];
+const WEAPON_ORB_PATHS = WEAPON_PATHS.slice(1);
+const WEAPON_ORB_LIFETIME = 6.25;
+const WEAPON_ORB_WARNING_TIME = 2.35;
+const SECTOR_LENGTH_SCALE = 1.2;
+const ORB_COMBO_WINDOW = 12;
+const ORB_COMBO_DURATION = 18;
+const ORB_COMBO_RECIPES = {
+  "fork+pulse": { id: "phase", label: "Phase Lattice", note: "Pierce + rapid fire" },
+  "fork+nova": { id: "storm", label: "Starstorm Array", note: "Twin storm lanes" },
+  "nova+pulse": { id: "fusion", label: "Solar Lance", note: "Damage + blast radius" },
+  "fork+nova+pulse": { id: "prismatic", label: "Prismatic Jackpot", note: "All Orb Sync bonuses" }
+};
+const DEV_WEAPON_ORB_PATH = QUERY_PARAMS.has("dev") && WEAPON_ORB_PATHS.includes(QUERY_PARAMS.get("orb"))
+  ? QUERY_PARAMS.get("orb")
+  : "";
+const DEV_WEAPON_ORB_PATHS = QUERY_PARAMS.has("dev")
+  ? String(QUERY_PARAMS.get("orbs") || DEV_WEAPON_ORB_PATH).split(",").filter((path) => WEAPON_ORB_PATHS.includes(path))
+  : [];
+const DEV_WEAPON_ORB_MISS = QUERY_PARAMS.has("dev") && QUERY_PARAMS.has("orbMiss");
+const DEV_LEGENDARY_CARRIER = QUERY_PARAMS.has("dev") && QUERY_PARAMS.has("legendary");
 const WEAPON_PATH_TONES = { signal: "cyan", pulse: "pulse", fork: "fork", nova: "nova" };
 const WEAPON_EVOLUTION_NAMES = {
   pulse: ["Pulse Shot", "Phase Piercer", "Rail Pulse", "Singularity Lance"],
@@ -1137,6 +1159,15 @@ const hud = {
   best: $("bestText")
 };
 const chainUi = { panel: $("signalChain"), value: $("chainValue"), fill: $("chainFill") };
+const replayUi = {
+  panel: $("replayHud"),
+  mission: $("missionHud"),
+  missionLabel: $("missionLabel"),
+  missionProgress: $("missionProgress"),
+  combo: $("orbComboHud"),
+  comboLabel: $("orbComboLabel"),
+  comboTime: $("orbComboTime")
+};
 const shell = $("shell");
 const overlay = $("overlay");
 const overlayTitle = $("overlayTitle");
@@ -2164,6 +2195,7 @@ function createState() {
   const rng = new Rng(mode === "daily" ? dailySeed() : 0x0f9e42);
   const playerCount = selectedPlayerCount;
   const players = Array.from({ length: playerCount }, (_, index) => makePlayer(index, playerCount));
+  const permanentPerks = unlocksForRank(playerProfile.rank);
   return {
     status: "menu",
     rng,
@@ -2181,14 +2213,20 @@ function createState() {
     weaponTier: DEV_WEAPON_TIER,
     weaponPath: WEAPON_PATHS[DEV_WEAPON_TIER] ?? "signal",
     weaponEvolution: DEV_WEAPON_TIER > 0 ? 1 : 0,
-    weaponCores: 0,
+    weaponOrbs: 0,
+    orbCombo: { paths: [], window: 0, buff: 0, id: "", label: "", note: "" },
     upgrades: { overclock: 0, thrusters: 0, chain: 0, magnet: 0, bomb: 0, hull: 0 },
     draft: { nextLevel: 0, choices: [], selected: 0 },
     signalChain: { count: 0, multiplier: 1, timer: 0, limit: 3.4, peak: 1, tick: 0 },
     totalKilled: 0,
     enemySequence: 0,
     eliteSpawned: 0,
-    hullAura: playerProfile.rank >= 6,
+    legendarySpawned: 0,
+    legendaryPity: 0,
+    legendaryBroken: 0,
+    mission: null,
+    permanentPerks,
+    hullAura: permanentPerks.novaHull,
     resultRewards: null,
     playerCount,
     players,
@@ -2348,6 +2386,7 @@ function beginLevel(index) {
   state.spawned = 0;
   state.killed = 0;
   state.eliteSpawned = 0;
+  state.legendarySpawned = 0;
   state.spawnTimer = 0.7;
   state.transitionTimer = 0;
   state.banner = { text: `${STR.level} ${index + 1}`, timer: 1.8 };
@@ -2357,8 +2396,16 @@ function beginLevel(index) {
     state.signalChain.timer = Math.max(state.signalChain.timer, state.signalChain.limit * 0.72);
   }
   const profile = currentLevel();
+  state.mission = createSectorMission(index, profile);
   for (let i = 0; i < profile.wells; i += 1) spawnWell();
   if (profile.boss) spawnBoss(profile.boss);
+  if (DEV_WEAPON_ORB_PATHS.length > 0 && index === devStartLevel && state.totalKilled === 0) {
+    const player = state.players[0];
+    DEV_WEAPON_ORB_PATHS.forEach((path, pathIndex) => {
+      spawnPickup(player.x + (DEV_WEAPON_ORB_MISS ? 300 : 34 + pathIndex * 42), player.y, "core", { path });
+      if (DEV_WEAPON_ORB_MISS) Object.assign(state.pickups.at(-1), { vx: 0, vy: 0 });
+    });
+  }
   bus.refreshLoops();
   refreshForge(STR.forgeRunNote, 0x4000 + index, true);
   bus.play("level", 0.6);
@@ -2381,7 +2428,7 @@ function buildLevelProfile(index) {
   const profile = {
     ...base,
     name: index < LEVELS.length ? base.name : `Infinite Signal ${index + 1}`,
-    quota: Math.max(8, Math.round(base.quota * difficulty.quota * modeScale * scale)),
+    quota: Math.max(8, Math.round(base.quota * difficulty.quota * modeScale * scale * SECTOR_LENGTH_SCALE)),
     max: Math.max(6, Math.round(base.max * Math.min(1.6, scale))),
     interval: Math.max(0.24, base.interval / Math.min(1.8, scale)),
     wells: Math.min(6, base.wells + Math.floor(endlessTier / 3)),
@@ -2465,6 +2512,7 @@ function update(dt, commands) {
   state.bombWave = Math.max(0, state.bombWave - dt * 1.6);
   state.banner.timer = Math.max(0, state.banner.timer - dt);
   updateSignalChain(dt);
+  updateOrbCombo(dt);
   updateForge(dt);
   for (const player of state.players) {
     player.invuln = Math.max(0, player.invuln - dt);
@@ -2581,7 +2629,7 @@ function updateEnemies(dt) {
     const player = nearestPlayer(enemy.x, enemy.y) ?? state.player;
     const toPlayer = normalize(player.x - enemy.x, player.y - enemy.y);
     const spec = ENEMY[enemy.type];
-    const speed = spec.speed * (DIFFICULTIES[state.difficulty]?.speed ?? 1) * (enemy.elite ? 0.92 : 1);
+    const speed = spec.speed * (DIFFICULTIES[state.difficulty]?.speed ?? 1) * (enemy.legendary ? 0.84 : enemy.elite ? 0.92 : 1);
     if (enemy.type === "boss") {
       const hpRatio = clamp(enemy.hp / enemy.maxHp, 0, 1);
       const nextPhase = hpRatio <= 0.34 ? 3 : hpRatio <= 0.67 ? 2 : enemy.shield > 0 ? 0 : 1;
@@ -2644,15 +2692,16 @@ function updatePickups(dt) {
   for (const pickup of state.pickups) {
     pickup.age += dt;
     pickup.life -= dt;
+    pickup.warningTick = Math.max(0, (pickup.warningTick ?? 0) - dt);
     applyGravity(pickup, dt, 0.48);
     const player = nearestPlayer(pickup.x, pickup.y);
     if (player) {
       const dx = player.x - pickup.x;
       const dy = player.y - pickup.y;
       const d = Math.hypot(dx, dy) || 1;
-      const magnetRadius = 140 + state.upgrades.magnet * 48;
+      const magnetRadius = (pickup.kind === "core" ? 220 : 140) + state.upgrades.magnet * 48;
       if (d < magnetRadius) {
-        const pull = (1 - d / magnetRadius) * (560 + state.upgrades.magnet * 90);
+        const pull = (1 - d / magnetRadius) * (pickup.kind === "core" ? 780 : 560) + state.upgrades.magnet * 90;
         pickup.vx += (dx / d) * pull * dt;
         pickup.vy += (dy / d) * pull * dt;
       }
@@ -2661,7 +2710,19 @@ function updatePickups(dt) {
     pickup.y += pickup.vy * dt;
     pickup.vx *= 0.985;
     pickup.vy *= 0.985;
-    if (pickup.life <= 0) pickup.dead = true;
+    if (pickup.kind === "core" && pickup.life > 0 && pickup.life <= WEAPON_ORB_WARNING_TIME && pickup.warningTick <= 0) {
+      const urgency = 1 - pickup.life / WEAPON_ORB_WARNING_TIME;
+      addRing(pickup.x, pickup.y, urgency > 0.62 ? COLORS.white : weaponPathColor(pickup.path), 26 + urgency * 14, 160 + urgency * 120);
+      bus.play("menuSelect", 0.012, { playbackRate: 1.24 + urgency * 0.52, volumeScale: 0.12 + urgency * 0.08 });
+      pickup.warningTick = Math.max(0.16, 0.43 - urgency * 0.19);
+    }
+    if (pickup.life <= 0) {
+      pickup.dead = true;
+      if (pickup.kind === "core") {
+        addRing(pickup.x, pickup.y, weaponPathColor(pickup.path), 30, 210);
+        burst(pickup.x, pickup.y, weaponPathColor(pickup.path), 10);
+      }
+    }
   }
   compact(state.pickups);
 }
@@ -2838,10 +2899,6 @@ function checkProgression(dt) {
   }
   const cleared = quotaSpent && state.killed >= profile.quota && liveEnemies === 0 && liveWells === 0;
   if (cleared) {
-    for (const pickup of state.pickups) {
-      if (!pickup.dead && pickup.kind === "core") collectPickup(pickup);
-    }
-    compact(state.pickups);
     state.transitionTimer = 2.1;
     state.banner = { text: STR.cleared, timer: 1.8 };
     state.score += Math.round((state.levelIndex + 1) * 1000 * state.team.multiplier * (GAME_MODES[state.mode]?.scoreScale ?? 1));
@@ -2858,6 +2915,84 @@ function neutralizeEnemyForProgress(enemy) {
   enemy.dead = true;
   state.killed += 1;
   return true;
+}
+
+function createSectorMission(index, profile) {
+  const rotation = (index + playerProfile.runs + (state.mode === "daily" ? new Date().getUTCDate() : 0)) % 4;
+  const missions = [
+    { type: "chain", label: "Reach Signal Chain", target: Math.min(4, 2 + Math.floor(index / 4)) },
+    { type: "orbs", label: "Secure Weapon Orbs", target: index >= 5 ? 2 : 1 },
+    { type: "carriers", label: "Break Elite Carriers", target: index >= 4 ? 2 : 1 },
+    profile.wells > 0
+      ? { type: "wells", label: "Collapse Static Wells", target: Math.min(profile.wells, index >= 7 ? 2 : 1) }
+      : { type: "chain", label: "Reach Signal Chain", target: Math.min(3, 2 + Math.floor(index / 5)) }
+  ];
+  const mission = missions[rotation];
+  const baseReward = 900 + (index + 1) * 260;
+  return {
+    ...mission,
+    progress: 0,
+    complete: false,
+    reward: Math.round(baseReward * (state.permanentPerks.missionDividend ? 1.25 : 1))
+  };
+}
+
+function advanceMission(type, amount = 1, absolute = false) {
+  const mission = state.mission;
+  if (!mission || mission.complete || mission.type !== type) return;
+  mission.progress = absolute ? Math.max(mission.progress, amount) : mission.progress + amount;
+  if (mission.progress < mission.target) return;
+  mission.progress = mission.target;
+  mission.complete = true;
+  state.score += mission.reward;
+  state.team.multiplier = Math.min(9, state.team.multiplier + 1);
+  state.banner = { text: `MISSION COMPLETE +${formatNumber(mission.reward)}`, timer: 1.7 };
+  addRing(WORLD.w / 2, WORLD.h / 2, COLORS.gold, 72, 420);
+  triggerCombatFlash(COLORS.gold, 0.2);
+  bus.play("multiplier", 0.22, { playbackRate: 1.2, volumeScale: 1.12 });
+  haptic([24, 16, 44]);
+  checkRewards();
+}
+
+function orbComboWindowLimit() {
+  return ORB_COMBO_WINDOW + (state.permanentPerks.resonanceCache ? 2 : 0);
+}
+
+function orbComboDuration() {
+  return ORB_COMBO_DURATION + (state.permanentPerks.spectrumMemory ? 4 : 0);
+}
+
+function registerOrbCombo(path, x, y) {
+  const combo = state.orbCombo;
+  if (combo.window <= 0) combo.paths.length = 0;
+  if (!combo.paths.includes(path)) combo.paths.push(path);
+  combo.window = orbComboWindowLimit();
+  const recipe = ORB_COMBO_RECIPES[[...combo.paths].sort().join("+")];
+  if (!recipe) return;
+  combo.id = recipe.id;
+  combo.label = recipe.label;
+  combo.note = recipe.note;
+  combo.buff = orbComboDuration();
+  const points = 500 + combo.paths.length * 350;
+  state.score += points;
+  state.banner = { text: `${recipe.label.toUpperCase()} ONLINE`, timer: 1.75 };
+  spawnScorePop(x, y - 24, `ORB SYNC +${formatNumber(points)}`, COLORS.gold);
+  addRing(x, y, COLORS.gold, recipe.id === "prismatic" ? 104 : 76, 480);
+  triggerCombatFlash(recipe.id === "prismatic" ? COLORS.white : COLORS.magenta, recipe.id === "prismatic" ? 0.34 : 0.22);
+  bus.play("multiplier", 0.24, { playbackRate: recipe.id === "prismatic" ? 1.42 : 1.26, volumeScale: 1.16 });
+  haptic(recipe.id === "prismatic" ? [32, 16, 32, 16, 70] : [26, 16, 48]);
+  checkRewards();
+}
+
+function updateOrbCombo(dt) {
+  const combo = state.orbCombo;
+  combo.window = Math.max(0, combo.window - dt);
+  combo.buff = Math.max(0, combo.buff - dt);
+  if (combo.window <= 0) combo.paths.length = 0;
+  if (combo.buff > 0 || !combo.id) return;
+  combo.id = "";
+  combo.label = "";
+  combo.note = "";
 }
 
 function signalChainLimit() {
@@ -2879,6 +3014,7 @@ function advanceSignalChain(enemy) {
   chain.timer = chain.limit;
   chain.multiplier = signalChainMultiplier(chain.count);
   chain.peak = Math.max(chain.peak, chain.multiplier);
+  advanceMission("chain", chain.multiplier, true);
   if (chain.multiplier > previousMultiplier) {
     state.banner = { text: `SIGNAL CHAIN x${chain.multiplier}`, timer: 1.05 };
     addRing(enemy.x, enemy.y, chain.multiplier >= 4 ? COLORS.gold : COLORS.cyan, 44 + chain.multiplier * 8, 280);
@@ -2953,7 +3089,7 @@ function createEvolutionChoice() {
     type: "evolution",
     path,
     tone: WEAPON_PATH_TONES[path],
-    category: state.weaponCores > 0 ? "Carrier core ready" : "Weapon evolution",
+    category: "Weapon evolution",
     title: names[nextLevel - 1] ?? `${currentWeapon().name} Mk ${nextLevel}`,
     description: descriptions[path],
     level: `Evolution ${nextLevel}/4`,
@@ -2967,7 +3103,7 @@ function createGeneralUpgrade(id) {
     overclock: { tone: "pulse", title: "Trigger Overclock", description: "Fire 10% faster without enabling auto-fire.", stats: ["Rate +10%", "Manual fire"] },
     thrusters: { tone: "cyan", title: "Vector Thrusters", description: "Increase movement speed by 8% while keeping manual steering.", stats: ["Speed +8%", "Control stable"] },
     chain: { tone: "chain", title: "Chain Capacitor", description: "Add 0.7 seconds to the Signal Chain window.", stats: ["Window +0.7s", "Chain safer"] },
-    magnet: { tone: "fork", title: "Core Magnet", description: "Pull carrier cores and multiplier shards from farther away.", stats: ["Range +48", "Auto collect"] },
+    magnet: { tone: "fork", title: "Orb Magnet", description: "Pull short-lived weapon orbs and multiplier shards from farther away.", stats: ["Range +48", "Auto collect"] },
     bomb: { tone: "nova", title: "Bomb Reserve", description: "Add one bomb to the team reserve immediately.", stats: ["Bomb +1", "Instant"] },
     hull: { tone: "chain", title: "Hull Patch", description: "Restore one team life immediately.", stats: ["Life +1", "Instant"] }
   };
@@ -3035,7 +3171,7 @@ function buildDraftChoices() {
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   const choices = [];
-  const evolutionReady = state.weaponEvolution < 4 && (state.weaponCores > 0 || state.levelIndex % 2 === 1);
+  const evolutionReady = state.weaponEvolution < 4 && state.levelIndex % 2 === 1;
   if (evolutionReady) choices.push(createEvolutionChoice());
   for (const id of pool) {
     if (choices.length >= 3) break;
@@ -3083,8 +3219,7 @@ function renderUpgradeChoices() {
     button.innerHTML = `<small>${index + 1} / ${choice.category}</small><span class="upgrade-visual" data-preview="${choice.preview ?? choice.tone}" aria-hidden="true">${projectiles}</span><strong>${choice.title}</strong><span class="upgrade-description">${choice.description}</span><span class="upgrade-stats">${stats}</span><span class="upgrade-level">${choice.level}</span>`;
     upgradeUi.choices.append(button);
   });
-  const coreLabel = state.weaponCores === 1 ? "carrier core" : "carrier cores";
-  upgradeUi.cores.textContent = `${state.weaponCores} ${coreLabel}`;
+  upgradeUi.cores.textContent = `${state.weaponOrbs} weapon orbs secured - upgrades activate on contact`;
 }
 
 function setDraftSelection(index, focus = false) {
@@ -3106,12 +3241,10 @@ function applyUpgradeChoice(choice) {
     state.weaponPath = choice.path;
     state.weaponTier = Math.max(1, WEAPON_PATHS.indexOf(choice.path));
     state.weaponEvolution = 1;
-    if (state.weaponCores > 0) state.weaponCores -= 1;
     return;
   }
   if (choice.type === "evolution") {
     state.weaponEvolution = Math.min(4, state.weaponEvolution + 1);
-    if (state.weaponCores > 0) state.weaponCores -= 1;
     return;
   }
   state.upgrades[choice.id] = (state.upgrades[choice.id] ?? 0) + 1;
@@ -3147,14 +3280,19 @@ function currentWeapon() {
     angles = [-0.08, -0.04, 0, 0.04, 0.08];
   }
   const names = WEAPON_EVOLUTION_NAMES[state.weaponPath];
+  const comboId = state.orbCombo.id;
+  const phaseActive = state.orbCombo.buff > 0 && (comboId === "phase" || comboId === "prismatic");
+  const stormActive = state.orbCombo.buff > 0 && (comboId === "storm" || comboId === "prismatic");
+  const fusionActive = state.orbCombo.buff > 0 && (comboId === "fusion" || comboId === "prismatic");
+  if (stormActive) angles = [...new Set([...angles, -0.11, 0.11])].sort((a, b) => a - b);
   return {
     ...base,
     name: names?.[Math.max(0, state.weaponEvolution - 1)] ?? base.name,
     angles,
-    damage: base.damage * (1 + evolution * 0.16),
-    cooldown: base.cooldown * Math.max(0.58, 1 - evolution * 0.045 - state.upgrades.overclock * 0.1),
-    pierce: state.weaponPath === "pulse" ? Math.floor((evolution + 1) / 2) : 0,
-    splash: state.weaponPath === "nova" ? 24 + evolution * 12 : 0
+    damage: base.damage * (1 + evolution * 0.16) * (fusionActive ? 1.3 : 1),
+    cooldown: base.cooldown * Math.max(0.58, 1 - evolution * 0.045 - state.upgrades.overclock * 0.1) * (phaseActive ? 0.88 : 1),
+    pierce: (state.weaponPath === "pulse" ? Math.floor((evolution + 1) / 2) : 0) + (phaseActive ? 1 : 0),
+    splash: (state.weaponPath === "nova" ? 24 + evolution * 12 : 0) + (fusionActive ? 18 : 0)
   };
 }
 
@@ -3224,7 +3362,7 @@ function triggerBomb(player) {
 function spawnEnemy(type, forcedX, forcedY, options = {}) {
   const countsTowardQuota = options.countQuota !== false;
   const profile = currentLevel();
-  if (countsTowardQuota && type === "mayfly" && state.eliteSpawned === 0 && state.spawned >= profile.quota - 1) type = "seeker";
+  if (countsTowardQuota && type === "mayfly" && state.eliteSpawned < 2 && state.spawned >= profile.quota - 1) type = "seeker";
   const spec = ENEMY[type];
   const edge = state.rng.int(0, 3);
   let x = forcedX;
@@ -3236,13 +3374,20 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
     if (edge === 3) { x = -30; y = state.rng.range(40, WORLD.h - 40); }
   }
   const carrierEligible = countsTowardQuota && type !== "boss" && type !== "mayfly";
-  const guaranteeAt = Math.floor(profile.quota * 0.35);
-  const guaranteedCarrier = carrierEligible && state.eliteSpawned === 0 && state.spawned >= guaranteeAt;
-  const randomCarrier = carrierEligible && state.rng.chance(Math.min(0.14, 0.045 + state.levelIndex * 0.008));
-  const elite = options.elite === true || (options.elite !== false && (guaranteedCarrier || randomCarrier));
+  const nextQuotaSpawn = state.spawned + 1;
+  const firstCarrierAt = Math.max(1, Math.ceil(profile.quota * 0.28));
+  const secondCarrierAt = Math.max(firstCarrierAt + 1, Math.ceil(profile.quota * 0.7));
+  const guaranteedCarrierCount = nextQuotaSpawn >= secondCarrierAt ? 2 : nextQuotaSpawn >= firstCarrierAt ? 1 : 0;
+  const guaranteedCarrier = carrierEligible && state.eliteSpawned < guaranteedCarrierCount;
+  const randomCarrier = carrierEligible && state.rng.chance(Math.min(0.09, 0.025 + state.levelIndex * 0.005));
+  const elite = options.legendary === true || options.elite === true || (options.elite !== false && (guaranteedCarrier || randomCarrier));
   const firstElite = elite && state.eliteSpawned === 0;
   const carrierPath = elite ? ["pulse", "fork", "nova"][state.rng.int(0, 2)] : null;
-  const hp = Math.max(1, Math.ceil(spec.hp * (DIFFICULTIES[state.difficulty]?.hp ?? 1) * (elite ? 2.35 : 1)));
+  const legendaryEligible = elite && state.levelIndex >= 2 && state.legendarySpawned < 1 && options.legendary !== false;
+  const legendaryChance = Math.min(0.24, 0.018 + state.levelIndex * 0.004 + state.legendaryPity * 0.017 + (state.permanentPerks.carrierIntel ? 0.035 : 0));
+  const legendary = legendaryEligible && (options.legendary === true || DEV_LEGENDARY_CARRIER || state.legendaryPity >= 5 || state.rng.chance(legendaryChance));
+  const hpScale = legendary ? 4.75 : elite ? 2.35 : 1;
+  const hp = Math.max(1, Math.ceil(spec.hp * (DIFFICULTIES[state.difficulty]?.hp ?? 1) * hpScale));
   const enemy = {
     id: ++state.enemySequence,
     type,
@@ -3253,6 +3398,7 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
     hp,
     maxHp: hp,
     elite,
+    legendary,
     carrierPath,
     age: 0,
     seed: state.rng.range(0, TAU),
@@ -3265,7 +3411,18 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
   state.enemies.push(enemy);
   if (countsTowardQuota) state.spawned += 1;
   if (elite) state.eliteSpawned += 1;
-  if (firstElite) {
+  if (legendary) {
+    state.legendarySpawned += 1;
+    state.legendaryPity = 0;
+    state.banner = { text: `LEGENDARY ${carrierPath.toUpperCase()} CARRIER`, timer: 2 };
+    addRing(enemy.x, enemy.y, COLORS.gold, 104, 440);
+    triggerCombatFlash(COLORS.gold, 0.18);
+    bus.play("wellAlert", 0.26, { playbackRate: 0.82, volumeScale: 0.72 });
+    haptic([28, 22, 54]);
+  } else if (elite) {
+    state.legendaryPity += 1;
+  }
+  if (elite && !legendary && (firstElite || guaranteedCarrier)) {
     state.banner = { text: `${carrierPath.toUpperCase()} CARRIER INBOUND`, timer: 1.45 };
     addRing(enemy.x, enemy.y, weaponPathColor(carrierPath), 68, 260);
     bus.play("wellAlert", 0.18, { playbackRate: 1.24, volumeScale: 0.52 });
@@ -3274,7 +3431,7 @@ function spawnEnemy(type, forcedX, forcedY, options = {}) {
   else bus.playRandom(["spawn1", "spawn2", "spawn3", "spawn4", "spawn5", "spawn6"], 0.08);
   for (let i = 0; i < 10; i += 1) {
     const a = state.rng.range(0, TAU);
-    addParticle(enemy.x, enemy.y, Math.cos(a) * state.rng.range(40, 160), Math.sin(a) * state.rng.range(40, 160), elite ? weaponPathColor(carrierPath) : spec.color, 0.38, elite ? 3.2 : 2.3, 0.975);
+    addParticle(enemy.x, enemy.y, Math.cos(a) * state.rng.range(40, 160), Math.sin(a) * state.rng.range(40, 160), legendary ? COLORS.gold : elite ? weaponPathColor(carrierPath) : spec.color, legendary ? 0.54 : 0.38, legendary ? 4.2 : elite ? 3.2 : 2.3, 0.975);
   }
 }
 
@@ -3393,7 +3550,12 @@ function syncMissionSetup() {
   for (const button of difficultyChooser?.querySelectorAll("button") ?? []) button.setAttribute("aria-pressed", String(button.dataset.value === selectedDifficulty));
   if (pilotBriefingTitle) pilotBriefingTitle.textContent = `${selectedPlayerCount} PILOT${selectedPlayerCount === 1 ? "" : "S"} READY`;
   if (pilotBriefingText) pilotBriefingText.textContent = pilotControlSummary(selectedPlayerCount);
-  if (profileSummary) profileSummary.innerHTML = `<strong>Rank ${playerProfile.rank}</strong><span>${playerProfile.xp} XP / ${playerProfile.medals} medals / ${playerProfile.achievements.length} achievements</span>`;
+  if (profileSummary) {
+    const nextUnlock = nextUnlockForRank(playerProfile.rank);
+    const unlockProgress = nextUnlock ? Math.max(0, (nextUnlock.rank - 1) * 900 - playerProfile.xp) : 0;
+    const unlockNote = nextUnlock ? `Next: ${nextUnlock.label} in ${unlockProgress} XP` : "Permanent track complete";
+    profileSummary.innerHTML = `<strong>Rank ${playerProfile.rank}</strong><span>${playerProfile.xp} XP / ${playerProfile.medals} medals / ${playerProfile.achievements.length} achievements<br>${unlockNote}</span>`;
+  }
   if (preflightSummary) preflightSummary.textContent = `${GAME_MODES[selectedMode].label} / ${DIFFICULTIES[selectedDifficulty].label}`;
 }
 
@@ -3618,10 +3780,11 @@ function killEnemy(enemy, bomb = false) {
   state.totalKilled += 1;
   const scoreScale = (DIFFICULTIES[state.difficulty]?.score ?? 1) * (GAME_MODES[state.mode]?.scoreScale ?? 1);
   const chainMultiplier = enemy.type === "boss" || bomb ? 1 : advanceSignalChain(enemy);
-  const eliteMultiplier = enemy.elite ? 3 : 1;
+  const eliteMultiplier = enemy.legendary ? 8 : enemy.elite ? 3 : 1;
   const points = Math.round(spec.score * state.team.multiplier * chainMultiplier * eliteMultiplier * scoreScale);
   state.score += points;
   spawnScorePop(enemy.x, enemy.y, `+${formatNumber(points)}${chainMultiplier > 1 ? `  CHAIN x${chainMultiplier}` : ""}`, enemy.elite ? COLORS.gold : spec.color);
+  if (enemy.elite) advanceMission("carriers");
   if (enemy.type === "boss") {
     state.bossesDefeated += 1;
     state.team.multiplier = Math.min(9, state.team.multiplier + 2);
@@ -3630,9 +3793,22 @@ function killEnemy(enemy, bomb = false) {
     state.bossDestructions.push({ x: enemy.x, y: enemy.y, age: 0, life: 1.35, maxLife: 1.35, color: spec.color });
     state.hitStop = Math.max(state.hitStop, 0.1);
     triggerCombatFlash(COLORS.gold, 0.42);
+  } else if (enemy.legendary) {
+    const alternatePaths = WEAPON_ORB_PATHS.filter((path) => path !== enemy.carrierPath);
+    const bonusPath = alternatePaths[state.rng.int(0, alternatePaths.length - 1)];
+    spawnPickup(enemy.x - 20, enemy.y, "core", { path: enemy.carrierPath, life: 8.5, legendary: true });
+    spawnPickup(enemy.x + 20, enemy.y, "core", { path: bonusPath, life: 8.5, legendary: true });
+    state.legendaryBroken += 1;
+    state.banner = { text: "LEGENDARY CACHE - TWO ORBS - 8 SEC", timer: 2.1 };
+    state.hitStop = Math.max(state.hitStop, 0.1);
+    state.shake = Math.max(state.shake, 0.88);
+    triggerCombatFlash(COLORS.gold, 0.38);
+    addRing(enemy.x, enemy.y, COLORS.gold, 112, 520);
+    burst(enemy.x, enemy.y, COLORS.gold, 42);
+    haptic([34, 18, 34, 18, 70]);
   } else if (enemy.elite) {
     spawnPickup(enemy.x, enemy.y, "core", { path: enemy.carrierPath });
-    state.banner = { text: `${enemy.carrierPath.toUpperCase()} CARRIER BROKEN`, timer: 1.2 };
+    state.banner = { text: `${enemy.carrierPath.toUpperCase()} WEAPON ORB - 6 SEC`, timer: 1.35 };
     state.hitStop = Math.max(state.hitStop, 0.065);
     state.shake = Math.max(state.shake, 0.58);
     triggerCombatFlash(weaponPathColor(enemy.carrierPath), 0.25);
@@ -3644,7 +3820,7 @@ function killEnemy(enemy, bomb = false) {
   if (enemy.type === "splitter" && !bomb) {
     for (let i = 0; i < 3; i += 1) spawnEnemy("mayfly", enemy.x + state.rng.range(-22, 22), enemy.y + state.rng.range(-22, 22), { countQuota: false });
   }
-  burst(enemy.x, enemy.y, spec.color, enemy.type === "boss" ? 72 : enemy.type === "mayfly" ? 10 : 22);
+  burst(enemy.x, enemy.y, enemy.legendary ? COLORS.gold : spec.color, enemy.type === "boss" ? 72 : enemy.legendary ? 38 : enemy.type === "mayfly" ? 10 : 22);
   bus.playRandom(["hit1", "hit2"], 0.035, weaponSoundProfile(enemy.carrierPath, enemy.elite ? 1.12 : 1));
   checkRewards();
 }
@@ -3668,6 +3844,7 @@ function damageWell(well, damage) {
     pushForgePulse(well.x, well.y, COLORS.violet, STR.forgeWellNote, 0x5000 + state.levelIndex + state.killed);
     bus.play("wellDestroyed", 0.2);
     bus.play("wellExplode", 0.25);
+    advanceMission("wells");
   }
   checkRewards();
 }
@@ -3690,6 +3867,7 @@ function activateWellSuction(well, boost = 0.62) {
 
 function spawnPickup(x, y, kind = "multiplier", options = {}) {
   const a = state.rng.range(0, TAU);
+  const life = Number(options.life) > 0 ? Number(options.life) : kind === "core" ? WEAPON_ORB_LIFETIME : 8;
   state.pickups.push({
     kind,
     path: options.path ?? state.weaponPath,
@@ -3697,25 +3875,70 @@ function spawnPickup(x, y, kind = "multiplier", options = {}) {
     y,
     vx: Math.cos(a) * state.rng.range(50, 150),
     vy: Math.sin(a) * state.rng.range(50, 150),
-    r: kind === "core" ? 16 : 10,
+    r: kind === "core" ? (options.legendary ? 20 : 18) : 10,
+    legendary: Boolean(options.legendary),
     age: 0,
-    life: kind === "core" ? 14 : 8
+    life,
+    maxLife: life,
+    warningTick: 0
   });
+}
+
+function applyWeaponOrb(pickup) {
+  const path = WEAPON_ORB_PATHS.includes(pickup.path) ? pickup.path : WEAPON_ORB_PATHS[state.rng.int(0, WEAPON_ORB_PATHS.length - 1)];
+  const previousPath = state.weaponPath;
+  const previousEvolution = state.weaponEvolution;
+  state.weaponPath = path;
+  state.weaponTier = Math.max(1, WEAPON_PATHS.indexOf(path));
+
+  let action = "EQUIPPED";
+  if (previousPath === "signal") {
+    state.weaponEvolution = 1;
+    action = "ONLINE";
+  } else if (previousPath === path && previousEvolution < 4) {
+    state.weaponEvolution = previousEvolution + 1;
+    action = "EVOLVED";
+  } else if (previousPath !== path) {
+    state.weaponEvolution = Math.max(1, Math.min(4, previousEvolution));
+    action = "SWAPPED";
+  } else if (state.upgrades.overclock < 4) {
+    state.upgrades.overclock = Math.min(4, state.upgrades.overclock + 1);
+    action = state.upgrades.overclock >= 4 ? "MAX OVERDRIVE" : "OVERDRIVE";
+  } else {
+    state.team.multiplier = Math.min(9, state.team.multiplier + 1);
+    state.signalChain.count += 3;
+    state.signalChain.limit = signalChainLimit();
+    state.signalChain.timer = state.signalChain.limit;
+    state.signalChain.multiplier = signalChainMultiplier(state.signalChain.count);
+    state.signalChain.peak = Math.max(state.signalChain.peak, state.signalChain.multiplier);
+    action = "CHAIN SURGE";
+  }
+
+  state.weaponOrbs += 1;
+  const weapon = currentWeapon();
+  return { path, weapon, action };
 }
 
 function collectPickup(pickup) {
   pickup.dead = true;
   if (pickup.kind === "core") {
-    state.weaponCores += 1;
-    const points = 900 + state.weaponCores * 100;
+    const result = applyWeaponOrb(pickup);
+    const color = weaponPathColor(result.path);
+    const points = 900 + state.weaponEvolution * 220;
     state.score += points;
-    state.banner = { text: "CARRIER CORE SECURED", timer: 1.7 };
-    spawnScorePop(pickup.x, pickup.y, `CORE ${state.weaponCores}`, COLORS.gold);
-    addRing(pickup.x, pickup.y, COLORS.magenta, 54, 360);
-    bus.play("multiplier", 0.16);
-    haptic([24, 16, 48]);
-    burst(pickup.x, pickup.y, COLORS.magenta, 24);
-    pushForgePulse(pickup.x, pickup.y, COLORS.gold, STR.forgeCarrierNote, 0x3600 + state.weaponCores + state.totalKilled);
+    state.banner = { text: `${result.weapon.name.toUpperCase()} ${result.action}`, timer: 1.8 };
+    state.signalChain.timer = Math.max(state.signalChain.timer, signalChainLimit() * 0.75);
+    spawnScorePop(pickup.x, pickup.y, `${result.weapon.shortName ?? result.weapon.name} ${result.action}`, color);
+    addRing(pickup.x, pickup.y, color, 68, 440);
+    bus.play("multiplier", 0.2, { playbackRate: 1.08 + state.weaponEvolution * 0.05, volumeScale: 1.05 });
+    bus.playRandom(["playerFire1", "playerFire2", "playerFire3"], 0.07, weaponSoundProfile(result.path, 1.12));
+    haptic([28, 16, 56]);
+    state.hitStop = Math.max(state.hitStop, 0.045);
+    triggerCombatFlash(color, 0.24);
+    burst(pickup.x, pickup.y, color, 30);
+    pushForgePulse(pickup.x, pickup.y, color, STR.forgeCarrierNote, 0x3600 + state.weaponOrbs + state.totalKilled);
+    advanceMission("orbs");
+    registerOrbCombo(result.path, pickup.x, pickup.y);
     checkRewards();
     return;
   }
@@ -4545,7 +4768,9 @@ function drawPickups() {
     const s = 1 + Math.sin(pickup.age * 8) * 0.16;
     if (pickup.kind === "core") {
       const color = weaponPathColor(pickup.path);
-      renderer.drawWorldImage(GL_IMAGES.glow, pickup.x, pickup.y, 94 * s, 94 * s, pickup.age, 0.34, { color });
+      const lifeRatio = clamp(pickup.life / Math.max(0.01, pickup.maxLife ?? WEAPON_ORB_LIFETIME), 0, 1);
+      const warningFlash = pickup.life <= WEAPON_ORB_WARNING_TIME ? 0.52 + Math.sin(pickup.age * 24) * 0.34 : 1;
+      renderer.drawWorldImage(GL_IMAGES.glow, pickup.x, pickup.y, 94 * s, 94 * s, pickup.age, 0.34 * warningFlash, { color });
       renderer.drawWorldImage(GL_IMAGES.glow, pickup.x, pickup.y, 48 * s, 48 * s, -pickup.age, 0.3, { color: COLORS.white });
       drawRotatedPoly(pickup.x, pickup.y, pickup.age * 2.4, [
         { x: 0, y: -17 * s },
@@ -4557,6 +4782,13 @@ function drawPickups() {
       ], color, 0.48);
       renderer.drawWorldRing(pickup.x, pickup.y, 19 * s, 2.2, color, 0.9, 6);
       renderer.drawWorldRing(pickup.x, pickup.y, 27 * s, 1.2, COLORS.gold, 0.58, 12);
+      if (pickup.legendary) renderer.drawWorldRing(pickup.x, pickup.y, 36 * s, 3.4, COLORS.gold, 0.9, 8);
+      renderer.drawWorldArc(pickup.x, pickup.y, 33 * s, -Math.PI / 2, -Math.PI / 2 + TAU * lifeRatio, 3.2, lifeRatio < 0.38 ? COLORS.white : color, 0.92);
+      const satellites = Math.max(1, WEAPON_PATHS.indexOf(pickup.path));
+      for (let i = 0; i < satellites; i += 1) {
+        const orbit = pickup.age * (2.8 + i * 0.18) + (i / satellites) * TAU;
+        renderer.drawWorldCircle(pickup.x + Math.cos(orbit) * 25 * s, pickup.y + Math.sin(orbit) * 25 * s, 2.8, i % 2 ? COLORS.white : color, 0.9, 10);
+      }
       renderer.drawWorldLine(pickup.x - 8 * s, pickup.y, pickup.x + 8 * s, pickup.y, 3, COLORS.white, 0.86);
       renderer.drawWorldLine(pickup.x, pickup.y - 8 * s, pickup.x, pickup.y + 8 * s, 3, COLORS.white, 0.86);
     } else {
@@ -4762,6 +4994,20 @@ function drawEliteCarrier(enemy, spec, angle) {
   }
   renderer.drawWorldCircle(enemy.x, enemy.y, spec.r * 0.42, color, 0.74, 18);
   renderer.drawWorldRing(enemy.x, enemy.y, spec.r * 0.58, 2.2, COLORS.gold, 0.86, 8);
+  if (enemy.legendary) {
+    const health = clamp(enemy.hp / Math.max(1, enemy.maxHp), 0, 1);
+    renderer.drawWorldImage(GL_IMAGES.glow, enemy.x, enemy.y, spec.r * 8.4 * pulse, spec.r * 8.4 * pulse, angle, 0.2, { color: COLORS.gold });
+    renderer.drawWorldRing(enemy.x, enemy.y, spec.r * 3.35 * pulse, 5.6, COLORS.gold, 0.94, 8);
+    renderer.drawWorldRing(enemy.x, enemy.y, spec.r * 3.02, 2.2, COLORS.white, 0.68, 32);
+    for (let i = 0; i < 6; i += 1) {
+      const nodeAngle = -enemy.age * 3.1 + i * TAU / 6;
+      const nodeX = enemy.x + Math.cos(nodeAngle) * spec.r * 3.15;
+      const nodeY = enemy.y + Math.sin(nodeAngle) * spec.r * 3.15;
+      renderer.drawWorldCircle(nodeX, nodeY, 4.2, i % 2 ? color : COLORS.gold, 0.95, 12);
+    }
+    renderer.drawWorldRect(enemy.x - 38, enemy.y + spec.r * 3.55, 76, 5, COLORS.ink, 0.88);
+    renderer.drawWorldRect(enemy.x - 38, enemy.y + spec.r * 3.55, 76 * health, 5, COLORS.gold, 0.94);
+  }
 }
 
 function drawEnemyPlate(enemy, spec, color, angle) {
@@ -5146,6 +5392,7 @@ function updateHud() {
   updateSignalChainHud();
   updateTouchControlAvailability();
   updateBossMeter();
+  updateReplayHud();
   renderTutorial();
   updateForgePanels();
 }
@@ -5166,6 +5413,31 @@ function updateSignalChainHud() {
   chainUi.value.textContent = `x${chain.multiplier} / ${chain.count}`;
   chainUi.fill.style.setProperty("--chain-value", `${ratio * 100}%`);
   chainUi.panel.setAttribute("aria-label", active ? `Signal Chain x${chain.multiplier}, ${chain.count} hits` : "Signal Chain inactive");
+}
+
+function updateReplayHud() {
+  if (!replayUi.panel) return;
+  const mission = state.mission;
+  replayUi.mission.hidden = !mission;
+  if (mission) {
+    replayUi.mission.dataset.complete = String(mission.complete);
+    replayUi.missionLabel.textContent = mission.label;
+    replayUi.missionProgress.textContent = mission.complete
+      ? `DONE +${formatNumber(mission.reward)}`
+      : `${Math.min(mission.progress, mission.target)} / ${mission.target}`;
+  }
+  const combo = state.orbCombo;
+  const buffed = combo.buff > 0 && Boolean(combo.id);
+  const syncing = combo.window > 0 && combo.paths.length > 0;
+  replayUi.combo.hidden = !(buffed || syncing);
+  replayUi.combo.dataset.buffed = String(buffed);
+  if (buffed) {
+    replayUi.comboLabel.textContent = combo.label;
+    replayUi.comboTime.textContent = `${Math.ceil(combo.buff)}s`;
+  } else if (syncing) {
+    replayUi.comboLabel.textContent = `${combo.paths.map((path) => path.toUpperCase()).join(" + ")} + ?`;
+    replayUi.comboTime.textContent = `${Math.ceil(combo.window)}s`;
+  }
 }
 
 function haptic(pattern) {
@@ -5215,6 +5487,7 @@ function updateBossMeter() {
   const boss = state.enemies.find((enemy) => enemy.type === "boss" && !enemy.dead);
   const active = state.status === "running" && Boolean(boss);
   bossUi.panel.hidden = !active;
+  if (replayUi.panel) replayUi.panel.dataset.boss = String(active);
   if (!active) return;
   const shield = boss.maxShield ? clamp(boss.shield / boss.maxShield, 0, 1) : 0;
   bossUi.name.textContent = `${boss.name || state.bossName || "CROWN SIGNAL"} - ${shield > 0 ? `SHIELD ${Math.ceil(shield * 100)}%` : `PHASE ${Math.max(1, boss.phase)}`}`;
@@ -5314,7 +5587,8 @@ function updateDev(now, rendered = false) {
     fpsAt = now;
   }
   if (!devEnabled) return;
-  devEl.textContent = `${STR.devLabel} ${fps} fps | e ${state.enemies.length} | b ${state.bullets.length} | w ${state.weaponPath}:${state.weaponEvolution} | c x${state.signalChain.multiplier}/${state.signalChain.count} | core ${state.weaponCores} | p ${state.particles.length} | d ${state.entitiesDrawn}`;
+  const mission = state.mission ? `${state.mission.type}:${state.mission.progress}/${state.mission.target}` : "-";
+  devEl.textContent = `${STR.devLabel} ${fps} fps | e ${state.enemies.length} | b ${state.bullets.length} | w ${state.weaponPath}:${state.weaponEvolution} | c x${state.signalChain.multiplier}/${state.signalChain.count} | orb ${state.weaponOrbs} | sync ${state.orbCombo.id || "-"} | lg ${state.legendaryBroken}/${state.legendaryPity} | m ${mission} | pk ${state.pickups.length} | p ${state.particles.length} | d ${state.entitiesDrawn}`;
 }
 
 function resize() {

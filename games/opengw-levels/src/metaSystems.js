@@ -6,7 +6,7 @@ const DIFFICULTY_KEY = "2084-static-wave-difficulty-v1";
 export const GAME_MODES = {
   campaign: { label: "Campaign", note: "Clear all 12 sectors", scoreScale: 1 },
   endless: { label: "Endless", note: "Escalating sectors without a ceiling", scoreScale: 1.15 },
-  timeAttack: { label: "Time Attack", note: "Three minutes. Score everything.", scoreScale: 1.2, timeLimit: 180 },
+  timeAttack: { label: "Time Attack", note: "Three and a half minutes. Score everything.", scoreScale: 1.2, timeLimit: 210 },
   daily: { label: "Daily Signal", note: "One seeded challenge per day", scoreScale: 1.3 }
 };
 
@@ -24,6 +24,24 @@ export const ACHIEVEMENTS = {
   highScore: { label: "Five Digit Mind", note: "Score 50,000 points" },
   victory: { label: "Static Sovereign", note: "Clear the campaign" }
 };
+
+export const UNLOCK_TRACK = [
+  { rank: 2, id: "resonanceCache", label: "Resonance Cache", note: "Orb Sync input window +2 seconds" },
+  { rank: 4, id: "carrierIntel", label: "Carrier Intel", note: "Legendary carrier odds improve" },
+  { rank: 6, id: "novaHull", label: "Nova Hull Aura", note: "All future runs launch with a hull aura" },
+  { rank: 8, id: "missionDividend", label: "Mission Dividend", note: "Sector mission rewards +25%" },
+  { rank: 10, id: "spectrumMemory", label: "Spectrum Memory", note: "Orb Sync bonuses last 4 seconds longer" }
+];
+
+export function unlocksForRank(rank = 1) {
+  const safeRank = Math.max(1, Number(rank) || 1);
+  return Object.fromEntries(UNLOCK_TRACK.map((unlock) => [unlock.id, safeRank >= unlock.rank]));
+}
+
+export function nextUnlockForRank(rank = 1) {
+  const safeRank = Math.max(1, Number(rank) || 1);
+  return UNLOCK_TRACK.find((unlock) => unlock.rank > safeRank) ?? null;
+}
 
 export const DEFAULT_SETTINGS = {
   music: 0.78,
@@ -117,9 +135,9 @@ export function awardRun(profile, summary) {
   earn("victory", summary.victory);
 
   for (let rank = previousRank + 1; rank <= next.rank; rank += 1) {
-    if (rank === 2) unlocked.push("Pulse Cannon II");
-    if (rank === 4) unlocked.push("Tri-Lance Cannons");
-    if (rank === 6) unlocked.push("Nova Hull Aura");
+    for (const unlock of UNLOCK_TRACK) {
+      if (unlock.rank === rank) unlocked.push(unlock.label);
+    }
   }
   saveProfile(next);
   return { profile: next, grade, medal, xp, achievements: achievementIds, unlocked };
